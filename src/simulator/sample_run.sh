@@ -13,11 +13,12 @@ module load gromacs/2025.1
 
 restart_gro="gmx.gro"
 MAXWARN=10
+gmx_cmd="gmx"
 
 # minimization
 i=0
 if [ ! -f "step6.${i}_minimization.gro" ]; then
-    gmx grompp \
+    $gmx_cmd grompp \
         -f step6.${i}_minimization.mdp \
         -c ${restart_gro} \
         -r gmx.gro \
@@ -25,7 +26,7 @@ if [ ! -f "step6.${i}_minimization.gro" ]; then
         -p gmx.top \
         -maxwarn ${MAXWARN} \
         -o step6.${i}_minimization.tpr
-    gmx mdrun -v -deffnm step6.${i}_minimization
+    $gmx_cmd run -v -deffnm step6.${i}_minimization
 fi
 restart_gro="step6.${i}_minimization.gro"
 
@@ -33,7 +34,7 @@ restart_gro="step6.${i}_minimization.gro"
 for i in {1..6};
 do
     if [ ! -f "step6.${i}_equilibration.gro" ]; then
-        gmx grompp \
+        $gmx_cmd grompp \
             -f step6.${i}_equilibration.mdp \
             -c ${restart_gro} \
             -r gmx.gro \
@@ -41,9 +42,8 @@ do
             -p gmx.top \
             -maxwarn ${MAXWARN} \
             -o step6.${i}_equilibration.tpr
-        gmx mdrun -v -deffnm step6.${i}_equilibration
+        $gmx_cmd run -v -deffnm step6.${i}_equilibration
     fi
-
     restart_gro="step6.${i}_equilibration.gro"
 done
 
@@ -54,7 +54,7 @@ do
         # Use restraints option with force=0 for system converted by acpype
         #   restraints force is 0 during production MD
         #   restraints is enabled to prevent segmentation fault
-        gmx grompp \
+        $gmx_cmd grompp \
             -f step7_production.mdp \
             -c ${restart_gro} \
             -n index.ndx \
@@ -62,7 +62,7 @@ do
             -maxwarn ${MAXWARN} \
             -o step7_${i}.tpr
             # -r gmx.gro \
-        gmx mdrun -v -deffnm step7_${i} -dlb no
+        $gmx_cmd mdrun -v -deffnm step7_${i} -dlb no
     fi
     restart_gro="step7_${i}.gro"
 done
