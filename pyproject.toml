@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 dependencies = []
 
 [tool.uv]
-dev-dependencies = ["mypy", "notebook", "pandas", "pytest", "pytest-cov", "ruff", "pyyaml", "pandas"]
+dev-dependencies = ["mypy", "notebook", "pandas", "pytest", "pytest-cov", "ruff", "pyyaml"]
 
 [tool.ruff]
 indent-width = 4
@@ -42,7 +42,7 @@ known-third-party = ["fastapi", "pydantic", "starlette"]
 filterwarnings = [
     "ignore:.*Jupyter is migrating.*:DeprecationWarning",
 ]
-addopts = "-vv --color=yes --cov=mdtbx --cov-report=term-missing --capture=no"
+addopts = "-vv --color=yes --cov=src --cov-report=term-missing --capture=no"
 
 [build-system]
 requires = ["hatchling"]
@@ -52,7 +52,7 @@ build-backend = "hatchling.build"
 dynamic = ["name", "version"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["mdtbx"]
+packages = ["src"]
 
 [project.scripts]
-mdtbx = "mdtbx.__main__:main"
+mdtbx = "src.__main__:main"
