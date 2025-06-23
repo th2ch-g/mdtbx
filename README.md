@@ -1,7 +1,7 @@
 # mdtbx
 Toolbox for MD simulation
 
-- Build and run MD simulation
+- Build system quickly and run MD simulation
 - Extract CVs from trajectory
 - Run MSM
 
