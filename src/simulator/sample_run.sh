@@ -17,34 +17,34 @@ gmx_cmd="gmx"
 
 # minimization
 i=0
-if [ ! -f "step6.${i}_minimization.gro" ]; then
+if [ ! -f "step${i}_minimization.gro" ]; then
     $gmx_cmd grompp \
-        -f step6.${i}_minimization.mdp \
+        -f step${i}_minimization.mdp \
         -c ${restart_gro} \
         -r gmx.gro \
         -n index.ndx \
         -p gmx.top \
         -maxwarn ${MAXWARN} \
-        -o step6.${i}_minimization.tpr
-    $gmx_cmd run -v -deffnm step6.${i}_minimization
+        -o step${i}_minimization.tpr
+    $gmx_cmd run -v -deffnm step${i}_minimization
 fi
-restart_gro="step6.${i}_minimization.gro"
+restart_gro="step${i}_minimization.gro"
 
 # nvt npt
 for i in {1..6};
 do
-    if [ ! -f "step6.${i}_equilibration.gro" ]; then
+    if [ ! -f "step${i}_equilibration.gro" ]; then
         $gmx_cmd grompp \
-            -f step6.${i}_equilibration.mdp \
+            -f step${i}_equilibration.mdp \
             -c ${restart_gro} \
             -r gmx.gro \
             -n index.ndx \
             -p gmx.top \
             -maxwarn ${MAXWARN} \
-            -o step6.${i}_equilibration.tpr
-        $gmx_cmd run -v -deffnm step6.${i}_equilibration
+            -o step${i}_equilibration.tpr
+        $gmx_cmd run -v -deffnm step${i}_equilibration
     fi
-    restart_gro="step6.${i}_equilibration.gro"
+    restart_gro="step${i}_equilibration.gro"
 done
 
 # production
