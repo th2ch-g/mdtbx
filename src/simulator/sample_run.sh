@@ -26,7 +26,7 @@ if [ ! -f "step${i}_minimization.gro" ]; then
         -p gmx.top \
         -maxwarn ${MAXWARN} \
         -o step${i}_minimization.tpr
-    $gmx_cmd run -v -deffnm step${i}_minimization
+    $gmx_cmd mdrun -v -deffnm step${i}_minimization
 fi
 restart_gro="step${i}_minimization.gro"
 
@@ -42,7 +42,7 @@ do
             -p gmx.top \
             -maxwarn ${MAXWARN} \
             -o step${i}_equilibration.tpr
-        $gmx_cmd run -v -deffnm step${i}_equilibration
+        $gmx_cmd mdrun -v -deffnm step${i}_equilibration
     fi
     restart_gro="step${i}_equilibration.gro"
 done
