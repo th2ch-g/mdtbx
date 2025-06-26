@@ -25,7 +25,7 @@ cmake .. \
     -DGMX_OPENMP=ON \
     -DGMX_GPU=CUDA \
     -DGMX_DOUBLE=OFF \
-    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
     -DGMX_SIMD=$SIMD \ # maybe OK to remove
     -DGMX_FFT_LIBRARY=fftw3 \
     -DCMAKE_C_COMPILER=gcc \
