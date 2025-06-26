@@ -7,7 +7,7 @@ VERSION="3-1-1"
 
 # source /home/apps/Modules/init/bash
 # module purge
-# module load cmake gcc cuda
+# module load cmake gcc
 
 if [ -z $thread ] || [ -z $PREFIX ]; then
     echo "thread number and prefix must be inputed" >&2
