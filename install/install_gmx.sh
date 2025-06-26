@@ -1,19 +1,14 @@
 #!/bin/bash
 set -e
 
-thread=$1
-PREFIX=$2
 VERSION="2025.1"
+INSTALL_PREFIX="${PWD}/gromacs-${VERSION}"
+thread=12
 SIMD="AVX_512"
 
 # source /home/apps/Modules/init/bash
 # module purge
 # module load cmake gcc cuda
-
-if [ -z $thread ] || [ -z $PREFIX ]; then
-    echo "thread number and prefix must be inputed" >&2
-    exit 1
-fi
 
 URL="https://ftp.gromacs.org/gromacs/gromacs-${VERSION}.tar.gz"
 wget $URL
@@ -31,7 +26,7 @@ cmake .. \
     -DGMX_GPU=CUDA \
     -DGMX_DOUBLE=OFF \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
-    -DGMX_SIMD=$SIMD \
+    -DGMX_SIMD=$SIMD \ # maybe OK to remove
     -DGMX_FFT_LIBRARY=fftw3 \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++

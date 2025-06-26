@@ -1,18 +1,13 @@
 #!/bin/bash
 set -e
 
-thread=$1
-PREFIX=$2
+thread=12
+PREFIX="${PWD}/obabel-${VERSION}"
 VERSION="3-1-1"
 
 # source /home/apps/Modules/init/bash
 # module purge
 # module load cmake gcc
-
-if [ -z $thread ] || [ -z $PREFIX ]; then
-    echo "thread number and prefix must be inputed" >&2
-    exit 1
-fi
 
 URL="https://github.com/openbabel/openbabel/archive/refs/tags/openbabel-${VERSION}.tar.gz"
 wget $URL
