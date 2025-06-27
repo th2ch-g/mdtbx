@@ -16,6 +16,9 @@ GMX_CMD="gmx"
 MAXWARN=10
 PRODUCTION_STEPS=10
 MDRUN_OPTION="-dlb no -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
+SIMULATION_CONTINUE=true
+# continue simulation => true
+# start from scratch => false
 
 echo "hostname: $(hostname)"
 echo "cpus: $SLURM_CPUS_ON_NODE"
@@ -50,7 +53,11 @@ do
             -p gmx.top \
             -maxwarn ${MAXWARN} \
             -o step${i}_equilibration.tpr
-        $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION}
+        if $SIMULATION_CONTINUE; then
+            $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION} -cpi step${i}_equilibration.cpt
+        else
+            $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION}
+        fi
     fi
     restart_gro="step${i}_equilibration.gro"
 done
@@ -70,7 +77,11 @@ do
             -maxwarn ${MAXWARN} \
             -o step7_${i}.tpr
             # -r gmx.gro \
-        $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION}
+        if $SIMULATION_CONTINUE; then
+            $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION} -cpi step7_${i}.cpt
+        else
+            $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION}
+        fi
     fi
     restart_gro="step7_${i}.gro"
 done
