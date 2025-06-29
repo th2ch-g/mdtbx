@@ -29,14 +29,16 @@ restart_gro="gmx.gro"
 # minimization
 i=0
 if [ ! -f "step${i}_minimization.gro" ]; then
-    $GMX_CMD grompp \
-        -f step${i}_minimization.mdp \
-        -c ${restart_gro} \
-        -r gmx.gro \
-        -n index.ndx \
-        -p gmx.top \
-        -maxwarn ${MAXWARN} \
-        -o step${i}_minimization.tpr
+    if [[ $SIMULATION_CONTINUE == "false" || ! -f "step${i}_minimization.tpr" ]]; then
+        $GMX_CMD grompp \
+            -f step${i}_minimization.mdp \
+            -c ${restart_gro} \
+            -r gmx.gro \
+            -n index.ndx \
+            -p gmx.top \
+            -maxwarn ${MAXWARN} \
+            -o step${i}_minimization.tpr
+    fi
     $GMX_CMD mdrun -v -deffnm step${i}_minimization
 fi
 restart_gro="step${i}_minimization.gro"
@@ -45,14 +47,16 @@ restart_gro="step${i}_minimization.gro"
 for i in {1..6};
 do
     if [ ! -f "step${i}_equilibration.gro" ]; then
-        $GMX_CMD grompp \
-            -f step${i}_equilibration.mdp \
-            -c ${restart_gro} \
-            -r gmx.gro \
-            -n index.ndx \
-            -p gmx.top \
-            -maxwarn ${MAXWARN} \
-            -o step${i}_equilibration.tpr
+        if [[ $SIMULATION_CONTINUE == "false" || ! -f "step${i}_equilibration.tpr" ]]; then
+            $GMX_CMD grompp \
+                -f step${i}_equilibration.mdp \
+                -c ${restart_gro} \
+                -r gmx.gro \
+                -n index.ndx \
+                -p gmx.top \
+                -maxwarn ${MAXWARN} \
+                -o step${i}_equilibration.tpr
+        fi
         if $SIMULATION_CONTINUE; then
             $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION} -cpi step${i}_equilibration.cpt
         else
@@ -69,14 +73,16 @@ do
         # Use restraints option with force=0 for system converted by acpype
         #   restraints force is 0 during production MD
         #   restraints is enabled to prevent segmentation fault
-        $GMX_CMD grompp \
-            -f step7_production.mdp \
-            -c ${restart_gro} \
-            -n index.ndx \
-            -p gmx.top \
-            -maxwarn ${MAXWARN} \
-            -o step7_${i}.tpr
-            # -r gmx.gro \
+        if [[ $SIMULATION_CONTINUE == "false" || ! -f "step7_${i}.tpr" ]]; then
+            $GMX_CMD grompp \
+                -f step7_production.mdp \
+                -c ${restart_gro} \
+                -n index.ndx \
+                -p gmx.top \
+                -maxwarn ${MAXWARN} \
+                -o step7_${i}.tpr
+                # -r gmx.gro \
+        fi
         if $SIMULATION_CONTINUE; then
             $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION} -cpi step7_${i}.cpt
         else
