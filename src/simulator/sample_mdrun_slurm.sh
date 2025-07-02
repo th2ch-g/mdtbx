@@ -12,17 +12,31 @@ source $MODULESHOME/init/bash
 module purge
 module load gromacs/2025.1
 
-GMX_CMD="gmx"
-MAXWARN=10
-PRODUCTION_STEPS=10
-MDRUN_OPTION="-dlb no -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
-SIMULATION_CONTINUE=true
+
 # continue simulation => true
 # start from scratch => false
+SIMULATION_CONTINUE=true
+
+MAXWARN=10
+PRODUCTION_STEPS=10
+
+# for GPU
+GMX_CMD="gmx"
+MDRUN_OPTION="-dlb no -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
+
+# for CPU
+# GMX_CMD="srun -np $SLURM_NTASKS gmx_mpi"
+# MDRUN_OPTION="-dlb no -nomp $SLURM_CPUS_PER_TASK"
+
 
 echo "hostname: $(hostname)"
+echo "jobid: $SLURM_JOB_ID"
+echo "node list: $SLURM_JOB_NODELIST"
+echo "nodes: $SLURM_NNODES"
 echo "cpus: $SLURM_CPUS_ON_NODE"
 echo "gpus: $SLURM_GPUS_ON_NODE"
+echo "omp: $SLURM_CPUS_PER_TASK"
+echo "mpi: $SLURM_NTASKS"
 
 restart_gro="gmx.gro"
 
