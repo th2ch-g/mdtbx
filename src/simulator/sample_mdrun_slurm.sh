@@ -21,7 +21,7 @@ PRODUCTION_STEPS=10
 
 # for GPU
 GMX_CMD="gmx"
-MDRUN_OPTION="-dlb no -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
+MDRUN_OPTION="-dlb no -pin on -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
 
 # for CPU
 # GMX_CMD="srun -np $SLURM_NTASKS gmx_mpi"
