@@ -22,6 +22,7 @@ PRODUCTION_STEPS=10
 # for GPU
 export GMX_CUDA_GRAPH=1
 # export GMX_ENABLE_DIRECT_GPU_COMM=1
+# export GMX_FORCE_GPU_AWARE_MPI=1
 GMX_CMD="gmx"
 MDRUN_OPTION="-dlb no -pin on -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
 
