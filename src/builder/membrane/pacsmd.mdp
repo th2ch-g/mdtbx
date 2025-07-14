@@ -33,7 +33,6 @@ ref_p                   = 1.0     1.0
 ;
 constraints             = h-bonds
 constraint_algorithm    = LINCS
-continuation            = yes
 ;
 nstcomm                 = 100
 comm_mode               = linear

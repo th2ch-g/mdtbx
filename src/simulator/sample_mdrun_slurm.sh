@@ -12,10 +12,8 @@ source $MODULESHOME/init/bash
 module purge
 module load gromacs/2025.1
 
-# continue simulation => true
-# start from scratch => false
 SIMULATION_CONTINUE=true
-
+SIMULATION_OVERWRITE=false
 MAXWARN=10
 PRODUCTION_STEPS=10
 
@@ -43,8 +41,8 @@ restart_gro="gmx.gro"
 
 # minimization
 i=0
-if [ ! -f "step${i}_minimization.gro" ]; then
-    if [[ $SIMULATION_CONTINUE == "false" || ! -f "step${i}_minimization.tpr" ]]; then
+if [[ $SIMULATION_OVERWRITE == "true" || ! -f "step${i}_minimization.gro" ]]; then
+    if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "step${i}_minimization.tpr" ]]; then
         $GMX_CMD grompp \
             -f step${i}_minimization.mdp \
             -c ${restart_gro} \
@@ -61,8 +59,8 @@ restart_gro="step${i}_minimization.gro"
 # nvt npt
 for i in {1..6};
 do
-    if [ ! -f "step${i}_equilibration.gro" ]; then
-        if [[ $SIMULATION_CONTINUE == "false" || ! -f "step${i}_equilibration.tpr" ]]; then
+    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "step${i}_equilibration.gro" ]]; then
+        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "step${i}_equilibration.tpr" ]]; then
             $GMX_CMD grompp \
                 -f step${i}_equilibration.mdp \
                 -c ${restart_gro} \
@@ -72,7 +70,7 @@ do
                 -maxwarn ${MAXWARN} \
                 -o step${i}_equilibration.tpr
         fi
-        if $SIMULATION_CONTINUE; then
+        if [[ $SIMULATION_CONTINUE == "true" && $SIMULATION_OVERWRITE == "false" ]]; then
             $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION} -cpi step${i}_equilibration.cpt
         else
             $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION}
@@ -84,11 +82,11 @@ done
 # production
 for i in $(seq 1 ${PRODUCTION_STEPS});
 do
-    if [ ! -f "step7_${i}.gro" ]; then
+    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "step7_${i}.gro" ]]; then
         # Use restraints option with force=0 for system converted by acpype
         #   restraints force is 0 during production MD
         #   restraints is enabled to prevent segmentation fault
-        if [[ $SIMULATION_CONTINUE == "false" || ! -f "step7_${i}.tpr" ]]; then
+        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "step7_${i}.tpr" ]]; then
             $GMX_CMD grompp \
                 -f step7_production.mdp \
                 -c ${restart_gro} \
@@ -98,7 +96,7 @@ do
                 -o step7_${i}.tpr
                 # -r gmx.gro \
         fi
-        if $SIMULATION_CONTINUE; then
+        if [[ $SIMULATION_CONTINUE == "true" && $SIMULATION_OVERWRITE == "false" ]]; then
             $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION} -cpi step7_${i}.cpt
         else
             $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION}
