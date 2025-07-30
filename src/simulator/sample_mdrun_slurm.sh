@@ -10,7 +10,7 @@ set -e
 
 source $MODULESHOME/init/bash
 module purge
-module load gromacs/2025.1
+module load gromacs/2025.2
 
 SIMULATION_CONTINUE=true
 SIMULATION_OVERWRITE=false
