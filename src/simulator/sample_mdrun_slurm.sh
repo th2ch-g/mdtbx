@@ -40,76 +40,75 @@ echo "mpi: $SLURM_NTASKS"
 restart_gro="gmx.gro"
 
 # minimization
-i=0
-if [[ $SIMULATION_OVERWRITE == "true" || ! -f "step${i}_minimization.gro" ]]; then
-    if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "step${i}_minimization.tpr" ]]; then
+if [[ $SIMULATION_OVERWRITE == "true" || ! -f "mini.gro" ]]; then
+    if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "mini.tpr" ]]; then
         $GMX_CMD grompp \
-            -f step${i}_minimization.mdp \
+            -f mini.mdp \
             -c ${restart_gro} \
             -r gmx.gro \
             -n index.ndx \
             -p gmx.top \
             -maxwarn ${MAXWARN} \
-            -o step${i}_minimization.tpr
+            -o mini.tpr
     fi
-    $GMX_CMD mdrun -v -deffnm step${i}_minimization
+    $GMX_CMD mdrun -v -deffnm mini
 fi
-restart_gro="step${i}_minimization.gro"
+restart_gro="mini.gro"
 
 # nvt npt
 for i in {1..6};
 do
-    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "step${i}_equilibration.gro" ]]; then
-        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "step${i}_equilibration.tpr" ]]; then
+    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "eq${i}.gro" ]]; then
+        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "eq${i}.tpr" ]]; then
             $GMX_CMD grompp \
-                -f step${i}_equilibration.mdp \
+                -f eq${i}.mdp \
                 -c ${restart_gro} \
                 -r gmx.gro \
                 -n index.ndx \
                 -p gmx.top \
                 -maxwarn ${MAXWARN} \
-                -o step${i}_equilibration.tpr
+                -o eq${i}.tpr
         fi
         if [[ $SIMULATION_CONTINUE == "true" && $SIMULATION_OVERWRITE == "false" ]]; then
-            $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION} -cpi step${i}_equilibration.cpt
+            $GMX_CMD mdrun -v -deffnm eq${i} ${MDRUN_OPTION} -cpi eq${i}.cpt
         else
-            $GMX_CMD mdrun -v -deffnm step${i}_equilibration ${MDRUN_OPTION}
+            $GMX_CMD mdrun -v -deffnm eq${i} ${MDRUN_OPTION}
         fi
     fi
-    restart_gro="step${i}_equilibration.gro"
+    restart_gro="eq${i}.gro"
 done
 
 # production
 for i in $(seq 1 ${PRODUCTION_STEPS});
 do
-    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "step7_${i}.gro" ]]; then
+    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "prd${i}.gro" ]]; then
         # Use restraints option with force=0 for system converted by acpype
         #   restraints force is 0 during production MD
         #   restraints is enabled to prevent segmentation fault
-        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "step7_${i}.tpr" ]]; then
+        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "prd${i}.tpr" ]]; then
             $GMX_CMD grompp \
-                -f step7_production.mdp \
+                -f prd.mdp \
                 -c ${restart_gro} \
                 -n index.ndx \
                 -p gmx.top \
                 -maxwarn ${MAXWARN} \
-                -o step7_${i}.tpr
+                -o prd${i}.tpr
                 # -r gmx.gro \
         fi
         if [[ $SIMULATION_CONTINUE == "true" && $SIMULATION_OVERWRITE == "false" ]]; then
-            $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION} -cpi step7_${i}.cpt
+            $GMX_CMD mdrun -v -deffnm prd${i} ${MDRUN_OPTION} -cpi prd${i}.cpt
         else
-            $GMX_CMD mdrun -v -deffnm step7_${i} ${MDRUN_OPTION}
+            $GMX_CMD mdrun -v -deffnm prd${i} ${MDRUN_OPTION}
         fi
     fi
-    restart_gro="step7_${i}.gro"
+    restart_gro="prd${i}.gro"
 done
 
 # remove temporary files
 rm -f *cpt
 rm -f \#*
 # remove intermediate files
-rm -f step0_minimization.xtc step0_minimization.trr
-rm -f step{1..6}_equilibration.xtc step{1..6}_equilibration.trr
+rm -f mini.xtc mini.trr
+rm -f eq{1..6}.xtc eq{1..6}.trr
 
 echo done
