@@ -6,51 +6,6 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
-[tool.uv]
-dev-dependencies = ["mypy", "notebook", "pandas", "pytest", "pytest-cov", "ruff", "pyyaml"]
-
-[tool.ruff]
-indent-width = 4
-line-length = 88 # Same as Black.
-exclude = [".ruff_cache", ".ruff.toml", ".ruff.lock"]
-target-version = "py310"
-
-[tool.ruff.lint]
-select = [
-    "F", # Flake8
-    "B", # Black
-    "I", # isort
-    "E", # error
-    "W", # warning
-]
-ignore = ["F401", "E501"]
-fixable = ["ALL"]
-unfixable = []
-
-[tool.ruff.isort]
-combine-as-imports = true
-section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
-split-on-trailing-comma = true
-
-[tool.ruff.format]
-quote-style = "double"
-
-[tool.ruff.lint.isort]
-known-third-party = ["fastapi", "pydantic", "starlette"]
-
-[tool.pytest.ini_options]
-filterwarnings = [
-    "ignore:.*Jupyter is migrating.*:DeprecationWarning",
-]
-addopts = "-vv --color=yes --cov=src --cov-report=term-missing --capture=no"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.metadata]
-dynamic = ["name", "version"]
-
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
 
