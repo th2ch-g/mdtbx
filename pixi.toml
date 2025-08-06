@@ -5,4 +5,4 @@ channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64", "osx-arm64"]
 
 [dependencies]
-pymol-open-source = "3.1.0"
+pymol-open-source = "==3.1.0"
