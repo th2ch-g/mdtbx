@@ -2253,7 +2253,7 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: 75ff64d768e22902424079a5b060b446fcecad35f37412da37e75ff5e02a80d7
+  sha256: 6a9361c1dcab409e4ea75c4541d7fc125eef0df9971f0196cd4d1546996d9716
   requires_python: '>=3.10'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mpg123-1.32.9-hc50e24c_0.conda

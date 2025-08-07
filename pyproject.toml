@@ -16,8 +16,8 @@ pymol-open-source = "==3.1.0"
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
 
-[tool.hatch.build.targets.wheel]
-packages = ["src"]
+[tool.setuptools.packages.find]
+where = ["."]
 
 [project.scripts]
 mdtbx = "src.__main__:main"
