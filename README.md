@@ -5,15 +5,20 @@ Toolbox for MD simulation
 - Extract CVs from trajectory
 - Run MSM
 
-## dependencies
-- Python 3.10
-- Gromacs 2025.1
-- AmberTools 24
-- PyMOL 3.1.0
-- OpenBabel 3.1.0
-
 ## Assumptions
 - System build Tools: Amber, PyMOL, OpenBabel
 - Simulation Tools: Gromacs
 - ForceField: ff14SB, TIP3P, Lipid21, GLYCAM06-j
 
+## Install and Usage
+~~~bash
+# for pixi users
+pixi install
+pixi run mdtbx ...
+pixi run gmx ...
+
+# for docker users
+docker build -t mdtbx .
+ocker run -it --rm mdtbx-app pixi run mdtbx ...
+docker run -it --rm mdtbx-app pixi run gmx ...
+~~~
