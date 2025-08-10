@@ -26,6 +26,8 @@ openbabel = "*"
 seqkit = "*"
 usalign = "*"
 acpype = "*"
+mafft = "*"
+aliview = "*"
 
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
