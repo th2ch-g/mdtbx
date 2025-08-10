@@ -10,15 +10,27 @@ Toolbox for MD simulation
 - Simulation Tools: Gromacs
 - ForceField: ff14SB, TIP3P, Lipid21, GLYCAM06-j
 
-## Install and Usage
+## Install
 ~~~bash
 # for pixi users
 pixi install
+
+# for docker users
+docker build -t mdtbx .
+~~~
+
+## Update
+```bash
+pixi run update
+```
+
+## Usage
+~~~bash
+# for pixi users
 pixi run mdtbx ...
 pixi run gmx ...
 
 # for docker users
-docker build -t mdtbx .
 docker run -it --rm mdtbx pixi run mdtbx ...
 docker run -it --rm mdtbx pixi run gmx ...
 ~~~

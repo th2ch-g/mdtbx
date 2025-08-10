@@ -6856,7 +6856,7 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: a6f20c30884939e90d370e63930af44662d235ca224d391f2f194c4dacc6cb8c
+  sha256: 45f4143e4f8d39780c59e01e645ab0353711aa35528bbbe82caffc7a07a163f0
   requires_python: ==3.10
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda

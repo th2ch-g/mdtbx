@@ -17,8 +17,9 @@ RUN curl -fsSL https://pixi.sh/install.sh | setarch x86_64 bash
 
 WORKDIR /app
 
-# COPY pyproject.toml pixi.lock ./
-COPY . .
+COPY ./pixi.lock .
+COPY ./pyproject.toml .
+COPY ./src/ .
 
 RUN setarch x86_64 pixi install --frozen
 
