@@ -9,6 +9,7 @@ environments:
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-3_kmp_llvm.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/acpype-2023.10.27-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/alsa-lib-1.2.14-hb9d3cd8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ambertools-24.8-cuda_None_nompi_py310h834fefc_101.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/arpack-3.9.1-nompi_hf03ea27_102.conda
@@ -375,6 +376,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e9/04/fd55695f6448abd22295fc68b2d3a135389558f0f49a24b0dffe019d0ecb/zope_event-5.1.1-py3-none-any.whl
       - pypi: ./
       osx-64:
+      - conda: https://conda.anaconda.org/conda-forge/noarch/acpype-2023.10.27-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ambertools-24.8-cuda_None_nompi_py310h1f0fd6b_101.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/arpack-3.9.1-nompi_hdfe9103_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/astunparse-1.6.3-pyhd8ed1ab_3.conda
@@ -693,6 +695,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e9/04/fd55695f6448abd22295fc68b2d3a135389558f0f49a24b0dffe019d0ecb/zope_event-5.1.1-py3-none-any.whl
       - pypi: ./
       osx-arm64:
+      - conda: https://conda.anaconda.org/conda-forge/noarch/acpype-2023.10.27-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ambertools-24.8-cuda_None_nompi_py310h596b6d9_101.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/arpack-3.9.1-nompi_h1f29f7c_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/astunparse-1.6.3-pyhd8ed1ab_3.conda
@@ -1022,6 +1025,23 @@ packages:
   purls: []
   size: 7649
   timestamp: 1741390353130
+- conda: https://conda.anaconda.org/conda-forge/noarch/acpype-2023.10.27-pyhd8ed1ab_0.conda
+  sha256: b2b70f98536285ae1df9ad8fe6ceac62c223c997928099ac7d62577f9fd86e3e
+  md5: 48c1ebc88db3e22129814ab03fcde202
+  depends:
+  - ambertools
+  - matplotlib-base
+  - numpy
+  - openbabel
+  - parmed
+  - python >=3
+  - scipy
+  license: GPL-3.0-or-later
+  license_family: GPL
+  purls:
+  - pkg:pypi/acpype?source=hash-mapping
+  size: 18099211
+  timestamp: 1698417430440
 - pypi: https://files.pythonhosted.org/packages/24/38/2c2e0b4dd406ba90802c132a03b169ba4d016d1f524b44ee250d500af4d6/adbc_driver_manager-1.7.0-cp310-cp310-macosx_10_15_x86_64.whl
   name: adbc-driver-manager
   version: 1.7.0
@@ -6632,7 +6652,7 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: eee6624078eb8b37a178dd0552ad6deb58e45048f745bed2358a5389620dc4d7
+  sha256: bfd26035ecd49af231e883b27bd20ce7858d5ef0a12dc22025a404758d3d5ab1
   requires_python: ==3.10
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda

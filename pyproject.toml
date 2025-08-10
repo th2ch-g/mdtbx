@@ -25,6 +25,7 @@ gromacs = "*"
 openbabel = "*"
 seqkit = "*"
 usalign = "*"
+acpype = "*"
 
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
