@@ -19,9 +19,11 @@ WORKDIR /app
 
 COPY ./pixi.lock .
 COPY ./pyproject.toml .
-COPY ./src/ .
+COPY ./src/ ./src/
 
 RUN setarch x86_64 pixi install --frozen
 
+ENV PYTHONPATH /app
 
+ENTRYPOINT ["pixi", "run"]
 CMD ["bash"]
