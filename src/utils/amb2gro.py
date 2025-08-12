@@ -13,7 +13,7 @@ def add_subcmd(subparsers):
     mdtbx amb2gro -p leap.parm7 -x leap.rst7
     """
     parser = subparsers.add_parser(
-        "convert",
+        "amb2gro",
         help="Convert files from Amber to Gromacs",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )

@@ -35,10 +35,10 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-m", "--multiplicity", required=True, type=int, help="Multiplicity"
+        "-m", "--multiplicity", default=1, type=int, help="Multiplicity"
     )
 
-    parser.add_argument("-c", "--charge", required=True, type=int, help="Charge")
+    parser.add_argument("-c", "--charge", default=0, type=int, help="Charge")
 
     parser.add_argument(
         "--memory", default="60GB", type=str, help="Memory for Gaussian"

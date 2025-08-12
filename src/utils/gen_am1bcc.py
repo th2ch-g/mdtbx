@@ -35,10 +35,10 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-m", "--multiplicity", required=True, type=int, help="Multiplicity"
+        "-m", "--multiplicity", default=1, type=int, help="Multiplicity"
     )
 
-    parser.add_argument("-c", "--charge", required=True, type=int, help="Charge")
+    parser.add_argument("-c", "--charge", default=0, type=int, help="Charge")
 
 
 def run(args):
@@ -57,7 +57,7 @@ def run(args):
     lig = loadmol2 {args.resname}.mol2
     saveoff lig {args.resname}.lib
     """
-    cmd = f"echo {cmd_tleap} | tleap -f -"
+    cmd = f"echo '{cmd_tleap}' | tleap -f -"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}.lib generated")
 

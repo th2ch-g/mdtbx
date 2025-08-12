@@ -40,6 +40,14 @@ def add_subcmd(subparsers):
         "-idx", "--index", default="index.ndx", type=str, help="Index file"
     )
 
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="gmx.gro",
+        type=str,
+        help="Output file name",
+    )
+
 
 def run(args):
     dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
