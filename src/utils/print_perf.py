@@ -27,6 +27,10 @@ def add_subcmd(subparsers):
         "--prefix", help="prefix of gromacs log file", type=str, default="prd"
     )
 
+    parser.add_argument(
+        "-o", "--output", help="Output file name", type=str,
+    )
+
 
 def parse_log_file(log_path):
     data = {
@@ -125,3 +129,10 @@ def run(args):
         print(f"  - GPU Info: {row['GPU_info']}")
         print(f"  - CPU Info: {row['CPU_info']}")
         print("-" * 120)
+
+    if args.output:
+        try:
+            agg_df.write_csv(args.output)
+            LOGGER.info(f"Performance data successfully saved to {args.output}")
+        except IOError as e:
+            LOGGER.error(f"Error writing to file {args.output}: {e}")
