@@ -7,13 +7,14 @@ from .utils import rmfile
 from .utils import addace
 from .utils import addnme
 from .utils import add_ndx
+from .utils import convert
 from .utils import calc_ion_conc
 from .utils import centering_gro
 from .utils import find_bond
 from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_posres
-from .utils import convert
+from .utils import amb2gro
 from .utils import trjcat
 from .utils import print_perf
 
@@ -34,9 +35,10 @@ def cli() -> None:
     gen_resp.add_subcmd(subparsers)
     gen_posres.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
+    convert.add_subcmd(subparsers)
     calc_ion_conc.add_subcmd(subparsers)
     centering_gro.add_subcmd(subparsers)
-    convert.add_subcmd(subparsers)
+    amb2gro.add_subcmd(subparsers)
     trjcat.add_subcmd(subparsers)
     rmfile.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
@@ -60,11 +62,14 @@ def cli() -> None:
     if sys.argv[1] == "trjcat":
         trjcat.run(args)
 
+    if sys.argv[1] == "convert":
+        convert.run(args)
+
     if sys.argv[1] == "centering_gro":
         centering_gro.run(args)
 
-    if sys.argv[1] == "convert":
-        convert.run(args)
+    if sys.argv[1] == "amb2gro":
+        amb2gro.run(args)
 
     if sys.argv[1] == "find_bond":
         find_bond.run(args)
