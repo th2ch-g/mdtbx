@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import mdtraj as md
+from itertools import groupby
 
 from ..config import *  # NOQA
 from ..logger import generate_logger
@@ -10,10 +11,10 @@ LOGGER = generate_logger(__name__)
 
 def add_subcmd(subparsers):
     """
-    mdtbx add_make_ndx
+    mdtbx add_ndx
     """
     parser = subparsers.add_parser(
-        "add_make_ndx",
+        "add_ndx",
         help="Add new index group with gmx make_ndx",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
@@ -41,23 +42,33 @@ def add_subcmd(subparsers):
 
 
 def make_default_index(args):
-    cmd = f"echo q | {args.gmx} make_ndx -f {args.structure} -o {args.index}"
+    cmd = f"echo q | {args.gmx} make_ndx -f {args.gro} -o {args.output}"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.index} newly generated")
+    LOGGER.info(f"{args.output} newly generated")
 
 
 def add_index(args):
     gro = md.load(args.gro)
     target_atom_indices = gro.topology.select(args.selection)
     target_atom_indices = [i + 1 for i in target_atom_indices]  # index start from 0
-    target_atom_indices = " ".join([str(i) for i in target_atom_indices])
+    target_atom_indices = sorted(target_atom_indices)
+    grouped_numbers = groupby(enumerate(target_atom_indices), lambda x: x[0] - x[1])
+    result_parts = []
+    for _, group in grouped_numbers:
+        group_list = [item[1] for item in group]
+        if len(group_list) > 1:
+            result_parts.append(f"{group_list[0]}-{group_list[-1]}")
+        else:
+            result_parts.append(str(group_list[0]))
+    target_atom_indices = " ".join(result_parts)
+    print(target_atom_indices)
     count = count_index_group(args)
     cmd = f"""
 echo '
 a {target_atom_indices}
 name {count + 1} {args.name}
 q
-' | {args.gmx} make_ndx -f {args.structure} -n {args.index} -o {args.output}"""
+' | {args.gmx} make_ndx -f {args.gro} -n {args.index} -o {args.output}"""
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} updated")
 

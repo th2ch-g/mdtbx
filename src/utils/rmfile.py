@@ -1,5 +1,6 @@
 from pathlib import Path
 import argparse
+import subprocess
 
 from ..logger import generate_logger
 
@@ -12,11 +13,12 @@ def add_subcmd(subparsers):
         help="Remove unnecessary files related to MD simulation (e.g. .cpt, mdout.mdp, backup files)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("path", type=str, help="Path to the directory", default=".")
+    parser.add_argument("--path", type=str, help="Path to the directory", default=".")
 
 
 def run(args):
-    for suffix in ["\#*", "*cpt", "mdout.mdp"]:
+    for suffix in ["#*#", "*cpt", "mdout.mdp"]:
         for p in Path(args.path).glob(suffix):
-            LOGGER.info(f"rm -f {p}")
-            p.unlink()
+            cmd = f"rm -f '{p}'"
+            subprocess.run(cmd, shell=True, check=True)
+            LOGGER.info(f"{p} removed")
