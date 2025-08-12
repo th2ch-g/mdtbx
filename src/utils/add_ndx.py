@@ -46,6 +46,7 @@ def make_default_index(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} newly generated")
 
+
 def count_index_group(args) -> int:
     count = 0
     with open(args.index) as f:
@@ -54,6 +55,7 @@ def count_index_group(args) -> int:
             if line.startswith("["):
                 count += 1
     return count
+
 
 def add_index(args):
     gro = md.load(args.gro)
@@ -80,6 +82,7 @@ q
 ' | {args.gmx} make_ndx -f {args.gro} -n {args.index} -o {args.output}"""
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} updated")
+
 
 def run(args):
     if args.selection is None and args.index is not None:
