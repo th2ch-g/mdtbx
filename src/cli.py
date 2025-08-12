@@ -7,6 +7,7 @@ from .utils import rmfile
 from .utils import addace
 from .utils import addnme
 from .utils import trjcat
+from .utils import centering_gro
 
 LOGGER = generate_logger(__name__)
 
@@ -22,6 +23,7 @@ def cli() -> None:
     addace.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
     trjcat.add_subcmd(subparsers)
+    centering_gro.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -41,5 +43,8 @@ def cli() -> None:
 
     if sys.argv[1] == "trjcat":
         trjcat.run(args)
+
+    if sys.argv[1] == "centering_gro":
+        centering_gro.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")

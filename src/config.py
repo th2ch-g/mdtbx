@@ -14,3 +14,6 @@ cmd.set("spec_reflect", "0")
 cmd.set("cartoon_tube_radius", "0.5")
 cmd.set("ambient", "0.4")
 cmd.set("ray_trace_color", "black")
+
+# grompp setting
+MAXWARN = 10
