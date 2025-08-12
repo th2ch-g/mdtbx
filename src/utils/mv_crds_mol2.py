@@ -1,6 +1,5 @@
 import argparse
 import re
-from pathlib import Path
 from ..config import *  # NOQA
 from ..logger import generate_logger
 
@@ -40,6 +39,7 @@ def add_subcmd(subparsers):
         type=str,
         help="Output mol2 file",
     )
+
 
 def run(args):
     atomname2crds = {}

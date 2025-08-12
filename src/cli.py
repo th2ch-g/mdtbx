@@ -20,6 +20,10 @@ from .utils import trjcat
 from .utils import print_perf
 from .utils import mv_crds_mol2
 
+from .simulator import gen_sample as gen_sample_simulator
+from .builder import gen_sample as gen_sample_builder
+from .msm import gen_sample as gen_sample_msm
+
 LOGGER = generate_logger(__name__)
 
 
@@ -46,6 +50,10 @@ def cli() -> None:
     trjcat.add_subcmd(subparsers)
     rmfile.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
+
+    gen_sample_builder.add_subcmd(subparsers)
+    gen_sample_simulator.add_subcmd(subparsers)
+    gen_sample_msm.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -101,5 +109,14 @@ def cli() -> None:
 
     if sys.argv[1] == "calc_ion_conc":
         calc_ion_conc.run(args)
+
+    if sys.argv[1] == "gen-sample-simulator":
+        gen_sample_simulator.run(args)
+
+    if sys.argv[1] == "gen-sample-builder":
+        gen_sample_builder.run(args)
+
+    if sys.argv[1] == "gen-sample-msm":
+        gen_sample_msm.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
