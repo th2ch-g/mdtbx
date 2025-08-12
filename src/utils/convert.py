@@ -38,20 +38,20 @@ def add_subcmd(subparsers):
 def run(args):
     if args.type == "parmed":
         cmd = f"amb2gro_top_gro.py -p {args.parm} -c {args.rst} -t gmx.top -g gmx.gro -b gmx.pdb"
-        subprocess.run(cmd, shell=True)
+        subprocess.run(cmd, shell=True, check=True)
         LOGGER.info("gmx.gro generated")
         LOGGER.info("gmx.top generated")
         LOGGER.info("gmx.pdb generated")
     elif args.type == "acpype":
         cmd = f"acpype -p {args.parm} -x {args.rst}"
-        subprocess.run(cmd, shell=True)
+        subprocess.run(cmd, shell=True, check=True)
         stem = Path(args.parm).stem
         cmd = f"cp {stem}.amb2gmx/{stem}_GMX.gro gmx.gro"
-        subprocess.run(cmd, shell=True)
+        subprocess.run(cmd, shell=True, check=True)
         cmd = f"cp {stem}.amb2gmx/{stem}_GMX.top gmx.top"
-        subprocess.run(cmd, shell=True)
+        subprocess.run(cmd, shell=True, check=True)
         LOGGER.info("gmx.gro generated")
         LOGGER.info("gmx.top generated")
         cmd = f"rm -rf {stem}.amb2gmx/"
-        subprocess.run(cmd, shell=True)
+        subprocess.run(cmd, shell=True, check=True)
         LOGGER.info(f"{stem}.amb2gmx/ removed")

@@ -46,13 +46,13 @@ def run(args):
     stem = Path(args.structure).stem
 
     cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.toplogy} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
-    subprocess.run(cmd, shell=True)
+    subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("tmp.tpr generated")
 
     cmd = f"echo {args.centering_selection} System | {args.gmx} trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {stem}_center.gro -pbc mol -center"
-    subprocess.run(cmd, shell=True)
+    subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{stem}_center.gro generated")
 
     cmd = "rm -f tmp.tpr"
-    subprocess.run(cmd, shell=True)
+    subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("tmp.tpr removed")

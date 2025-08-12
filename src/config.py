@@ -17,3 +17,6 @@ cmd.set("ray_trace_color", "black")
 
 # grompp setting
 MAXWARN = 10
+
+# tleap settings
+SYSTEM_NAME = "SYS"
