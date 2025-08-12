@@ -28,7 +28,7 @@ def add_subcmd(subparsers):
         "-v",
         "--volume",
         type=float,
-        help="Volume [A^3]",
+        help="Volume [A^3] (if this is provided, pdb is not required, directly calculate ion concentration)",
     )
 
     parser.add_argument(
@@ -40,7 +40,7 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "--warter_name",
+        "--water_name",
         default="WAT",
         type=str,
         help="Water name (e.g. WAT, HOH, TIP3)",
@@ -48,14 +48,15 @@ def add_subcmd(subparsers):
 
     parser.add_argument(
         "--method",
-        default="cubic",
+        default="water",
         type=str,
         help="Method for calculating ion concentration (if pdb is provided)",
-        choices=["cubic", "water"],
+        choices=["cubic", "water", "optimize"],
     )
 
-    # cubic: calculate from system volume
+    # cubic: calculate from system volume(assume cubic system)
     # water: calculate from water volume
+    # optimize: consider charge of system
 
 
 def get_boxsize_from_pdb(args) -> tuple[float, float, float]:  # angstrom^3
@@ -74,7 +75,7 @@ def get_water_number_from_pdb(args) -> int:
     with open(args.pdb) as f:
         for idx, line in enumerate(f):
             line = line.rstrip()
-            if "O" in line and args.warter_name in line:
+            if "O" in line and args.water_name in line:
                 count += 1
     return count
 
@@ -109,6 +110,7 @@ def run(args):
             num_water = get_water_number_from_pdb(args)
             LOGGER.info(f"Number of water molecules: # {num_water}")
             volume = num_water * WATER_VOLUME * 1000  # NOQA # convert from nm^3 to A^3
+            # volume = num_water * TIP3P_VOLUME * 1000
             LOGGER.info(f"Volume of water molecules: {volume}")
             calc_ion_conc_from_volume(volume, args.concentration)
         else:
