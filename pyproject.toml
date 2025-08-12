@@ -47,7 +47,6 @@ scipy = "*"
 optuna = "*"
 scikit-learn = "*"
 
-
 [tool.pixi.tasks]
 update = "git pull && pixi install"
 docker_build = "docker build -t mdtbx ."
