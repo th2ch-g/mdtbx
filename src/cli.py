@@ -10,6 +10,8 @@ from .utils import trjcat
 from .utils import centering_gro
 from .utils import convert
 from .utils import find_bond
+from .utils import gen_am1bcc
+from .utils import gen_resp
 
 LOGGER = generate_logger(__name__)
 
@@ -28,6 +30,8 @@ def cli() -> None:
     centering_gro.add_subcmd(subparsers)
     convert.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
+    gen_am1bcc.add_subcmd(subparsers)
+    gen_resp.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -56,5 +60,11 @@ def cli() -> None:
 
     if sys.argv[1] == "find_bond":
         find_bond.run(args)
+
+    if sys.argv[1] == "gen_am1bcc":
+        gen_am1bcc.run(args)
+
+    if sys.argv[1] == "gen_resp":
+        gen_resp.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
