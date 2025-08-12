@@ -122,13 +122,13 @@ def cli() -> None:
     if sys.argv[1] == "build-solution":
         build_solution.run(args)
 
-    if sys.argv[1] == "gen-sample-simulator":
+    if sys.argv[1] == "gen_sample_simulator":
         gen_sample_simulator.run(args)
 
-    if sys.argv[1] == "gen-sample-builder":
+    if sys.argv[1] == "gen_sample_builder":
         gen_sample_builder.run(args)
 
-    if sys.argv[1] == "gen-sample-msm":
+    if sys.argv[1] == "gen_sample_msm":
         gen_sample_msm.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
