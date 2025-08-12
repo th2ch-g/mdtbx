@@ -4,6 +4,7 @@ import sys
 from .logger import generate_logger
 
 from .utils import rmfile
+from .utils import addace
 
 LOGGER = generate_logger(__name__)
 
@@ -16,6 +17,7 @@ def cli() -> None:
     subparsers = parser.add_subparsers()
 
     rmfile.add_subcmd(subparsers)
+    addace.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -26,5 +28,8 @@ def cli() -> None:
 
     if sys.argv[1] == "rmfile":
         rmfile.run(args)
+
+    if sys.argv[1] == "addace":
+        addace.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
