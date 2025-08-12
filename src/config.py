@@ -22,5 +22,6 @@ MAXWARN = 10
 SYSTEM_NAME = "SYS"
 
 # gaussian setting
+GAUSSIAN_CMD = "g16"
 STRUCUTRE_OPTIMIZATION = "#p opt=(tight) scf=qc b3lyp/6-31+g(d,p)"
 SINGLE_POINT_CALCULATION = "#p hf/6-31g(d) pop=mk iop(6/33=2,6/42=6) scf=tight"

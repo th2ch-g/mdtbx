@@ -12,6 +12,7 @@ from .utils import convert
 from .utils import find_bond
 from .utils import gen_am1bcc
 from .utils import gen_resp
+from .utils import gen_posres
 
 LOGGER = generate_logger(__name__)
 
@@ -32,6 +33,7 @@ def cli() -> None:
     find_bond.add_subcmd(subparsers)
     gen_am1bcc.add_subcmd(subparsers)
     gen_resp.add_subcmd(subparsers)
+    gen_posres.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -66,5 +68,8 @@ def cli() -> None:
 
     if sys.argv[1] == "gen_resp":
         gen_resp.run(args)
+
+    if sys.argv[1] == "gen_posres":
+        gen_posres.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")

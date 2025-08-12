@@ -51,40 +51,43 @@ def add_subcmd(subparsers):
 
 def run(args):
     # structure optimization
+    filetype = Path(args.structure).suffix
     cmd = f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
     subprocess.run(cmd, shell=True, check=True)
 
     with open("structure_optimization.gjf") as ref:
         lines = ref.readlines()
 
-    lines[0] = f"%chk=structure_optimization.chk"
+    lines[0] = "%chk=structure_optimization.chk"
     lines[1] = f"%mem={args.memory}GB"
     lines.insert(2, f"%nprocshared={args.threads}")
-    lines.insert(3, STRUCTURE_OPTIMIZATION)
+    lines.insert(3, STRUCTURE_OPTIMIZATION)  # NOQA
 
     with open("structure_optimization.gjf", "w") as f:
         f.writelines(lines)
 
-    cmd = f"g16 < structure_optimization.gjf > structure_optimization.log"
+    cmd = f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("structure_optimization.log generated")
 
     # single point
-    cmd = f"obabel -i g16 structure_optimization.log -o gjf > single_point_calculation.gjf"
+    cmd = f"obabel -i {GAUSSIAN_CMD} structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
     subprocess.run(cmd, shell=True, check=True)
 
-    with open(f"single_point_calculation.gjf") as ref:
+    with open("single_point_calculation.gjf") as ref:
         lines = ref.readlines()
 
-    lines[0] = f"%chk=single_point_calculation.chk"
+    lines[0] = "%chk=single_point_calculation.chk"
     lines[1] = f"%mem={args.memory}GB"
     lines.insert(2, f"%nprocshared={args.threads}")
-    lines.insert(3, single_point_calculation)
+    lines.insert(3, SINGLE_POINT_CALCULATION)  # NOQA
 
     with open("single_point_calculation.gjf", "w") as f:
         f.writelines(lines)
 
-    cmd = f"g16 < single_point_calculation.gjf > single_point_calculation.log"
+    cmd = (
+        f"{GAUSSIAN_CMD} < single_point_calculation.gjf > single_point_calculation.log"  # NOQA
+    )
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("single_point_calculation.log generated")
 

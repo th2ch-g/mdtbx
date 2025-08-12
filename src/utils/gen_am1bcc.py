@@ -60,6 +60,6 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output_prefix}.lib generated")
 
-    cmd = f"rm -f leap.log"
+    cmd = "rm -f leap.log"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("leap.log removed")
