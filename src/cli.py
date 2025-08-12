@@ -20,6 +20,9 @@ from .utils import trjcat
 from .utils import print_perf
 from .utils import mv_crds_mol2
 
+from .utils import build_membrane
+from .utils import build_solution
+
 from .simulator import gen_sample as gen_sample_simulator
 from .builder import gen_sample as gen_sample_builder
 from .msm import gen_sample as gen_sample_msm
@@ -50,6 +53,9 @@ def cli() -> None:
     trjcat.add_subcmd(subparsers)
     rmfile.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
+
+    build_membrane.add_subcmd(subparsers)
+    build_solution.add_subcmd(subparsers)
 
     gen_sample_builder.add_subcmd(subparsers)
     gen_sample_simulator.add_subcmd(subparsers)
@@ -109,6 +115,12 @@ def cli() -> None:
 
     if sys.argv[1] == "calc_ion_conc":
         calc_ion_conc.run(args)
+
+    if sys.argv[1] == "build-membrane":
+        build_membrane.run(args)
+
+    if sys.argv[1] == "build-solution":
+        build_solution.run(args)
 
     if sys.argv[1] == "gen-sample-simulator":
         gen_sample_simulator.run(args)

@@ -10,10 +10,10 @@ LOGGER = generate_logger(__name__)
 
 def add_subcmd(subparsers):
     """
-    mdtbx gen-sample-msm
+    mdtbx gen_sample_msm
     """
     parser = subparsers.add_parser(
-        "gen-sample-msm",
+        "gen_sample_msm",
         help="Generate sample msm scripts",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )

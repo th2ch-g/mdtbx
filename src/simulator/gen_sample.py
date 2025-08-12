@@ -10,10 +10,10 @@ LOGGER = generate_logger(__name__)
 
 def add_subcmd(subparsers):
     """
-    mdtbx gen-sample-simulator
+    mdtbx gen_sample_simulator
     """
     parser = subparsers.add_parser(
-        "gen-sample-simulator",
+        "gen_sample_simulator",
         help="Generate sample simulator scripts",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
