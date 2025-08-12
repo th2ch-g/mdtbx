@@ -13,6 +13,7 @@ from .utils import find_bond
 from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_posres
+from .utils import add_ndx
 
 LOGGER = generate_logger(__name__)
 
@@ -24,16 +25,17 @@ def cli() -> None:
     # subcommands
     subparsers = parser.add_subparsers()
 
-    rmfile.add_subcmd(subparsers)
     addace.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
-    trjcat.add_subcmd(subparsers)
-    centering_gro.add_subcmd(subparsers)
-    convert.add_subcmd(subparsers)
-    find_bond.add_subcmd(subparsers)
+    add_ndx.add_subcmd(subparsers)
     gen_am1bcc.add_subcmd(subparsers)
     gen_resp.add_subcmd(subparsers)
     gen_posres.add_subcmd(subparsers)
+    find_bond.add_subcmd(subparsers)
+    centering_gro.add_subcmd(subparsers)
+    convert.add_subcmd(subparsers)
+    trjcat.add_subcmd(subparsers)
+    rmfile.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -71,5 +73,8 @@ def cli() -> None:
 
     if sys.argv[1] == "gen_posres":
         gen_posres.run(args)
+
+    if sys.argv[1] == "add_ndx":
+        add_ndx.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
