@@ -47,6 +47,8 @@ scipy = "*"
 optuna = "*"
 scikit-learn = "*"
 ruff = "*"
+setuptools = "<81" # for mdtraj 1.9.9
+
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
