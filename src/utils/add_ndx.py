@@ -46,6 +46,14 @@ def make_default_index(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} newly generated")
 
+def count_index_group(args) -> int:
+    count = 0
+    with open(args.index) as f:
+        for idx, line in enumerate(f):
+            line = line.rstrip()
+            if line.startswith("["):
+                count += 1
+    return count
 
 def add_index(args):
     gro = md.load(args.gro)
@@ -57,41 +65,31 @@ def add_index(args):
     for _, group in grouped_numbers:
         group_list = [item[1] for item in group]
         if len(group_list) > 1:
-            result_parts.append(f"{group_list[0]}-{group_list[-1]}")
+            result_parts.append(f"a {group_list[0]}-{group_list[-1]}")
         else:
             result_parts.append(str(group_list[0]))
-    target_atom_indices = " ".join(result_parts)
-    print(target_atom_indices)
+    target_atom_indices = " | ".join(result_parts)
+    LOGGER.info(f"Target selection in make_ndx: {target_atom_indices=}")
     count = count_index_group(args)
+    LOGGER.info(f"Number of Current index group: {count=}")
     cmd = f"""
 echo '
-a {target_atom_indices}
-name {count + 1} {args.name}
+{target_atom_indices}
+name {count} {args.name}
 q
 ' | {args.gmx} make_ndx -f {args.gro} -n {args.index} -o {args.output}"""
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} updated")
 
-
-def count_index_group(args) -> int:
-    count = 0
-    with open(args.index) as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
-            if line.startswith("["):
-                count += 1
-    return count
-
-
 def run(args):
     if args.selection is None and args.index is not None:
         LOGGER.warn("use --selection")
-    if args.selection is None and args.index is None:
+    elif args.selection is None and args.index is None:
         make_default_index(args)
         args.index = args.output
-    if args.selection is not None and args.index is None:
+    elif args.selection is not None and args.index is None:
         make_default_index(args)
         args.index = args.output
         add_index(args)
-    if args.selection is not None and args.index is not None:
+    elif args.selection is not None and args.index is not None:
         add_index(args)
