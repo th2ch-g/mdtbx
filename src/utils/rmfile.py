@@ -9,7 +9,7 @@ LOGGER = generate_logger(__name__)
 def add_subcmd(subparsers):
     parser = subparsers.add_parser(
         "rmfile",
-        help="Remove unnecessary files related to MD simulation",
+        help="Remove unnecessary files related to MD simulation (e.g. .cpt, mdout.mdp, backup files)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("path", type=str, help="Path to the directory", default=".")

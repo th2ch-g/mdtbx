@@ -14,7 +14,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "add_make_ndx",
-        help="Add new index group",
+        help="Add new index group with gmx make_ndx",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

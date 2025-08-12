@@ -13,7 +13,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "find_bond",
-        help="Find bond",
+        help="Find bond (e.g. CYS-CYS)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

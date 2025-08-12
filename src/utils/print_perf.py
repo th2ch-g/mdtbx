@@ -15,7 +15,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "print_perf",
-        help="Print performance",
+        help="Print performance (ns/day)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

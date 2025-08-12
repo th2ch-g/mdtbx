@@ -14,7 +14,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "gen_resp",
-        help="Generate RESP charges",
+        help="Generate RESP charges with Gaussian",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

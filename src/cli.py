@@ -14,9 +14,11 @@ from .utils import find_bond
 from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_posres
+from .utils import gen_distres
 from .utils import amb2gro
 from .utils import trjcat
 from .utils import print_perf
+from .utils import mv_crds_mol2
 
 LOGGER = generate_logger(__name__)
 
@@ -31,9 +33,11 @@ def cli() -> None:
     addace.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
     add_ndx.add_subcmd(subparsers)
+    mv_crds_mol2.add_subcmd(subparsers)
     gen_am1bcc.add_subcmd(subparsers)
     gen_resp.add_subcmd(subparsers)
     gen_posres.add_subcmd(subparsers)
+    gen_distres.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
     convert.add_subcmd(subparsers)
     calc_ion_conc.add_subcmd(subparsers)
@@ -59,6 +63,9 @@ def cli() -> None:
     if sys.argv[1] == "addnme":
         addnme.run(args)
 
+    if sys.argv[1] == "mv_crds_mol2":
+        mv_crds_mol2.run(args)
+
     if sys.argv[1] == "trjcat":
         trjcat.run(args)
 
@@ -82,6 +89,9 @@ def cli() -> None:
 
     if sys.argv[1] == "gen_posres":
         gen_posres.run(args)
+
+    if sys.argv[1] == "gen_distres":
+        gen_distres.run(args)
 
     if sys.argv[1] == "add_ndx":
         add_ndx.run(args)
