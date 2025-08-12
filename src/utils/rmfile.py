@@ -5,6 +5,7 @@ from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
 
+
 def add_subcmd(subparsers):
     parser = subparsers.add_parser(
         "rmfile",

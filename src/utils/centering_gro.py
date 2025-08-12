@@ -2,10 +2,11 @@ import argparse
 import subprocess
 from pathlib import Path
 
-from ..config import *
+from ..config import *  # NOQA
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
+
 
 def add_subcmd(subparsers):
     """
@@ -26,12 +27,14 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-c", "--centering_selection", default="Protein", type=str, help="Centering selection"
+        "-c",
+        "--centering_selection",
+        default="Protein",
+        type=str,
+        help="Centering selection",
     )
 
-    parser.add_argument(
-        "-g", "--gmx", default="gmx", type=str, help="gmx command"
-    )
+    parser.add_argument("-g", "--gmx", default="gmx", type=str, help="gmx command")
 
     parser.add_argument(
         "-idx", "--index", default="index.ndx", type=str, help="Index file"
@@ -39,10 +42,10 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    dummy_mdp_path = Path(__file__).parent / 'dummy.mdp'
+    dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
     stem = Path(args.structure).stem
 
-    cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.toplogy} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"
+    cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.toplogy} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
     subprocess.run(cmd, shell=True)
     LOGGER.info("tmp.tpr generated")
 
@@ -50,6 +53,6 @@ def run(args):
     subprocess.run(cmd, shell=True)
     LOGGER.info(f"{stem}_center.gro generated")
 
-    cmd = f"rm -f tmp.tpr"
+    cmd = "rm -f tmp.tpr"
     subprocess.run(cmd, shell=True)
     LOGGER.info("tmp.tpr removed")
