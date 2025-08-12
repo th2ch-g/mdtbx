@@ -14,6 +14,7 @@ from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_posres
 from .utils import add_ndx
+from .utils import print_perf
 
 LOGGER = generate_logger(__name__)
 
@@ -36,6 +37,7 @@ def cli() -> None:
     convert.add_subcmd(subparsers)
     trjcat.add_subcmd(subparsers)
     rmfile.add_subcmd(subparsers)
+    print_perf.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -76,5 +78,8 @@ def cli() -> None:
 
     if sys.argv[1] == "add_ndx":
         add_ndx.run(args)
+
+    if sys.argv[1] == "print_perf":
+        print_perf.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
