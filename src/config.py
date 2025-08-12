@@ -22,6 +22,8 @@ MAXWARN = 10
 # tleap settings
 SYSTEM_NAME = "SYS"
 AVOGADRO_CONST = 6.022  # 10**23 mol^-1
+WATER_WEGITH = 18  # g/mol
+WATER_VOLUME = WATER_WEGITH / AVOGADRO_CONST / 100  # nm^3/number
 
 # gaussian setting
 GAUSSIAN_CMD = "g16"
