@@ -68,7 +68,7 @@ def run(args):
     # volume [A^3] = volume x 10^-3 [nm^3] = volume x 10^-3 x 10^-24 [L]
     # AVOGADRO = 6.022 * 10^23 [mol^-1]
     # -> concentration [M] * volume [A^3] * 1/10000
-    ionnum = volume * args.concentration * AVOGADRO_CONST // 10000 # NOQA
+    ionnum = volume * args.concentration * AVOGADRO_CONST // 10000  # NOQA
     ionnum = int(ionnum)
     LOGGER.info(f"Number of ions that should be added: # {ionnum}")
     print(f"ionnum: {ionnum}")
