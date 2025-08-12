@@ -22,6 +22,7 @@ def run(args):
     cmd.load(args.structure, "target")
     for chain in cmd.get_chains("target and polymer.protein"):
         editor.attach_amino_acid(f"first (chain {chain}) and name N", 'ace')
+        LOGGER.info(f"ACE added to {chain}")
     cmd.save(f"{args.output_prefix}.pdb")
 
     with open(f"{args.output_prefix}.pdb") as ref:

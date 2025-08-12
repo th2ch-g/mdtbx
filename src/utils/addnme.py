@@ -1,0 +1,43 @@
+import argparse
+from pymol import cmd, editor
+import subprocess
+
+from ..logger import generate_logger
+from ..config import *
+
+LOGGER = generate_logger(__name__)
+
+def add_subcmd(subparsers):
+    parser = subparsers.add_parser(
+        "addnme",
+        help="Add NME to protein",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    parser.add_argument("-s", "--structure", required=True, type=str, help="Structure file (can be parsed in PyMOL)")
+    parser.add_argument("-o", "--output_prefix", required=True, type=str, help="Output file prefix")
+
+
+def run(args):
+    cmd.load(args.structure, "target")
+    cmd.select("oxts", f"name OXT")
+    cmd.remove("oxts")
+    LOGGER.info("OXTs removed")
+    for chain in cmd.get_chains("target and polymer.protein"):
+        editor.attach_amino_acid(f"last (chain {chain}) and name C", 'nme')
+        LOGGER.info(f"NME added to {chain}")
+    cmd.save(f"{args.output_prefix}.pdb")
+
+    with open(f"{args.output_prefix}.pdb") as ref:
+        lines = ref.readlines()
+
+    for target_idx in range(1, 3+1):
+        with open(f"{args.output_prefix}.pdb") as f:
+            for idx, line in enumerate(f):
+                line = line.rstrip()
+
+                if "NME" in line:
+                    lines[idx] = lines[idx].replace(f"HH3{target_idx}", f" H{target_idx} ", 1)
+
+    with open(f"{args.output_prefix}.pdb", "w") as f:
+        f.writelines(lines)
