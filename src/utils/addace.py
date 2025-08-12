@@ -22,7 +22,7 @@ def add_subcmd(subparsers):
         help="Structure file (can be parsed in PyMOL)",
     )
     parser.add_argument(
-        "-o", "--output_prefix", required=True, type=str, help="Output file prefix"
+        "-o", "--output_prefix", default="out_ace", type=str, help="Output file prefix"
     )
 
 
