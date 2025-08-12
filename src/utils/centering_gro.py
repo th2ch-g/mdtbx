@@ -1,5 +1,6 @@
 import argparse
 import subprocess
+from pathlib import Path
 
 from ..config import *
 from ..logger import generate_logger
@@ -38,7 +39,10 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    cmd = f"{args.gmx} grompp -f tmp.mdp -c {args.structure} -r {args.structure} -p {args.toplogy} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"
+    dummy_mdp_path = Path(__file__).parent / 'dummy.mdp'
+    stem = Path(args.structure).stem
+
+    cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.toplogy} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"
     subprocess.run(cmd, shell=True)
     LOGGER.info("tmp.tpr generated")
 
