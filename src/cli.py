@@ -6,6 +6,7 @@ from .logger import generate_logger
 from .utils import rmfile
 from .utils import addace
 from .utils import addnme
+from .utils import trjcat
 
 LOGGER = generate_logger(__name__)
 
@@ -20,6 +21,7 @@ def cli() -> None:
     rmfile.add_subcmd(subparsers)
     addace.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
+    trjcat.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -36,5 +38,8 @@ def cli() -> None:
 
     if sys.argv[1] == "addnme":
         addnme.run(args)
+
+    if sys.argv[1] == "trjcat":
+        trjcat.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
