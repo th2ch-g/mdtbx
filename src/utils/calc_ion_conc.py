@@ -48,14 +48,14 @@ def add_subcmd(subparsers):
 
     parser.add_argument(
         "--method",
-        default="water",
+        default="cubic",
         type=str,
         help="Method for calculating ion concentration (if pdb is provided)",
         choices=["cubic", "water", "optimize"],
     )
 
     # cubic: calculate from system volume(assume cubic system)
-    # water: calculate from water volume
+    # water: calculate from water volume(recomended if lipid system)
     # optimize: consider charge of system
 
 
