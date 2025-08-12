@@ -1,5 +1,6 @@
 from pymol import cmd
 
+# pymol setting
 # save setting
 cmd.set("pdb_reformat_names_mode", 2)
 cmd.set("retain_order", 1)
