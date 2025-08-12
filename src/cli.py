@@ -6,14 +6,15 @@ from .logger import generate_logger
 from .utils import rmfile
 from .utils import addace
 from .utils import addnme
-from .utils import trjcat
+from .utils import add_ndx
+from .utils import calc_ion_conc
 from .utils import centering_gro
-from .utils import convert
 from .utils import find_bond
 from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_posres
-from .utils import add_ndx
+from .utils import convert
+from .utils import trjcat
 from .utils import print_perf
 
 LOGGER = generate_logger(__name__)
@@ -33,6 +34,7 @@ def cli() -> None:
     gen_resp.add_subcmd(subparsers)
     gen_posres.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
+    calc_ion_conc.add_subcmd(subparsers)
     centering_gro.add_subcmd(subparsers)
     convert.add_subcmd(subparsers)
     trjcat.add_subcmd(subparsers)
@@ -81,5 +83,8 @@ def cli() -> None:
 
     if sys.argv[1] == "print_perf":
         print_perf.run(args)
+
+    if sys.argv[1] == "calc_ion_conc":
+        calc_ion_conc.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")

@@ -28,7 +28,10 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-o", "--output", help="Output file name", type=str,
+        "-o",
+        "--output",
+        help="Output file name",
+        type=str,
     )
 
 

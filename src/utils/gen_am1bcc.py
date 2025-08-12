@@ -43,7 +43,7 @@ def add_subcmd(subparsers):
 
 def run(args):
     filetype = Path(args.structure).suffix
-    cmd = f"antechamber -i {args.structure} -fi {filetype} -o {args.resname}.mol2 -fo mol2 -c bcc -s 2 -nc {args.charge} -m {args.multiplicity} -rn {args.resname}"
+    cmd = f"antechamber -i {args.structure} -fi {filetype} -o {args.resname}.mol2 -fo mol2 -c bcc -s 2 -nc {args.charge} -m {args.multiplicity} -rn {args.resname} -pf y"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}.mol2 generated")
 
@@ -53,12 +53,13 @@ def run(args):
 
     cmd_tleap = """
     source leaprc.gaff2
-    lig = loadmol2 {args.output_prefix}.mol2
+    loadamberparams {args.resname}.frcmod
+    lig = loadmol2 {args.resname}.mol2
     saveoff lig {args.resname}.lib
     """
     cmd = f"echo {cmd_tleap} | tleap -f -"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.output_prefix}.lib generated")
+    LOGGER.info(f"{args.resname}.lib generated")
 
     cmd = "rm -f leap.log"
     subprocess.run(cmd, shell=True, check=True)

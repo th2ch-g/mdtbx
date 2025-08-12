@@ -99,3 +99,23 @@ def run(args):
     cmd = "rm -f QOUT esout punch qout"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("QOUT esout punch qout removed")
+
+    # parmchk2
+    cmd = f"parmchk2 -i {args.resname}.mol2 -f mol2 -o {args.resname}.frcmod -s gaff2"
+    subprocess.run(cmd, shell=True, check=True)
+    LOGGER.info(f"{args.resname}.frcmod generated")
+
+    # tleap
+    cmd_tleap = """
+    source leaprc.gaff2
+    loadamberparams {args.resname}.frcmod
+    lig = loadmol2 {args.resname}.mol2
+    saveoff lig {args.resname}.lib
+    """
+    cmd = f"echo {cmd_tleap} | tleap -f -"
+    subprocess.run(cmd, shell=True, check=True)
+    LOGGER.info(f"{args.resname}.lib generated")
+
+    cmd = "rm -f leap.log"
+    subprocess.run(cmd, shell=True, check=True)
+    LOGGER.info("leap.log removed")

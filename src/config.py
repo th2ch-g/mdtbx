@@ -21,6 +21,7 @@ MAXWARN = 10
 
 # tleap settings
 SYSTEM_NAME = "SYS"
+AVOGADRO_CONST = 6.022  # 10**23 mol^-1
 
 # gaussian setting
 GAUSSIAN_CMD = "g16"
