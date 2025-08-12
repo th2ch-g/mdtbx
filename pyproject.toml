@@ -34,6 +34,7 @@ mdtbx = { path = ".", editable = true }
 # pacs = { path = "/path/to/PaCS-Toolkit", editable = true }
 pacs = { git = "git+https://github.com/KitaoLab/PaCS-Toolkit.git", extras = ["all"] }
 tmplot = { git = "git+https://github.com/th2ch-g/tmplot.git" }
+myplugins = { git = "git+https://github.com/th2ch-g/pymol-plugins.git" }
 mmterm = { git = "git+https://github.com/jgreener64/mmterm.git" }
 treon = "*"
 deeptime = "==0.4.4"
