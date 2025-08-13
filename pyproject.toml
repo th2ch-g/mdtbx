@@ -30,11 +30,11 @@ aliview = "*"
 
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
-# pacs = { path = "/path/to/PaCS-Toolkit", editable = true }
-pacs = { git = "git+https://github.com/KitaoLab/PaCS-Toolkit.git", extras = ["all"] }
-tmplot = { git = "git+https://github.com/th2ch-g/tmplot.git" }
 myplugins = { git = "git+https://github.com/th2ch-g/pymol-plugins.git" }
 mmterm = { git = "git+https://github.com/jgreener64/mmterm.git" }
+rdkit = "*"
+py3Dmol = "*"
+MDAnalysis = "*"
 treon = "*"
 deeptime = "==0.4.4"
 matplotlib = "*"
@@ -48,9 +48,6 @@ optuna = "*"
 scikit-learn = "*"
 ruff = "*"
 setuptools = "<81" # for mdtraj 1.9.9
-rdkit = "*"
-py3Dmol = "*"
-MDAnalysis = "*"
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
