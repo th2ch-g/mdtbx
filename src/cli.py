@@ -24,7 +24,8 @@ from .utils import mv_crds_mol2
 from .utils import build_solution
 
 from .simulator import gen_sample as gen_sample_simulator
-from .builder import gen_sample as gen_sample_builder
+from .builder import gen_sample_builder
+from .builder import gen_sample_mdp
 from .msm import gen_sample as gen_sample_msm
 
 from .cv import comdist
@@ -63,6 +64,7 @@ def cli() -> None:
     build_solution.add_subcmd(subparsers)
 
     gen_sample_builder.add_subcmd(subparsers)
+    gen_sample_mdp.add_subcmd(subparsers)
     gen_sample_simulator.add_subcmd(subparsers)
     gen_sample_msm.add_subcmd(subparsers)
 
@@ -137,6 +139,9 @@ def cli() -> None:
 
     if sys.argv[1] == "gen_sample_builder":
         gen_sample_builder.run(args)
+
+    if sys.argv[1] == "gen_sample_mdp":
+        gen_sample_mdp.run(args)
 
     if sys.argv[1] == "gen_sample_msm":
         gen_sample_msm.run(args)
