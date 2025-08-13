@@ -96,11 +96,11 @@ def run(args):
         )
         for i in range(len(target_atom_indices1)):
             f.write(
-                f"{target_atom_indices1[i]} {target_atom_indices2[i]} {CONST_HATENA} {i} {CONST_FUNCT} {args.lo} {args.up1} {args.up2} {force_const}\n"
+                f"{target_atom_indices1[i]} {target_atom_indices2[i]} {CONST_HATENA} {i} {CONST_FUNCT} {args.lower_bound} {args.upper_bound1} {args.upper_bound2} {force_const}\n"
             )
         f.write("#endif\n")
 
     # insert distres.itp into topology.top
     # system section treats as global
     with open(args.topology, "a") as f:
-        f.write('\n#include "{args.output_prefix}.itp"\n')
+        f.write(f'\n#include "{args.output_prefix}.itp"\n')

@@ -5,10 +5,12 @@ source leaprc.gaff2
 LIGAND_PARAMS
 SYSTEM_NAME = loadpdb INPUT_PDB
 ADDCMD
+set SYSTEM_NAME box { BOX_SIZE }
+solvatebox SYSTEM_NAME TIP3PBOX 0.0
 setbox SYSTEM_NAME vdw
 addionsrand SYSTEM_NAME CATION ION_NUM
 addionsrand SYSTEM_NAME ANION 0
 charge SYSTEM_NAME
-saveamberparm SYSTEM_NAME OUT_DIR/leap.parm7 OUTDIR/leap.rst7
 savepdb SYSTEM_NAME OUT_DIR/leap.pdb
+saveamberparm SYSTEM_NAME OUT_DIR/leap.parm7 OUT_DIR/leap.rst7
 quit

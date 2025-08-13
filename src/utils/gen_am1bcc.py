@@ -54,8 +54,8 @@ def run(args):
     cmd_tleap = """
 source leaprc.gaff2
 loadamberparams {args.resname}.frcmod
-lig = loadmol2 {args.resname}.mol2
-saveoff lig {args.resname}.lib
+{args.resname} = loadmol2 {args.resname}.mol2
+saveoff {args.resname} {args.resname}.lib
 quit
     """
     cmd = f"echo '{cmd_tleap}' | tleap -f -"

@@ -81,4 +81,8 @@ def run(args):
             f.write(bonds_str)
         LOGGER.info(f"{args.output} generated")
     else:
-        print(bonds_str)
+        if len(bonds) == 0:
+            LOGGER.info("No bond found")
+        else:
+            LOGGER.info(f"{len(bonds)} bonds found")
+            print(bonds_str)

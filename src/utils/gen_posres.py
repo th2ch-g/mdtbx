@@ -59,4 +59,4 @@ def run(args):
     # insert posres.itp into topology.top
     # system section treats as global
     with open(args.topology, "a") as f:
-        f.write('\n#include "{args.output_prefix}.itp"\n')
+        f.write(f'\n#include "{args.output_prefix}.itp"\n')

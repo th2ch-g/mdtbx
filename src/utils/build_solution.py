@@ -54,7 +54,6 @@ def add_subcmd(subparsers):
 
 def run(args):
     # tleap
-    # SYSTEM_NAME, ION_NUM, INPUT_PDB, LIGAND_PARAMS, SSBONDS
     lines = []
     with open(Path(__file__).parent / "template_tleap.in") as f:
         for idx, line in enumerate(f):
@@ -69,6 +68,8 @@ def run(args):
                 line = line.replace("CATION", args.cation)
             if "ANION" in line:
                 line = line.replace("ANION", args.anion)
+            if "BOX_SIZE" in line:
+                line = line.replace("BOX_SIZE", " ".join(map(str, args.boxsize)))
             if "LIGAND_PARAMS" in line:
                 if args.ligparam is not None:
                     frcmod = args.ligparam.split(":")[0]
