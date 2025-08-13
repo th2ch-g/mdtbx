@@ -57,9 +57,9 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("tmp.tpr generated")
 
-    cmd = f"echo {args.centering_selection} System | {args.gmx} trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {stem}_center.gro -pbc mol -center"
+    cmd = f"echo {args.centering_selection} System | {args.gmx} trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {args.output} -pbc mol -center"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{stem}_center.gro generated")
+    LOGGER.info(f"{args.output} generated")
 
     cmd = "rm -f tmp.tpr"
     subprocess.run(cmd, shell=True, check=True)
