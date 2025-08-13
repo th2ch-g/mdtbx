@@ -54,6 +54,7 @@ def run(args):
     force_const = const + "_FC"
     all_moleculetypes = parser.get_all_moleculetypes()
     LOGGER.info(f"all_moleculetypes: {all_moleculetypes}")
+    pad_count = 0
     for moleculetypes in all_moleculetypes:
         atoms = parser.get_atoms_in(moleculetypes)
         target_atom_indices = []
@@ -77,10 +78,12 @@ def run(args):
 
         target_insert_linenumber = parser.get_insert_linenumber_in(moleculetypes)
         lines.insert(
-            target_insert_linenumber,
+            target_insert_linenumber + pad_count,
             f'\n#include "{args.output_prefix}_{moleculetypes}.itp"\n',
         )
         LOGGER.info(f"{args.output_prefix}_{moleculetypes}.itp inserted")
+
+        pad_count += 1
 
     # update
     with open(args.topology, "w") as f:
