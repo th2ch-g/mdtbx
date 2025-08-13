@@ -11,7 +11,13 @@ input_pdb=./input.pdb
 # prepare system
 $mdtbx addace -s input.pdb -o input_ace.pdb
 $mdtbx addnme -s input_ace.pdb -o input_ace_nme.pdb
-$mdtbx build_solution ...
+$mdtbx build_solution \
+    -f input_ace_nme.pdb \
+    -o ./ \
+    --ion_conc 0.15 \
+    --cation Na+ \
+    --anion Cl- \
+    --boxsize 100 100 100
 
 # convert from amber format to gromacs
 $mdtbx amb2gro -p leap.prmtop -x leap.inpcrd --type parmed

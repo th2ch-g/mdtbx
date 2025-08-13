@@ -38,7 +38,7 @@ def add_subcmd(subparsers):
 
     parser.add_argument("--anion", default="Cl-", type=str, help="Anion name")
 
-    parser.add_argument("--ligparam", type=str, help="Ligand parameter")
+    parser.add_argument("--ligparam", type=str, help="Ligand parameter. e.g. --ligparam FRCMOD:LIB")
 
     parser.add_argument(
         "--boxsize", nargs=3, type=float, help="Box size [angstrom, angstrom, angstrom]"
