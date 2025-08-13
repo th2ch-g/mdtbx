@@ -80,15 +80,14 @@ def get_water_number_from_pdb(args) -> int:
     return count
 
 
-def calc_ion_conc_from_volume(volume: float, concentration: float) -> float:
+def calc_ion_conc_from_volume(volume: float, concentration: float) -> int:
     # concentration [M] = concentration [mol/L]
     # volume [A^3] = volume x 10^-3 [nm^3] = volume x 10^-3 x 10^-24 [L]
     # AVOGADRO = 6.022 * 10^23 [mol^-1]
     # -> concentration [M] * volume [A^3] * 1/10000
     ionnum = volume * concentration * AVOGADRO_CONST // 10000  # NOQA
     ionnum = int(ionnum)
-    LOGGER.info(f"Number of ions that should be added: # {ionnum}")
-    print(f"ionnum: {ionnum}")
+    return ionnum
 
 
 def run(args):
@@ -96,7 +95,7 @@ def run(args):
         raise Exception("pdb or volume is required")
 
     if args.volume is not None:
-        calc_ion_conc_from_volume(args.volume, args.concentration)
+        ionnum = calc_ion_conc_from_volume(args.volume, args.concentration)
     else:
         if args.method == "cubic":
             # How to calculate ion concentration?
@@ -105,13 +104,15 @@ def run(args):
             boxsize = get_boxsize_from_pdb(args)
             volume = boxsize[0] * boxsize[1] * boxsize[2]
             LOGGER.info(f"Volume of system: {volume}")
-            calc_ion_conc_from_volume(volume, args.concentration)
+            ionnum = calc_ion_conc_from_volume(volume, args.concentration)
         elif args.method == "water":
             num_water = get_water_number_from_pdb(args)
             LOGGER.info(f"Number of water molecules: # {num_water}")
             volume = num_water * WATER_VOLUME * 1000  # NOQA # convert from nm^3 to A^3
             # volume = num_water * TIP3P_VOLUME * 1000
             LOGGER.info(f"Volume of water molecules: {volume}")
-            calc_ion_conc_from_volume(volume, args.concentration)
+            ionnum = calc_ion_conc_from_volume(volume, args.concentration)
         else:
             raise NotImplementedError
+    LOGGER.info(f"Number of ions that should be added: # {ionnum}")
+    print(f"ionnum: {ionnum}")

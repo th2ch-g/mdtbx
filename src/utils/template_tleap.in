@@ -2,13 +2,13 @@ source leaprc.protein.ff14SB
 source leaprc.water.tip3p
 source leaprc.GLYCAM_06j-1
 source leaprc.gaff2
-complex = loadpdb {INPUT_PDB}
-{LIGAND_PARAMS}
-{SSBONDS}
-setbox complex vdw
-addionsrand complex Na+ {ION_CONC}
-addionsrand complex Cl- 0
-charge complex
-saveamberparm complex leap.parm7 leap.rst7
-savepdb complex leap.pdb
+LIGAND_PARAMS
+SYSTEM_NAME = loadpdb INPUT_PDB
+ADDCMD
+setbox SYSTEM_NAME vdw
+addionsrand SYSTEM_NAME CATION ION_NUM
+addionsrand SYSTEM_NAME ANION 0
+charge SYSTEM_NAME
+saveamberparm SYSTEM_NAME OUT_DIR/leap.parm7 OUTDIR/leap.rst7
+savepdb SYSTEM_NAME OUT_DIR/leap.pdb
 quit

@@ -7,6 +7,7 @@ from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
 
+
 def add_subcmd(subparsers):
     """
     mdtbx rmsd --topology structure.pdb --trajectory trajectory.xtc --selection "resid 1 to 10" -o cv.npy
@@ -17,26 +18,59 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument("-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)")
-    parser.add_argument("-t", "--trajectory", type=str, required=True, help="Trajectory file (.xtc, .trr)")
-    parser.add_argument("-r", "--reference", type=str, required=True, help="Reference trajectory file (.xtc, .trr)")
     parser.add_argument(
-        "-sct", "--selection_cal_trj", type=str, required=True, help="Selection for trajectory (MDtraj Atom selection language)"
+        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
     )
     parser.add_argument(
-        "-scr", "--selection_cal_ref", type=str, required=True, help="Selection for reference (MDtraj Atom selection language)"
+        "-t",
+        "--trajectory",
+        type=str,
+        required=True,
+        help="Trajectory file (.xtc, .trr)",
     )
     parser.add_argument(
-        "-sft", "--selection_fit_trj", type=str, required=True, help="Selection for trajectory (MDtraj Atom selection language)"
+        "-r",
+        "--reference",
+        type=str,
+        required=True,
+        help="Reference trajectory file (.xtc, .trr)",
     )
     parser.add_argument(
-        "-sfr", "--selection_fit_ref", type=str, required=True, help="Selection for reference (MDtraj Atom selection language)"
+        "-sct",
+        "--selection_cal_trj",
+        type=str,
+        required=True,
+        help="Selection for trajectory (MDtraj Atom selection language)",
     )
-    parser.add_argument("-o", "--output", type=str, default="rmsd.npy", help="Output file (.npy)")
+    parser.add_argument(
+        "-scr",
+        "--selection_cal_ref",
+        type=str,
+        required=True,
+        help="Selection for reference (MDtraj Atom selection language)",
+    )
+    parser.add_argument(
+        "-sft",
+        "--selection_fit_trj",
+        type=str,
+        required=True,
+        help="Selection for trajectory (MDtraj Atom selection language)",
+    )
+    parser.add_argument(
+        "-sfr",
+        "--selection_fit_ref",
+        type=str,
+        required=True,
+        help="Selection for reference (MDtraj Atom selection language)",
+    )
+    parser.add_argument(
+        "-o", "--output", type=str, default="rmsd.npy", help="Output file (.npy)"
+    )
+
 
 def run(args):
     trj = md.load(args.trajectory, top=args.topology)
-    ref = md.load(reference)
+    ref = md.load(args.reference)
     trj.superpose(
         ref,
         0,
