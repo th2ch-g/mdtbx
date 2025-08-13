@@ -27,6 +27,11 @@ from .simulator import gen_sample as gen_sample_simulator
 from .builder import gen_sample as gen_sample_builder
 from .msm import gen_sample as gen_sample_msm
 
+from .cv import comdist
+from .cv import comvec
+from .cv import rmsd
+from .cv import xyz
+
 LOGGER = generate_logger(__name__)
 
 
@@ -60,6 +65,11 @@ def cli() -> None:
     gen_sample_builder.add_subcmd(subparsers)
     gen_sample_simulator.add_subcmd(subparsers)
     gen_sample_msm.add_subcmd(subparsers)
+
+    comdist.add_subcmd(subparsers)
+    comvec.add_subcmd(subparsers)
+    rmsd.add_subcmd(subparsers)
+    xyz.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -130,5 +140,17 @@ def cli() -> None:
 
     if sys.argv[1] == "gen_sample_msm":
         gen_sample_msm.run(args)
+
+    if sys.argv[1] == "comdist":
+        comdist.run(args)
+
+    if sys.argv[1] == "comvec":
+        comvec.run(args)
+
+    if sys.argv[1] == "rmsd":
+        rmsd.run(args)
+
+    if sys.argv[1] == "xyz":
+        xyz.run(args)
 
     LOGGER.info(f"{sys.argv[1]} finished")
