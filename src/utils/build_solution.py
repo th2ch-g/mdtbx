@@ -38,7 +38,9 @@ def add_subcmd(subparsers):
 
     parser.add_argument("--anion", default="Cl-", type=str, help="Anion name")
 
-    parser.add_argument("--ligparam", type=str, help="Ligand parameter. e.g. --ligparam FRCMOD:LIB")
+    parser.add_argument(
+        "--ligparam", type=str, help="Ligand parameter. e.g. --ligparam FRCMOD:LIB"
+    )
 
     parser.add_argument(
         "--boxsize", nargs=3, type=float, help="Box size [angstrom, angstrom, angstrom]"
@@ -91,13 +93,15 @@ loadoff {lib}
             lines.append(line)
 
     cmd_tleap = "\n".join(lines)
-    cmd = f"echo '{cmd_tleap}' | tleap -f -"
+    with open("tleap.in", "w") as f:
+        f.write(cmd_tleap)
+    cmd = "tleap -f tleap.in"
     subprocess.run(cmd, shell=True, check=True)
 
     LOGGER.info(
         f"{args.output}/leap.parm7 {args.output}/leap.rst7 {args.output}/leap.pdb generated"
     )
 
-    cmd = "rm -f leap.log"
+    cmd = "rm -f leap.log tleap.in"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("leap.log removed")
+    LOGGER.info("leap.log tleap.in removed")

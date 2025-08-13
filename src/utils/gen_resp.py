@@ -29,7 +29,7 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "-r",
         "--resname",
-        required=True,
+        default="UNK",
         type=str,
         help="Residue name",
     )
@@ -41,7 +41,7 @@ def add_subcmd(subparsers):
     parser.add_argument("-c", "--charge", default=0, type=int, help="Charge")
 
     parser.add_argument(
-        "--memory", default="60GB", type=str, help="Memory for Gaussian"
+        "--memory", default="60", type=int, help="Memory(GB) for Gaussian"
     )
 
     parser.add_argument(
@@ -51,17 +51,17 @@ def add_subcmd(subparsers):
 
 def run(args):
     # structure optimization
-    filetype = Path(args.structure).suffix
+    filetype = Path(args.structure).suffix[1:]
     cmd = f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
     subprocess.run(cmd, shell=True, check=True)
 
     with open("structure_optimization.gjf") as ref:
         lines = ref.readlines()
 
-    lines[0] = "%chk=structure_optimization.chk"
-    lines[1] = f"%mem={args.memory}GB"
-    lines.insert(2, f"%nprocshared={args.threads}")
-    lines.insert(3, STRUCTURE_OPTIMIZATION)  # NOQA
+    lines[0] = "%chk=structure_optimization.chk\n"
+    lines[1] = f"%mem={args.memory}GB\n"
+    lines.insert(2, f"%nprocshared={args.threads}\n")
+    lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
 
     with open("structure_optimization.gjf", "w") as f:
         f.writelines(lines)
@@ -77,10 +77,10 @@ def run(args):
     with open("single_point_calculation.gjf") as ref:
         lines = ref.readlines()
 
-    lines[0] = "%chk=single_point_calculation.chk"
-    lines[1] = f"%mem={args.memory}GB"
-    lines.insert(2, f"%nprocshared={args.threads}")
-    lines.insert(3, SINGLE_POINT_CALCULATION)  # NOQA
+    lines[0] = "%chk=single_point_calculation.chk\n"
+    lines[1] = f"%mem={args.memory}GB\n"
+    lines.insert(2, f"%nprocshared={args.threads}\n")
+    lines.insert(3, f"{SINGLE_POINT_CALCULATION}\n")  # NOQA
 
     with open("single_point_calculation.gjf", "w") as f:
         f.writelines(lines)
@@ -106,16 +106,19 @@ def run(args):
     LOGGER.info(f"{args.resname}.frcmod generated")
 
     # tleap
-    cmd_tleap = """
-    source leaprc.gaff2
-    loadamberparams {args.resname}.frcmod
-    lig = loadmol2 {args.resname}.mol2
-    saveoff lig {args.resname}.lib
+    cmd_tleap = f"""
+source leaprc.gaff2
+loadamberparams {args.resname}.frcmod
+lig = loadmol2 {args.resname}.mol2
+saveoff lig {args.resname}.lib
+quit
     """
-    cmd = f"echo {cmd_tleap} | tleap -f -"
+    with open("tleap.in", "w") as f:
+        f.write(cmd_tleap)
+    cmd = "tleap -f tleap.in"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}.lib generated")
 
-    cmd = "rm -f leap.log"
+    cmd = "rm -f leap.log tleap.in"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("leap.log removed")
+    LOGGER.info("leap.log tleap.in removed")

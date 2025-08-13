@@ -43,5 +43,5 @@ OPC_VOLUME = WATER_WEGITH / OPC_DENSITY / AVOGADRO_CONST / 100  # nm^3/number
 # gaussian setting
 # ref: https://qiita.com/Ag_smith/items/430e9efb32a855d4c511
 GAUSSIAN_CMD = "g16"
-STRUCUTRE_OPTIMIZATION = "#p opt=(tight) scf=qc b3lyp/6-31+g(d,p)"
+STRUCTURE_OPTIMIZATION = "#p opt=(tight) scf=qc b3lyp/6-31+g(d,p)"
 SINGLE_POINT_CALCULATION = "#p hf/6-31g(d) pop=mk iop(6/33=2,6/42=6) scf=tight"

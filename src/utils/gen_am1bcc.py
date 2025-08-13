@@ -29,7 +29,7 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "-r",
         "--resname",
-        required=True,
+        default="UNK",
         type=str,
         help="Residue name",
     )
@@ -42,7 +42,7 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    filetype = Path(args.structure).suffix
+    filetype = Path(args.structure).suffix[1:]
     cmd = f"antechamber -i {args.structure} -fi {filetype} -o {args.resname}.mol2 -fo mol2 -c bcc -s 2 -nc {args.charge} -m {args.multiplicity} -rn {args.resname} -pf y"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}.mol2 generated")
@@ -52,10 +52,11 @@ def run(args):
     LOGGER.info(f"{args.resname}.frcmod generated")
 
     cmd_tleap = """
-    source leaprc.gaff2
-    loadamberparams {args.resname}.frcmod
-    lig = loadmol2 {args.resname}.mol2
-    saveoff lig {args.resname}.lib
+source leaprc.gaff2
+loadamberparams {args.resname}.frcmod
+lig = loadmol2 {args.resname}.mol2
+saveoff lig {args.resname}.lib
+quit
     """
     cmd = f"echo '{cmd_tleap}' | tleap -f -"
     subprocess.run(cmd, shell=True, check=True)
