@@ -51,8 +51,6 @@ def add_subcmd(subparsers):
 
 def run(args):
     dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
-    stem = Path(args.structure).stem
-
     cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.topology} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("tmp.tpr generated")
