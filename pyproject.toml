@@ -50,6 +50,7 @@ ruff = "*"
 setuptools = "<81" # for mdtraj 1.9.9
 rdkit = "*"
 py3Dmol = "*"
+MDAnalysis = "*"
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
