@@ -51,11 +51,11 @@ def add_subcmd(subparsers):
 
 def run(args):
     dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
-    cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.topology} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
+    cmd = f"gmx grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.topology} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("tmp.tpr generated")
 
-    cmd = f"echo {args.centering_selection} System | {args.gmx} trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {args.output} -pbc mol -center"
+    cmd = f"echo {args.centering_selection} System | gmx trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {args.output} -pbc mol -center"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} generated")
 

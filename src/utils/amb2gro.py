@@ -55,3 +55,7 @@ def run(args):
         cmd = f"rm -rf {stem}.amb2gmx/"
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info(f"{stem}.amb2gmx/ removed")
+
+    cmd = "gmx editconf -f gmx.gro -o gmx.gro -resnr 1"
+    subprocess.run(cmd, shell=True, check=True)
+    LOGGER.info("gmx editconf -f gmx.gro -o gmx.gro -resnr 1 runned")

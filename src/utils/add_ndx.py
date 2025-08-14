@@ -42,7 +42,7 @@ def add_subcmd(subparsers):
 
 
 def make_default_index(args):
-    cmd = f"echo q | {args.gmx} make_ndx -f {args.gro} -o {args.output}"
+    cmd = f"echo q | gmx make_ndx -f {args.gro} -o {args.output}"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} newly generated")
 
@@ -79,7 +79,7 @@ echo '
 {target_atom_indices}
 name {count} {args.name}
 q
-' | {args.gmx} make_ndx -f {args.gro} -n {args.index} -o {args.output}"""
+' | gmx make_ndx -f {args.gro} -n {args.index} -o {args.output}"""
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.output} updated")
 
