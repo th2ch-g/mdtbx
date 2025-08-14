@@ -48,6 +48,10 @@ def add_subcmd(subparsers):
         help="Output file name",
     )
 
+    parser.add_argument(
+        "--no-editconf", action="store_true", help="Do not run gmx editconf"
+    )
+
 
 def run(args):
     dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
@@ -63,6 +67,7 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("tmp.tpr removed")
 
-    cmd = f"gmx editconf -f {args.output} -o {args.output} -resnr 1"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"gmx editconf -f {args.output} -o {args.output} -resnr 1 runned")
+    if not args.no_editconf:
+        cmd = f"gmx editconf -f {args.output} -o {args.output} -resnr 1"
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info(f"gmx editconf -f {args.output} -o {args.output} -resnr 1 runned")

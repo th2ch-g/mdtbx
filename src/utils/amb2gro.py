@@ -34,6 +34,10 @@ def add_subcmd(subparsers):
         choices=["parmed", "acpype"],
     )
 
+    parser.add_argument(
+        "--no-editconf", action="store_true", help="Do not run gmx editconf"
+    )
+
 
 def run(args):
     if args.type == "parmed":
@@ -56,6 +60,7 @@ def run(args):
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info(f"{stem}.amb2gmx/ removed")
 
-    cmd = "gmx editconf -f gmx.gro -o gmx.gro -resnr 1"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("gmx editconf -f gmx.gro -o gmx.gro -resnr 1 runned")
+    if not args.no_editconf:
+        cmd = "gmx editconf -f gmx.gro -o gmx.gro -resnr 1"
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info("gmx editconf -f gmx.gro -o gmx.gro -resnr 1 runned")

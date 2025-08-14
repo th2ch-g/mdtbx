@@ -44,6 +44,10 @@ def add_subcmd(subparsers):
         "--prefix", default="prd", type=str, help="Prefix of trajectory files"
     )
 
+    parser.add_argument(
+        "--no-editconf", action="store_true", help="Do not run gmx editconf"
+    )
+
 
 def run(args):
     # make new represent topology
@@ -51,9 +55,10 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("rmmol_top.gro generated")
 
-    cmd = "gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 runned")
+    if not args.no_editconf:
+        cmd = "gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1"
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 runned")
 
     for step in range(1, args.num_of_step + 1):
         cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}{step}.xtc -s {args.prefix}{step}.tpr -n {args.index} -o {args.prefix}{step}_skip{args.skip}_rmmol.xtc -pbc mol -center -skip {args.skip}"
