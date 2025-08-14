@@ -62,3 +62,7 @@ def run(args):
     cmd = "rm -f tmp.tpr"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("tmp.tpr removed")
+
+    cmd = "gmx editconf -f {args.output} -o {args.output} -resnr 1"
+    subprocess.run(cmd, shell=True, check=True)
+    LOGGER.info("gmx editconf -f {args.output} -o {args.output} -resnr 1 runned")
