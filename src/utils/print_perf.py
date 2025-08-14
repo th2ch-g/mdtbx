@@ -117,6 +117,7 @@ def run(args):
             pl.first("CPU_info"),
         )
         .sort("cmd")
+        .with_columns(pl.col("std_perf").fill_null(0.0))
     )
 
     print(f"{'Command':<80} {'Mean (ns/day)':>15} {'Std (ns/day)':>15} {'Count':>7}")
