@@ -77,9 +77,13 @@ def run(args):
 
     for i in range(len(atom_selector1)):
         sele1 = gro.top.select(atom_selector1[i])
-        assert sele1 == 1, f"selection {atom_selector1[i]} should be single atom"
+        assert len(sele1) == 1, (
+            f"selection {atom_selector1[i]} should be single atom: {sele1}"
+        )
         sele2 = gro.top.select(atom_selector2[i])
-        assert sele2 == 1, f"selection {atom_selector2[i]} should be single atom"
+        assert len(sele2) == 1, (
+            f"selection {atom_selector2[i]} should be single atom: {sele2}"
+        )
 
         # index start from 0
         target_atom_indices1.append(sele1[0] + 1)
