@@ -14,7 +14,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "gen_am1bcc",
-        help="Generate AM1BCC charges",
+        help="Generate AM1BCC charges for Ligand",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
