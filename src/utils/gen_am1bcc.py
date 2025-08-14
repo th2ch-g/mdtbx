@@ -47,11 +47,11 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}.mol2 generated")
 
-    cmd = f"parmchk2 -i {args.output_prefix}.mol2 -f mol2 -o {args.resname}.frcmod -s gaff2"
+    cmd = f"parmchk2 -i {args.resname}.mol2 -f mol2 -o {args.resname}.frcmod -s gaff2"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}.frcmod generated")
 
-    cmd_tleap = """
+    cmd_tleap = f"""
 source leaprc.gaff2
 loadamberparams {args.resname}.frcmod
 {args.resname} = loadmol2 {args.resname}.mol2

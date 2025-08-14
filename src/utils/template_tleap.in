@@ -2,9 +2,10 @@ source leaprc.protein.ff14SB
 source leaprc.water.tip3p
 source leaprc.GLYCAM_06j-1
 source leaprc.gaff2
+ADDPRECMD
 LIGAND_PARAMS
 SYSTEM_NAME = loadpdb INPUT_PDB
-ADDCMD
+ADDPOSTCMD
 set SYSTEM_NAME box { BOX_SIZE }
 solvatebox SYSTEM_NAME TIP3PBOX 0.0
 setbox SYSTEM_NAME vdw

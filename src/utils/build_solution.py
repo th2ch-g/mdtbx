@@ -45,17 +45,31 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "--boxsize", nargs=3, type=float, help="Box size [angstrom, angstrom, angstrom]"
     )
+
     parser.add_argument(
-        "--addcmd",
+        "--addprecmd",
         type=str,
-        help="Additional command in tleap (e.g. bond SYS.1.SG SYS.2.SG)",
+        help="Additional pre command before load structure in tleap (e.g. bond SYS.1.SG SYS.2.SG)",
+    )
+
+    parser.add_argument(
+        "--addpostcmd",
+        type=str,
+        help="Additional command after load structure in tleap (e.g. bond SYS.1.SG SYS.2.SG)",
+    )
+
+    parser.add_argument(
+        "--template-tleap",
+        default=Path(__file__).parent / "template_tleap.in",
+        type=str,
+        help="Template file for tleap",
     )
 
 
 def run(args):
     # tleap
     lines = []
-    with open(Path(__file__).parent / "template_tleap.in") as f:
+    with open(args.template_tleap) as f:
         for idx, line in enumerate(f):
             line = line.rstrip()
             if "INPUT_PDB" in line:
@@ -86,9 +100,14 @@ loadoff {lib}
                     args.boxsize[0] * args.boxsize[1] * args.boxsize[2], args.ion_conc
                 )  # cubic method
                 line = line.replace("ION_NUM", str(ionnum))
-            if "ADDCMD" in line:
-                if args.addcmd is not None:
-                    line = line.replace("ADDCMD", args.addcmd)
+            if "ADDPRECMD" in line:
+                if args.addprecmd is not None:
+                    line = line.replace("ADDPRECMD", args.addprecmd)
+                else:
+                    line = ""
+            if "ADDPOSTCMD" in line:
+                if args.addpostcmd is not None:
+                    line = line.replace("ADDPOSTCMD", args.addpostcmd)
                 else:
                     line = ""
             lines.append(line)
