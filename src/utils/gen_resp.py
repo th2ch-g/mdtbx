@@ -23,7 +23,7 @@ def add_subcmd(subparsers):
         "--structure",
         required=True,
         type=str,
-        help="Compound(Structure) file (.mol or .mol2 or .pdb?)",
+        help="Compound(Structure) file (.mol or .mol2)",
     )
 
     parser.add_argument(

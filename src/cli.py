@@ -21,6 +21,7 @@ from .utils import trjcat
 from .utils import print_perf
 from .utils import mv_crds_mol2
 from .utils import shell_hook
+from .utils import cmd
 
 # from .utils import build_membrane
 from .utils import build_solution
@@ -63,6 +64,7 @@ def cli() -> None:
     rmfile.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
     shell_hook.add_subcmd(subparsers)
+    cmd.add_subcmd(subparsers)
 
     # build_membrane.add_subcmd(subparsers)
     build_solution.add_subcmd(subparsers)
@@ -87,85 +89,91 @@ def cli() -> None:
     if sys.argv[1] == "rmfile":
         rmfile.run(args)
 
-    if sys.argv[1] == "addace":
+    elif sys.argv[1] == "addace":
         addace.run(args)
 
-    if sys.argv[1] == "addnme":
+    elif sys.argv[1] == "addnme":
         addnme.run(args)
 
-    if sys.argv[1] == "mv_crds_mol2":
+    elif sys.argv[1] == "mv_crds_mol2":
         mv_crds_mol2.run(args)
 
-    if sys.argv[1] == "trjcat":
+    elif sys.argv[1] == "trjcat":
         trjcat.run(args)
 
-    if sys.argv[1] == "convert":
+    elif sys.argv[1] == "convert":
         convert.run(args)
 
-    if sys.argv[1] == "centering_gro":
+    elif sys.argv[1] == "centering_gro":
         centering_gro.run(args)
 
-    if sys.argv[1] == "amb2gro":
+    elif sys.argv[1] == "amb2gro":
         amb2gro.run(args)
 
-    if sys.argv[1] == "find_bond":
+    elif sys.argv[1] == "find_bond":
         find_bond.run(args)
 
-    if sys.argv[1] == "gen_am1bcc":
+    elif sys.argv[1] == "gen_am1bcc":
         gen_am1bcc.run(args)
 
-    if sys.argv[1] == "gen_resp":
+    elif sys.argv[1] == "gen_resp":
         gen_resp.run(args)
 
-    if sys.argv[1] == "gen_modres_am1bcc":
+    elif sys.argv[1] == "gen_modres_am1bcc":
         gen_modres_am1bcc.run(args)
 
-    if sys.argv[1] == "gen_posres":
+    elif sys.argv[1] == "gen_posres":
         gen_posres.run(args)
 
-    if sys.argv[1] == "gen_distres":
+    elif sys.argv[1] == "gen_distres":
         gen_distres.run(args)
 
-    if sys.argv[1] == "add_ndx":
+    elif sys.argv[1] == "add_ndx":
         add_ndx.run(args)
 
-    if sys.argv[1] == "print_perf":
+    elif sys.argv[1] == "print_perf":
         print_perf.run(args)
 
-    if sys.argv[1] == "shell_hook":
+    elif sys.argv[1] == "shell_hook":
         shell_hook.run(args)
 
-    if sys.argv[1] == "calc_ion_conc":
+    elif sys.argv[1] == "cmd":
+        cmd.run(args)
+
+    elif sys.argv[1] == "calc_ion_conc":
         calc_ion_conc.run(args)
 
-    # if sys.argv[1] == "build_membrane":
+    # elif sys.argv[1] == "build_membrane":
     #     build_membrane.run(args)
 
-    if sys.argv[1] == "build_solution":
+    elif sys.argv[1] == "build_solution":
         build_solution.run(args)
 
-    if sys.argv[1] == "gen_sample_simulator":
+    elif sys.argv[1] == "gen_sample_simulator":
         gen_sample_simulator.run(args)
 
-    if sys.argv[1] == "gen_sample_builder":
+    elif sys.argv[1] == "gen_sample_builder":
         gen_sample_builder.run(args)
 
-    if sys.argv[1] == "gen_sample_mdp":
+    elif sys.argv[1] == "gen_sample_mdp":
         gen_sample_mdp.run(args)
 
-    if sys.argv[1] == "gen_sample_msm":
+    elif sys.argv[1] == "gen_sample_msm":
         gen_sample_msm.run(args)
 
-    if sys.argv[1] == "comdist":
+    elif sys.argv[1] == "comdist":
         comdist.run(args)
 
-    if sys.argv[1] == "comvec":
+    elif sys.argv[1] == "comvec":
         comvec.run(args)
 
-    if sys.argv[1] == "rmsd":
+    elif sys.argv[1] == "rmsd":
         rmsd.run(args)
 
-    if sys.argv[1] == "xyz":
+    elif sys.argv[1] == "xyz":
         xyz.run(args)
+
+    else:
+        print(f"Unknown command: {sys.argv[1]}")
 
     LOGGER.info(f"{sys.argv[1]} finished")

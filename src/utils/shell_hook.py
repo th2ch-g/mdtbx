@@ -21,8 +21,19 @@ def add_subcmd(subparsers):
 def run(args):
     hook = f"""
 # begin of mdtbx shell hook
-alias mdtbx = "pixi run --manifest-path {Path(__file__).parent.parent.parent} mdtbx"
-alias pymol = "pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol"
+# for alias
+shopt -s expand_aliases
+alias mdtbx="pixi run --manifest-path {Path(__file__).parent.parent.parent} mdtbx"
+alias pymol="pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol"
+
+# for function
+mdtbx() {{
+    pixi run --manifest-path {Path(__file__).parent.parent.parent} mdtbx "$@"
+}}
+
+pymol() {{
+    pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol "$@"
+}}
 
 pymol -c -p <<EOF
 import myplugins
