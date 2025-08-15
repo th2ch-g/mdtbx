@@ -8,7 +8,7 @@ Toolbox for MD simulation
 ## Assumptions
 - System build Tools: Amber, PyMOL, OpenBabel
 - Simulation Tools: Gromacs
-- ForceField: ff14SB, TIP3P, Lipid21, GLYCAM06-j
+- ForceField: ff14SB, TIP3P, GAFF2, Lipid21, GLYCAM06-j
 
 ## Install
 ~~~bash

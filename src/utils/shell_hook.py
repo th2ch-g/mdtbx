@@ -1,5 +1,4 @@
 import argparse
-import subprocess
 from pathlib import Path
 
 from ..config import *  # NOQA
@@ -12,11 +11,12 @@ def add_subcmd(subparsers):
     """
     mdtbx shell_hook
     """
-    parser = subparsers.add_parser(
+    _parser = subparsers.add_parser(
         "shell_hook",
         help="Generate shell hook",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+
 
 def run(args):
     hook = f"""

@@ -13,6 +13,7 @@ from .utils import centering_gro
 from .utils import find_bond
 from .utils import gen_am1bcc
 from .utils import gen_resp
+from .utils import gen_modres_am1bcc
 from .utils import gen_posres
 from .utils import gen_distres
 from .utils import amb2gro
@@ -50,6 +51,7 @@ def cli() -> None:
     mv_crds_mol2.add_subcmd(subparsers)
     gen_am1bcc.add_subcmd(subparsers)
     gen_resp.add_subcmd(subparsers)
+    gen_modres_am1bcc.add_subcmd(subparsers)
     gen_posres.add_subcmd(subparsers)
     gen_distres.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
@@ -114,6 +116,9 @@ def cli() -> None:
 
     if sys.argv[1] == "gen_resp":
         gen_resp.run(args)
+
+    if sys.argv[1] == "gen_modres_am1bcc":
+        gen_modres_am1bcc.run(args)
 
     if sys.argv[1] == "gen_posres":
         gen_posres.run(args)
