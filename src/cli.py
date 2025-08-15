@@ -19,6 +19,7 @@ from .utils import amb2gro
 from .utils import trjcat
 from .utils import print_perf
 from .utils import mv_crds_mol2
+from .utils import shell_hook
 
 # from .utils import build_membrane
 from .utils import build_solution
@@ -59,6 +60,7 @@ def cli() -> None:
     trjcat.add_subcmd(subparsers)
     rmfile.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
+    shell_hook.add_subcmd(subparsers)
 
     # build_membrane.add_subcmd(subparsers)
     build_solution.add_subcmd(subparsers)
@@ -124,6 +126,9 @@ def cli() -> None:
 
     if sys.argv[1] == "print_perf":
         print_perf.run(args)
+
+    if sys.argv[1] == "shell_hook":
+        shell_hook.run(args)
 
     if sys.argv[1] == "calc_ion_conc":
         calc_ion_conc.run(args)
