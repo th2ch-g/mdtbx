@@ -63,6 +63,18 @@ def run(args):
     lines.insert(2, f"%nprocshared={args.threads}\n")
     lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
 
+    for idx, line in enumerate(lines):
+        line = line.strip()
+        if len(line.split()) == 2:
+            try:
+                _charge = int(line.split()[0])
+                _multiplicity = int(line.split()[1])
+                target_idx = idx
+                lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
+                break
+            except Exception:
+                continue
+
     with open("structure_optimization.gjf", "w") as f:
         f.writelines(lines)
 
