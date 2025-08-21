@@ -14,7 +14,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "gen_modres_am1bcc",
-        help="Centering modified residue parameters with AM1BCC",
+        help="Centering modified residue parameters with AM1BCC (WIP)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -108,6 +108,6 @@ CHARGE {args.charge}
         f.writelines(content)
     LOGGER.info(f"{args.resname}_1.frcmod updated")
 
-    cmd = f"parmchk2 -i {args.resname}.prepin -f prepi -o {args.resname}_2.frcmod"
+    cmd = f"parmchk2 -i {args.resname}.prepin -f prepi -o {args.resname}_2.frcmod -s gaff2"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}_2.frcmod generated")

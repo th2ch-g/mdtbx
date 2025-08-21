@@ -1,5 +1,6 @@
 import argparse
 import sys
+from importlib import metadata
 
 from .logger import generate_logger
 
@@ -14,6 +15,7 @@ from .utils import find_bond
 from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_modres_am1bcc
+from .utils import gen_modres_resp
 from .utils import gen_posres
 from .utils import gen_distres
 from .utils import amb2gro
@@ -39,9 +41,24 @@ from .cv import xyz
 LOGGER = generate_logger(__name__)
 
 
+def get_version():
+    try:
+        return metadata.version("mdtbx")
+    except metadata.PackageNotFoundError:
+        return "unknown"
+
+
 def cli() -> None:
     # make parser
     parser = argparse.ArgumentParser(description=("ToolBox for MD simulation"))
+
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"%(prog)s {get_version()}",
+        help="Print version",
+    )
 
     # subcommands
     subparsers = parser.add_subparsers()
@@ -53,6 +70,7 @@ def cli() -> None:
     gen_am1bcc.add_subcmd(subparsers)
     gen_resp.add_subcmd(subparsers)
     gen_modres_am1bcc.add_subcmd(subparsers)
+    gen_modres_resp.add_subcmd(subparsers)
     gen_posres.add_subcmd(subparsers)
     gen_distres.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
@@ -121,6 +139,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "gen_modres_am1bcc":
         gen_modres_am1bcc.run(args)
+
+    elif sys.argv[1] == "gen_modres_resp":
+        gen_modres_resp.run(args)
 
     elif sys.argv[1] == "gen_posres":
         gen_posres.run(args)
