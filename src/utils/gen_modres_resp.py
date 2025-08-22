@@ -14,7 +14,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "gen_modres_resp",
-        help="Centering modified residue parameters with Gaussian",
+        help="Centering modified residue parameters with Gaussian (WIP)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -85,45 +85,45 @@ def run(args):
     # hint: Check Structure as PDB before running. You can check by antechamber or obabel
     # hint: Need cap atom for specifying SEP_BOND
 
-    filetype = Path(args.structure).suffix[1:]
-    cmd = f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
-    subprocess.run(cmd, shell=True, check=True)
-
-    with open("structure_optimization.gjf") as ref:
-        lines = ref.readlines()
-
-    lines[0] = "%chk=structure_optimization.chk\n"
-    lines[1] = f"%mem={args.memory}GB\n"
-    lines.insert(2, f"%nprocshared={args.threads}\n")
-    lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
-
-    for idx, line in enumerate(lines):
-        line = line.strip()
-        if len(line.split()) == 2:
-            try:
-                _charge = int(line.split()[0])
-                _multiplicity = int(line.split()[1])
-                target_idx = idx
-                lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
-                break
-            except Exception:
-                continue
-
-    with open("structure_optimization.gjf", "w") as f:
-        f.writelines(lines)
-
-    cmd = f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("structure_optimization.log generated")
-
-    # single point
-    cmd = f"obabel -i {GAUSSIAN_CMD} structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
-    subprocess.run(cmd, shell=True, check=True)
-
-    # # single point calculation
     # filetype = Path(args.structure).suffix[1:]
-    # cmd = f"obabel -i {filetype} {args.structure} -o gjf > single_point_calculation.gjf"
+    # cmd = f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
     # subprocess.run(cmd, shell=True, check=True)
+    #
+    # with open("structure_optimization.gjf") as ref:
+    #     lines = ref.readlines()
+    #
+    # lines[0] = "%chk=structure_optimization.chk\n"
+    # lines[1] = f"%mem={args.memory}GB\n"
+    # lines.insert(2, f"%nprocshared={args.threads}\n")
+    # lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
+    #
+    # for idx, line in enumerate(lines):
+    #     line = line.strip()
+    #     if len(line.split()) == 2:
+    #         try:
+    #             _charge = int(line.split()[0])
+    #             _multiplicity = int(line.split()[1])
+    #             target_idx = idx
+    #             lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
+    #             break
+    #         except Exception:
+    #             continue
+    #
+    # with open("structure_optimization.gjf", "w") as f:
+    #     f.writelines(lines)
+    #
+    # cmd = f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
+    # subprocess.run(cmd, shell=True, check=True)
+    # LOGGER.info("structure_optimization.log generated")
+    #
+    # # single point
+    # cmd = f"obabel -i {GAUSSIAN_CMD} structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
+    # subprocess.run(cmd, shell=True, check=True)
+
+    # single point calculation
+    filetype = Path(args.structure).suffix[1:]
+    cmd = f"obabel -i {filetype} {args.structure} -o gjf > single_point_calculation.gjf"
+    subprocess.run(cmd, shell=True, check=True)
 
     with open("single_point_calculation.gjf") as ref:
         lines = ref.readlines()
