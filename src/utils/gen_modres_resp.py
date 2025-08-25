@@ -14,7 +14,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "gen_modres_resp",
-        help="Centering modified residue parameters with Gaussian (WIP)",
+        help="Centering modified residue parameters with Gaussian",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -198,28 +198,24 @@ RESIDUE_SYMBOL: {args.resname}
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.resname}.prep generated")
 
-    cmd = (
-        f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_1.frcmod -s parm10"
-    )
+    cmd = f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_parm10.frcmod -s parm10"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}_1.frcmod generated")
+    LOGGER.info(f"{args.resname}_parm10.frcmod generated")
 
     lines = []
-    with open(f"{args.resname}_1.frcmod") as f:
+    with open(f"{args.resname}_parm10.frcmod") as f:
         for idx, line in enumerate(f):
             line = line.rstrip()
             if "ATTN" not in line:
                 lines.append(line)
     content = "\n".join(lines)
-    with open(f"{args.resname}_1.frcmod", "w") as f:
+    with open(f"{args.resname}_parm10.frcmod", "w") as f:
         f.writelines(content)
-    LOGGER.info(f"{args.resname}_1.frcmod updated")
+    LOGGER.info(f"{args.resname}_parm10.frcmod updated")
 
-    cmd = (
-        f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_2.frcmod -s gaff2"
-    )
+    cmd = f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_gaff2.frcmod -s gaff2"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}_2.frcmod generated")
+    LOGGER.info(f"{args.resname}_gaff2.frcmod generated")
 
     # if args.postatomname is not None:
     #     section = None
@@ -234,6 +230,14 @@ RESIDUE_SYMBOL: {args.resname}
     LOGGER.warning(f"You need to modify {args.resname}.prep manually.")
     LOGGER.warning("Like ' 18  C8    C     E' => ' 18  C8    C     M'")
 
-    print(
-        f"use --addprecmd 'loadAmberPrep {args.resname}.prep\nloadamberparams {args.resname}_1.frcmod\nloadamberparams {args.resname}_2.frcmod'"
-    )
+    """
+    mol2 file should be as follows
+    NH(mainchain)
+    CA, HA, CB, HB1, HB2,...(sidechain)
+    CO(mainchain)
+
+    --addprecmd '
+    loadAmberPrep {args.resname}.prep
+    loadamberparams {args.resname}_gaff2.frcmod
+    loadamberparams {args.resname}_parm10.frcmod'
+    """
