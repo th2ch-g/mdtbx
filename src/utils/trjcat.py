@@ -51,7 +51,7 @@ def add_subcmd(subparsers):
 
 def run(args):
     # make new represent topology
-    cmd = f"echo {args.keep_selection} | gmx trjconv -f {args.prefix}1.gro -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.gro"
+    cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}1.gro -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.gro -center"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("rmmol_top.gro generated")
 
