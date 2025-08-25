@@ -9,6 +9,7 @@ set -e
 # Tip1: NH(mainchain), CA, CB,..(sidechain), CO(mainchain)
 # Tip2: run structure optimization
 # Tip3: modify bond format in CGX.prep like (S => M)
+# Tip4: Cap terminal atom (N, H, C, O) like amide bond
 
 mkdir CGX
 cd CGX
