@@ -6,7 +6,7 @@ Toolbox for MD simulation
 - Run MSM
 
 ## Assumptions
-- System build Tools: Amber, PyMOL, OpenBabel
+- System build Tools: Amber, PyMOL, OpenBabel, Gaussian16
 - Simulation Tools: Gromacs
 - ForceField: ff14SB, TIP3P, GAFF2, Lipid21, GLYCAM06-j
 
