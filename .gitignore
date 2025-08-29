@@ -195,4 +195,4 @@ cython_debug/
 
 .pixi
 
-!/test/build
+!/sample/build
