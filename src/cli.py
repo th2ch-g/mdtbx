@@ -28,11 +28,6 @@ from .utils import cmd
 # from .utils import build_membrane
 from .utils import build_solution
 
-from .simulator import gen_sample as gen_sample_simulator
-from .builder import gen_sample_builder
-from .builder import gen_sample_mdp
-from .msm import gen_sample as gen_sample_msm
-
 from .cv import comdist
 from .cv import comvec
 from .cv import rmsd
@@ -86,11 +81,6 @@ def cli() -> None:
 
     # build_membrane.add_subcmd(subparsers)
     build_solution.add_subcmd(subparsers)
-
-    gen_sample_builder.add_subcmd(subparsers)
-    gen_sample_mdp.add_subcmd(subparsers)
-    gen_sample_simulator.add_subcmd(subparsers)
-    gen_sample_msm.add_subcmd(subparsers)
 
     comdist.add_subcmd(subparsers)
     comvec.add_subcmd(subparsers)
@@ -169,18 +159,6 @@ def cli() -> None:
 
     elif sys.argv[1] == "build_solution":
         build_solution.run(args)
-
-    elif sys.argv[1] == "gen_sample_simulator":
-        gen_sample_simulator.run(args)
-
-    elif sys.argv[1] == "gen_sample_builder":
-        gen_sample_builder.run(args)
-
-    elif sys.argv[1] == "gen_sample_mdp":
-        gen_sample_mdp.run(args)
-
-    elif sys.argv[1] == "gen_sample_msm":
-        gen_sample_msm.run(args)
 
     elif sys.argv[1] == "comdist":
         comdist.run(args)
