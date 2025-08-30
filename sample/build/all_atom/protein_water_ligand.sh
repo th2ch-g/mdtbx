@@ -20,4 +20,14 @@ mdtbx gen_posres -p gmx.top -s "(protein and backbone) or resname GXL" -o posres
 
 mdtbx rmfile
 
+mkdir gmx
+mv gmx.gro gmx/
+mv gmx.top gmx/
+mv *itp gmx/
+mv *.ndx gmx/
+cp mdps/*.mdp gmx/
+cp mdrun_slurm.sh gmx/
+
+rm -f leap.parm7 leap.rst7
+
 echo done
