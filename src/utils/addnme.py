@@ -34,6 +34,8 @@ def run(args):
     for chain in cmd.get_chains("target and polymer.protein"):
         editor.attach_amino_acid(f"last (chain {chain}) and name C", "nme")
         LOGGER.info(f"NME added to {chain}")
+    cmd.set("retain_order", 0)
+    cmd.sort()
     cmd.save(f"{args.output_prefix}.pdb")
 
     with open(f"{args.output_prefix}.pdb") as ref:
@@ -50,6 +52,23 @@ def run(args):
                     )
 
                 lines[idx] = lines[idx].replace("CH3", "C  ", 1)
+
+    with open(f"{args.output_prefix}.pdb", "w") as f:
+        f.writelines(lines)
+
+    with open(f"{args.output_prefix}.pdb") as f:
+        for idx, line in enumerate(f):
+            line = line.rstrip()
+            if "NME" in line and "H3" in line:
+                print("insert! ", line)
+                lines.insert(idx + 1, "TER\n")
+
+    with open(f"{args.output_prefix}.pdb") as f:
+        for idx, line in enumerate(f):
+            line = line.rstrip()
+            if "NME" in line and "N" in line and "TER" in lines[idx - 1]:
+                print("remove! ", line)
+                lines.pop(idx - 1)
 
     with open(f"{args.output_prefix}.pdb", "w") as f:
         f.writelines(lines)
