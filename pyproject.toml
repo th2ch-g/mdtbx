@@ -50,7 +50,7 @@ ruff = "*"
 setuptools = "<81" # for mdtraj 1.9.9
 
 [tool.pixi.tasks]
-update = "git pull && pixi install"
+update = "git pull && pixi update myplugins && pixi install"
 docker_build = "docker build -t mdtbx ."
 jupyter_remote = "jupyter lab --no-browser --port=8889" # ssh -N -L localhost:8888:localhost:8889 HOST1 && open http://localhost:8888
 ruff-format = "ruff format --force-exclude"
