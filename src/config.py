@@ -1,4 +1,5 @@
 # pymol setting
+import myplugins  # NOQA
 
 # grompp setting
 MAXWARN = 10
