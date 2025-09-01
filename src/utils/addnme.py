@@ -39,15 +39,17 @@ def run(args):
     with open(f"{args.output_prefix}.pdb") as ref:
         lines = ref.readlines()
 
-    for target_idx in range(1, 3 + 1):
-        with open(f"{args.output_prefix}.pdb") as f:
-            for idx, line in enumerate(f):
-                line = line.rstrip()
+    with open(f"{args.output_prefix}.pdb") as f:
+        for idx, line in enumerate(f):
+            line = line.rstrip()
 
-                if "NME" in line:
+            if "NME" in line:
+                for target_idx in range(1, 3 + 1):
                     lines[idx] = lines[idx].replace(
                         f"HH3{target_idx}", f" H{target_idx} ", 1
                     )
+
+                lines[idx] = lines[idx].replace("CH3", "C  ", 1)
 
     with open(f"{args.output_prefix}.pdb", "w") as f:
         f.writelines(lines)

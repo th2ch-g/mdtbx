@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-mdtbx addnme -s template.pdb -o nme
+mdtbx addace -s template.pdb -o ace
 
-mdtbx addace -s nme.pdb -o nme_ace
+mdtbx addnme -s ace.pdb -o ace_nme
 
 mdtbx build_solution \
-    -f ./nme_ace.pdb \
+    -f ./ace_nme.pdb \
     -o ./ \
     --ion_conc 0.15 \
     --cation Na+ \
