@@ -391,7 +391,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/3e/e5/0b359e99084f033d413419eff23ee9c2bd33bca2ca9f4e83d11856f22d10/zope.interface-7.2-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e9/04/fd55695f6448abd22295fc68b2d3a135389558f0f49a24b0dffe019d0ecb/zope_event-5.1.1-py3-none-any.whl
       - pypi: ./
-      - pypi: ./pymol_plugins
+      - pypi: ./pymol-plugins
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/acpype-2023.10.27-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/bioconda/noarch/aliview-1.30-hdfd78af_0.tar.bz2
@@ -724,7 +724,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/76/71/e6177f390e8daa7e75378505c5ab974e0bf59c1d3b19155638c7afbf4b2d/zope.interface-7.2-cp310-cp310-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e9/04/fd55695f6448abd22295fc68b2d3a135389558f0f49a24b0dffe019d0ecb/zope_event-5.1.1-py3-none-any.whl
       - pypi: ./
-      - pypi: ./pymol_plugins
+      - pypi: ./pymol-plugins
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/noarch/acpype-2023.10.27-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/bioconda/noarch/aliview-1.30-hdfd78af_0.tar.bz2
@@ -1057,7 +1057,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/52/db/7e5f4226bef540f6d55acfd95cd105782bc6ee044d9b5587ce2c95558a5e/zope.interface-7.2-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/e9/04/fd55695f6448abd22295fc68b2d3a135389558f0f49a24b0dffe019d0ecb/zope_event-5.1.1-py3-none-any.whl
       - pypi: ./
-      - pypi: ./pymol_plugins
+      - pypi: ./pymol-plugins
 packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-4_kmp_llvm.conda
   build_number: 4
@@ -6936,7 +6936,7 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: f59679207fb1e2be4ae14d05ae19efb56a222268adc1589c0342111cdaf16e36
+  sha256: 37fdd2519ea1367daa19fd25bc07fc363c70f1da6da9bce072fe3d7a4658d82d
   requires_python: ==3.10
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda
@@ -9013,7 +9013,7 @@ packages:
   - pkg:pypi/pymol?source=hash-mapping
   size: 5853007
   timestamp: 1746128844335
-- pypi: ./pymol_plugins
+- pypi: ./pymol-plugins
   name: pymol-plugins
   version: 0.1.0
   sha256: b4767ff35a7c7890031b5f4670ce1eaa197ef62f3e308422b2723963ca10f989

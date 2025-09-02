@@ -66,5 +66,3 @@ def mydefault():
 
 cmd.extend("mydefault", mydefault)
 mydefault()
-
-print("Loadded!")

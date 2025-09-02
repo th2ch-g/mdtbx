@@ -30,7 +30,7 @@ aliview = "*"
 
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
-pymol_plugins = { path = "./pymol_plugins", editable = true }
+pymol_plugins = { path = "./pymol-plugins", editable = true }
 mmterm = { git = "git+https://github.com/jgreener64/mmterm.git" }
 rdkit = "*"
 py3Dmol = "*"
@@ -56,4 +56,4 @@ jupyter_remote = "jupyter lab --no-browser --port=8889" # ssh -N -L localhost:88
 ruff-format = "ruff format --force-exclude"
 ruff-lint = "ruff check --fix --exit-non-zero-on-fix --force-exclude"
 r = { cmd = "echo OK", depends-on = ["ruff-format", "ruff-lint"] }
-pymolrc = "echo \"#!/usr/bin/env python3\nimport sys; import os; sys.path.append(os.path.expanduser('\"$(pwd)/pymol_plugins/\"')); import pymol_plugins; from pymol_plugins import *;\" > $HOME/.pymolrc"
+pymolrc = "echo \"#!/usr/bin/env python3\nimport sys; import os; sys.path.append(os.path.expanduser('\"$(pwd)/pymol-plugins/\"')); import pymol_plugins; from pymol_plugins import *;\" > $HOME/.pymolrc"
