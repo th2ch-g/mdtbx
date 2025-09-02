@@ -30,7 +30,7 @@ aliview = "*"
 
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
-myplugins = { git = "git+https://github.com/th2ch-g/pymol-plugins.git" }
+pymol_plugins = { path = "./pymol_plugins", editable = true }
 mmterm = { git = "git+https://github.com/jgreener64/mmterm.git" }
 rdkit = "*"
 py3Dmol = "*"
@@ -50,9 +50,10 @@ ruff = "*"
 setuptools = "<81" # for mdtraj 1.9.9
 
 [tool.pixi.tasks]
-update = "git pull && pixi update myplugins && pixi install"
+update = "git pull && pixi install"
 docker_build = "docker build -t mdtbx ."
 jupyter_remote = "jupyter lab --no-browser --port=8889" # ssh -N -L localhost:8888:localhost:8889 HOST1 && open http://localhost:8888
 ruff-format = "ruff format --force-exclude"
 ruff-lint = "ruff check --fix --exit-non-zero-on-fix --force-exclude"
 r = { cmd = "echo OK", depends-on = ["ruff-format", "ruff-lint"] }
+pymolrc = "echo \"#!/usr/bin/env python3\nimport sys; import os; sys.path.append(os.path.expanduser('\"$(pwd)/pymol_plugins/\"')); import pymol_plugins; from pymol_plugins import *;\" > $HOME/.pymolrc"

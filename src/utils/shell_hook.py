@@ -37,8 +37,8 @@ pymol() {{
 
 # pymol template
 pymol -c -p <<EOF
-import myplugins
-from myplugins import *
+import pymol_plugins
+from pymol_plugins import *
 from pymol import cmd
 
 EOF
