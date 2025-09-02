@@ -14,7 +14,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "gen_modres_resp",
-        help="Centering modified residue parameters with Gaussian",
+        help="Generate modified residue parameters with Gaussian",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

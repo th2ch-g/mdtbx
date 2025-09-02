@@ -41,6 +41,14 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
+        "--pbc",
+        default="mol",
+        type=str,
+        help="PBC option for gmx trjconv",
+        choices=["none", "mol", "res", "atom", "nojump", "cluster", "whole"],
+    )
+
+    parser.add_argument(
         "--prefix", default="prd", type=str, help="Prefix of trajectory files"
     )
 
