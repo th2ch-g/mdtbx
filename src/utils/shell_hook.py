@@ -20,7 +20,7 @@ def add_subcmd(subparsers):
 
 def run(args):
     hook = f"""
-# begin of mdtbx shell hook
+----- BEGIN OF MDTBX SHELL HOOK -----
 # for alias
 shopt -s expand_aliases
 alias mdtbx="pixi run --manifest-path {Path(__file__).parent.parent.parent} mdtbx"
@@ -35,11 +35,13 @@ pymol() {{
     pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol "$@"
 }}
 
+# pymol template
 pymol -c -p <<EOF
 import myplugins
+from myplugins import *
 from pymol import cmd
-EOF
 
-# end of mdtbx shell hook
+EOF
+----- END OF MDTBX SHELL HOOK -----
     """
     print(hook)
