@@ -50,6 +50,7 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    # ref: https://zenn.dev/kh01734/articles/012380a58949d1
     # make new represent topology
     cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}1.gro -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.gro -center"
     subprocess.run(cmd, shell=True, check=True)
@@ -60,22 +61,21 @@ def run(args):
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 runned")
 
-    for step in range(1, args.num_of_step + 1):
-        cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}{step}.xtc -s {args.prefix}{step}.tpr -n {args.index} -o {args.prefix}{step}_skip{args.skip}_rmmol.xtc -pbc mol -center -skip {args.skip}"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"{args.prefix}{step}_skip{args.skip}_rmmol.xtc generated")
-
+    # trjcat -> trjconv
     c_cmd = "c\n" * args.num_of_step
-    trj_files = [
-        f"{args.prefix}{step}_skip{args.skip}_rmmol.xtc"
-        for step in range(1, args.num_of_step + 1)
-    ]
+    trj_files = [f"{args.prefix}{step}.xtc" for step in range(1, args.num_of_step + 1)]
     trj_files = " ".join(trj_files)
 
-    cmd = f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {args.prefix}_all_skip{args.skip}_rmmol.xtc -settime"
+    cmd = (
+        f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {args.prefix}_all.xtc -settime"
+    )
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.prefix}_all_skip{args.skip}_rmmol.xtc generated")
+    LOGGER.info(f"{args.prefix}_all.xtc generated")
 
-    cmd = f"rm -f {trj_files}"
+    cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s rmmol_top.gro -n {args.index} -o {args.prefix}_all_rmmol.xtc -pbc {args.pbc} -center"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{trj_files} removed")
+    LOGGER.info(f"{args.prefix}_all_rmmol.xtc generated")
+
+    cmd = f"rm -f {args.prefix}_all.xtc"
+    subprocess.run(cmd, shell=True, check=True)
+    LOGGER.info(f"{args.prefix}_all.xtc removed")
