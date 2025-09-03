@@ -80,7 +80,7 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.prefix}_all.xtc generated")
 
-    cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s rmmol_top.gro -n {args.index} -o {args.prefix}_all_rmmol.xtc -pbc {args.pbc} -center"
+    cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s {args.prefix}1.tpr -n {args.index} -o {args.prefix}_all_rmmol.xtc -pbc {args.pbc} -center"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.prefix}_all_rmmol.xtc generated")
 
