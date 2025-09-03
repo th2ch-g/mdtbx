@@ -70,6 +70,7 @@ def run(args):
         with open(f"{args.output_prefix}_{moleculetypes}.itp", "w") as f:
             f.write(f"#ifdef {const}\n")
             f.write("[ position_restraints ]\n")
+            f.write(f"; {args.selection}\n")
             f.write(";  i funct       fcx        fcy        fcz\n")
             for atom_index in target_atom_indices:
                 f.write(f"{atom_index} 1 {force_const} {force_const} {force_const}\n")
