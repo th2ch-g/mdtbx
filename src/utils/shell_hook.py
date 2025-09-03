@@ -25,6 +25,7 @@ def run(args):
 shopt -s expand_aliases
 alias mdtbx="pixi run --manifest-path {Path(__file__).parent.parent.parent} mdtbx"
 alias pymol="pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol"
+alias python3="pixi run --manifest-path {Path(__file__).parent.parent.parent} python3"
 
 for export
 export PATH={Path(__file__).parent.parent.parent}/.pixi/envs/default/bin:$PATH
@@ -42,12 +43,21 @@ pymol() {{
     pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol "$@"
 }}
 
+python3() {{
+    pixi run --manifest-path {Path(__file__).parent.parent.parent} python3 "$@"
+}}
+
 # pymol template
 pymol -c -p <<EOF
 import pymol_plugins
 import pymol
 from pymol_plugins import *
 from pymol import *
+
+EOF
+
+# python3 template
+python3 -u <<EOF
 
 EOF
 ----- END OF MDTBX SHELL HOOK -----
