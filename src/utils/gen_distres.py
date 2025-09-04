@@ -51,15 +51,30 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-lo", "--lower_bound", default=0.0, type=float, help="Lower bound [nm]"
+        "-lo",
+        "--lower_bound",
+        default=0.0,
+        type=float,
+        nargs="*",
+        help="Lower bound [nm]. Use multiple value if multiple selection. Single value will be applied to all selection if single value is given",
     )
 
     parser.add_argument(
-        "-up1", "--upper_bound1", default=0.3, type=float, help="Upper bound1 [nm]"
+        "-up1",
+        "--upper_bound1",
+        default=0.3,
+        type=float,
+        nargs="*",
+        help="Upper bound1 [nm] Use multiple value if multiple selection. Single value will be applied to all selection if single value is given",
     )
 
     parser.add_argument(
-        "-up2", "--upper_bound2", default=0.4, type=float, help="Upper bound2 [nm]"
+        "-up2",
+        "--upper_bound2",
+        default=0.4,
+        type=float,
+        nargs="*",
+        help="Upper bound2 [nm] Use multiple value if multiple selection. Single value will be applied to all selection if single value is given",
     )
 
 
@@ -70,6 +85,30 @@ def run(args):
     assert len(atom_selector1) == len(atom_selector2), (
         "number of selection should be same for both selection1 and selection2"
     )
+
+    if len(args.lower_bound) != 1:
+        assert len(atom_selector1) == len(args.lower_bound), (
+            "number of selection and lower bound should be same"
+        )
+        lower_bound = args.lower_bound
+    else:
+        lower_bound = [args.lower_bound[0] for _ in range(len(atom_selector1))]
+
+    if len(args.upper_bound1) != 1:
+        assert len(atom_selector1) == len(args.upper_bound1), (
+            "number of selection and upper bound1 should be same"
+        )
+        upper_bound1 = args.upper_bound1
+    else:
+        upper_bound1 = [args.upper_bound1[0] for _ in range(len(atom_selector1))]
+
+    if len(args.upper_bound2) != 1:
+        assert len(atom_selector1) == len(args.upper_bound2), (
+            "number of selection and upper bound2 should be same"
+        )
+        upper_bound2 = args.upper_bound2
+    else:
+        upper_bound2 = [args.upper_bound2[0] for _ in range(len(atom_selector1))]
 
     gro = md.load(args.gro)
     target_atom_indices1 = []
@@ -100,7 +139,7 @@ def run(args):
         )
         for i in range(len(target_atom_indices1)):
             f.write(
-                f"{target_atom_indices1[i]} {target_atom_indices2[i]} {CONST_HATENA} {i} {CONST_FUNCT} {args.lower_bound} {args.upper_bound1} {args.upper_bound2} {force_const} ; '{atom_selector1[i].strip()}'-'{atom_selector2[i].strip()}'\n"
+                f"{target_atom_indices1[i]} {target_atom_indices2[i]} {CONST_HATENA} {i} {CONST_FUNCT} {lower_bound[i]} {upper_bound1[i]} {upper_bound2[i]} {force_const} ; '{atom_selector1[i].strip()}'-'{atom_selector2[i].strip()}'\n"
             )
         f.write("#endif\n")
 
