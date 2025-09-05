@@ -12,6 +12,7 @@ from .utils import convert
 from .utils import calc_ion_conc
 from .utils import centering_gro
 from .utils import find_bond
+from .utils import mod_mdp
 from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_modres_am1bcc
@@ -69,6 +70,7 @@ def cli() -> None:
     gen_posres.add_subcmd(subparsers)
     gen_distres.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
+    mod_mdp.add_subcmd(subparsers)
     convert.add_subcmd(subparsers)
     calc_ion_conc.add_subcmd(subparsers)
     centering_gro.add_subcmd(subparsers)
@@ -120,6 +122,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "find_bond":
         find_bond.run(args)
+
+    elif sys.argv[1] == "mod_mdp":
+        mod_mdp.run(args)
 
     elif sys.argv[1] == "gen_am1bcc":
         gen_am1bcc.run(args)
