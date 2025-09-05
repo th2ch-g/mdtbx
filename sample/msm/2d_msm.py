@@ -7,10 +7,8 @@ import pickle
 
 n_clusters_list = [50, 100, 200, 300, 400, 500]
 lags_list = [1, 10, 100, 1000, 5000]
-# n_clusters_list = [50,]
-# lags_list = [1]
-T = 310  # [K]
-RT = 8.314 * T / 1000 / 4.184  # [kcal/mol/T]
+T = 310
+RT = 8.314 * T / 1000 / 4.184
 
 features = []
 open_tmscores = []

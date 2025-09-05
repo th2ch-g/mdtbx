@@ -19,27 +19,21 @@ from scipy.interpolate import CubicSpline
 
 
 # input the following variables
-n_trial_for_calc: List[int] = [
-    1
-]  # enter here                    # list of indices of trials
-trial_root_directory: str = None  # directory path containing trial directories
-feature_1d_directory: str = "./comdist/"  # directory path containing comdist (created by pacs gengeature comdist)
-feature_3d_directory: str = (
-    "./comvec/"  # directory path containing comvec (created by pacs gengeature comvec)
-)
-output_directory: str = "./out_distnb"  # output directory path created by this notebook
-show_picture: bool = (
-    False  # whether to show pictures in this notebook, select from [True, False]
-)
-T: float = 310  # enter here                    # [K], temperature in your system
-dt: int = 1  # enter here                    # [ps], time interval of saved trajectory in PaCS-MD
+n_trial_for_calc: List[int] = [1]
+trial_root_directory: str = None
+feature_1d_directory: str = "./comdist/"
+feature_3d_directory: str = "./comvec/"
+output_directory: str = "./out_distnb"
+show_picture: bool = False
+T: float = 310
+dt: int = 1
 n_clusters_for_try_1d: List[int] = [
     20,
     50,
     100,
     500,
     1000,
-]  # n_clusters list for plotting ITS
+]
 lags_for_try_1d: List[int] = [
     1,
     50,
@@ -53,13 +47,16 @@ lags_for_try_1d: List[int] = [
     3000,
     4000,
     5000,
-]  # lag time [steps] list for plotting ITS (1 step = 1 interval in the trajectory)
+]
+n_clusters_1d_main = n_clusters_for_try_1d
+lags_1d_main = lags_for_try_1d
+
 n_clusters_for_try_3d: List[int] = [
     100,
     500,
     1000,
     5000,
-]  # n_clusters list for plotting ITS
+]
 lags_for_try_3d: List[int] = [
     1,
     50,
@@ -73,32 +70,33 @@ lags_for_try_3d: List[int] = [
     3000,
     4000,
     5000,
-]  # lag time [steps] list for plotting ITS (1 step = 1 interval in the trajectory)
-cutoff: float = 12.5  # decrease in need         # [nm], cutoff for inter-COM distance to decide whether the replica is used for MSM.
-nbins: int = 15  # enter here                    # the number of bins when plotting.
-cmap: ListedColormap = mpl.colormaps.get_cmap(
-    "tab20"
-)  # color map for plotting FEL of each trial
-do_volume_correction: bool = (
-    True  # whether to perform volume correction, select from [True, False]
-)
-num_of_ligand: int = 1  # the number of ligands in your system
-box_size: float = (
-    17 * 17 * 17
-)  # enter here                    # [nm^3], box size for volume ligand concentration used for koff calculation
+]
+n_clusters_3d_main = n_clusters_for_try_3d
+lags_3d_main = lags_for_try_3d
+
+cutoff: float = 12.5
+nbins: int = 15
+cmap: ListedColormap = mpl.colormaps.get_cmap("tab20")
+do_volume_correction: bool = True
+num_of_ligand: int = 1
+box_size: float = 17 * 17 * 17
+# definition for bound-state
+lower_bound = 0  # 0 is recommended
+upper_bound = 2
+
+# definition for unbound-state
+lower_unbound = 4
+upper_unbound = cutoff  # params.cutoff is recommended
 
 
-# get tab20 and tab20b color map
 cmap_tab20 = mpl.colormaps.get_cmap("tab20")
 cmap_tab20b = mpl.colormaps.get_cmap("tab20b")
 
-# create new color map by concatenating tab20 and tab20b
 colors_tab20_tab20b = np.vstack(
     (cmap_tab20(np.linspace(0, 1, 20)), cmap_tab20b(np.linspace(0, 1, 20)))
 )
 cmap_tab20_tab20b = ListedColormap(colors_tab20_tab20b)
 
-# set new color map to "cmap" variable
 cmap: ListedColormap = cmap_tab20_tab20b
 
 
@@ -141,9 +139,6 @@ hex_colors = [mpl.colors.to_hex(rgb) for rgb in rgb_list]
 vmd_cmap = ListedColormap(hex_colors)
 
 
-# In[ ]:
-
-
 # define the logger object and log file
 logger = logging.getLogger(__name__)
 log_file = Path(output_directory) / "logs/distance_deeptime.log"
@@ -183,9 +178,6 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 
 sys.excepthook = handle_exception
-
-
-# In[ ]:
 
 
 @dataclass(frozen=True)
@@ -256,10 +248,6 @@ if not params.show_picture:
 
 # ## 1D: Clustering
 # - Perform k-means clustering
-
-# In[ ]:
-
-
 def cluster_1d(
     params: Parameters,
     max_iter: int = 2000,
@@ -334,9 +322,6 @@ def cluster_1d(
             )
 
 
-# In[ ]:
-
-
 # run
 cluster_1d(
     params=params,
@@ -345,10 +330,6 @@ cluster_1d(
 
 # ## 1D: Plot Histgram of $d$
 #
-
-# In[ ]:
-
-
 def plot_hist_1d_per_trial(
     params: Parameters,
     trial: int,
@@ -422,9 +403,6 @@ def plot_hist_1d(
         )
 
 
-# In[ ]:
-
-
 # run
 for n_clusters in params.n_clusters_for_try_1d:
     plot_hist_1d(params=params, n_clusters=n_clusters)
@@ -433,10 +411,6 @@ for n_clusters in params.n_clusters_for_try_1d:
 # ## 1D: Plot inertias
 # - plot inertias along n_clusters
 # - can be used to decide appropriate n_clusters
-
-# In[ ]:
-
-
 def plot_inertia_1d(params: Parameters):
     for trial in params.n_trial_for_calc:
         params.logger.info(f"Starting plotting inertia for trial{trial:03}")
@@ -488,19 +462,12 @@ def plot_inertia_1d(params: Parameters):
         params.logger.info(f"Finished plotting inertia for trial{trial:03}")
 
 
-# In[ ]:
-
-
 # run
 plot_inertia_1d(params=params)
 
 
 # ## 1D: Build MSM
 # - build MSM for each trial and n_clusters as specified at the top.
-
-# In[ ]:
-
-
 def build_msm_1d(
     params: Parameters,
 ) -> None:
@@ -627,19 +594,12 @@ def build_msm_1d(
             )
 
 
-# In[ ]:
-
-
 # run
 build_msm_1d(params=params)
 
 
 # ## 1D: Plot ITS using distance
 # - calculate "Implied Time Scale" for each trial
-
-# In[ ]:
-
-
 def plot_its_1d(params: Parameters) -> None:
     for trial in params.n_trial_for_calc:
         for n_clusters in params.n_clusters_for_try_1d:
@@ -696,9 +656,6 @@ def plot_its_1d(params: Parameters) -> None:
             params.logger.info(
                 f"Finished plotting ITS for trial{trial:03} n_clusters={n_clusters}"
             )
-
-
-# In[ ]:
 
 
 # run
@@ -961,13 +918,6 @@ def plot_fel_along_d_1d(
     )
 
 
-# In[ ]:
-
-
-n_clusters_1d_main = n_clusters_for_try_1d
-lags_1d_main = lags_for_try_1d
-
-
 # run
 for n_clusters in n_clusters_1d_main:
     for lag in lags_1d_main:
@@ -982,15 +932,6 @@ for n_clusters in n_clusters_1d_main:
         plot_fel_along_d_1d(
             params=params, n_clusters=n_clusters, lag=lag, interpolate_type="cubic"
         )
-
-
-# definition for bound-state
-lower_bound = 0  # 0 is recommended
-upper_bound = 2
-
-# definition for unbound-state
-lower_unbound = 4
-upper_unbound = params.cutoff  # params.cutoff is recommended
 
 
 def calc_vc_per_trial(
@@ -1223,11 +1164,7 @@ def calc_binding_energy_1d(
     )
 
 
-# In[ ]:
-
-
 # calc binding energy
-
 for n_clusters in n_clusters_1d_main:
     for lag in lags_1d_main:
         calc_binding_energy_1d(
@@ -1241,11 +1178,7 @@ for n_clusters in n_clusters_1d_main:
         )
 
 
-# ## 3D: Clustering
-
-# In[ ]:
-
-
+# 3D: Clustering
 def cluster_3d(
     params: Parameters,
     max_iter: int = 2000,
@@ -1324,18 +1257,11 @@ def cluster_3d(
         )
 
 
-# In[ ]:
-
-
 # plot
 cluster_3d(params=params)
 
 
-# ## 3D: Plot Histgram of $d$
-
-# In[ ]:
-
-
+# 3D: Plot Histgram of $d$
 def plot_hist_3d(
     params: Parameters,
     n_clusters: int,
@@ -1391,21 +1317,14 @@ def plot_hist_3d(
     params.logger.info(f"Finished histogram plotting for n_clusters={n_clusters}")
 
 
-# In[ ]:
-
-
 # run
 for n_clusters in params.n_clusters_for_try_3d:
     plot_hist_3d(params=params, n_clusters=n_clusters)
 
 
-# ## 3D: Plot inertias
+# 3D: Plot inertias
 # - plot inertias along n_clusters
 # - can be used to decide appropriate n_clusters
-
-# In[ ]:
-
-
 def plot_inertia_3d(params: Parameters):
     n_clusters_list = []
     inertias = []
@@ -1453,18 +1372,11 @@ def plot_inertia_3d(params: Parameters):
     params.logger.info("Finished plotting inertia for 3d")
 
 
-# In[ ]:
-
-
 # run
 plot_inertia_3d(params=params)
 
 
-# ## 3D: Build MSM
-
-# In[ ]:
-
-
+# 3D: Build MSM
 def build_msm_3d(
     params: Parameters,
 ) -> None:
@@ -1593,18 +1505,11 @@ def build_msm_3d(
             params.logger.info(f"Finished MSM for n_clusters={n_clusters} lag={lag}")
 
 
-# In[ ]:
-
-
 # build msm
 build_msm_3d(params)
 
 
-# ## 3D: Plot ITS
-
-# In[ ]:
-
-
+# 3D: Plot ITS
 def plot_its_3d(
     params: Parameters,
 ) -> None:
@@ -1663,29 +1568,8 @@ def plot_its_3d(
         params.logger.info(f"Finished plotting ITS for n_clusters={n_clusters}")
 
 
-# In[ ]:
-
-
 # plot its
 plot_its_3d(params=params)
-
-
-# Select n_clusters and lag time to use for later analysis in this notebook.
-#
-# You can select parameters where implied timescales above is converged.
-#
-# The parameters selected here will be subsequently used for plotting FEL, calculating binding free energy in this notebook.
-
-# In[ ]:
-
-
-# this is the default value
-n_clusters_3d_main = params.n_clusters_for_try_3d
-lags_3d_main = params.lags_for_try_3d
-
-# It is recommended to change the values as shown below (example) to save time
-# n_clusters_3d_main = [500, 1000]
-# lags_3d_main = [30, 40]
 
 
 # ## 3D: FEL along $d$
@@ -1721,10 +1605,6 @@ lags_3d_main = params.lags_for_try_3d
 #
 #    - Plot only the mean FEL with its error bounds, i.e., $\Delta W(d_i) \pm \text{error}$.
 #    - Do not plot individual samples; only the aggregated statistics (mean $\pm$ error) are displayed.
-
-# In[ ]:
-
-
 def plot_fel_along_d_3d(
     params: Parameters,
     n_clusters: int,
@@ -1800,31 +1680,12 @@ def plot_fel_along_d_3d(
     )
 
 
-# In[ ]:
-
-
 for n_clusters in n_clusters_3d_main:
     for lag in lags_3d_main:
         try:
             plot_fel_along_d_3d(params=params, n_clusters=n_clusters, lag=lag)
         except Exception:
             continue
-
-
-# Define the bound/unbound state according to 1d-fel of your system plotted above.
-#
-# If you don't set the definition, you can't calculate the binding free energy.
-# - the meaning of each variable is written in `1D: Binding Free Energy Calculation` section
-# - unit is [nm]
-# - set as lower_bound < lower_unbound <= upper_unbound < upper_bound
-
-# In[ ]:
-
-
-# Default values are invalid to prevent mistakes. Please modify them to fit your system.
-
-
-# In[ ]:
 
 
 def calc_vc_all_trials(
@@ -2033,9 +1894,6 @@ def calc_binding_energy_3d(
     )
 
 
-# In[ ]:
-
-
 for n_clusters in n_clusters_3d_main:
     for lag in lags_3d_main:
         calc_binding_energy_3d(
@@ -2047,14 +1905,6 @@ for n_clusters in n_clusters_3d_main:
             lower_unbound=lower_unbound,
             upper_unbound=params.cutoff,
         )
-
-
-# check the result
-
-# In[ ]:
-
-
-# In[ ]:
 
 
 # ## 3D: $k_{on}, k_{off}$
@@ -2071,10 +1921,6 @@ for n_clusters in n_clusters_3d_main:
 # - where $MFPT_{off}$ is the mean first passage time(MFPT) from the bound state to the unbound state, $MFPT_{on}$ is MFPT from the unbound state to the bound state, and $C_{ligand}$ is the ligand concentration.
 #
 # - MFPT can be calculated from MSM theory. See [deeptime web site](https://deeptime-ml.github.io/latest/api/generated/deeptime.markov.tools.analysis.mfpt.html) for more information.
-
-# In[ ]:
-
-
 def calc_rate_constant_3d(
     params: Parameters,
     n_clusters: int,
@@ -2186,25 +2032,17 @@ def calc_rate_constant_3d(
     )
 
 
-# In[ ]:
-
-
-# for n_clusters in n_clusters_3d_main:
-#     for lag in lags_3d_main:
-#         calc_rate_constant_3d(
-#             params=params,
-#             n_clusters=n_clusters,
-#             lag=lag,
-#             lower_bound=lower_bound,
-#             upper_bound=upper_bound,
-#             lower_unbound=lower_unbound,
-#             upper_unbound=params.cutoff,
-#         )
-
-
-# check the result
-
-# In[ ]:
+for n_clusters in n_clusters_3d_main:
+    for lag in lags_3d_main:
+        calc_rate_constant_3d(
+            params=params,
+            n_clusters=n_clusters,
+            lag=lag,
+            lower_bound=lower_bound,
+            upper_bound=upper_bound,
+            lower_unbound=lower_unbound,
+            upper_unbound=params.cutoff,
+        )
 
 
 # koff [s^-1]
@@ -2213,10 +2051,6 @@ def calc_rate_constant_3d(
 
 # ## 3D: FEL on 2D plane
 # - plot the FEL on the x-y, x-z, and y-z planes.
-
-# In[ ]:
-
-
 def plot_fel_each_2d(
     params: Parameters,
     n_clusters: int,
@@ -2319,10 +2153,7 @@ def plot_fel_each_2d(
     )
 
 
-# In[ ]:
-
-
-# # run
-# for n_clusters in n_clusters_3d_main:
-#     for lag in lags_3d_main:
-#         plot_fel_each_2d(params, n_clusters, lag, coord_names=["X", "Y", "Z"])
+# run
+for n_clusters in n_clusters_3d_main:
+    for lag in lags_3d_main:
+        plot_fel_each_2d(params, n_clusters, lag, coord_names=["X", "Y", "Z"])
