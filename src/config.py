@@ -1,3 +1,11 @@
+# for link
+import os
+from pathlib import Path
+
+current_path = os.environ.get("PATH", "")
+new_path = Path(__file__).parent.parent / f".pixi/envs/default/bin:{current_path}"
+os.environ["PATH"] = str(new_path)
+
 # pymol setting
 import pymol_plugins  # NOQA
 
