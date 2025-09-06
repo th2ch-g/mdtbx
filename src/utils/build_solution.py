@@ -19,7 +19,7 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-f",
+        "-i",
         "--input",
         required=True,
         type=str,
@@ -27,7 +27,7 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-o", "--output", required=True, type=str, help="Output file path"
+        "-o", "--outdir", default="./", type=str, help="Output file path"
     )
 
     parser.add_argument(
@@ -43,7 +43,11 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "--boxsize", nargs=3, type=float, help="Box size [angstrom, angstrom, angstrom]"
+        "--boxsize",
+        nargs=3,
+        type=float,
+        default=[100, 100, 100],
+        help="Box size [angstrom, angstrom, angstrom]",
     )
 
     parser.add_argument(
@@ -77,7 +81,7 @@ def run(args):
             if "SYSTEM_NAME" in line:
                 line = line.replace("SYSTEM_NAME", SYSTEM_NAME)  # NOQA
             if "OUT_DIR" in line:
-                line = line.replace("OUT_DIR", args.output)
+                line = line.replace("OUT_DIR", args.outdir)
             if "CATION" in line:
                 line = line.replace("CATION", args.cation)
             if "ANION" in line:
@@ -119,7 +123,7 @@ loadoff {lib}
     subprocess.run(cmd, shell=True, check=True)
 
     LOGGER.info(
-        f"{args.output}/leap.parm7 {args.output}/leap.rst7 {args.output}/leap.pdb generated"
+        f"{args.outdir}/leap.parm7 {args.outdir}/leap.rst7 {args.outdir}/leap.pdb generated"
     )
 
     cmd = "rm -f leap.log tleap.in"
