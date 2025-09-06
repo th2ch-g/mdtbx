@@ -6,7 +6,7 @@ mdtbx addace -s template.pdb -o ace
 mdtbx addnme -s ace.pdb -o ace_nme
 
 mdtbx build_solution \
-    -f ./ace_nme.pdb \
+    -i ./ace_nme.pdb \
     -o ./ \
     --ion_conc 0.15 \
     --cation Na+ \
@@ -32,6 +32,6 @@ mv *.ndx gmx/
 cp mdps/*.mdp gmx/
 cp mdrun_slurm.sh gmx/
 
-rm -f leap.parm7 leap.rst7
+rm -f leap.parm7 leap.rst7 leap.pdb gmx.pdb
 
 echo done

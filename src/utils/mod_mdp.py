@@ -29,6 +29,8 @@ def add_subcmd(subparsers):
 
     parser.add_argument("-v", "--new_value", type=str, required=True, help="New value")
 
+    parser.add_argument("--exclude", type=str, nargs="+", help="Exclude name of files")
+
     parser.add_argument(
         "-lj", "--ljust", type=int, default=23, help="Ljust for new variable line"
     )
@@ -36,8 +38,16 @@ def add_subcmd(subparsers):
 
 def run(args):
     for mdp in Path(args.path).glob("*.mdp"):
+        key_skip = False
+        if args.exclude is not None:
+            for exclude in args.exclude:
+                if exclude in mdp.name:
+                    LOGGER.info(f"{mdp} excluded")
+                    key_skip = True
+                    continue
+        if key_skip:
+            continue
         mod_mdp(args.target_variable, args.new_value, mdp, args.ljust)
-        LOGGER.info(f"{mdp} modified")
 
 
 def mod_mdp(target_variable, new_value, mdp, ljust):
@@ -59,6 +69,9 @@ def mod_mdp(target_variable, new_value, mdp, ljust):
 
     if not added_key:
         new_lines.append(f"{target_variable.ljust(ljust)} = {new_value}\n")
+        LOGGER.info(f"new variable {target_variable} added to {mdp}")
+    else:
+        LOGGER.info(f"{mdp} modified")
 
     with open(mdp, "w") as f:
         f.writelines(new_lines)
