@@ -30,6 +30,14 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
+        "--water",
+        default="tip3p",
+        type=str,
+        help="Water model",
+        choices=["tip3p", "opc"],
+    )
+
+    parser.add_argument(
         "--ion_conc", default=0.15, type=float, help="Ion concentration [M]"
     )
 
@@ -111,6 +119,12 @@ loadoff {lib}
                     line = line.replace("LIGAND_PARAMS", cmd)
                 else:
                     line = ""
+            if "WATER_MODEL" in line:
+                if "solvatebox" in line:
+                    water_name = args.water.upper()
+                else:
+                    water_name = args.water
+                line = line.replace("WATER_MODEL", water_name)
             if "ADDION" in line:
                 if args.noions:
                     LOGGER.info("Ions will not be added")
