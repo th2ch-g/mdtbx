@@ -21,7 +21,6 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "-i",
         "--input",
-        required=True,
         type=str,
         help="Input Structure file (.pdb)",
     )
@@ -37,6 +36,8 @@ def add_subcmd(subparsers):
     parser.add_argument("--cation", default="Na+", type=str, help="Cation name")
 
     parser.add_argument("--anion", default="Cl-", type=str, help="Anion name")
+
+    parser.add_argument("--noions", action="store_true", help="No ions")
 
     parser.add_argument(
         "--ligparam", type=str, help="Ligand parameter. e.g. --ligparam FRCMOD:LIB"
@@ -69,6 +70,10 @@ def add_subcmd(subparsers):
         help="Template file for tleap",
     )
 
+    parser.add_argument(
+        "--keepfiles", action="store_true", help="Keep intermediate files"
+    )
+
 
 def run(args):
     # tleap
@@ -76,16 +81,23 @@ def run(args):
     with open(args.template_tleap) as f:
         for idx, line in enumerate(f):
             line = line.rstrip()
-            if "INPUT_PDB" in line:
-                line = line.replace("INPUT_PDB", args.input)
+            if "LOADPDB" in line:
+                if args.input is not None:
+                    line = line.replace(
+                        "LOADPDB",
+                        f"{SYSTEM_NAME} = loadpdb {args.input}",  # NOQA
+                    )
+                else:
+                    LOGGER.warn("No input structure")
+                    LOGGER.warn("System will be water system")
+                    line = line.replace(
+                        "LOADPDB",
+                        f"{SYSTEM_NAME} = createunit '{SYSTEM_NAME}'",  # NOQA
+                    )
             if "SYSTEM_NAME" in line:
                 line = line.replace("SYSTEM_NAME", SYSTEM_NAME)  # NOQA
             if "OUT_DIR" in line:
                 line = line.replace("OUT_DIR", args.outdir)
-            if "CATION" in line:
-                line = line.replace("CATION", args.cation)
-            if "ANION" in line:
-                line = line.replace("ANION", args.anion)
             if "BOX_SIZE" in line:
                 line = line.replace("BOX_SIZE", " ".join(map(str, args.boxsize)))
             if "LIGAND_PARAMS" in line:
@@ -99,11 +111,20 @@ loadoff {lib}
                     line = line.replace("LIGAND_PARAMS", cmd)
                 else:
                     line = ""
-            if "ION_NUM" in line:
-                ionnum = calc_ion_conc_from_volume(
-                    args.boxsize[0] * args.boxsize[1] * args.boxsize[2], args.ion_conc
-                )  # cubic method
-                line = line.replace("ION_NUM", str(ionnum))
+            if "ADDION" in line:
+                if args.noions:
+                    LOGGER.info("Ions will not be added")
+                    line = ""
+                else:
+                    ion_num = calc_ion_conc_from_volume(
+                        args.boxsize[0] * args.boxsize[1] * args.boxsize[2],
+                        args.ion_conc,
+                    )  # cubic method
+                    cmd = f"""
+addionsrand {SYSTEM_NAME} {args.cation} {ion_num}
+addionsrand {SYSTEM_NAME} {args.anion} 0
+                    """  # NOQA
+                    line = line.replace("ADDION", cmd)
             if "ADDPRECMD" in line:
                 if args.addprecmd is not None:
                     line = line.replace("ADDPRECMD", args.addprecmd)
@@ -126,6 +147,7 @@ loadoff {lib}
         f"{args.outdir}/leap.parm7 {args.outdir}/leap.rst7 {args.outdir}/leap.pdb generated"
     )
 
-    cmd = "rm -f leap.log tleap.in"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("leap.log tleap.in removed")
+    if not args.keepfiles:
+        cmd = "rm -f leap.log tleap.in"
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info("leap.log tleap.in removed")
