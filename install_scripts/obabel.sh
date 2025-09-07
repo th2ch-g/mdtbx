@@ -2,7 +2,7 @@
 set -e
 
 thread=12
-INSTALL_PREFIX="${PWD}/obabel-${VERSION}/build"
+INSTALL_PREFIX="${PWD}/obabel-${VERSION}/"
 VERSION="3-1-1"
 
 # source /home/apps/Modules/init/bash

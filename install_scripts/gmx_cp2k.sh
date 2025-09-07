@@ -2,7 +2,7 @@
 set -e
 
 VERSION="2025.1"
-INSTALL_PREFIX="${PWD}/gromacs-${VERSION}/build"
+INSTALL_PREFIX="${PWD}/gromacs-${VERSION}/"
 thread=12
 SIMD="AVX_512"
 
