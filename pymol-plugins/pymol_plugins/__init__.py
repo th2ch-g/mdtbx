@@ -3,6 +3,7 @@ from .selector import *  # NoQA
 from .builder import *  # NoQA
 from .visualizer import *  # NoQA
 from .arrow import *  # NoQA
+from .alias import *  # NoQA
 
 
 # similar to alignto
