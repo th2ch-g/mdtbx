@@ -1,6 +1,7 @@
 import argparse
 import mdtraj as md
 import numpy as np
+import itertools
 
 from ..config import *  # NOQA
 from ..logger import generate_logger
@@ -50,14 +51,14 @@ def add_subcmd(subparsers):
 def run(args):
     trj = md.load(args.trajectory, top=args.topology)
 
-    mindist = np.min(
-        np.linalg.norm(
-            trj.xyz[:, trj.top.select(args.selection1)]
-            - trj.xyz[:, trj.top.select(args.selection2)],
-            axis=1,
-        ),
-        axis=0,
-    )
+    selection1_indices = trj.top.select(args.selection1)
+    selection2_indices = trj.top.select(args.selection2)
 
-    np.save(args.output, mindist)
+    atom_pairs = list(itertools.product(selection1_indices, selection2_indices))
+
+    distances = md.compute_distances(trj, atom_pairs)
+
+    min_dist_per_frame = np.min(distances, axis=1)
+
+    np.save(args.output, min_dist_per_frame)
     LOGGER.info(f"Saved to {args.output}")
