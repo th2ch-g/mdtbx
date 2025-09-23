@@ -31,6 +31,7 @@ from .utils import build_solution
 
 from .cv import comdist
 from .cv import comvec
+from .cv import mindist
 from .cv import rmsd
 from .cv import xyz
 
@@ -86,6 +87,7 @@ def cli() -> None:
 
     comdist.add_subcmd(subparsers)
     comvec.add_subcmd(subparsers)
+    mindist.add_subcmd(subparsers)
     rmsd.add_subcmd(subparsers)
     xyz.add_subcmd(subparsers)
 
@@ -170,6 +172,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "comvec":
         comvec.run(args)
+
+    elif sys.argv[1] == "mindist":
+        mindist.run(args)
 
     elif sys.argv[1] == "rmsd":
         rmsd.run(args)

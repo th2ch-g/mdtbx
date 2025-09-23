@@ -1,0 +1,63 @@
+import argparse
+import mdtraj as md
+import numpy as np
+
+from ..config import *  # NOQA
+from ..logger import generate_logger
+
+LOGGER = generate_logger(__name__)
+
+
+def add_subcmd(subparsers):
+    """
+    mdtbx mindist --topology structure.pdb --trajectory trajectory.xtc --selection1 "resid 1 to 10" --selection2 "resid 11 to 20" -o cv.npy
+    """
+    parser = subparsers.add_parser(
+        "mindist",
+        help="Extract minimum distance between two sets of atoms",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    parser.add_argument(
+        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
+    )
+    parser.add_argument(
+        "-t",
+        "--trajectory",
+        type=str,
+        required=True,
+        help="Trajectory file (.xtc, .trr)",
+    )
+    parser.add_argument(
+        "-s1",
+        "--selection1",
+        type=str,
+        required=True,
+        help="Selection 1 (MDtraj Atom selection language)",
+    )
+    parser.add_argument(
+        "-s2",
+        "--selection2",
+        type=str,
+        required=True,
+        help="Selection 2 (MDtraj Atom selection language)",
+    )
+    parser.add_argument(
+        "-o", "--output", type=str, default="comdist.npy", help="Output file (.npy)"
+    )
+
+
+def run(args):
+    trj = md.load(args.trajectory, top=args.topology)
+
+    mindist = np.min(
+        np.linalg.norm(
+            trj.xyz[:, trj.top.select(args.selection1)]
+            - trj.xyz[:, trj.top.select(args.selection2)],
+            axis=1,
+        ),
+        axis=0,
+    )
+
+    np.save(args.output, mindist)
+    LOGGER.info(f"Saved to {args.output}")
