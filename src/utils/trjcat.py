@@ -16,9 +16,9 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-s", "--skip", default=1, type=int, help="Number of frames to skip"
-    )
+    # parser.add_argument(
+    #     "-s", "--skip", default=1, type=int, help="Number of frames to skip"
+    # )
 
     parser.add_argument(
         "-k", "--keep_selection", default="non-Water", type=str, help="Keep selection"
@@ -84,6 +84,6 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.prefix}_all_rmmol.xtc generated")
 
-    cmd = f"rm -f {args.prefix}_all.xtc"
+    cmd = f"rm -f {args.prefix}_all.xtc \#*"
     subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.prefix}_all.xtc removed")
+    LOGGER.info(f"{args.prefix}_all.xtc and backup files removed")
