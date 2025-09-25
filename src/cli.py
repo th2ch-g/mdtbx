@@ -21,6 +21,7 @@ from .utils import gen_posres
 from .utils import gen_distres
 from .utils import amb2gro
 from .utils import trjcat
+from .utils import fit
 from .utils import pacs_trjcat
 from .utils import print_perf
 from .utils import mv_crds_mol2
@@ -78,6 +79,7 @@ def cli() -> None:
     centering_gro.add_subcmd(subparsers)
     amb2gro.add_subcmd(subparsers)
     trjcat.add_subcmd(subparsers)
+    fit.add_subcmd(subparsers)
     pacs_trjcat.add_subcmd(subparsers)
     rmfile.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
@@ -114,6 +116,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "trjcat":
         trjcat.run(args)
+
+    elif sys.argv[1] == "fit":
+        fit.run(args)
 
     elif sys.argv[1] == "pacs_trjcat":
         pacs_trjcat.run(args)
