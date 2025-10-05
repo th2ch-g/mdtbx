@@ -145,7 +145,7 @@ def run(args):
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info(f"{args.trial_dir}/cycle{cycle:03}/prd_all{ext} generated")
 
-        cmd = f"echo {args.fit_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.trial_dir}/cycle{cycle:03}/tmp_all_pbc{ext} -s {args.ref_structure} -o {args.trial_dir}/cycle{cycle:03}/prd_all{ext} -center -fit rot+trans"
+        cmd = f"echo {args.fit_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.trial_dir}/cycle{cycle:03}/tmp_all_pbc{ext} -s {args.ref_structure} {INDEX_OPTION} -o {args.trial_dir}/cycle{cycle:03}/prd_all{ext} -center -fit rot+trans"
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info(f"{args.trial_dir}/cycle{cycle:03}/prd_all{ext} generated")
 
