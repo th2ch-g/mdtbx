@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
-mdtbx addace -s template.pdb -o ace
+input_structure="template.pdb"
+out_dir="${PWD}/gmx"
+
+mdtbx addace -s ${input_structure} -o ace
 
 mdtbx addnme -s ace.pdb -o ace_nme
 
@@ -24,14 +27,15 @@ mdtbx gen_posres -p gmx.top -s "(protein and backbone) or resname GXL" -o posres
 
 mdtbx rmfile
 
-mkdir gmx
-mv gmx.gro gmx/
-mv gmx.top gmx/
-mv *itp gmx/
-mv *.ndx gmx/
-cp mdps/*.mdp gmx/
-cp mdrun_slurm.sh gmx/
+mkdir ${out_dir}
+mv gmx.gro ${out_dir}/
+mv gmx.top ${out_dir}/
+mv *itp ${out_dir}/
+mv *.ndx ${out_dir}/
+cp mdps/*.mdp ${out_dir}/
+cp mdrun_slurm.sh ${out_dir}/
 
 rm -f leap.parm7 leap.rst7 leap.pdb gmx.pdb
+rm -f ace_nme.pdb ace.pdb
 
 echo done

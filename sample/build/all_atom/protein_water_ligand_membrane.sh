@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 
-mdtbx addace -s prot_lig.pdb -o ace
+input_structure="prot_lig.pdb"
+out_dir="${PWD}/gmx"
+lig_frcmod="./NKP.frcmod"
+lig_lib="./NKP.lib"
+
+mdtbx addace -s ${input_structure} -o ace
 
 mdtbx addnme -s ace.pdb -o ace_nme
 
@@ -21,7 +26,7 @@ mdtbx cmd packmol-memgen \
     --ffwat tip3p \
     --ffprot ff14SB \
     --fflip lipid21 \
-    --ligand_param ./NKP.frcmod:./NKP.lib
+    --ligand_param ${lig_frcmod}:${lig_lib}
 
 mdtbx amb2gro -p bilayer_ace_nme_lipid.top -x bilayer_ace_nme_lipid.crd --type parmed
 
@@ -33,13 +38,13 @@ mdtbx gen_posres -p gmx.top -s "(protein and backbone) or (resname NKP) or (resn
 
 mdtbx rmfile
 
-mkdir gmx
-mv gmx.gro gmx/
-mv gmx.top gmx/
-mv *itp gmx/
-mv *.ndx gmx/
-cp mdps/*.mdp gmx/
-cp mdrun_slurm.sh gmx/
+mkdir ${out_dir}
+mv gmx.gro ${out_dir}
+mv gmx.top ${out_dir}
+mv *itp ${out_dir}/
+mv *.ndx ${out_dir}/
+cp mdps/*.mdp ${out_dir}/
+cp mdrun_slurm.sh ${out_dir}/
 
 rm -f ace.pdb \
     ace_nme.pdb \
