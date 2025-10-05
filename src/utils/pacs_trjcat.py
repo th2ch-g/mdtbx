@@ -78,6 +78,13 @@ def add_subcmd(subparsers):
         choices=["none", "mol", "res", "atom", "nojump", "cluster", "whole"],
     )
 
+    parser.add_argument(
+        "--keep_cycle_trj",
+        default=False,
+        action="store_true",
+        help="Keep cycle trajectory (e.g. trial001/cycle000/prd_all.xtc)",
+    )
+
 
 def check_cycle(args):
     cmd = f"ls {args.trial_dir} | grep cycle | wc -l"
@@ -174,3 +181,8 @@ def run(args):
     cmd = f"rm -f {args.trial_dir}/cycle*/tmp_all_pbc{ext} {args.trial_dir}/tmp_all{ext} {args.trial_dir}/tmp_all_pbc{ext} {args.trial_dir}/\#*"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.trial_dir}/tmp_all{ext} and backup files removed")
+
+    if not args.keep_cycle_trj:
+        cmd = f"rm -f {args.trial_dir}/cycle*/prd_all{ext}"
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info(f"{args.trial_dir}/cycle*/prd_all{ext} removed")
