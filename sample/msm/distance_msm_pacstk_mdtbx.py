@@ -19,10 +19,10 @@ from scipy.interpolate import CubicSpline
 
 
 # input the following variables
-n_trial_for_calc: List[int] = [1]
-trial_root_directory: str = None
-feature_1d_directory: str = "./comdist/"
-feature_3d_directory: str = "./comvec/"
+n_trial_for_calc: List[int] = [i for i in range(1, 15 + 1)]
+trial_root_directory: str = "./dpacs/"
+feature_1d_directory: str = "./cvs/comdist/"
+feature_3d_directory: str = "./cvs/comvec/"
 output_directory: str = "./out_distnb"
 show_picture: bool = False
 T: float = 310
@@ -352,10 +352,10 @@ def plot_hist_1d_per_trial(
 
     # load features
     features = []
-    feature_files_trial = list(Path(f"{params.feature_1d_directory}").glob("*.npy"))
-    feature_files_trial.sort()
-    for rep_path in feature_files_trial:
-        features_per_rep = np.load(rep_path)
+    feature_file_trial = f"{params.feature_1d_directory}/trial{trial}.npy"
+    a = np.load(feature_file_trial)
+    for each_rep in range(0, a.shape[0]):
+        features_per_rep = a[each_rep]
         max_distance = np.max(features_per_rep)
         if max_distance > params.cutoff:
             continue
@@ -974,10 +974,10 @@ def calc_vc_per_trial(
     params.logger.info(f"Starting volume correction calculation for trial{trial:03}")
     # load
     inter_COM_vec_all = []
-    feature_files_trial = list(Path(f"{params.feature_3d_directory}").glob("*.npy"))
-    feature_files_trial.sort()
-    for rep_path in feature_files_trial:
-        inter_COM_vec = np.load(rep_path)
+    feature_file_trial = f"{params.feature_1d_directory}/trial{trial}.npy"
+    a = np.load(feature_file_trial)
+    for each_rep in range(0, a.shape[0]):
+        inter_COM_vec = a[each_rep]
         max_distance = np.max(np.linalg.norm(inter_COM_vec, axis=1))
         if max_distance > params.cutoff:
             continue
@@ -1199,17 +1199,14 @@ def cluster_3d(
         # loads
         features = []
         for trial in params.n_trial_for_calc:
-            feature_files_trial = list(
-                Path(f"{params.feature_3d_directory}").glob("*.npy")
-            )
-            feature_files_trial.sort()
-            for rep_path in feature_files_trial:
-                features_per_rep = np.load(rep_path)
-                max_distance = np.max(np.linalg.norm(features_per_rep, axis=1))
+            a = np.load(f"{params.feature_3d_directory}/trial{trial}.npy")
+            for each_rep in range(0, a.shape[0]):
+                feature_per_rep = a[each_rep]
+                max_distance = np.max(np.linalg.norm(feature_per_rep, axis=1))
                 if max_distance > params.cutoff:
                     continue
                 else:
-                    features.append(features_per_rep)
+                    features.append(feature_per_rep)
 
         # clustering
         estimator = deeptime.clustering.KMeans(
@@ -1281,10 +1278,9 @@ def plot_hist_3d(
     # load
     features = []
     for trial in params.n_trial_for_calc:
-        feature_files_trial = list(Path(f"{params.feature_3d_directory}").glob("*.npy"))
-        feature_files_trial.sort()
-        for rep_path in feature_files_trial:
-            features_per_rep = np.load(rep_path)
+        a = np.load(f"{params.feature_3d_directory}/trial{trial}.npy")
+        for each_rep in range(0, a.shape[0]):
+            features_per_rep = a[each_rep]
             max_distance = np.max(np.linalg.norm(features_per_rep, axis=1))
             if max_distance > params.cutoff:
                 continue
@@ -1729,10 +1725,9 @@ def calc_vc_all_trials(
     # calc vc
     inter_COM_vec_all = []
     for trial in params.n_trial_for_calc:
-        feature_files_trial = list(Path(f"{params.feature_3d_directory}").glob("*.npy"))
-        feature_files_trial.sort()
-        for rep_path in feature_files_trial:
-            inter_COM_vec = np.load(rep_path)
+        a = np.load(f"{params.inter_COM_3d_directory}/trial{trial}.npy")
+        for each_rep in range(0, a.shape[0]):
+            inter_COM_vec = a[each_rep]
             max_distance = np.max(np.linalg.norm(inter_COM_vec, axis=1))
             if max_distance > params.cutoff:
                 continue
@@ -2060,10 +2055,9 @@ def plot_fel_each_2d(
     # load raw feature data
     features = []
     for trial in params.n_trial_for_calc:
-        feature_files_trial = list(Path(f"{params.feature_3d_directory}").glob("*.npy"))
-        feature_files_trial.sort()
-        for rep_path in feature_files_trial:
-            features_per_rep = np.load(rep_path)
+        a = np.load(f"{params.feature_3d_directory}/trial{trial}.npy")
+        for each_rep in range(0, a.shape[0]):
+            features_per_rep = a[each_rep]
             max_distance = np.max(np.linalg.norm(features_per_rep, axis=1))
             if max_distance > params.cutoff:
                 continue

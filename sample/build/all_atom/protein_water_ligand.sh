@@ -4,7 +4,15 @@ set -e
 input_structure="template.pdb"
 out_dir="${PWD}/gmx"
 
-mdtbx addace -s ${input_structure} -o ace
+mdtbx cmd pymol -c -p <<EOF
+import pymol_plugins
+from pymol_plugins import *
+cmd.load("${input_structure}")
+rename_atomname_renumber("chain B and resn GXL")
+cmd.save("rename.pdb")
+EOF
+
+mdtbx addace -s rename.pdb -o ace
 
 mdtbx addnme -s ace.pdb -o ace_nme
 
