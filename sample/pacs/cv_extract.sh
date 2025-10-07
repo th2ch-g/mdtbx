@@ -9,16 +9,18 @@ do
     mdtbx comdist \
         -p trial$i/trial001/rmmol_top.gro \
         -t trial$i/trial001/prd_all.xtc \
-        -s1 "protein" \
-        -s2 "resname NKP" \
-        -o cvs/comdist/trial$i.npy
+        -s1 "Protein" \
+        -s2 "NKP" \
+        -o cvs/comdist/trial$i.npy \
+        --gmx
 
     mdtbx comvec \
         -p trial$i/trial001/rmmol_top.gro \
         -t trial$i/trial001/prd_all.xtc \
-        -s1 "protein" \
-        -s2 "resname NKP" \
-        -o cvs/comvec/trial$i.npy
+        -s1 "Protein" \
+        -s2 "NKP" \
+        -o cvs/comvec/trial$i.npy \
+        --gmx
 done
 
 echo done
