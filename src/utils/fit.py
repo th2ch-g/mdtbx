@@ -1,5 +1,6 @@
 import argparse
 import mdtraj as md
+import subprocess
 
 from ..logger import generate_logger
 
@@ -35,17 +36,29 @@ def add_subcmd(subparsers):
         "--selection",
         default="protein",
         type=str,
-        help="Centering selection (MDtraj atom selection language)",
+        help="Selection (MDtraj atom selection language)",
     )
+    parser.add_argument("--gmx", action="store_true", help="Use gmx instead of MDtraj")
 
 
 def run(args):
-    trj = md.load(args.file, top=args.topology)
-    ref = md.load(args.topology)
-    fit_trj = trj.superpose(
-        ref,
-        atom_indices=trj.top.select(args.selection),
-        ref_atom_indices=ref.top.select(args.selection),
-    )
-    fit_trj.save(args.output)
+    if args.gmx:
+        # cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc nojump -center"
+        cmd = f"echo System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc nojump"
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info(f"{args.output} generated")
+        cmd = f"echo {args.selection} System | gmx trjconv -f tmp.xtc -s {args.topology} -o {args.output} -fit rot+trans"
+        subprocess.run(cmd, shell=True, check=True)
+        cmd = "rm -f tmp.xtc"
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info("tmp.xtc removed")
+    else:
+        trj = md.load(args.file, top=args.topology)
+        ref = md.load(args.topology)
+        fit_trj = trj.superpose(
+            ref,
+            atom_indices=trj.top.select(args.selection),
+            ref_atom_indices=ref.top.select(args.selection),
+        )
+        fit_trj.save(args.output)
     LOGGER.info(f"{args.output} generated")

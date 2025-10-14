@@ -32,8 +32,6 @@ def add_subcmd(subparsers):
         "--name", default="NEWGROUP", type=str, help="Name for new index group"
     )
 
-    parser.add_argument("--gmx", default="gmx", type=str, help="gmx command")
-
     parser.add_argument("-n", "--index", type=str, help="Input Index file")
 
     parser.add_argument(

@@ -16,14 +16,15 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 from scipy.spatial import ConvexHull
 from scipy.interpolate import CubicSpline
+import subprocess as sb
 
 
 # input the following variables
 n_trial_for_calc: List[int] = [i for i in range(1, 15 + 1)]
-trial_root_directory: str = "./dpacs/"
-feature_1d_directory: str = "./cvs/comdist/"
-feature_3d_directory: str = "./cvs/comvec/"
-output_directory: str = "./out_distnb"
+trial_root_directory: str = "./trials/"
+feature_1d_directory: str = "./cvs_reshaped/comdist/"
+feature_3d_directory: str = "./cvs_reshaped/comvec/"
+output_directory: str = "./out_dist_msm"
 show_picture: bool = False
 T: float = 310
 dt: int = 1
@@ -32,44 +33,34 @@ n_clusters_for_try_1d: List[int] = [
     50,
     100,
     500,
-    1000,
 ]
 lags_for_try_1d: List[int] = [
     1,
+    5,
+    10,
+    20,
+    30,
+    40,
     50,
-    100,
-    200,
-    300,
-    400,
-    500,
-    1000,
-    2000,
-    3000,
-    4000,
-    5000,
 ]
 n_clusters_1d_main = n_clusters_for_try_1d
 lags_1d_main = lags_for_try_1d
 
 n_clusters_for_try_3d: List[int] = [
+    20,
+    50,
     100,
     500,
     1000,
-    5000,
 ]
 lags_for_try_3d: List[int] = [
     1,
+    5,
+    10,
+    20,
+    30,
+    40,
     50,
-    100,
-    200,
-    300,
-    400,
-    500,
-    1000,
-    2000,
-    3000,
-    4000,
-    5000,
 ]
 n_clusters_3d_main = n_clusters_for_try_3d
 lags_3d_main = lags_for_try_3d
@@ -246,6 +237,58 @@ if not params.show_picture:
     mpl.use("Agg")
 
 
+def plot_feature(params: Parameters, threshold: float) -> None:
+    plt.figure(figsize=(20, 5))
+    for trial in params.n_trial_for_calc:
+        if not Path(f"{params.trial_root_directory}/trial{trial:03}/").exists():
+            params.logger.info(f"trial{trial:03} was not found")
+            continue
+        else:
+            res = sb.run(
+                f"head -n 1 {params.trial_root_directory}/trial{trial:03}/cycle*/summary/cv_ranked.log | grep frame | awk '{{print $6}}'",
+                shell=True,
+                text=True,
+                capture_output=True,
+            )
+            if res.returncode != 0:
+                params.logger.error("error occurred at head command")
+                sys.exit(1)
+            y_list = [float(line) for line in res.stdout.strip().split("\n")]
+            # y_list = []
+            # print(f"trial{trial:03} is plotting")
+            # for cycle in range(1, 210, 1):
+            #     cycle_list = []
+            #     for rep_path in Path(f"{params.feature_1d_directory}").glob(f"t{trial:03}c{cycle:03}r*.npy"):
+            #         tmp_y_list = np.load(rep_path)
+            #         cycle_list.append(max(tmp_y_list))
+            #     else:
+            #         if len(cycle_list) == 0:
+            #             break
+            #     y_list.append(max(cycle_list))
+            plt.plot(y_list, label=f"trial{trial:03}", color=params.cmap(trial))
+    plt.axhline(y=threshold, color="r", linestyle="--", label="unbound state")
+    plt.legend()
+    plt.xlabel("Cycle")
+    plt.ylabel("Inter-COM [nm]")
+    plt.grid()
+    plt.tight_layout()
+    # plt.xlim(0, 200)
+    # plt.ylim(0, 10)
+    plt.savefig(
+        f"{params.output_directory}/images/cycle_feature.png",
+        bbox_inches="tight",
+        pad_inches=0.1,
+        dpi=300,
+    )
+    if params.show_picture:
+        plt.show()
+    plt.clf()
+    plt.close()
+
+
+plot_feature(params=params, threshold=4)
+
+
 # ## 1D: Clustering
 # - Perform k-means clustering
 def cluster_1d(
@@ -255,10 +298,9 @@ def cluster_1d(
     for trial in params.n_trial_for_calc:
         # loads
         features = []
-        feature_files_trial = list(Path("./comdist/").glob("*.npy"))
-        feature_files_trial.sort()
-        for rep_path in feature_files_trial:
-            features_per_rep = np.load(rep_path)
+        a = np.load(f"{params.feature_1d_directory}/trial{trial}.npy")
+        for each_rep in range(0, a.shape[0]):
+            features_per_rep = a[each_rep]
             max_distance = np.max(features_per_rep)
             if max_distance > params.cutoff:
                 continue
@@ -724,6 +766,9 @@ def plot_fel_along_d_1d(
         plot_data_y_all = np.array(plot_data_y_all)
         print(f"{plot_data_x_all=}")
         print(f"{plot_data_y_all=}")
+        if len(plot_data_x_all) == 0:
+            params.logger.info("No data to plot. Skipping.")
+            return
         bins = np.linspace(
             start=min(plot_data_x_all), stop=max(plot_data_x_all), num=params.nbins
         )
@@ -756,7 +801,7 @@ def plot_fel_along_d_1d(
         )
 
         plt.xlim(0, params.cutoff)
-        plt.ylim(0, 12)
+        plt.ylim(0, 20)
         plt.title(f"n_clusters={n_clusters} lag={lag}")
         plt.xlabel(r"$d$ [nm]")
         plt.ylabel(r"$\Delta W$ [kcal/mol]")
@@ -791,6 +836,9 @@ def plot_fel_along_d_1d(
             df = pd.read_csv(msm_result_csv)
             cluster_center_d = df["cluster_center_d"].values.tolist()
             center_list.extend(cluster_center_d)
+        if len(center_list) == 0:
+            params.logger.info("No data to plot. Skipping.")
+            return
         bins = np.linspace(
             start=min(center_list), stop=max(center_list), num=params.nbins
         )
@@ -893,7 +941,7 @@ def plot_fel_along_d_1d(
         )
 
         plt.xlim(0, params.cutoff)
-        plt.ylim(0, 12)
+        plt.ylim(0, 20)
         plt.title(f"n_clusters={n_clusters} lag={lag}")
         plt.xlabel(r"$d$ [nm]")
         plt.ylabel(r"$\Delta W$ [kcal/mol]")
@@ -974,7 +1022,7 @@ def calc_vc_per_trial(
     params.logger.info(f"Starting volume correction calculation for trial{trial:03}")
     # load
     inter_COM_vec_all = []
-    feature_file_trial = f"{params.feature_1d_directory}/trial{trial}.npy"
+    feature_file_trial = f"{params.feature_3d_directory}/trial{trial}.npy"
     a = np.load(feature_file_trial)
     for each_rep in range(0, a.shape[0]):
         inter_COM_vec = a[each_rep]
@@ -1656,7 +1704,7 @@ def plot_fel_along_d_3d(
         capsize=3,
     )
     plt.xlim(0, 13)
-    plt.ylim(0, 12)
+    plt.ylim(0, 20)
     plt.title(f"n_clusters={n_clusters} lag={lag}")
     plt.xlabel(r"$d$ [nm]")
     plt.ylabel(r"$\Delta W$ [kcal/mol]")
@@ -1725,7 +1773,7 @@ def calc_vc_all_trials(
     # calc vc
     inter_COM_vec_all = []
     for trial in params.n_trial_for_calc:
-        a = np.load(f"{params.inter_COM_3d_directory}/trial{trial}.npy")
+        a = np.load(f"{params.feature_3d_directory}/trial{trial}.npy")
         for each_rep in range(0, a.shape[0]):
             inter_COM_vec = a[each_rep]
             max_distance = np.max(np.linalg.norm(inter_COM_vec, axis=1))
@@ -1973,6 +2021,10 @@ def calc_rate_constant_3d(
     ) as f:
         count_pkl = pickle.load(f)
 
+    if not (lag in count_pkl and lag in msm_pkl and lag in cluster_pkl):
+        params.logger.info(f"lag={lag} does not exist. Skipping.")
+        return
+
     cluster_centers = cluster_pkl["model"].cluster_centers
     largest_connected_set = deeptime.markov.tools.estimation.largest_connected_set(
         count_pkl[lag].count_matrix, directed=True
@@ -2087,6 +2139,10 @@ def plot_fel_each_2d(
         return
     with open(msm_model_pkl, "rb") as f:
         msm_result = pickle.load(f)
+
+    if lag not in msm_result:
+        params.logger.info(f"lag={lag} does not exist. Skipping.")
+        return
 
     # find weights for each snapshot in trajectory
     msm_model = msm_result[lag]

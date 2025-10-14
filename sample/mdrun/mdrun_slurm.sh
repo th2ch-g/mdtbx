@@ -17,12 +17,28 @@ SIMULATION_OVERWRITE=false
 MAXWARN=10
 PRODUCTION_STEPS=10
 
-# for GPU
+# for single GPU
 export GMX_CUDA_GRAPH=1
-# export GMX_ENABLE_DIRECT_GPU_COMM=1
-# export GMX_FORCE_GPU_AWARE_MPI=1
+export GMX_ENABLE_DIRECT_GPU_COMM=1
+export GMX_FORCE_GPU_AWARE_MPI=1
+export GMX_FORCE_UPDATE_DEFAULT_GPU=1
+export GMX_GPU_DD_COMMS=1
+export GMX_GPU_PME_DECOMPOSITION=1
+export GMX_GPU_PME_PP_COMMS=1
 GMX_CMD="gmx"
 MDRUN_OPTION="-dlb no -pin on -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
+
+# for multiple GPU with thead-MPI
+# export CUDA_VISIBLE_DEVICES=0,1
+# export GMX_CUDA_GRAPH=1
+# export GMX_ENABLE_DIRECT_GPU_COMM=1
+# export GMX_FORCE_GPU_AWARE_MPI=1
+# export GMX_FORCE_UPDATE_DEFAULT_GPU=1
+# export GMX_GPU_DD_COMMS=1
+# export GMX_GPU_PME_DECOMPOSITION=1
+# export GMX_GPU_PME_PP_COMMS=1
+# GMX_CMD="gmx"
+# MDRUN_OPTION="-dlb no -pin on -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu -gpu_id 01 -ntomp 8 -ntmpi 2 -npme 1"
 
 # for CPU
 # GMX_CMD="srun -np $SLURM_NTASKS gmx_mpi"

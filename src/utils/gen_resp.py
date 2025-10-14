@@ -48,43 +48,56 @@ def add_subcmd(subparsers):
         "--threads", default=16, type=int, help="Number of threads for Gaussian"
     )
 
+    parser.add_argument(
+        "--no-opt", action="store_true", help="Do not optimize structure"
+    )
+
 
 def run(args):
-    # structure optimization
     filetype = Path(args.structure).suffix[1:]
-    cmd = f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
-    subprocess.run(cmd, shell=True, check=True)
+    if not args.no_opt:
+        # structure optimization
+        cmd = (
+            f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
+        )
+        subprocess.run(cmd, shell=True, check=True)
 
-    with open("structure_optimization.gjf") as ref:
-        lines = ref.readlines()
+        with open("structure_optimization.gjf") as ref:
+            lines = ref.readlines()
 
-    lines[0] = "%chk=structure_optimization.chk\n"
-    lines[1] = f"%mem={args.memory}GB\n"
-    lines.insert(2, f"%nprocshared={args.threads}\n")
-    lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
+        lines[0] = "%chk=structure_optimization.chk\n"
+        lines[1] = f"%mem={args.memory}GB\n"
+        lines.insert(2, f"%nprocshared={args.threads}\n")
+        lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
 
-    for idx, line in enumerate(lines):
-        line = line.strip()
-        if len(line.split()) == 2:
-            try:
-                _charge = int(line.split()[0])
-                _multiplicity = int(line.split()[1])
-                target_idx = idx
-                lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
-                break
-            except Exception:
-                continue
+        for idx, line in enumerate(lines):
+            line = line.strip()
+            if len(line.split()) == 2:
+                try:
+                    _charge = int(line.split()[0])
+                    _multiplicity = int(line.split()[1])
+                    target_idx = idx
+                    lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
+                    break
+                except Exception:
+                    continue
 
-    with open("structure_optimization.gjf", "w") as f:
-        f.writelines(lines)
+        with open("structure_optimization.gjf", "w") as f:
+            f.writelines(lines)
 
-    cmd = f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("structure_optimization.log generated")
+        cmd = (
+            f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
+        )
+        subprocess.run(cmd, shell=True, check=True)
+        LOGGER.info("structure_optimization.log generated")
 
-    # single point
-    cmd = f"obabel -i {GAUSSIAN_CMD} structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
-    subprocess.run(cmd, shell=True, check=True)
+        # single point
+        cmd = f"obabel -i {GAUSSIAN_CMD} structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
+        subprocess.run(cmd, shell=True, check=True)
+
+    else:
+        cmd = f"obabel -i {filetype} {args.structure} -o gjf > single_point_calculation.gjf"
+        subprocess.run(cmd, shell=True, check=True)
 
     with open("single_point_calculation.gjf") as ref:
         lines = ref.readlines()

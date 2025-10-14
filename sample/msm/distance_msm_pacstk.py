@@ -16,6 +16,7 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 from scipy.spatial import ConvexHull
 from scipy.interpolate import CubicSpline
+import subprocess as sb
 
 
 # input the following variables
@@ -244,6 +245,58 @@ Path(f"{params.output_directory}/logs").mkdir(parents=True, exist_ok=True)
 
 if not params.show_picture:
     mpl.use("Agg")
+
+
+def plot_feature(params: Parameters, threshold: float) -> None:
+    plt.figure(figsize=(20, 5))
+    for trial in params.n_trial_for_calc:
+        if not Path(f"{params.trial_root_directory}/trial{trial:03}").exists():
+            params.logger.info(f"trial{trial:03} was not found")
+            continue
+        else:
+            res = sb.run(
+                f"head -n 1 {params.trial_root_directory}/trial{trial:03}/cycle*/summary/cv_ranked.log | grep frame | awk '{{print $6}}'",
+                shell=True,
+                text=True,
+                capture_output=True,
+            )
+            if res.returncode != 0:
+                params.logger.error("error occurred at head command")
+                sys.exit(1)
+            y_list = [float(line) for line in res.stdout.strip().split("\n")]
+            # y_list = []
+            # print(f"trial{trial:03} is plotting")
+            # for cycle in range(1, 210, 1):
+            #     cycle_list = []
+            #     for rep_path in Path(f"{params.feature_1d_directory}").glob(f"t{trial:03}c{cycle:03}r*.npy"):
+            #         tmp_y_list = np.load(rep_path)
+            #         cycle_list.append(max(tmp_y_list))
+            #     else:
+            #         if len(cycle_list) == 0:
+            #             break
+            #     y_list.append(max(cycle_list))
+            plt.plot(y_list, label=f"trial{trial:03}", color=params.cmap(trial))
+    plt.axhline(y=threshold, color="r", linestyle="--", label="unbound state")
+    plt.legend()
+    plt.xlabel("Cycle")
+    plt.ylabel("Inter-COM [nm]")
+    plt.grid()
+    plt.tight_layout()
+    # plt.xlim(0, 200)
+    # plt.ylim(0, 10)
+    plt.savefig(
+        f"{params.output_directory}/images/cycle_feature.png",
+        bbox_inches="tight",
+        pad_inches=0.1,
+        dpi=300,
+    )
+    if params.show_picture:
+        plt.show()
+    plt.clf()
+    plt.close()
+
+
+plot_feature(params=params, threshold=4)
 
 
 # ## 1D: Clustering

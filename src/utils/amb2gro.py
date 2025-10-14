@@ -46,6 +46,8 @@ def run(args):
         LOGGER.info("gmx.gro generated")
         LOGGER.info("gmx.top generated")
         LOGGER.info("gmx.pdb generated")
+    # acpype may create wrong gro file
+    # because of overflow of residue numbers or atom numbers
     elif args.type == "acpype":
         cmd = f"acpype -p {args.parm} -x {args.rst}"
         subprocess.run(cmd, shell=True, check=True)
