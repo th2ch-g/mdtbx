@@ -40,11 +40,19 @@ def add_subcmd(subparsers):
     )
     parser.add_argument("--gmx", action="store_true", help="Use gmx instead of MDtraj")
 
+    parser.add_argument(
+        "--pbc",
+        default="mol",
+        type=str,
+        help="PBC option for gmx trjconv",
+        choices=["none", "mol", "res", "atom", "nojump", "cluster", "whole"],
+    )
+
 
 def run(args):
     if args.gmx:
         # cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc nojump -center"
-        cmd = f"echo System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc nojump"
+        cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc {args.pbc} -center"
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info(f"{args.output} generated")
         cmd = f"echo {args.selection} System | gmx trjconv -f tmp.xtc -s {args.topology} -o {args.output} -fit rot+trans"

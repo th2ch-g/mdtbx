@@ -53,21 +53,33 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "--no-editconf", action="store_true", help="Do not run gmx editconf"
+        "--no-resnr", action="store_true", help="Do not run gmx editconf -resnr 1"
     )
 
 
 def run(args):
     # ref: https://zenn.dev/kh01734/articles/012380a58949d1
     # make new represent topology
-    cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}1.gro -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.gro -center"
+    cmd = f"echo {args.keep_selection} | gmx convert-tpr -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.tpr"
+    subprocess.run(cmd, shell=True, check=True)
+    LOGGER.info("rmmol_top.tpr generated")
+
+    if not args.no_resnr:
+        cmd = "gmx editconf -f rmmol_top.tpr -o rmmol_top.gro"
+    else:
+        cmd = "gmx editconf -f rmmol_top.tpr -o rmmol_top.gro -resnr 1"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info("rmmol_top.gro generated")
 
-    if not args.no_editconf:
-        cmd = "gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 runned")
+    # make gro with trjconv
+    # cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}1.gro -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.gro -center"
+    # subprocess.run(cmd, shell=True, check=True)
+    # LOGGER.info("rmmol_top.gro generated")
+    #
+    # if not args.no_editconf:
+    #     cmd = "gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1"
+    #     subprocess.run(cmd, shell=True, check=True)
+    #     LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 runned")
 
     # trjcat -> trjconv
     c_cmd = "c\n" * args.num_of_step

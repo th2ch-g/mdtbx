@@ -18,7 +18,8 @@ def add_subcmd(subparsers):
 
 def run(args):
     for suffix in ["#*#", "*cpt", "mdout.mdp"]:
-        for p in Path(args.path).glob(suffix):
+        # for p in Path(args.path).glob(suffix):
+        for p in Path(args.path).rglob(suffix):
             cmd = f"rm -f '{p}'"
             subprocess.run(cmd, shell=True, check=True)
             LOGGER.info(f"{p} removed")

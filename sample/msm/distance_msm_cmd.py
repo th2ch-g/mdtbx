@@ -17,13 +17,14 @@ from matplotlib.colors import ListedColormap
 from scipy.spatial import ConvexHull
 from scipy.interpolate import CubicSpline
 
+target_name = sys.argv[1]
 
 # input the following variables
 n_trial_for_calc: List[int] = [1]
 trial_root_directory: str = None
-feature_1d_directory: str = "./cvs/comdist/"
-feature_3d_directory: str = "./cvs/comvec/"
-output_directory: str = "./out_distnb"
+feature_1d_directory: str = f"./cvs/comdist/{target_name}/"
+feature_3d_directory: str = f"./cvs/comvec/{target_name}/"
+output_directory: str = f"./out_distnb_{target_name}/"
 show_picture: bool = False
 T: float = 310
 dt: int = 1
@@ -55,7 +56,6 @@ n_clusters_for_try_3d: List[int] = [
     100,
     500,
     1000,
-    5000,
 ]
 lags_for_try_3d: List[int] = [
     1,
@@ -255,7 +255,7 @@ def cluster_1d(
     for trial in params.n_trial_for_calc:
         # loads
         features = []
-        feature_files_trial = list(Path("./comdist/").glob("*.npy"))
+        feature_files_trial = list(Path(f"{params.feature_1d_directory}").glob("*.npy"))
         feature_files_trial.sort()
         for rep_path in feature_files_trial:
             features_per_rep = np.load(rep_path)
@@ -1978,6 +1978,10 @@ def calc_rate_constant_3d(
     ) as f:
         count_pkl = pickle.load(f)
 
+    if not (lag in count_pkl and lag in msm_pkl and lag in cluster_pkl):
+        params.logger.info(f"lag={lag} does not exist. Skipping.")
+        return
+
     cluster_centers = cluster_pkl["model"].cluster_centers
     largest_connected_set = deeptime.markov.tools.estimation.largest_connected_set(
         count_pkl[lag].count_matrix, directed=True
@@ -2093,6 +2097,10 @@ def plot_fel_each_2d(
         return
     with open(msm_model_pkl, "rb") as f:
         msm_result = pickle.load(f)
+
+    if lag not in msm_result:
+        params.logger.info(f"lag={lag} does not exist. Skipping.")
+        return
 
     # find weights for each snapshot in trajectory
     msm_model = msm_result[lag]
