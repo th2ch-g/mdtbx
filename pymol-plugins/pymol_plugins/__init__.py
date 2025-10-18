@@ -66,8 +66,15 @@ def make_trj_movie():
 cmd.extend("make_trj_movie", make_trj_movie)
 
 
-def laboo_settings():
+def default_settings():
     cmd.reinitialize("settings")
+
+
+cmd.extend("default_settings", default_settings)
+
+
+def laboo_settings():
+    default_settings()
     cmd.set("sphere_scale", 0.22)
     cmd.set("sphere_scale", 0.22, "elem C+N+O+S+Cl+F+Na+Mg")
     cmd.set("sphere_scale", 0.13, "elem H")
@@ -104,7 +111,7 @@ cmd.extend("laboo_settings", laboo_settings)
 
 
 def my_settings():
-    cmd.reinitialize("settings")
+    default_settings()
     # save setting
     cmd.set("pdb_reformat_names_mode", 2)
     cmd.set("retain_order", 1)
