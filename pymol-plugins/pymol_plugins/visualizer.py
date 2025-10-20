@@ -22,3 +22,11 @@ def color_baker():
 
 
 cmd.extend("color_baker", color_baker)
+
+
+def ray_png(png="out_pymol_ray.png"):
+    cmd.ray()
+    cmd.png(png, dpi=300)
+    print(f"ray image is saved as {png}")
+
+cmd.extend("ray_png", ray_png)
