@@ -22,9 +22,9 @@ target_name = sys.argv[1]
 # input the following variables
 n_trial_for_calc: List[int] = [1]
 trial_root_directory: str = None
-feature_1d_directory: str = f"./cvs/comdist/{target_name}/"
-feature_3d_directory: str = f"./cvs/comvec/{target_name}/"
-output_directory: str = f"./out_distnb_{target_name}/"
+feature_1d_directory: str = f"./cvs2/comdist/{target_name}/"
+feature_3d_directory: str = f"./cvs2/comvec/{target_name}/"
+output_directory: str = f"./out_distnb2_{target_name}/"
 show_picture: bool = False
 T: float = 310
 dt: int = 1
@@ -312,6 +312,13 @@ def cluster_1d(
                 pad_inches=0.1,
                 dpi=300,
             )
+            plt.savefig(
+                f"{params.output_directory}/images/clustering_converge_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+                bbox_inches="tight",
+                pad_inches=0.1,
+                dpi=300,
+                transparent=True,
+            )
             if params.show_picture:
                 plt.show()
             plt.clf()
@@ -381,6 +388,13 @@ def plot_hist_1d_per_trial(
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
+    )
+    plt.savefig(
+        f"{params.output_directory}/images/hist_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+        bbox_inches="tight",
+        pad_inches=0.1,
+        dpi=300,
+        transparent=True,
     )
     if params.show_picture:
         plt.show()
@@ -454,6 +468,13 @@ def plot_inertia_1d(params: Parameters):
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
+        )
+        plt.savefig(
+            f"{params.output_directory}/images/inertia_1d_trial{trial:03}_cut{params.cutoff}.svg",
+            bbox_inches="tight",
+            pad_inches=0.1,
+            dpi=300,
+            transparent=True,
         )
         if params.show_picture:
             plt.show()
@@ -649,6 +670,13 @@ def plot_its_1d(params: Parameters) -> None:
                 pad_inches=0.1,
                 dpi=300,
             )
+            plt.savefig(
+                f"{params.output_directory}/images/its_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+                bbox_inches="tight",
+                pad_inches=0.1,
+                dpi=300,
+                transparent=True,
+            )
             if params.show_picture:
                 plt.show()
             plt.clf()
@@ -766,6 +794,13 @@ def plot_fel_along_d_1d(
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
+        )
+        plt.savefig(
+            f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}.svg",
+            bbox_inches="tight",
+            pad_inches=0.1,
+            dpi=300,
+            transparent=True,
         )
         if params.show_picture:
             plt.show()
@@ -903,6 +938,13 @@ def plot_fel_along_d_1d(
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
+        )
+        plt.savefig(
+            f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}.svg",
+            bbox_inches="tight",
+            pad_inches=0.1,
+            dpi=300,
+            transparent=True,
         )
         if params.show_picture:
             plt.show()
@@ -1247,6 +1289,13 @@ def cluster_3d(
             pad_inches=0.1,
             dpi=300,
         )
+        plt.savefig(
+            f"{params.output_directory}/images/clustering_converge_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+            bbox_inches="tight",
+            pad_inches=0.1,
+            dpi=300,
+            transparent=True,
+        )
         if params.show_picture:
             plt.show()
         plt.clf()
@@ -1309,6 +1358,13 @@ def plot_hist_3d(
         pad_inches=0.1,
         dpi=300,
     )
+    plt.savefig(
+        f"{params.output_directory}/images/hist_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+        bbox_inches="tight",
+        pad_inches=0.1,
+        dpi=300,
+        transparent=True,
+    )
     if params.show_picture:
         plt.show()
     plt.clf()
@@ -1363,6 +1419,13 @@ def plot_inertia_3d(params: Parameters):
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
+    )
+    plt.savefig(
+        f"{params.output_directory}/images/inertia_3d_cut{params.cutoff}.svg",
+        bbox_inches="tight",
+        pad_inches=0.1,
+        dpi=300,
+        transparent=True,
     )
     if params.show_picture:
         plt.show()
@@ -1560,6 +1623,13 @@ def plot_its_3d(
             pad_inches=0.1,
             dpi=300,
         )
+        plt.savefig(
+            f"{params.output_directory}/images/its_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+            bbox_inches="tight",
+            pad_inches=0.1,
+            dpi=300,
+            transparent=True,
+        )
         if params.show_picture:
             plt.show()
         plt.clf()
@@ -1670,6 +1740,13 @@ def plot_fel_along_d_3d(
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
+    )
+    plt.savefig(
+        f"{params.output_directory}/images/fel_3d_n_clusters{n_clusters}_lag{lag}.svg",
+        bbox_inches="tight",
+        pad_inches=0.1,
+        dpi=300,
+        transparent=True,
     )
     if params.show_picture:
         plt.show()
@@ -2151,6 +2228,13 @@ def plot_fel_each_2d(
                 bbox_inches="tight",
                 pad_inches=0.1,
                 dpi=300,
+            )
+            plt.savefig(
+                f"{params.output_directory}/images/fel_2d_n_clusters{n_clusters}_lag{lag}_dim={first_coord}-{second_coord}_cut{params.cutoff}.svg",
+                bbox_inches="tight",
+                pad_inches=0.1,
+                dpi=300,
+                transparent=True,
             )
             if params.show_picture:
                 plt.show()

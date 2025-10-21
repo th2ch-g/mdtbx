@@ -182,10 +182,18 @@ for n_clusters in n_clusters_list:
     plt.yscale("log")
     plt.tight_layout()
     plt.savefig(
-        f"its_3d_n_clusters{n_clusters}.png",
+        f"its_2d_n_clusters{n_clusters}.png",
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
+        transparent=True,
+    )
+    plt.savefig(
+        f"its_2d_n_clusters{n_clusters}.pdf",
+        bbox_inches="tight",
+        pad_inches=0.1,
+        dpi=300,
+        transparent=True,
     )
     plt.clf()
     plt.close()
@@ -238,7 +246,8 @@ for n_clusters in n_clusters_list:
         plt.xlabel("Similarity to open structures [TM-score]")
         plt.ylabel("Similarity to close structures [TM-score]")
         plt.tight_layout()
-        plt.savefig(f"ene2d_n_clusters{n_clusters}_lag{lag}.png")
+        plt.savefig(f"ene2d_n_clusters{n_clusters}_lag{lag}.png", dpi=300, transparent=True)
+        plt.savefig(f"ene2d_n_clusters{n_clusters}_lag{lag}.pdf", dpi=300, transparent=True)
         plt.clf()
         plt.close()
 

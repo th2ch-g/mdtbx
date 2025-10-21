@@ -3,8 +3,8 @@ name = "mdtbx"
 version = "0.1.0"
 description = "ToolBox for MD simulation"
 readme = "README.md"
-requires-python = "==3.10"
-dependencies = []
+# requires-python = "==3.10"
+requires-python = ">=3.10"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -16,9 +16,22 @@ mdtbx = "src.__main__:main"
 channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64", "osx-arm64", "osx-64"]
 
+[tool.marimo.package_management]
+manager = "pixi"
+
+[tool.marimo.save]
+autosave = "after_delay"
+autosave_delay = 1000
+format_on_save = true
+
+[tool.marimo.ai]
+rules = "- prefer polars over pandas\n- make charts using altair"
+
 [tool.pixi.dependencies]
 pymol-open-source = "==3.1.0"
-mdtraj = "==1.9.9"
+# mdtraj = "==1.9.9"
+mdtraj = "==1.11.0"
+deeptime = "==0.4.4"
 ambertools = "*"
 gromacs = "*"
 openbabel = "*"
@@ -36,18 +49,18 @@ rdkit = "*"
 py3Dmol = "*"
 MDAnalysis = "*"
 treon = "*"
-deeptime = "==0.4.4"
 matplotlib = "*"
 numpy = "*"
 polars = { version = "*", extras = ["all"] }
 pandas = "*"
 jupyterlab = "*"
+marimo = { version = "*", extras = ["recommended"] }
 seaborn = "*"
 scipy = "*"
 optuna = "*"
 scikit-learn = "*"
 ruff = "*"
-setuptools = "<81" # for mdtraj 1.9.9
+# setuptools = "<81" # for mdtraj 1.9.9
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
