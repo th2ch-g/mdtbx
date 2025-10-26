@@ -3,8 +3,8 @@ name = "mdtbx"
 version = "0.1.0"
 description = "ToolBox for MD simulation"
 readme = "README.md"
-# requires-python = "==3.10"
-requires-python = ">=3.10"
+requires-python = "==3.10"
+# requires-python = ">=3.10"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -29,8 +29,8 @@ rules = "- prefer polars over pandas\n- make charts using altair"
 
 [tool.pixi.dependencies]
 pymol-open-source = "==3.1.0"
-# mdtraj = "==1.9.9"
-mdtraj = "==1.11.0"
+mdtraj = "==1.9.9" # https://github.com/ParmEd/ParmEd/pull/1387
+# mdtraj = "==1.11.0"
 deeptime = "==0.4.4"
 ambertools = "*"
 gromacs = "*"
@@ -54,13 +54,13 @@ numpy = "*"
 polars = { version = "*", extras = ["all"] }
 pandas = "*"
 jupyterlab = "*"
-marimo = { version = "*", extras = ["recommended"] }
+marimo = { version = "*", extras = ["recommended"] } # available if python >= 3.12?
 seaborn = "*"
 scipy = "*"
 optuna = "*"
 scikit-learn = "*"
 ruff = "*"
-# setuptools = "<81" # for mdtraj 1.9.9
+setuptools = "<81" # for mdtraj 1.9.9
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"

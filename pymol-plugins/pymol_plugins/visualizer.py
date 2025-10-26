@@ -29,4 +29,5 @@ def ray_png(png="out_pymol_ray.png"):
     cmd.png(png, dpi=300)
     print(f"ray image is saved as {png}")
 
+
 cmd.extend("ray_png", ray_png)
