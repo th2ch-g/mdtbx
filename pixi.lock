@@ -142,6 +142,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/lz4-c-1.10.0-h5888daf_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/mafft-7.526-h4bc722e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/matplotlib-base-3.10.7-py310hfde16b3_0.conda
+      - conda: https://conda.anaconda.org/bioconda/linux-64/maxit-11.300-h503566f_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/mkl-2024.2.2-ha770c72_17.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/mpfr-4.2.1-h90cbb55_3.conda
@@ -194,6 +195,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/snappy-1.2.2-h03e3b7b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/sqlite-3.50.4-hbc0de68_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/tbb-2021.13.0-hb60516a_3.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/tcsh-6.24.16-h18c060e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/threadpoolctl-3.6.0-pyhecae5ae_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/tk-8.6.13-noxft_hd72426e_102.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/toml-0.10.2-pyhd8ed1ab_1.conda
@@ -509,6 +511,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/lz4-c-1.10.0-h240833e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/mafft-7.526-hfdf4475_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/matplotlib-base-3.10.7-py310h2102b89_0.conda
+      - conda: https://conda.anaconda.org/bioconda/osx-64/maxit-11.300-h5eaf441_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-64/mdtraj-1.9.9-py310h18b6ea6_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/mpfr-4.2.1-haed47dc_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/munkres-1.1.4-pyhd8ed1ab_1.conda
@@ -859,6 +862,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/lz4-c-1.10.0-h286801f_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/mafft-7.526-h99b78c6_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/matplotlib-base-3.10.7-py310h0181960_0.conda
+      - conda: https://conda.anaconda.org/bioconda/osx-arm64/maxit-11.300-haef7865_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/mdtraj-1.9.9-py310h455934c_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/mpfr-4.2.1-hb693164_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/munkres-1.1.4-pyhd8ed1ab_1.conda
@@ -6886,6 +6890,38 @@ packages:
   requires_dist:
   - traitlets
   requires_python: '>=3.8'
+- conda: https://conda.anaconda.org/bioconda/linux-64/maxit-11.300-h503566f_0.tar.bz2
+  sha256: 6c2c4b8287c55cc86842bc6f6512c6ddd0de3ad18c971b17bd5e62943511d144
+  md5: 14ffb1db034b4440b24db3a17c0d9961
+  depends:
+  - libgcc >=13
+  - libstdcxx >=13
+  - tcsh
+  license: RCSB PDB Software License
+  license_family: OTHER
+  purls: []
+  size: 194704246
+  timestamp: 1745174001502
+- conda: https://conda.anaconda.org/bioconda/osx-64/maxit-11.300-h5eaf441_0.tar.bz2
+  sha256: e12f68b542f610f43b85628b5fa59680dd5643048d0344480b8716340ba8097c
+  md5: 0f82a519b3d7d30cf299ad78bbd29e0c
+  depends:
+  - libcxx >=18
+  license: RCSB PDB Software License
+  license_family: OTHER
+  purls: []
+  size: 195041853
+  timestamp: 1745175374399
+- conda: https://conda.anaconda.org/bioconda/osx-arm64/maxit-11.300-haef7865_0.tar.bz2
+  sha256: 77593c696834c8c1ffcd6ef3bac4bd85344dc8c33f77bb15436e914f3e2c9670
+  md5: dcbc17df928cf3a9950e408b7e30b17e
+  depends:
+  - libcxx >=18
+  license: RCSB PDB Software License
+  license_family: OTHER
+  purls: []
+  size: 194795638
+  timestamp: 1745173826829
 - pypi: https://files.pythonhosted.org/packages/4f/4b/5fe3a00833a9f9775b3c237624a6212798167278ffe10fe0de04f58612d0/mda_xdrlib-0.2.0-py3-none-any.whl
   name: mda-xdrlib
   version: 0.2.0
@@ -7016,7 +7052,7 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: aeb58a2b498d6bb141fb1a7394b3d7c58f4e83225e78096c7bbd6f7327248e6d
+  sha256: 0bfb07f08a84feb4a66929e7f81c712b2b0f52b06f44e4a69ea22902122f0224
   requires_python: ==3.10
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda
@@ -10471,6 +10507,19 @@ packages:
   purls: []
   size: 177271
   timestamp: 1755775913224
+- conda: https://conda.anaconda.org/conda-forge/linux-64/tcsh-6.24.16-h18c060e_0.conda
+  sha256: d1fbed202ac1a2292e2eed539c86c60f93d3382b89c867e51a406a0de16613fc
+  md5: 3caba8110333b5b05137e88b2eec15f9
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - libgcc >=14
+  - libxcrypt >=4.4.36
+  - ncurses >=6.5,<7.0a0
+  license: BSD-3-Clause
+  license_family: BSD
+  purls: []
+  size: 386085
+  timestamp: 1752068404654
 - pypi: https://files.pythonhosted.org/packages/e5/30/643397144bfbfec6f6ef821f36f33e57d35946c44a2352d3c9f0ae847619/tenacity-9.1.2-py3-none-any.whl
   name: tenacity
   version: 9.1.2

@@ -19,6 +19,7 @@ from .utils import gen_modres_am1bcc
 from .utils import gen_modres_resp
 from .utils import gen_posres
 from .utils import gen_distres
+from .utils import modeling_cf
 from .utils import amb2gro
 from .utils import trjcat
 from .utils import fit
@@ -72,6 +73,7 @@ def cli() -> None:
     gen_modres_resp.add_subcmd(subparsers)
     gen_posres.add_subcmd(subparsers)
     gen_distres.add_subcmd(subparsers)
+    modeling_cf.add_subcmd(subparsers)
     find_bond.add_subcmd(subparsers)
     mod_mdp.add_subcmd(subparsers)
     convert.add_subcmd(subparsers)
@@ -155,6 +157,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "gen_distres":
         gen_distres.run(args)
+
+    elif sys.argv[1] == "modeling_cf":
+        modeling_cf.run(args)
 
     elif sys.argv[1] == "add_ndx":
         add_ndx.run(args)
