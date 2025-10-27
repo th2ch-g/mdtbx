@@ -12,7 +12,7 @@ def super_all():
     obj_list = cmd.get_object_list("all")
     for obj in obj_list[1:]:
         cmd.super(obj, obj_list[0])
-
+    cmd.zoom(obj_list[0])
 
 cmd.extend("super_all", super_all)
 
