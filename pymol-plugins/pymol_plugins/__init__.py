@@ -14,6 +14,7 @@ def super_all():
         cmd.super(obj, obj_list[0])
     cmd.zoom(obj_list[0])
 
+
 cmd.extend("super_all", super_all)
 
 
