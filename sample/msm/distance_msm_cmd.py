@@ -22,9 +22,9 @@ target_name = sys.argv[1]
 # input the following variables
 n_trial_for_calc: List[int] = [1]
 trial_root_directory: str = None
-feature_1d_directory: str = f"./cvs2/comdist/{target_name}/"
-feature_3d_directory: str = f"./cvs2/comvec/{target_name}/"
-output_directory: str = f"./out_distnb2_{target_name}/"
+feature_1d_directory: str = f"./cvs/comdist/{target_name}/"
+feature_3d_directory: str = f"./cvs/comvec/{target_name}/"
+output_directory: str = f"./out_distnb_{target_name}/"
 show_picture: bool = False
 T: float = 310
 dt: int = 1
