@@ -48,6 +48,7 @@ pymol_plugins = { path = "./pymol-plugins", editable = true }
 mmterm = { git = "git+https://github.com/jgreener64/mmterm.git" }
 rdkit = "*"
 py3Dmol = "*"
+py2Dmol = "*"
 MDAnalysis = "*"
 treon = "*"
 matplotlib = "*"

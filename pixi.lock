@@ -279,6 +279,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/76/91/7216b27286936c16f5b4d0c530087e4a54eead683e6b0b73dd0c64844af6/filelock-3.20.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/58/8acf1b3e91c58313ce5cb67df61001fc9dcd21be4fadb76c1a2d540e09ed/fqdn-1.5.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/71/70db47e4f6ce3e5c37a607355f80da8860a33226be640226ac52cb05ef2e/fsspec-2025.9.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/72/38/aab6114d0e308056216908fdc89eb08a05fe2a79688f0dbb4cf5529de3b9/gemmi-0.7.3-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/76/24/c0c7c7db70ca74c7b1918388ebda7c8c2a3c3bff0bbfbaa9280ed04b3340/gevent-25.9.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/18/7a/b3061b8e05e80956750c17fbe31aed6553266b5ef88b9aee9b25ef93ea78/great_tables-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/91/ae2eb6b7979e2f9b035a9f612cf70f1bf54aad4e1d125129bef1eae96f19/greenlet-3.2.4-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl
@@ -353,6 +354,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/3d/3c/b56076bb35303d0733fc47b110a1c9cce081a05ae2e886575a3587c1ee76/psutil-7.1.1-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8e/37/efad0257dc6e593a18957422533ff0f87ede7c9c6ea010a2177d738fb82f/pure_eval-0.2.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ed/b9/569c82738655b5f384e886e8edb9681c4232d0025c167e3c90c197a8afdf/py2dmol-1.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0b/a6/e2e8535d8146bce05de6e0ecf1099a7e2887d840ae2a7b3a09385543fd02/py3dmol-2.5.3-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/44/28/b6672962639e85dc0ac36f71ab3a8f5f38e01b51343d7aa372a6b56fa3f3/pyarrow-21.0.0-cp310-cp310-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/a0/e3/59cd50310fc9b59512193629e1984c1f95e5c8ae6e5d8c69532ccc65a7fe/pycparser-2.23-py3-none-any.whl
@@ -630,6 +632,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/76/91/7216b27286936c16f5b4d0c530087e4a54eead683e6b0b73dd0c64844af6/filelock-3.20.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/58/8acf1b3e91c58313ce5cb67df61001fc9dcd21be4fadb76c1a2d540e09ed/fqdn-1.5.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/71/70db47e4f6ce3e5c37a607355f80da8860a33226be640226ac52cb05ef2e/fsspec-2025.9.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/55/5b/3507422437930597e9a7c4a9c3d6e2e6aa20398b58890490eb9e9f4818dd/gemmi-0.7.3-cp310-cp310-macosx_10_14_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/9e/48/b3ef2673ffb940f980966694e40d6d32560f3ffa284ecaeb5ea3a90a6d3f/gevent-25.9.1.tar.gz
       - pypi: https://files.pythonhosted.org/packages/18/7a/b3061b8e05e80956750c17fbe31aed6553266b5ef88b9aee9b25ef93ea78/great_tables-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7d/ed/6bfa4109fcb23a58819600392564fea69cdc6551ffd5e69ccf1d52a40cbc/greenlet-3.2.4-cp310-cp310-macosx_11_0_universal2.whl
@@ -704,6 +707,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/51/30/f97f8fb1f9ecfbeae4b5ca738dcae66ab28323b5cfbc96cb5565f3754056/psutil-7.1.1-cp36-abi3-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8e/37/efad0257dc6e593a18957422533ff0f87ede7c9c6ea010a2177d738fb82f/pure_eval-0.2.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ed/b9/569c82738655b5f384e886e8edb9681c4232d0025c167e3c90c197a8afdf/py2dmol-1.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0b/a6/e2e8535d8146bce05de6e0ecf1099a7e2887d840ae2a7b3a09385543fd02/py3dmol-2.5.3-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/df/5f/c1c1997613abf24fceb087e79432d24c19bc6f7259cab57c2c8e5e545fab/pyarrow-21.0.0-cp310-cp310-macosx_12_0_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/a0/e3/59cd50310fc9b59512193629e1984c1f95e5c8ae6e5d8c69532ccc65a7fe/pycparser-2.23-py3-none-any.whl
@@ -981,6 +985,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/76/91/7216b27286936c16f5b4d0c530087e4a54eead683e6b0b73dd0c64844af6/filelock-3.20.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cf/58/8acf1b3e91c58313ce5cb67df61001fc9dcd21be4fadb76c1a2d540e09ed/fqdn-1.5.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/71/70db47e4f6ce3e5c37a607355f80da8860a33226be640226ac52cb05ef2e/fsspec-2025.9.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/28/58/733d2b353fb4e7949e0426d98eecd55239b846bc5acb22b1792027c0337f/gemmi-0.7.3-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/9e/48/b3ef2673ffb940f980966694e40d6d32560f3ffa284ecaeb5ea3a90a6d3f/gevent-25.9.1.tar.gz
       - pypi: https://files.pythonhosted.org/packages/18/7a/b3061b8e05e80956750c17fbe31aed6553266b5ef88b9aee9b25ef93ea78/great_tables-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7d/ed/6bfa4109fcb23a58819600392564fea69cdc6551ffd5e69ccf1d52a40cbc/greenlet-3.2.4-cp310-cp310-macosx_11_0_universal2.whl
@@ -1055,6 +1060,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/7b/98/b8d1f61ebf35f4dbdbaabadf9208282d8adc820562f0257e5e6e79e67bf2/psutil-7.1.1-cp36-abi3-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/22/a6/858897256d0deac81a172289110f31629fc4cee19b6f01283303e18c8db3/ptyprocess-0.7.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8e/37/efad0257dc6e593a18957422533ff0f87ede7c9c6ea010a2177d738fb82f/pure_eval-0.2.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ed/b9/569c82738655b5f384e886e8edb9681c4232d0025c167e3c90c197a8afdf/py2dmol-1.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0b/a6/e2e8535d8146bce05de6e0ecf1099a7e2887d840ae2a7b3a09385543fd02/py3dmol-2.5.3-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/17/d9/110de31880016e2afc52d8580b397dbe47615defbf09ca8cf55f56c62165/pyarrow-21.0.0-cp310-cp310-macosx_12_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/a0/e3/59cd50310fc9b59512193629e1984c1f95e5c8ae6e5d8c69532ccc65a7fe/pycparser-2.23-py3-none-any.whl
@@ -2847,6 +2853,21 @@ packages:
   purls: []
   size: 1150948
   timestamp: 1726677426423
+- pypi: https://files.pythonhosted.org/packages/28/58/733d2b353fb4e7949e0426d98eecd55239b846bc5acb22b1792027c0337f/gemmi-0.7.3-cp310-cp310-macosx_11_0_arm64.whl
+  name: gemmi
+  version: 0.7.3
+  sha256: b42dbc353135f309da678e3f098b9cc9d8ac4d42170cc965324d1e76d120c92c
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/55/5b/3507422437930597e9a7c4a9c3d6e2e6aa20398b58890490eb9e9f4818dd/gemmi-0.7.3-cp310-cp310-macosx_10_14_x86_64.whl
+  name: gemmi
+  version: 0.7.3
+  sha256: 74ae3e6210b8ffcf3fee6ef92b92bd2a27e13a7fe963e71974df823154f8bdd7
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/72/38/aab6114d0e308056216908fdc89eb08a05fe2a79688f0dbb4cf5529de3b9/gemmi-0.7.3-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+  name: gemmi
+  version: 0.7.3
+  sha256: f11e635f94486947be2cc92826d661db9af09a30bf65b62a0d12b747ea15d573
+  requires_python: '>=3.8'
 - conda: https://conda.anaconda.org/conda-forge/linux-64/gettext-0.25.1-h3f43e3d_1.conda
   sha256: cbfa8c80771d1842c2687f6016c5e200b52d4ca8f2cc119f6377f64f899ba4ff
   md5: c42356557d7f2e37676e121515417e3b
@@ -7052,7 +7073,7 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: 0bfb07f08a84feb4a66929e7f81c712b2b0f52b06f44e4a69ea22902122f0224
+  sha256: 37cc80bbcd17490d2755ad24a3146c0b1fbd204e57dafcedeb3c1884f63cf007
   requires_python: ==3.10
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda
@@ -8974,6 +8995,15 @@ packages:
   - pkg:pypi/py-cpuinfo?source=hash-mapping
   size: 25766
   timestamp: 1733236452235
+- pypi: https://files.pythonhosted.org/packages/ed/b9/569c82738655b5f384e886e8edb9681c4232d0025c167e3c90c197a8afdf/py2dmol-1.4.0-py3-none-any.whl
+  name: py2dmol
+  version: 1.4.0
+  sha256: 9870b6854a658282664de204bca7e3132eb7c91780f4f3aa755f9bfbf41dbdba
+  requires_dist:
+  - numpy
+  - ipython
+  - gemmi
+  requires_python: '>=3.6'
 - pypi: https://files.pythonhosted.org/packages/0b/a6/e2e8535d8146bce05de6e0ecf1099a7e2887d840ae2a7b3a09385543fd02/py3dmol-2.5.3-py2.py3-none-any.whl
   name: py3dmol
   version: 2.5.3
