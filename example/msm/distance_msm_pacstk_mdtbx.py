@@ -20,7 +20,7 @@ import subprocess as sb
 
 
 # input the following variables
-n_trial_for_calc: List[int] = [i for i in range(1, 15 + 1)]
+n_trial_for_calc: List[int] = [i for i in range(1, 25 + 1)]
 trial_root_directory: str = "./trials/"
 feature_1d_directory: str = "./cvs_reshaped/comdist/"
 feature_3d_directory: str = "./cvs_reshaped/comvec/"

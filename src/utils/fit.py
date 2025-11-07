@@ -48,14 +48,22 @@ def add_subcmd(subparsers):
         choices=["none", "mol", "res", "atom", "nojump", "cluster", "whole"],
     )
 
+    parser.add_argument(
+        "-idx", "--index", default="index.ndx", type=str, help="Index file"
+    )
+
 
 def run(args):
     if args.gmx:
+        if args.index is None:
+            INDEX_OPT = ""
+        else:
+            INDEX_OPT = f"-n {args.index}"
         # cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc nojump -center"
-        cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc {args.pbc} -center"
+        cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc {args.pbc} {INDEX_OPT} -center"
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info(f"{args.output} generated")
-        cmd = f"echo {args.selection} System | gmx trjconv -f tmp.xtc -s {args.topology} -o {args.output} -fit rot+trans"
+        cmd = f"echo {args.selection} System | gmx trjconv -f tmp.xtc -s {args.topology} -o {args.output} -fit rot+trans {INDEX_OPT}"
         subprocess.run(cmd, shell=True, check=True)
         cmd = "rm -f tmp.xtc"
         subprocess.run(cmd, shell=True, check=True)

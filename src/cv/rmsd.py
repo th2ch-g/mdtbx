@@ -71,6 +71,21 @@ def add_subcmd(subparsers):
 def run(args):
     trj = md.load(args.trajectory, top=args.topology)
     ref = md.load(args.reference)
+
+    n_fit_trj = len(trj.top.select(args.selection_fit_trj))
+    n_fit_ref = len(ref.top.select(args.selection_fit_ref))
+    if n_fit_trj != n_fit_ref:
+        LOGGER.error(
+            f"Number of atoms in fit selection for trajectory ({n_fit_trj}) and reference ({n_fit_ref}) are different"
+        )
+
+    n_cal_trj = len(trj.top.select(args.selection_cal_trj))
+    n_cal_ref = len(ref.top.select(args.selection_cal_ref))
+    if n_cal_trj != n_cal_ref:
+        LOGGER.error(
+            f"Number of atoms in cal selection for trajectory ({n_cal_trj}) and reference ({n_cal_ref}) are different"
+        )
+
     trj.superpose(
         ref,
         0,
