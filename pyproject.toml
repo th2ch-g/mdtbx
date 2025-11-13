@@ -56,6 +56,7 @@ numpy = "*"
 polars = { version = "*", extras = ["all"] }
 pandas = "*"
 jupyterlab = "*"
+jupytext = "*"
 marimo = { version = "*", extras = ["recommended"] } # available if python >= 3.12?
 seaborn = "*"
 scipy = "*"
