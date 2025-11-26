@@ -49,22 +49,23 @@ def comdist(selection1, selection2):
 cmd.extend("comdist", comdist)
 
 
-def make_trj_movie():
-    cmd.viewport(6400, 5200)
-    cmd.mset("1 -%d" % cmd.count_states())
-    cmd.mpng("traj_frame_")
-    import subprocess
-
-    subprocess.run(
-        "ffmpeg -r 30 -i traj_frame_%04d.png -c:v libx264 -pix_fmt yuv420p out.mp4",
-        shell=True,
-        check=True,
-    )
-    subprocess.run("rm -f traj_frame_*.png", shell=True, check=True)
-    print("movie is saved as out.mp4")
-
-
-cmd.extend("make_trj_movie", make_trj_movie)
+# use gui for instead
+# def make_trj_movie():
+#     cmd.viewport(12000, 10000)
+#     cmd.mset("1 -%d" % cmd.count_states())
+#     cmd.mpng("traj_frame_")
+#     import subprocess
+#
+#     subprocess.run(
+#         "ffmpeg -r 30 -i traj_frame_%04d.png -c:v libx264 -pix_fmt yuv420p out.mov",
+#         shell=True,
+#         check=True,
+#     )
+#     subprocess.run("rm -f traj_frame_*.png", shell=True, check=True)
+#     print("movie is saved as out.mp4")
+#
+#
+# cmd.extend("make_trj_movie", make_trj_movie)
 
 
 def default_settings():
