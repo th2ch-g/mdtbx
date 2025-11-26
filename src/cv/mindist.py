@@ -44,7 +44,7 @@ def add_subcmd(subparsers):
         help="Selection 2 (MDtraj Atom selection language)",
     )
     parser.add_argument(
-        "-o", "--output", type=str, default="comdist.npy", help="Output file (.npy)"
+        "-o", "--output", type=str, default="mindist.npy", help="Output file (.npy)"
     )
 
 

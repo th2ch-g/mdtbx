@@ -74,8 +74,8 @@ lags_for_try_3d: List[int] = [
 n_clusters_3d_main = n_clusters_for_try_3d
 lags_3d_main = lags_for_try_3d
 
-cutoff: float = 8.0
-nbins: int = 30
+cutoff: float = 6.0
+nbins: int = 15
 cmap: ListedColormap = mpl.colormaps.get_cmap("tab20")
 do_volume_correction: bool = True
 num_of_ligand: int = 1

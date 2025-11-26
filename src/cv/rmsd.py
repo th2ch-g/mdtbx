@@ -33,7 +33,7 @@ def add_subcmd(subparsers):
         "--reference",
         type=str,
         required=True,
-        help="Reference trajectory file (.xtc, .trr)",
+        help="Reference structure file (.gro, .pdb)",
     )
     parser.add_argument(
         "-sct",
