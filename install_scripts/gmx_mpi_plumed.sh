@@ -2,7 +2,7 @@
 set -eux
 
 thread=12
-VERSION="2024.3"
+VERSION="2022.5"
 PREFIX="$PWD/gromacs-${VERSION}/"
 
 PLUMED_VERSION="2.10.0"
@@ -21,7 +21,8 @@ tar -zxvf gromacs-${VERSION}.tar.gz
 rm -f gromacs-${VERSION}.tar.gz
 cd gromacs-${VERSION}
 # echo 4 | plumed patch -p # select 4: gromacs-2025.0
-echo 3 | plumed patch -p # select 4: gromacs-2024.3
+# echo 3 | plumed patch -p # select 3: gromacs-2024.3
+echo 1 | plumed patch -p # select 1: gromacs-2022.5
 mkdir build
 cd build
 
