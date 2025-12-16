@@ -1,9 +1,11 @@
 # mdtbx
 Toolbox for MD simulation
 
-- Build system quickly and run MD simulation
+- Build system quickly
+- Run conventional/enhanced MD simulation
 - Extract CVs from trajectory
-- Run MSM
+- Calculate Free energy
+- Run MSM/TRAM analysis
 
 ## Assumptions
 - System build Tools: AMBER, PyMOL, OpenBabel
