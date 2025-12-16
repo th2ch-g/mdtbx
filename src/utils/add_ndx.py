@@ -66,6 +66,8 @@ def add_index(args):
         group_list = [item[1] for item in group]
         if len(group_list) > 1:
             result_parts.append(f"a {group_list[0]}-{group_list[-1]}")
+        elif len(group_list) == 1:
+            result_parts.append(f"a {group_list[0]}")
         else:
             result_parts.append(str(group_list[0]))
     target_atom_indices = " | ".join(result_parts)
