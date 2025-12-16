@@ -17,6 +17,9 @@ Toolbox for MD simulation
 # for pixi users
 pixi install
 
+# create pymolrc
+pixi run pymolrc
+
 # for docker users
 docker build -t mdtbx .
 ~~~
