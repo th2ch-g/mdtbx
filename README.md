@@ -3,9 +3,63 @@ Toolbox for MD simulation
 
 - Build system quickly
 - Run conventional/enhanced MD simulation
-- Extract CVs from trajectory
+- Analyze trajectory
 - Calculate Free energy
-- Run MSM/TRAM analysis
+
+<details> <summary> Supported Features </summary>
+
+- Enhanced Sampling
+  - [x] PaCS-MD
+  - [ ] REST
+  - [ ] REUS
+  - [ ] T-REMD
+  - [ ] SMD
+  - [ ] US
+  - [ ] WT-Metadynamics
+  - [ ] OPES
+  - [ ] AWH
+  - [ ] GaMD
+  - [ ] String method
+  - [ ] Weighted Ensemble
+  - [ ] Adaptive Biasing Force
+
+- Free energy calculation
+  - [ ] MMPBSA
+  - [ ] MBAR
+  - [ ] FEP
+  - [ ] TI
+  - [ ] Jarzynski Equality
+
+- Analysis
+  - [x] trjconv/trjcat
+  - [x] fit
+  - [x] comdist
+  - [x] comvec
+  - [x] mindist
+  - [x] rmsd
+  - [ ] rmsf
+  - [x] xyz
+  - [ ] PCA
+  - [ ] TICA
+
+- Kinetic analysis
+  - [x] MSM
+  - [ ] TRAM
+
+- Build system
+  - [x] Solution
+  - [x] Membrane
+  - [x] Protein Modeling
+  - [x] Make index group
+  - [x] Partial Chage
+  - [ ] Martini
+  - [ ] QM/MM
+
+- Others
+  - [ ] 3D-RISM
+  - [ ] PCA Vector visualization
+
+</details>
 
 ## Assumptions
 - System build Tools: AMBER, PyMOL, OpenBabel
