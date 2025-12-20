@@ -8,7 +8,8 @@ Toolbox for MD simulation
 
 <details> <summary> Supported Features </summary>
 
-- Enhanced Sampling
+- Sampling
+  - [x] cMD
   - [x] PaCS-MD
   - [ ] REST
   - [ ] REUS
@@ -41,12 +42,14 @@ Toolbox for MD simulation
   - [x] xyz
   - [ ] PCA
   - [ ] TICA
+  - [ ] densmap
 
 - Kinetic analysis
   - [x] MSM
   - [ ] TRAM
 
 - Build system
+  - [ ] Vacuum
   - [x] Solution
   - [x] Membrane
   - [x] Protein Modeling
