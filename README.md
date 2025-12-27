@@ -38,10 +38,10 @@ Toolbox for MD simulation
   - [x] comvec
   - [x] mindist
   - [x] rmsd
-  - [ ] rmsf
+  - [x] rmsf
   - [x] xyz
   - [ ] PCA
-  - [ ] TICA
+  - [ ] tICA
   - [ ] densmap
 
 - Kinetic analysis
@@ -53,6 +53,7 @@ Toolbox for MD simulation
   - [x] Solution
   - [x] Membrane
   - [x] Protein Modeling
+  - [x] Modified Residue
   - [x] Make index group
   - [x] Partial Chage
   - [ ] Martini

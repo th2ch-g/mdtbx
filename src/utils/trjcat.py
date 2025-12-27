@@ -52,9 +52,7 @@ def add_subcmd(subparsers):
         "--prefix", default="prd", type=str, help="Prefix of trajectory files"
     )
 
-    parser.add_argument(
-        "--skip", default=1, type=int, help="Number of frames to skip"
-    )
+    parser.add_argument("--skip", default=1, type=int, help="Number of frames to skip")
 
     parser.add_argument(
         "--no-resnr", action="store_true", help="Do not run gmx editconf -resnr 1"
