@@ -9,7 +9,7 @@ LOGGER = generate_logger(__name__)
 
 def add_subcmd(subparsers):
     """
-    mdtbx show_mdtraj --topology topology.pdb
+    mdtbx show_mdtraj topology.pdb
     """
     parser = subparsers.add_parser(
         "show_mdtraj",
@@ -18,7 +18,7 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
+        "topology", type=str, help="Topology file (.gro, .pdb)"
     )
 
 
