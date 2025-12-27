@@ -36,7 +36,9 @@ from .cv import comdist
 from .cv import comvec
 from .cv import mindist
 from .cv import rmsd
+from .cv import rmsf
 from .cv import xyz
+from .cv import pca
 
 LOGGER = generate_logger(__name__)
 
@@ -95,7 +97,9 @@ def cli() -> None:
     comvec.add_subcmd(subparsers)
     mindist.add_subcmd(subparsers)
     rmsd.add_subcmd(subparsers)
+    rmsf.add_subcmd(subparsers)
     xyz.add_subcmd(subparsers)
+    pca.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -193,6 +197,12 @@ def cli() -> None:
 
     elif sys.argv[1] == "rmsd":
         rmsd.run(args)
+
+    elif sys.argv[1] == "rmsf":
+        rmsf.run(args)
+
+    elif sys.argv[1] == "pca":
+        pca.run(args)
 
     elif sys.argv[1] == "xyz":
         xyz.run(args)

@@ -66,6 +66,6 @@ def run(args):
         # mdtraj
         trj = md.load(args.trajectory, top=args.topology)
         atom_indices = trj.top.select(args.selection)
-        rmsf = md.rmsf(trj, atom_indices)
+        rmsf = md.rmsf(trj, trj, 0, atom_indices=atom_indices)
     np.save(args.output, rmsf)
     LOGGER.info(f"Saved to {args.output}")

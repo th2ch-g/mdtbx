@@ -40,7 +40,7 @@ Toolbox for MD simulation
   - [x] rmsd
   - [x] rmsf
   - [x] xyz
-  - [ ] PCA
+  - [x] PCA
   - [ ] tICA
   - [ ] densmap
 
