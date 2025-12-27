@@ -27,6 +27,7 @@ from .utils import pacs_trjcat
 from .utils import extract_ave_str
 from .utils import extract_str
 from .utils import show_mdtraj
+from .utils import show_npy
 from .utils import print_perf
 from .utils import mv_crds_mol2
 from .utils import shell_hook
@@ -93,6 +94,7 @@ def cli() -> None:
     extract_ave_str.add_subcmd(subparsers)
     extract_str.add_subcmd(subparsers)
     show_mdtraj.add_subcmd(subparsers)
+    show_npy.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
     shell_hook.add_subcmd(subparsers)
     cmd.add_subcmd(subparsers)
@@ -184,6 +186,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "show_mdtraj":
         show_mdtraj.run(args)
+
+    elif sys.argv[1] == "show_npy":
+        show_npy.run(args)
 
     elif sys.argv[1] == "print_perf":
         print_perf.run(args)
