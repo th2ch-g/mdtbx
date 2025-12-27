@@ -13,7 +13,7 @@ def add_subcmd(subparsers):
     """
     parser = subparsers.add_parser(
         "extract_str",
-        help="Extract structure in trajectory",
+        help="Extract structure in specific time point",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

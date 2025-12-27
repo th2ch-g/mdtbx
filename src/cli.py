@@ -24,6 +24,9 @@ from .utils import amb2gro
 from .utils import trjcat
 from .utils import fit
 from .utils import pacs_trjcat
+from .utils import extract_ave_str
+from .utils import extract_str
+from .utils import show_mdtraj
 from .utils import print_perf
 from .utils import mv_crds_mol2
 from .utils import shell_hook
@@ -39,6 +42,7 @@ from .cv import rmsd
 from .cv import rmsf
 from .cv import xyz
 from .cv import pca
+from .cv import densmap
 
 LOGGER = generate_logger(__name__)
 
@@ -86,6 +90,9 @@ def cli() -> None:
     fit.add_subcmd(subparsers)
     pacs_trjcat.add_subcmd(subparsers)
     rmfile.add_subcmd(subparsers)
+    extract_ave_str.add_subcmd(subparsers)
+    extract_str.add_subcmd(subparsers)
+    show_mdtraj.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
     shell_hook.add_subcmd(subparsers)
     cmd.add_subcmd(subparsers)
@@ -100,6 +107,7 @@ def cli() -> None:
     rmsf.add_subcmd(subparsers)
     xyz.add_subcmd(subparsers)
     pca.add_subcmd(subparsers)
+    densmap.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
@@ -168,6 +176,15 @@ def cli() -> None:
     elif sys.argv[1] == "add_ndx":
         add_ndx.run(args)
 
+    elif sys.argv[1] == "extract_ave_str":
+        extract_ave_str.run(args)
+
+    elif sys.argv[1] == "extract_str":
+        extract_str.run(args)
+
+    elif sys.argv[1] == "show_mdtraj":
+        show_mdtraj.run(args)
+
     elif sys.argv[1] == "print_perf":
         print_perf.run(args)
 
@@ -206,6 +223,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "xyz":
         xyz.run(args)
+
+    elif sys.argv[1] == "densmap":
+        densmap.run(args)
 
     else:
         print(f"Unknown command: {sys.argv[1]}")

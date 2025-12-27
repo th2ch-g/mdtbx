@@ -41,8 +41,8 @@ Toolbox for MD simulation
   - [x] rmsf
   - [x] xyz
   - [x] PCA
+  - [x] densmap
   - [ ] tICA
-  - [ ] densmap
 
 - Kinetic analysis
   - [x] MSM
