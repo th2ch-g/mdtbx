@@ -75,7 +75,7 @@ n_clusters_3d_main = n_clusters_for_try_3d
 lags_3d_main = lags_for_try_3d
 
 cutoff: float = 6.0
-nbins: int = 15
+nbins: int = 30
 cmap: ListedColormap = mpl.colormaps.get_cmap("tab20")
 do_volume_correction: bool = True
 num_of_ligand: int = 1
@@ -312,13 +312,26 @@ def cluster_1d(
                 pad_inches=0.1,
                 dpi=300,
             )
+
+            plt.title("")
+            plt.xlabel("")
+            plt.ylabel("")
+            plt.tick_params(axis='both', labelbottom=False, labelleft=False)
             plt.savefig(
-                f"{params.output_directory}/images/clustering_converge_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+                f"{params.output_directory}/images/clustering_converge_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
                 bbox_inches="tight",
                 pad_inches=0.1,
                 dpi=300,
                 transparent=True,
             )
+
+            # plt.savefig(
+            #     f"{params.output_directory}/images/clustering_converge_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+            #     bbox_inches="tight",
+            #     pad_inches=0.1,
+            #     dpi=300,
+            #     transparent=True,
+            # )
             if params.show_picture:
                 plt.show()
             plt.clf()
@@ -389,13 +402,26 @@ def plot_hist_1d_per_trial(
         pad_inches=0.1,
         dpi=300,
     )
+
+    plt.title("")
+    plt.xlabel("")
+    plt.ylabel("")
+    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
     plt.savefig(
-        f"{params.output_directory}/images/hist_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+        f"{params.output_directory}/images/hist_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
         transparent=True,
     )
+
+    # plt.savefig(
+    #     f"{params.output_directory}/images/hist_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+    #     bbox_inches="tight",
+    #     pad_inches=0.1,
+    #     dpi=300,
+    #     transparent=True,
+    # )
     if params.show_picture:
         plt.show()
     plt.clf()
@@ -469,13 +495,27 @@ def plot_inertia_1d(params: Parameters):
             pad_inches=0.1,
             dpi=300,
         )
+
+
+        plt.title("")
+        plt.xlabel("")
+        plt.ylabel("")
+        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
         plt.savefig(
-            f"{params.output_directory}/images/inertia_1d_trial{trial:03}_cut{params.cutoff}.svg",
+            f"{params.output_directory}/images/inertia_1d_trial{trial:03}_cut{params.cutoff}_no_title.png",
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
             transparent=True,
         )
+
+        # plt.savefig(
+        #     f"{params.output_directory}/images/inertia_1d_trial{trial:03}_cut{params.cutoff}.svg",
+        #     bbox_inches="tight",
+        #     pad_inches=0.1,
+        #     dpi=300,
+        #     transparent=True,
+        # )
         if params.show_picture:
             plt.show()
         plt.clf()
@@ -645,7 +685,7 @@ def plot_its_1d(params: Parameters) -> None:
             )
 
             # plot its
-            plt.figure(figsize=(3, 2))
+            plt.figure(figsize=(8, 6))
             deeptime.plots.plot_implied_timescales(
                 its_data,
                 n_its=10,  # decrease this number for n_clusters < 11
@@ -670,13 +710,26 @@ def plot_its_1d(params: Parameters) -> None:
                 pad_inches=0.1,
                 dpi=300,
             )
+
+            plt.title("")
+            plt.xlabel("")
+            plt.ylabel("")
+            plt.tick_params(axis='both', labelbottom=False, labelleft=False)
             plt.savefig(
-                f"{params.output_directory}/images/its_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+                f"{params.output_directory}/images/its_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
                 bbox_inches="tight",
                 pad_inches=0.1,
                 dpi=300,
                 transparent=True,
             )
+
+            # plt.savefig(
+            #     f"{params.output_directory}/images/its_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+            #     bbox_inches="tight",
+            #     pad_inches=0.1,
+            #     dpi=300,
+            #     transparent=True,
+            # )
             if params.show_picture:
                 plt.show()
             plt.clf()
@@ -795,13 +848,26 @@ def plot_fel_along_d_1d(
             pad_inches=0.1,
             dpi=300,
         )
+
+        plt.title("")
+        plt.xlabel("")
+        plt.ylabel("")
+        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
         plt.savefig(
-            f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}.svg",
+            f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}_no_title.png",
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
             transparent=True,
         )
+
+        # plt.savefig(
+        #     f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}.svg",
+        #     bbox_inches="tight",
+        #     pad_inches=0.1,
+        #     dpi=300,
+        #     transparent=True,
+        # )
         if params.show_picture:
             plt.show()
         plt.clf()
@@ -939,13 +1005,26 @@ def plot_fel_along_d_1d(
             pad_inches=0.1,
             dpi=300,
         )
+
+        plt.title("")
+        plt.xlabel("")
+        plt.ylabel("")
+        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
         plt.savefig(
-            f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}.svg",
+            f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}_no_title.png",
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
             transparent=True,
         )
+
+        # plt.savefig(
+        #     f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}.svg",
+        #     bbox_inches="tight",
+        #     pad_inches=0.1,
+        #     dpi=300,
+        #     transparent=True,
+        # )
         if params.show_picture:
             plt.show()
         plt.clf()
@@ -1289,13 +1368,26 @@ def cluster_3d(
             pad_inches=0.1,
             dpi=300,
         )
+
+        plt.title("")
+        plt.xlabel("")
+        plt.ylabel("")
+        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
         plt.savefig(
-            f"{params.output_directory}/images/clustering_converge_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+            f"{params.output_directory}/images/clustering_converge_3d_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
             transparent=True,
         )
+
+        # plt.savefig(
+        #     f"{params.output_directory}/images/clustering_converge_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+        #     bbox_inches="tight",
+        #     pad_inches=0.1,
+        #     dpi=300,
+        #     transparent=True,
+        # )
         if params.show_picture:
             plt.show()
         plt.clf()
@@ -1358,13 +1450,26 @@ def plot_hist_3d(
         pad_inches=0.1,
         dpi=300,
     )
+
+    plt.title("")
+    plt.xlabel("")
+    plt.ylabel("")
+    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
     plt.savefig(
-        f"{params.output_directory}/images/hist_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+        f"{params.output_directory}/images/hist_3d_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
         transparent=True,
     )
+
+    # plt.savefig(
+    #     f"{params.output_directory}/images/hist_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+    #     bbox_inches="tight",
+    #     pad_inches=0.1,
+    #     dpi=300,
+    #     transparent=True,
+    # )
     if params.show_picture:
         plt.show()
     plt.clf()
@@ -1420,13 +1525,26 @@ def plot_inertia_3d(params: Parameters):
         pad_inches=0.1,
         dpi=300,
     )
+
+    plt.title("")
+    plt.xlabel("")
+    plt.ylabel("")
+    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
     plt.savefig(
-        f"{params.output_directory}/images/inertia_3d_cut{params.cutoff}.svg",
+        f"{params.output_directory}/images/inertia_3d_cut{params.cutoff}_no_title.png",
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
         transparent=True,
     )
+
+    # plt.savefig(
+    #     f"{params.output_directory}/images/inertia_3d_cut{params.cutoff}.svg",
+    #     bbox_inches="tight",
+    #     pad_inches=0.1,
+    #     dpi=300,
+    #     transparent=True,
+    # )
     if params.show_picture:
         plt.show()
     plt.clf()
@@ -1600,7 +1718,7 @@ def plot_its_3d(
         )
 
         # plot its
-        plt.figure(figsize=(3, 2))
+        plt.figure(figsize=(8, 6))
         deeptime.plots.plot_implied_timescales(
             its_data,
             n_its=10,  # decrease this number for n_clusters < 11
@@ -1623,13 +1741,26 @@ def plot_its_3d(
             pad_inches=0.1,
             dpi=300,
         )
+
+        plt.title("")
+        plt.xlabel("")
+        plt.ylabel("")
+        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
         plt.savefig(
-            f"{params.output_directory}/images/its_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+            f"{params.output_directory}/images/its_3d_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
             bbox_inches="tight",
             pad_inches=0.1,
             dpi=300,
             transparent=True,
         )
+
+        # plt.savefig(
+        #     f"{params.output_directory}/images/its_3d_n_clusters{n_clusters}_cut{params.cutoff}.svg",
+        #     bbox_inches="tight",
+        #     pad_inches=0.1,
+        #     dpi=300,
+        #     transparent=True,
+        # )
         if params.show_picture:
             plt.show()
         plt.clf()
@@ -1741,13 +1872,26 @@ def plot_fel_along_d_3d(
         pad_inches=0.1,
         dpi=300,
     )
+
+    plt.title("")
+    plt.xlabel("")
+    plt.ylabel("")
+    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
     plt.savefig(
-        f"{params.output_directory}/images/fel_3d_n_clusters{n_clusters}_lag{lag}.svg",
+        f"{params.output_directory}/images/fel_3d_n_clusters{n_clusters}_lag{lag}_no_title.png",
         bbox_inches="tight",
         pad_inches=0.1,
         dpi=300,
         transparent=True,
     )
+
+    # plt.savefig(
+    #     f"{params.output_directory}/images/fel_3d_n_clusters{n_clusters}_lag{lag}.svg",
+    #     bbox_inches="tight",
+    #     pad_inches=0.1,
+    #     dpi=300,
+    #     transparent=True,
+    # )
     if params.show_picture:
         plt.show()
     plt.clf()
@@ -2229,13 +2373,26 @@ def plot_fel_each_2d(
                 pad_inches=0.1,
                 dpi=300,
             )
+
+            plt.title("")
+            plt.xlabel("")
+            plt.ylabel("")
+            plt.tick_params(axis='both', labelbottom=False, labelleft=False)
             plt.savefig(
-                f"{params.output_directory}/images/fel_2d_n_clusters{n_clusters}_lag{lag}_dim={first_coord}-{second_coord}_cut{params.cutoff}.svg",
+                f"{params.output_directory}/images/fel_2d_n_clusters{n_clusters}_lag{lag}_dim={first_coord}-{second_coord}_cut{params.cutoff}_no_title.png",
                 bbox_inches="tight",
                 pad_inches=0.1,
                 dpi=300,
                 transparent=True,
             )
+
+            # plt.savefig(
+            #     f"{params.output_directory}/images/fel_2d_n_clusters{n_clusters}_lag{lag}_dim={first_coord}-{second_coord}_cut{params.cutoff}.svg",
+            #     bbox_inches="tight",
+            #     pad_inches=0.1,
+            #     dpi=300,
+            #     transparent=True,
+            # )
             if params.show_picture:
                 plt.show()
             plt.clf()
