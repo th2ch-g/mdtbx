@@ -43,6 +43,12 @@ Toolbox for MD simulation
   - [x] PCA
   - [x] densmap
   - [ ] tICA
+  - [ ] RISM/3D-RISM
+  - [ ] Elastic Network Model
+  - [ ] Normal Mode analysis
+  - [ ] Relaxation Mode analysis
+  - [ ] Go model
+  - [ ] PCA Vector visualization
 
 - Kinetic analysis
   - [x] MSM
@@ -58,10 +64,6 @@ Toolbox for MD simulation
   - [x] Partial Chage
   - [ ] Martini
   - [ ] QM/MM
-
-- Others
-  - [ ] 3D-RISM
-  - [ ] PCA Vector visualization
 
 </details>
 
