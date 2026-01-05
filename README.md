@@ -14,8 +14,10 @@ Toolbox for MD simulation
   - [ ] REST
   - [ ] REUS
   - [ ] T-REMD
+  - [ ] Simulated Tempering
+  - [ ] Simulated Annealing
   - [ ] SMD
-  - [ ] US
+  - [x] US
   - [ ] WT-Metadynamics
   - [ ] OPES
   - [ ] AWH
@@ -26,10 +28,13 @@ Toolbox for MD simulation
 
 - Free energy calculation
   - [ ] MMPBSA
-  - [ ] MBAR
+  - [x] MBAR
+  - [x] WHAM
+  - [ ] BAR
   - [ ] FEP
   - [ ] TI
   - [ ] Jarzynski Equality
+  - [ ] ERmod
 
 - Analysis
   - [x] trjconv/trjcat
