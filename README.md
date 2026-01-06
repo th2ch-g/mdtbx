@@ -10,21 +10,20 @@ Toolbox for MD simulation
 
 - Sampling
   - [x] cMD
-  - [x] PaCS-MD
-  - [ ] REST
-  - [ ] REUS
-  - [ ] T-REMD
   - [ ] Simulated Tempering
   - [ ] Simulated Annealing
-  - [ ] SMD
+  - [ ] T-REMD
+  - [ ] REST
+  - [ ] REUS
   - [x] US
+  - [ ] AWH
   - [ ] WT-Metadynamics
   - [ ] OPES
-  - [ ] AWH
   - [ ] GaMD
+  - [x] PaCS-MD
+  - [ ] SMD
   - [ ] String method
   - [ ] Weighted Ensemble
-  - [ ] Adaptive Biasing Force
 
 - Free energy calculation
   - [ ] MMPBSA
