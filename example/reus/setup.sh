@@ -39,14 +39,14 @@ for rep in $(seq 1 $N_REPLICA);
 do
     STRUCTURE=$(head -n $rep target_structures_distances.txt | tail -n 1 | awk '{print $1}')
     TARGET_DISTANCE=$(head -n $rep target_structures_distances.txt | tail -n 1 | awk '{print $2}')
-    mkdir replica${rep}
-    cp $STRUCTURE replica${rep}/gmx.gro
-    cp $TOPOLOGY replica${rep}/gmx.top
-    cp $INDEX replica${rep}/index.ndx
-    cp $ITP replica${rep}/
-    cp $TEMPLATE_MDP replica${rep}/reus.mdp
-    sed -i -e "s/TARGET_DISTANCE/${TARGET_DISTANCE}/g" replica${rep}/reus.mdp
-    cp $SUBMIT_SCRIPT replica${rep}/
+    mkdir rep${rep}
+    cp $STRUCTURE rep${rep}/gmx.gro
+    cp $TOPOLOGY rep${rep}/gmx.top
+    cp $INDEX rep${rep}/index.ndx
+    cp $ITP rep${rep}/
+    cp $TEMPLATE_MDP rep${rep}/reus.mdp
+    sed -i -e "s/TARGET_DISTANCE/${TARGET_DISTANCE}/g" rep${rep}/reus.mdp
+    cp $SUBMIT_SCRIPT rep${rep}/
     mdtbx cmd gmx grompp \
         -f reus.mdp \
         -c gmx.gro \

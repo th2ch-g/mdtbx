@@ -48,7 +48,7 @@ echo "mpi: $SLURM_NTASKS"
 restart_gro="gmx.gro"
 mpirun -np ${SLURM_NTASKS} \
     gmx_mpi mdrun -deffnm ${DEFFNM} -ntomp ${SLURM_CPUS_PER_TASK} \
-    -multidir replica{1..${N_REPLICA}} -replex ${REPLEX} \
+    -multidir rep{1..${N_REPLICA}} -replex ${REPLEX} \
     ${MDRUN_OPTION}
 
 # remove temporary files
