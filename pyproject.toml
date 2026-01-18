@@ -12,7 +12,7 @@ where = ["."]
 [project.scripts]
 mdtbx = "src.__main__:main"
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64", "osx-arm64", "osx-64"]
 

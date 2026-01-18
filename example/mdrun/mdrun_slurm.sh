@@ -16,6 +16,7 @@ SIMULATION_CONTINUE=true
 SIMULATION_OVERWRITE=false
 MAXWARN=10
 PRODUCTION_STEPS=100
+PRD_PREXIX="prd" # or us_dist, awh_dist
 
 # for single GPU
 export GMX_CUDA_GRAPH=1
@@ -97,27 +98,27 @@ done
 # production
 for i in $(seq 1 ${PRODUCTION_STEPS});
 do
-    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "prd${i}.gro" ]]; then
+    if [[ $SIMULATION_OVERWRITE == "true" || ! -f "${PRD_PREXIX}${i}.gro" ]]; then
         # Use restraints option with force=0 for system converted by acpype
         #   restraints force is 0 during production MD
         #   restraints is enabled to prevent segmentation fault
-        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "prd${i}.tpr" ]]; then
+        if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "${PRD_PREXIX}${i}.tpr" ]]; then
             $GMX_CMD grompp \
-                -f prd.mdp \
+                -f ${PRD_PREXIX}.mdp \
                 -c ${restart_gro} \
                 -n index.ndx \
                 -p gmx.top \
                 -maxwarn ${MAXWARN} \
-                -o prd${i}.tpr
+                -o ${PRD_PREXIX}${i}.tpr
                 # -r gmx.gro \
         fi
         if [[ $SIMULATION_CONTINUE == "true" && $SIMULATION_OVERWRITE == "false" ]]; then
-            $GMX_CMD mdrun -v -deffnm prd${i} ${MDRUN_OPTION} -cpi prd${i}.cpt
+            $GMX_CMD mdrun -v -deffnm ${PRD_PREXIX}${i} ${MDRUN_OPTION} -cpi ${PRD_PREXIX}${i}.cpt
         else
-            $GMX_CMD mdrun -v -deffnm prd${i} ${MDRUN_OPTION}
+            $GMX_CMD mdrun -v -deffnm ${PRD_PREXIX}${i} ${MDRUN_OPTION}
         fi
     fi
-    restart_gro="prd${i}.gro"
+    restart_gro="${PRD_PREXIX}${i}.gro"
 done
 
 # remove temporary files

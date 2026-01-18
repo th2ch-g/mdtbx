@@ -75,7 +75,7 @@ n_clusters_3d_main = n_clusters_for_try_3d
 lags_3d_main = lags_for_try_3d
 
 cutoff: float = 6.0
-nbins: int = 30
+nbins: int = 15
 cmap: ListedColormap = mpl.colormaps.get_cmap("tab20")
 do_volume_correction: bool = True
 num_of_ligand: int = 1
@@ -301,7 +301,7 @@ def cluster_1d(
 
             # create convergence figure
             inertias = clustering_model.inertias
-            plt.figure(figsize=(5, 5))
+            # plt.figure(figsize=(5, 5))
             plt.plot(inertias)
             plt.xlabel("iteration")
             plt.ylabel("inertia")
@@ -383,7 +383,7 @@ def plot_hist_1d_per_trial(
             features.append(features_per_rep)
 
     # create figure
-    plt.figure(figsize=(5, 3))
+    # plt.figure(figsize=(5, 3))
     plt.vlines(center_d, 0, 10**10, "tab:red", linewidth=0.5, label="cluster center")
     plt.vlines(  # comment out if you don't need cutoff line (default: cutoff=1000)
         params.cutoff, 0, 10**10, "magenta", linewidth=0.5, label="cutoff"
@@ -484,7 +484,7 @@ def plot_inertia_1d(params: Parameters):
             return
 
         # plot
-        plt.figure(figsize=(3, 2))
+        # plt.figure(figsize=(3, 2))
         plt.plot(n_clusters_list, inertias, marker=".")
         plt.xlabel("number of clusters")
         plt.ylabel("inertia")
@@ -685,7 +685,7 @@ def plot_its_1d(params: Parameters) -> None:
             )
 
             # plot its
-            plt.figure(figsize=(8, 6))
+            # plt.figure(figsize=(8, 6))
             deeptime.plots.plot_implied_timescales(
                 its_data,
                 n_its=10,  # decrease this number for n_clusters < 11
@@ -763,7 +763,7 @@ def plot_fel_along_d_1d(
         # doesn't interpolate for each trial
         plot_data_x_all = []
         plot_data_y_all = []
-        plt.figure(figsize=(5, 5))
+        # plt.figure(figsize=(5, 5))
         for trial in params.n_trial_for_calc:
             print(f"{trial=}")
             print(f"{n_clusters=}")
@@ -877,7 +877,7 @@ def plot_fel_along_d_1d(
         # interpolate for each trial
         plot_data_x_all = []
         plot_data_y_all = []
-        plt.figure(figsize=(5, 5))
+        # plt.figure(figsize=(5, 5))
 
         # define bins
         center_list = []
@@ -1357,7 +1357,7 @@ def cluster_3d(
 
         # create convergence figure
         inertias = clustering_model.inertias
-        plt.figure(figsize=(5, 5))
+        # plt.figure(figsize=(5, 5))
         plt.plot(inertias)
         plt.xlabel("iteration")
         plt.ylabel("inertia")
@@ -1433,7 +1433,7 @@ def plot_hist_3d(
                 features.append(np.linalg.norm(features_per_rep, axis=1))
 
     # create figure
-    plt.figure(figsize=(5, 3))
+    # plt.figure(figsize=(5, 3))
     plt.vlines(center_d, 0, 10**10, "tab:red", linewidth=0.5, label="cluster center")
     plt.vlines(params.cutoff, 0, 10**10, "magenta", linewidth=0.5, label="cutoff")
     plt.hist(np.concatenate(features), bins=100, alpha=0.5)
@@ -1514,7 +1514,7 @@ def plot_inertia_3d(params: Parameters):
 
     # plot
     params.logger.info("Starting plotting inertia for 3d")
-    plt.figure(figsize=(3, 2))
+    # plt.figure(figsize=(3, 2))
     plt.plot(n_clusters_list, inertias, marker=".")
     plt.xlabel("number of clusters")
     plt.ylabel("inertia")
@@ -1718,7 +1718,7 @@ def plot_its_3d(
         )
 
         # plot its
-        plt.figure(figsize=(8, 6))
+        # plt.figure(figsize=(8, 6))
         deeptime.plots.plot_implied_timescales(
             its_data,
             n_its=10,  # decrease this number for n_clusters < 11
@@ -2348,7 +2348,7 @@ def plot_fel_each_2d(
             )
 
             # plot
-            plt.figure(figsize=(8, 6))
+            # plt.figure(figsize=(8, 6))
             ax, contour, cbar = deeptime.plots.plot_energy2d(
                 energies=energy_2d_obj,
                 ax=None,

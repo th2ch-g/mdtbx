@@ -16,7 +16,9 @@ Toolbox for MD simulation
   - [ ] REST
   - [ ] REUS
   - [x] US
-  - [ ] AWH
+  - [ ] FEP
+  - [ ] FEP/REST
+  - [x] AWH
   - [ ] WT-Metadynamics
   - [ ] OPES
   - [ ] GaMD
@@ -30,7 +32,7 @@ Toolbox for MD simulation
   - [x] MBAR
   - [x] WHAM
   - [ ] BAR
-  - [ ] FEP
+  - [ ] Zwanzig(FEP)
   - [ ] TI
   - [ ] Jarzynski Equality
   - [ ] ERmod
