@@ -10,7 +10,8 @@ set -e
 
 source $MODULESHOME/init/bash
 module purge
-module load gromacs/2025.2
+module load cmake/3.31.6  gcc/13.3.0 cuda/12.9
+export PATH="$TOOLS/gromacs/2025.1/gromacs-2025.1/bin:$PATH"
 
 SIMULATION_CONTINUE=true
 SIMULATION_OVERWRITE=false

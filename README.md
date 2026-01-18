@@ -13,8 +13,8 @@ Toolbox for MD simulation
   - [ ] Simulated Tempering
   - [ ] Simulated Annealing
   - [ ] T-REMD
-  - [ ] REST
-  - [ ] REUS
+  - [x] REST
+  - [x] REUS
   - [x] US
   - [ ] FEP
   - [ ] FEP/REST
