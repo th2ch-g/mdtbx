@@ -82,9 +82,9 @@ Toolbox for MD simulation
 ~~~bash
 # for pixi users
 pixi install
-
-# create pymolrc
 pixi run pymolrc
+ln -s $PWD/.pixi/envs/default/bin/mdtbx $BIN
+ln -s $PWD/.pixi/envs/default/bin/pymol $BIN
 
 # for docker users
 docker build -t mdtbx .
