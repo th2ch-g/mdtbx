@@ -24,5 +24,5 @@ def add_subcmd(subparsers):
 
 def run(args):
     top = md.load(args.topology)
-    atoms, bonds = top.to_dataframe()
+    atoms, bonds = top.top.to_dataframe()
     print(atoms)
