@@ -1,5 +1,8 @@
-from .cli import cli
+import warnings
 
+warnings.simplefilter('ignore')
+
+from .cli import cli
 
 def main():
     cli()

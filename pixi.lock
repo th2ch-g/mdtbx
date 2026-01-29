@@ -6,6 +6,8 @@ environments:
     - url: https://conda.anaconda.org/bioconda/
     indexes:
     - https://pypi.org/simple
+    options:
+      pypi-prerelease-mode: if-necessary-or-explicit
     packages:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-5_kmp_llvm.conda
@@ -7282,9 +7284,8 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: 26b7f2630cc7236b5ec4457d50aef9b99448987046cf63f56048d6b36bf19b7b
+  sha256: 8d450861726a7a1db404e0a6ca858ec5d21d6cb93b95309cc991fba54b030502
   requires_python: ==3.10
-  editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda
   sha256: f8aeffbd29bf9b7eb89020b7b5cbbea7ba961b18f3c1faec55076b2550c50581
   md5: 5889b9f6be50c79876d8840529f63cfc
@@ -9580,7 +9581,6 @@ packages:
   version: 0.1.0
   sha256: b4767ff35a7c7890031b5f4670ce1eaa197ef62f3e308422b2723963ca10f989
   requires_python: '>=3.10'
-  editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/pyparsing-3.2.5-pyhcf101f3_0.conda
   sha256: 6814b61b94e95ffc45ec539a6424d8447895fef75b0fec7e1be31f5beee883fb
   md5: 6c8979be6d7a17692793114fa26916e8

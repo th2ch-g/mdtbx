@@ -81,6 +81,7 @@ Toolbox for MD simulation
 ## Install
 ~~~bash
 # for pixi users
+export PIXI_FROZEN=false
 pixi install
 pixi run pymolrc
 ln -s $PWD/.pixi/envs/default/bin/mdtbx $BIN
