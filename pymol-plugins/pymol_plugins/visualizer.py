@@ -27,10 +27,21 @@ cmd.extend("color_baker", color_baker)
 def ray_png(png="out_pymol_ray.png"):
     cmd.bg_color("white")
     cmd.set("ray_opaque_background", 1)
+    cmd.ray(500, 500)
+    cmd.png(png, dpi=300)
+    print(f"ray image is saved as {png}")
+    cmd.bg_color("black")
+
+cmd.extend("ray_png", ray_png)
+
+
+def ray_png_fig(png="out_pymol_ray.png"):
+    cmd.bg_color("white")
+    cmd.set("ray_opaque_background", 1)
     cmd.ray(5000, 5000)
-    cmd.png(png, dpi=3000)
+    cmd.png(png, dpi=300)
     print(f"ray image is saved as {png}")
     cmd.bg_color("black")
 
 
-cmd.extend("ray_png", ray_png)
+cmd.extend("ray_png_fig", ray_png_fig)
