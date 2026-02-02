@@ -10,9 +10,12 @@ Toolbox for MD simulation
 
 - Sampling
   - [x] cMD
+  - [ ] Brownian Dynamics
+  - [ ] Langevin Dynamics
   - [ ] Simulated Tempering
   - [ ] Simulated Annealing
   - [ ] T-REMD
+  - [ ] 2D-REMD
   - [x] REST
   - [x] REUS
   - [x] US
