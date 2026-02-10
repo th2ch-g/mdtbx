@@ -45,7 +45,7 @@ def run(args):
     selector = AtomSelector(args.selection)
     parser = GromacsTopologyParser(args.topology)
 
-    print(parser.all_moleculetypes)
+    LOGGER.info(parser.all_moleculetypes)
 
     with open(args.topology) as f:
         lines = f.readlines()

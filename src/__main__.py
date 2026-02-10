@@ -1,8 +1,9 @@
 import warnings
 
-warnings.simplefilter('ignore')
+warnings.simplefilter("ignore")
 
-from .cli import cli
+from .cli import cli  # NOQA
+
 
 def main():
     cli()

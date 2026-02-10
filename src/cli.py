@@ -4,15 +4,24 @@ from importlib import metadata
 
 from .logger import generate_logger
 
+# general util
 from .utils import rmfile
+from .utils import convert
+from .utils import mod_mdp
+from .utils import shell_hook
+from .utils import cmd
+from .utils import mv_crds_mol2
+from .utils import print_perf
+from .utils import show_mdtraj
+from .utils import show_npy
+
+# build utils
 from .utils import addace
 from .utils import addnme
 from .utils import add_ndx
-from .utils import convert
 from .utils import calc_ion_conc
 from .utils import centering_gro
 from .utils import find_bond
-from .utils import mod_mdp
 from .utils import gen_am1bcc
 from .utils import gen_resp
 from .utils import gen_modres_am1bcc
@@ -21,20 +30,15 @@ from .utils import gen_posres
 from .utils import gen_distres
 from .utils import modeling_cf
 from .utils import amb2gro
+from .utils import build_solution
+from .utils import partial_tempering
+
+# analysis utils
 from .utils import trjcat
 from .utils import fit
 from .utils import pacs_trjcat
 from .utils import extract_ave_str
 from .utils import extract_str
-from .utils import show_mdtraj
-from .utils import show_npy
-from .utils import print_perf
-from .utils import mv_crds_mol2
-from .utils import shell_hook
-from .utils import cmd
-
-# from .utils import build_membrane
-from .utils import build_solution
 
 from .cv import comdist
 from .cv import comvec
@@ -97,6 +101,7 @@ def cli() -> None:
     show_npy.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
     shell_hook.add_subcmd(subparsers)
+    partial_tempering.add_subcmd(subparsers)
     cmd.add_subcmd(subparsers)
 
     # build_membrane.add_subcmd(subparsers)
@@ -198,6 +203,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "cmd":
         cmd.run(args)
+
+    elif sys.argv[1] == "partial_tempering":
+        partial_tempering.run(args)
 
     elif sys.argv[1] == "calc_ion_conc":
         calc_ion_conc.run(args)

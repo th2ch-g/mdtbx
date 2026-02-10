@@ -17,9 +17,7 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "topology", type=str, help="Topology file (.gro, .pdb)"
-    )
+    parser.add_argument("topology", type=str, help="Topology file (.gro, .pdb)")
 
 
 def run(args):

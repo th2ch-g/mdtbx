@@ -32,4 +32,5 @@ def ray_png(png="out_pymol_ray.png"):
     print(f"ray image is saved as {png}")
     cmd.bg_color("black")
 
+
 cmd.extend("ray_png", ray_png)

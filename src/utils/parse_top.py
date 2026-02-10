@@ -67,6 +67,7 @@ class GromacsTopologyParser:
                         "resid": resid,
                         "resname": resname,
                         "name": atom_name,
+                        "linenumber": idx,
                     }
 
                     moleculetype_dict[current_moleculetype].atoms.append(atom)

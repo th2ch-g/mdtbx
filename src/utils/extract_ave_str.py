@@ -9,7 +9,7 @@ LOGGER = generate_logger(__name__)
 
 def add_subcmd(subparsers):
     """
-    mdtbx comdist --topology structure.pdb --trajectory trajectory.xtc --selection "resid 1 to 10" -o ave.pdb
+    mdtbx extract_ave_str
     """
     parser = subparsers.add_parser(
         "extract_ave_str",

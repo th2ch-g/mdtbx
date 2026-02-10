@@ -316,7 +316,7 @@ def cluster_1d(
             plt.title("")
             plt.xlabel("")
             plt.ylabel("")
-            plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+            plt.tick_params(axis="both", labelbottom=False, labelleft=False)
             plt.savefig(
                 f"{params.output_directory}/images/clustering_converge_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
                 bbox_inches="tight",
@@ -406,7 +406,7 @@ def plot_hist_1d_per_trial(
     plt.title("")
     plt.xlabel("")
     plt.ylabel("")
-    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+    plt.tick_params(axis="both", labelbottom=False, labelleft=False)
     plt.savefig(
         f"{params.output_directory}/images/hist_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
         bbox_inches="tight",
@@ -496,11 +496,10 @@ def plot_inertia_1d(params: Parameters):
             dpi=300,
         )
 
-
         plt.title("")
         plt.xlabel("")
         plt.ylabel("")
-        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+        plt.tick_params(axis="both", labelbottom=False, labelleft=False)
         plt.savefig(
             f"{params.output_directory}/images/inertia_1d_trial{trial:03}_cut{params.cutoff}_no_title.png",
             bbox_inches="tight",
@@ -714,7 +713,7 @@ def plot_its_1d(params: Parameters) -> None:
             plt.title("")
             plt.xlabel("")
             plt.ylabel("")
-            plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+            plt.tick_params(axis="both", labelbottom=False, labelleft=False)
             plt.savefig(
                 f"{params.output_directory}/images/its_1d_trial{trial:03}_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
                 bbox_inches="tight",
@@ -852,7 +851,7 @@ def plot_fel_along_d_1d(
         plt.title("")
         plt.xlabel("")
         plt.ylabel("")
-        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+        plt.tick_params(axis="both", labelbottom=False, labelleft=False)
         plt.savefig(
             f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}_no_title.png",
             bbox_inches="tight",
@@ -1009,7 +1008,7 @@ def plot_fel_along_d_1d(
         plt.title("")
         plt.xlabel("")
         plt.ylabel("")
-        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+        plt.tick_params(axis="both", labelbottom=False, labelleft=False)
         plt.savefig(
             f"{params.output_directory}/images/fel_1d_n_clusters{n_clusters}_lag{lag}_interp_{interpolate_type}_no_title.png",
             bbox_inches="tight",
@@ -1372,7 +1371,7 @@ def cluster_3d(
         plt.title("")
         plt.xlabel("")
         plt.ylabel("")
-        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+        plt.tick_params(axis="both", labelbottom=False, labelleft=False)
         plt.savefig(
             f"{params.output_directory}/images/clustering_converge_3d_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
             bbox_inches="tight",
@@ -1454,7 +1453,7 @@ def plot_hist_3d(
     plt.title("")
     plt.xlabel("")
     plt.ylabel("")
-    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+    plt.tick_params(axis="both", labelbottom=False, labelleft=False)
     plt.savefig(
         f"{params.output_directory}/images/hist_3d_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
         bbox_inches="tight",
@@ -1529,7 +1528,7 @@ def plot_inertia_3d(params: Parameters):
     plt.title("")
     plt.xlabel("")
     plt.ylabel("")
-    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+    plt.tick_params(axis="both", labelbottom=False, labelleft=False)
     plt.savefig(
         f"{params.output_directory}/images/inertia_3d_cut{params.cutoff}_no_title.png",
         bbox_inches="tight",
@@ -1745,7 +1744,7 @@ def plot_its_3d(
         plt.title("")
         plt.xlabel("")
         plt.ylabel("")
-        plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+        plt.tick_params(axis="both", labelbottom=False, labelleft=False)
         plt.savefig(
             f"{params.output_directory}/images/its_3d_n_clusters{n_clusters}_cut{params.cutoff}_no_title.png",
             bbox_inches="tight",
@@ -1876,7 +1875,7 @@ def plot_fel_along_d_3d(
     plt.title("")
     plt.xlabel("")
     plt.ylabel("")
-    plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+    plt.tick_params(axis="both", labelbottom=False, labelleft=False)
     plt.savefig(
         f"{params.output_directory}/images/fel_3d_n_clusters{n_clusters}_lag{lag}_no_title.png",
         bbox_inches="tight",
@@ -2377,7 +2376,7 @@ def plot_fel_each_2d(
             plt.title("")
             plt.xlabel("")
             plt.ylabel("")
-            plt.tick_params(axis='both', labelbottom=False, labelleft=False)
+            plt.tick_params(axis="both", labelbottom=False, labelleft=False)
             plt.savefig(
                 f"{params.output_directory}/images/fel_2d_n_clusters{n_clusters}_lag{lag}_dim={first_coord}-{second_coord}_cut{params.cutoff}_no_title.png",
                 bbox_inches="tight",
