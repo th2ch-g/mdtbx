@@ -6,17 +6,19 @@
 #SBATCH -o test_md.out
 #SBATCH -e test_md.err
 #SBATCH --gres=gpu:1
-set -e
+set -ex
 
-source $MODULESHOME/init/bash
+source /home/apps/Modules/init/bash
 module purge
 module load $TOOLS/plumed-2.10.0/build/lib/plumed/modulefile
 module load gcc/13.3.0 cuda/12.9 cmake/3.31.6 openmpi/5.0.7
 export PATH="$TOOLS/gromacs/2022.5-mpi-plumed/gromacs-2022.5/bin:$PATH"
 
+OMP=1
+MPI=16
 REPLEX=500
 N_REPLICA=16
-DEFFNM="rest" # or grest, rest2
+DEFFNM="rest" # or grest, rest2, reus
 SIMULATION_CONTINUE=true
 SIMULATION_OVERWRITE=false
 MAXWARN=10
@@ -25,12 +27,11 @@ MAXWARN=10
 export GMX_CUDA_GRAPH=1
 export GMX_ENABLE_DIRECT_GPU_COMM=1
 export GMX_FORCE_GPU_AWARE_MPI=1
-export GMX_FORCE_UPDATE_DEFAULT_GPU=1
 export GMX_GPU_DD_COMMS=1
 export GMX_GPU_PME_DECOMPOSITION=1
 export GMX_GPU_PME_PP_COMMS=1
 GMX_CMD="gmx_mpi"
-MDRUN_OPTION="-dlb no -pin on -nb gpu -pme gpu -pmefft gpu -bonded gpu -update gpu"
+MDRUN_OPTION="-dlb no -pin on -nb gpu -pme gpu -pmefft gpu -bonded gpu -update cpu"
 
 # for CPU
 # GMX_CMD="srun -np $SLURM_NTASKS gmx_mpi"
@@ -46,8 +47,8 @@ echo "omp: $SLURM_CPUS_PER_TASK"
 echo "mpi: $SLURM_NTASKS"
 
 restart_gro="gmx.gro"
-mpirun -np ${SLURM_NTASKS} \
-    ${GMX_CMD} mdrun -deffnm ${DEFFNM} -ntomp ${SLURM_CPUS_PER_TASK} \
+eval srun --ntasks $MPI \
+    ${GMX_CMD} mdrun -deffnm ${DEFFNM} -ntomp $OMP \
     -multidir rep{1..${N_REPLICA}} -replex ${REPLEX} -plumed plumed.dat -hrex \
     ${MDRUN_OPTION}
 
