@@ -1,4 +1,5 @@
 from typing import List, Union, Dict, Protocol, runtime_checkable, Set
+from dataclasses import dataclass
 
 PROTEIN_RESNAMES: Set[str] = {
     "ALA",
@@ -448,6 +449,7 @@ def parse_selection(selection_string: str) -> Union[SelectionNode, str]:
         return str(e)
 
 
+@dataclass
 class AtomSelector:
     def __init__(self, selection_string: str) -> None:
         self.selection_string = selection_string

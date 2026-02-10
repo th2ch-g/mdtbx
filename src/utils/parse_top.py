@@ -53,9 +53,9 @@ class GromacsTopologyParser:
 
                 if current_section == "atoms":
                     splits = line.split()
-                    atom_index = splits[0]
-                    # atom_type = splits[1]
-                    resid = splits[2]
+                    atom_index = int(splits[0])
+                    atom_type = splits[1]
+                    resid = int(splits[2])
                     resname = splits[3]
                     atom_name = splits[4]
                     # cgnr = splits[5]
@@ -63,6 +63,7 @@ class GromacsTopologyParser:
                     # atom_mass = splits[7]
 
                     atom = {
+                        "atom_type": atom_type,
                         "index": atom_index,
                         "resid": resid,
                         "resname": resname,

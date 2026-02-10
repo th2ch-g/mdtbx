@@ -38,6 +38,7 @@ def run(args):
     parser = GromacsTopologyParser(args.topology)
 
     LOGGER.info(parser.all_moleculetypes)
+    LOGGER.info(selector.parsed_selection)
 
     all_moleculetypes = parser.get_all_moleculetypes()
     LOGGER.info(f"all_moleculetypes: {all_moleculetypes}")
@@ -48,6 +49,7 @@ def run(args):
         LOGGER.info(f"moleculetype: {moleculetype}")
         atoms = parser.get_atoms_in(moleculetype)
         for atom in atoms:
+            # print(atom)
             if selector.eval(atom):
                 LOGGER.info(f"atom: {atom}")
                 # rename to ATOM_ from ATOM
@@ -58,11 +60,11 @@ def run(args):
 
     for atom in selected_atoms:
         LOGGER.info(f"atom: {atom}")
-        atom_name = atom["name"]
+        atom_type = atom["atom_type"]
         # pattern = fr'^(\s*(?:\S+\s+){4}){atom_name}(\s+)'
         # replacement = fr'\1{atom_name}_\2'
-        pattern = rf"^(\s*(?:\S+\s+){{4}}){re.escape(atom_name)}(?=\s|$)"
-        replacement = rf"\1{atom_name}_"
+        pattern = rf"^(\s*(?:\S+\s+){{1}}){re.escape(atom_type)}(?=\s|$)"
+        replacement = rf"\g<1>{atom_type}_"
         atom_linenumber = atom["linenumber"]
         lines[atom_linenumber] = re.sub(pattern, replacement, lines[atom_linenumber])
 
