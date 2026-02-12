@@ -14,6 +14,8 @@ module load gcc/13.3.0 cuda/12.9 cmake/3.31.6 openmpi/5.0.7
 module load /home/hori/works/tools/hpc_sdk/modulefiles/nvhpc/25.7
 export PATH="$TOOLS/gromacs/2025.1-mpi/gromacs-2025.1/bin:$PATH"
 
+OMP=1
+MPI=16
 REPLEX=500
 N_REPLICA=16
 DEFFNM="reus" # or tremd
@@ -46,8 +48,8 @@ echo "omp: $SLURM_CPUS_PER_TASK"
 echo "mpi: $SLURM_NTASKS"
 
 restart_gro="gmx.gro"
-mpirun -np ${SLURM_NTASKS} \
-    gmx_mpi mdrun -deffnm ${DEFFNM} -ntomp ${SLURM_CPUS_PER_TASK} \
+eval mpirun -np $MPI \
+    gmx_mpi mdrun -deffnm ${DEFFNM} -ntomp $OMP \
     -multidir rep{1..${N_REPLICA}} -replex ${REPLEX} \
     ${MDRUN_OPTION}
 
