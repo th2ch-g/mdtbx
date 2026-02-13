@@ -32,6 +32,7 @@ from .utils import modeling_cf
 from .utils import amb2gro
 from .utils import build_solution
 from .utils import partial_tempering
+from .utils import gen_temperatures
 
 # analysis utils
 from .utils import trjcat
@@ -102,6 +103,7 @@ def cli() -> None:
     print_perf.add_subcmd(subparsers)
     shell_hook.add_subcmd(subparsers)
     partial_tempering.add_subcmd(subparsers)
+    gen_temperatures.add_subcmd(subparsers)
     cmd.add_subcmd(subparsers)
 
     # build_membrane.add_subcmd(subparsers)
@@ -206,6 +208,9 @@ def cli() -> None:
 
     elif sys.argv[1] == "partial_tempering":
         partial_tempering.run(args)
+
+    elif sys.argv[1] == "gen_temperatures":
+        gen_temperatures.run(args)
 
     elif sys.argv[1] == "calc_ion_conc":
         calc_ion_conc.run(args)
