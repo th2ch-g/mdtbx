@@ -4,6 +4,9 @@ from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
 
+# ref: https://virtualchemistry.org/remd-temperature-generator/
+# ref: https://github.com/dspoel/remd-temperature-generator
+
 # Constants
 A0 = -59.2194
 A1 = 0.07594
@@ -12,7 +15,6 @@ B1 = 0.01347
 D0 = 1.1677
 D1 = 0.002976
 KB = 0.008314  # kJ/mol/K
-
 MAXITER = 100
 
 def add_subcmd(subparsers):
