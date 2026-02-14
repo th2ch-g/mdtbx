@@ -16,6 +16,9 @@ mdtbx = "src.__main__:main"
 channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64", "osx-arm64", "osx-64"]
 
+[tool.pixi.target.linux-64.dependencies]
+cuda-version = "12.*"
+
 [tool.marimo.package_management]
 manager = "pixi"
 
