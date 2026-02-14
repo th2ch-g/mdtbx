@@ -1,28 +1,10 @@
+import fnmatch
 from typing import List, Union, Dict, Protocol, runtime_checkable, Set
 from dataclasses import dataclass
 
 PROTEIN_RESNAMES: Set[str] = {
-    "ALA",
-    "ARG",
-    "ASN",
-    "ASP",
-    "CYS",
-    "GLN",
-    "GLU",
-    "GLY",
-    "HIS",
-    "ILE",
-    "LEU",
-    "LYS",
-    "MET",
-    "PHE",
-    "PRO",
-    "SER",
-    "THR",
-    "TRP",
-    "TYR",
-    "VAL",
-    # "CYX", "NLN",
+    "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE",
+    "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
 }
 
 WATER_RESNAMES: Set[str] = {"HOH", "WAT", "SOL"}
@@ -86,7 +68,8 @@ class Chain(SelectionNode):
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
         chain = mol.get("chain")
-        return isinstance(chain, str) and chain in self.names
+        if not isinstance(chain, str): return False
+        return any(fnmatch.fnmatch(chain, p) for p in self.names)
 
 
 class ResName(SelectionNode):
@@ -95,7 +78,8 @@ class ResName(SelectionNode):
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
         resname = mol.get("resname")
-        return isinstance(resname, str) and resname in self.names
+        if not isinstance(resname, str): return False
+        return any(fnmatch.fnmatch(resname, p) for p in self.names)
 
 
 class ResId(SelectionNode):
@@ -113,7 +97,9 @@ class Name(SelectionNode):
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
         name = mol.get("name")
-        return isinstance(name, str) and name in self.names
+        if not isinstance(name, str): return False
+        # fnmatchを使用してワイルドカード(*)に対応
+        return any(fnmatch.fnmatch(name, p) for p in self.names)
 
 
 class Index(SelectionNode):
@@ -214,13 +200,18 @@ class SelectionParser:
             raise ParseError(f"Expected one or more spaces at position {self.pos}")
 
     def _parse_alphanumeric1(self) -> str:
+        """識別子を解析します。アルファベット、数字に加えて '*' を許可します。"""
         start_pos = self.pos
-        if self.pos < len(self.text) and self.text[self.pos].isalnum():
+
+        def is_id_char(c: str) -> bool:
+            return c.isalnum() or c == '*'
+
+        if self.pos < len(self.text) and is_id_char(self.text[self.pos]):
             self.pos += 1
-            while self.pos < len(self.text) and self.text[self.pos].isalnum():
+            while self.pos < len(self.text) and is_id_char(self.text[self.pos]):
                 self.pos += 1
             return self.text[start_pos : self.pos]
-        raise ParseError(f"Expected alphanumeric characters at position {self.pos}")
+        raise ParseError(f"Expected alphanumeric characters or '*' at position {self.pos}")
 
     def _parse_digit1(self) -> str:
         start_pos = self.pos
@@ -464,16 +455,6 @@ class AtomSelector:
             raise ValueError(f"Failed to parse selection string: {self._error}")
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
-        """
-        与えられた分子情報 (mol) が選択条件に合致するかどうかを評価します。
-
-        Args:
-            mol: 分子情報を表す辞書。
-                 例: {"chain": "A", "resname": "ALA", "resid": 1, "name": "CA", "index": 0}
-
-        Returns:
-            条件に合致すれば True, そうでなければ False。
-        """
         if self._error:
             print(f"Cannot evaluate: parsing failed with error: {self._error}")
             return False
@@ -511,6 +492,23 @@ if __name__ == "__main__":
         ),
         ("all", {"resname": "XYZ"}, True),
     ]
+
+    print("\n--- Wildcard Tests ---")
+    wildcard_test_cases = [
+        ("name C*", {"name": "CA"}, True),
+        ("name C*", {"name": "CB"}, True),
+        ("name C*", {"name": "CG1"}, True),
+        ("name C*", {"name": "N"}, False),
+        ("name *A", {"name": "CA"}, True),
+        ("name *A", {"name": "HA"}, True),
+        ("name *", {"name": "ANYTHING"}, True),
+        ("resname A*", {"resname": "ALA"}, True),
+        ("resname A*", {"resname": "ARG"}, True),
+        ("resname A*", {"resname": "GLY"}, False),
+        ("name C* and protein", {"resname": "ALA", "name": "CB"}, True),
+        ("name C* and water", {"resname": "ALA", "name": "CB"}, False),
+    ]
+    test_cases.extend(wildcard_test_cases)
 
     for i, (selection_str, mol, expected) in enumerate(test_cases):
         print(f"\nTest {i + 1}:")
