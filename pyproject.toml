@@ -41,6 +41,7 @@ acpype = "*"
 mafft = "*"
 aliview = "*"
 maxit = "*"
+openmm = "*"
 
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
