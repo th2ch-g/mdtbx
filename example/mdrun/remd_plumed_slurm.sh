@@ -18,7 +18,7 @@ OMP=1
 MPI=16
 REPLEX=500
 N_REPLICA=16
-DEFFNM="rest" # or grest, rest2, reus
+DEFFNM="grest" # or rest2, reus
 SIMULATION_CONTINUE=true
 SIMULATION_OVERWRITE=false
 MAXWARN=10
@@ -30,6 +30,8 @@ export GMX_FORCE_GPU_AWARE_MPI=1
 export GMX_GPU_DD_COMMS=1
 export GMX_GPU_PME_DECOMPOSITION=1
 export GMX_GPU_PME_PP_COMMS=1
+MPI_CMD="mpirun -np $MPI"
+# MPI_CMD="srun --ntasks $MPI"
 GMX_CMD="gmx_mpi"
 MDRUN_OPTION="-dlb no -pin on -nb gpu -pme gpu -pmefft gpu -bonded gpu -update cpu"
 
@@ -47,7 +49,7 @@ echo "omp: $SLURM_CPUS_PER_TASK"
 echo "mpi: $SLURM_NTASKS"
 
 restart_gro="gmx.gro"
-eval srun --ntasks $MPI \
+eval $MPI_CMD \
     ${GMX_CMD} mdrun -deffnm ${DEFFNM} -ntomp $OMP \
     -multidir rep{1..${N_REPLICA}} -replex ${REPLEX} -plumed plumed.dat -hrex \
     ${MDRUN_OPTION}

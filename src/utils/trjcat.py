@@ -94,7 +94,10 @@ def run(args):
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.prefix}_all.xtc generated")
 
-    cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s {args.prefix}1.tpr -n {args.index} -o {args.prefix}_all_rmmol.xtc -skip {args.skip} -pbc {args.pbc} -center"
+    if args.pbc == "cluster":
+        cmd = f"echo {args.centering_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s {args.prefix}1.tpr -n {args.index} -o {args.prefix}_all_rmmol.xtc -skip {args.skip} -pbc {args.pbc} -center"
+    else:
+        cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s {args.prefix}1.tpr -n {args.index} -o {args.prefix}_all_rmmol.xtc -skip {args.skip} -pbc {args.pbc} -center"
     subprocess.run(cmd, shell=True, check=True)
     LOGGER.info(f"{args.prefix}_all_rmmol.xtc generated")
 

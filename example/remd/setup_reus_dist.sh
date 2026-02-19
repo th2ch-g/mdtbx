@@ -9,9 +9,11 @@ ITP="*.itp"
 
 source /home/apps/Modules/init/bash
 module purge
+module load $TOOLS/plumed-2.10.0/build/lib/plumed/modulefile
 module load gcc/13.3.0 cuda/12.9 cmake/3.31.6 openmpi/5.0.7
-module load /home/hori/works/tools/hpc_sdk/modulefiles/nvhpc/25.7
-export PATH="$TOOLS/gromacs/2025.1-mpi/gromacs-2025.1/bin:$PATH"
+export PATH=$TOOLS/gromacs/2022.5-mpi-plumed/gromacs-2022.5/bin:$PATH
+
+touch plumed.dat
 
 cat <<EOF > target_structures_distances.txt
 init1.gro     15
@@ -45,9 +47,10 @@ do
     cp $INDEX rep${rep}/index.ndx
     cp $ITP rep${rep}/
     cp $TEMPLATE_MDP rep${rep}/reus.mdp
+    touch rep${rep}/plumed.dat
     sed -i -e "s/TARGET_DISTANCE/${TARGET_DISTANCE}/g" rep${rep}/reus.mdp
     cp $SUBMIT_SCRIPT rep${rep}/
-    mdtbx cmd gmx grompp \
+    gmx_mpi grompp \
         -f reus.mdp \
         -c gmx.gro \
         -n index.ndx \
