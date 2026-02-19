@@ -1,4 +1,6 @@
 from pymol import cmd
+from pathlib import Path
+from typing import List
 
 
 def color_plddt(model=None):
@@ -34,3 +36,14 @@ def ray_png(png="out_pymol_ray.png"):
 
 
 cmd.extend("ray_png", ray_png)
+
+
+
+def load_as(pdb_files: str, model_name="target"):
+    print(f"loading {pdb_files} as {model_name}")
+    for path in Path(".").glob(pdb_files):
+        print(path)
+        cmd.load(path, model_name)
+
+cmd.extend("load_as", load_as)
+
