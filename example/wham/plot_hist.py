@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_histograms(input_file='hist.xvg', output_file='hist_plot.png'):
+
+def plot_histograms(input_file="hist.xvg", output_file="hist_plot.png"):
     # xvgファイルを読み込む
-    data = np.loadtxt(input_file, comments=['#', '@'])
+    data = np.loadtxt(input_file, comments=["#", "@"])
 
     # 1列目が反応座標
     x = data[:, 0]
@@ -15,7 +16,7 @@ def plot_histograms(input_file='hist.xvg', output_file='hist_plot.png'):
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # カラーマップを使用（ウィンドウ数が多い場合に色を自動で変える）
-    cmap = plt.get_cmap('jet')
+    cmap = plt.get_cmap("jet")
     colors = [cmap(i) for i in np.linspace(0, 1, num_windows)]
 
     for i in range(num_windows):
@@ -25,13 +26,13 @@ def plot_histograms(input_file='hist.xvg', output_file='hist_plot.png'):
         ax.plot(x, y, color=colors[i], alpha=0.7, linewidth=1.5)
 
     # ラベル設定
-    ax.set_xlabel('Reaction Coordinate (nm)', fontsize=14)
-    ax.set_ylabel('Count', fontsize=14)
-    ax.set_title('Umbrella Sampling Histograms', fontsize=16)
+    ax.set_xlabel("Reaction Coordinate (nm)", fontsize=14)
+    ax.set_ylabel("Count", fontsize=14)
+    ax.set_title("Umbrella Sampling Histograms", fontsize=16)
 
     # グリッドなどの体裁
-    ax.grid(True, linestyle=':', alpha=0.6)
-    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.grid(True, linestyle=":", alpha=0.6)
+    ax.tick_params(axis="both", which="major", labelsize=12)
 
     # 保存
     fig.tight_layout()
@@ -45,6 +46,7 @@ def plot_histograms(input_file='hist.xvg', output_file='hist_plot.png'):
     # plt.savefig(output_file.replace(".png", "_no_title.png"), dpi=300, transparent=True)
 
     plt.close(fig)
+
 
 # 実行
 if __name__ == "__main__":

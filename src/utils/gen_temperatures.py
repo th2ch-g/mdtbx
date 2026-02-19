@@ -17,6 +17,7 @@ D1 = 0.002976
 KB = 0.008314  # kJ/mol/K
 MAXITER = 100
 
+
 def add_subcmd(subparsers):
     parser = subparsers.add_parser(
         "gen_temperatures",
@@ -24,10 +25,18 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument("--pdes", type=float, required=True, help="Exchange probability")
-    parser.add_argument("--tlow", type=float, required=True, help="Lower temperature limit")
-    parser.add_argument("--thigh", type=float, required=True, help="Upper temperature limit")
-    parser.add_argument("--nw", type=int, required=True, help="Number of water molecules")
+    parser.add_argument(
+        "--pdes", type=float, required=True, help="Exchange probability"
+    )
+    parser.add_argument(
+        "--tlow", type=float, required=True, help="Lower temperature limit"
+    )
+    parser.add_argument(
+        "--thigh", type=float, required=True, help="Upper temperature limit"
+    )
+    parser.add_argument(
+        "--nw", type=int, required=True, help="Number of water molecules"
+    )
     parser.add_argument("--np", type=int, required=True, help="Number of protein atoms")
     parser.add_argument("--tol", type=float, default=1e-4, help="Tolerance")
 
@@ -71,12 +80,15 @@ def add_subcmd(subparsers):
         help="Simulation type: 0=NPT, 1=NVT (Note: only NPT is fully supported)",
     )
 
+
 def calc_mu(nw, np_val, temp, fener):
-    return ((A0 + A1 * temp) * nw + (B0 + B1 * temp) * np_val - temp * fener)
+    return (A0 + A1 * temp) * nw + (B0 + B1 * temp) * np_val - temp * fener
+
 
 def myeval(m12, s12, cc, u):
     argument = -cc * u - (u - m12) ** 2 / (2 * s12 * s12)
     return math.exp(argument)
+
 
 def myintegral(m12, s12, cc):
     int_val = 0.0
@@ -90,6 +102,7 @@ def myintegral(m12, s12, cc):
         u += du
 
     return du * int_val / (s12 * math.sqrt(2 * math.pi))
+
 
 def run(args):
     # Input validation
@@ -177,7 +190,9 @@ def run(args):
 
             cc = (1.0 / KB) * ((1.0 / t1) - (1.0 / t2))
 
-            var = ndf * (D1 * D1 * (t1 * t1 + t2 * t2) + 2 * D1 * D0 * (t1 + t2) + 2 * D0 * D0)
+            var = ndf * (
+                D1 * D1 * (t1 * t1 + t2 * t2) + 2 * D1 * D0 * (t1 + t2) + 2 * D0 * D0
+            )
             sig12 = math.sqrt(var)
 
             if sig12 == 0:
@@ -220,7 +235,9 @@ def run(args):
 
     # Output table
     print("\nTemperatures and Energies")
-    print(f"{'Index':<5} {'Temp (K)':<10} {'mu':<10} {'sigma':<10} {'mu12':<10} {'sigma12':<10} {'P12':<10}")
+    print(
+        f"{'Index':<5} {'Temp (K)':<10} {'mu':<10} {'sigma':<10} {'mu12':<10} {'sigma12':<10} {'P12':<10}"
+    )
 
     for k in range(len(t_list)):
         idx = k + 1
@@ -229,13 +246,15 @@ def run(args):
         sigma = sigma_list[k]
 
         if k == 0:
-             print(f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f}")
+            print(f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f}")
         else:
-             # Previous interval values
-             prev_mu12 = mm_list[k-1]
-             prev_sig12 = ss_list[k-1]
-             prev_p = p_list[k-1]
-             print(f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f} {prev_mu12:<10.1f} {prev_sig12:<10.2f} {prev_p:<10.4f}")
+            # Previous interval values
+            prev_mu12 = mm_list[k - 1]
+            prev_sig12 = ss_list[k - 1]
+            prev_p = p_list[k - 1]
+            print(
+                f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f} {prev_mu12:<10.1f} {prev_sig12:<10.2f} {prev_p:<10.4f}"
+            )
 
     print("\nTemperature list for scripting:")
     print(", ".join([f"{t:.2f}" for t in t_list]))

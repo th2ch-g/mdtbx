@@ -24,9 +24,9 @@ print(f"Conversion factor (1 kT): {kT_to_kcal:.4f} kcal/mol")
 # ==========================================
 try:
     data = np.loadtxt(input_file)
-    r = data[:, 0]        # 1列目: 距離 (nm)
-    pmf_kT = data[:, 1]   # 2列目: PMF (kT)
-    error_kT = data[:, 2] # 3列目: 誤差 (kT)
+    r = data[:, 0]  # 1列目: 距離 (nm)
+    pmf_kT = data[:, 1]  # 2列目: PMF (kT)
+    error_kT = data[:, 2]  # 3列目: 誤差 (kT)
 except FileNotFoundError:
     print(f"Error: {input_file} が見つかりません。")
     exit()
@@ -42,16 +42,25 @@ fig, ax = plt.subplots(figsize=(8, 6))
 
 # 1. 誤差範囲を塗りつぶし (Shaded Error Bar)
 # kcal/mol なので少し線や色を濃いめに見やすく設定
-ax.fill_between(r, pmf_kcal - error_kcal, pmf_kcal + error_kcal,
-                 color='#1f77b4', alpha=0.3, linewidth=0, label='Standard Error')
+ax.fill_between(
+    r,
+    pmf_kcal - error_kcal,
+    pmf_kcal + error_kcal,
+    color="#1f77b4",
+    alpha=0.3,
+    linewidth=0,
+    label="Standard Error",
+)
 
 # 2. PMFのメインライン
-ax.plot(r, pmf_kcal, color='#1f77b4', linewidth=2.5, label='PMF')
+ax.plot(r, pmf_kcal, color="#1f77b4", linewidth=2.5, label="PMF")
 
 # ==========================================
 # 装飾
 # ==========================================
-ax.set_title(f"Potential of Mean Force (T={int(temperature)}K)", fontsize=16, fontweight='bold')
+ax.set_title(
+    f"Potential of Mean Force (T={int(temperature)}K)", fontsize=16, fontweight="bold"
+)
 ax.set_xlabel("Dihedral (nm)", fontsize=14)
 ax.set_ylabel("Free Energy (kcal/mol)", fontsize=14)
 
@@ -61,13 +70,13 @@ plt.ylim(0, 9)
 # ax.axhline(0, color='gray', linestyle='--', linewidth=1, alpha=0.7)
 
 # グリッド線
-ax.grid(True, linestyle=':', alpha=0.6)
+ax.grid(True, linestyle=":", alpha=0.6)
 
 # 軸の文字サイズと目盛りの向き
-ax.tick_params(axis='both', which='major', labelsize=12, direction='in')
+ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
 
 # 凡例
-ax.legend(fontsize=12, loc='best', frameon=True, framealpha=0.9)
+ax.legend(fontsize=12, loc="best", frameon=True, framealpha=0.9)
 
 # 余白の調整
 plt.tight_layout()
@@ -81,7 +90,7 @@ print(f"グラフを保存しました: {output_image}")
 ax.set_title("")
 ax.set_xlabel("")
 ax.set_ylabel("")
-ax.tick_params(axis='both', labelbottom=False, labelleft=False)
+ax.tick_params(axis="both", labelbottom=False, labelleft=False)
 legend = ax.get_legend()
 if legend:
     legend.remove()

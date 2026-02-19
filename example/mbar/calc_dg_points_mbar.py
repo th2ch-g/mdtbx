@@ -77,10 +77,16 @@ print("-" * 60)
 print(f"Temperature: {temperature} K")
 print(f"RT factor  : {RT_kcal:.4f} kcal/mol")
 print("-" * 60)
-print(f"{'Point':<10} | {'Target(nm)':<10} | {'Actual(nm)':<10} | {'PMF(kT)':<10} | {'PMF(kcal/mol)':<15}")
+print(
+    f"{'Point':<10} | {'Target(nm)':<10} | {'Actual(nm)':<10} | {'PMF(kT)':<10} | {'PMF(kcal/mol)':<15}"
+)
 print("-" * 60)
-print(f"{'Start (A)':<10} | {dist_A_target:<10.4f} | {dist_A_actual:<10.4f} | {pmf_A_kt:<10.4f} | {pmf_A_kt * RT_kcal:<15.4f}")
-print(f"{'End   (B)':<10} | {dist_B_target:<10.4f} | {dist_B_actual:<10.4f} | {pmf_B_kt:<10.4f} | {pmf_B_kt * RT_kcal:<15.4f}")
+print(
+    f"{'Start (A)':<10} | {dist_A_target:<10.4f} | {dist_A_actual:<10.4f} | {pmf_A_kt:<10.4f} | {pmf_A_kt * RT_kcal:<15.4f}"
+)
+print(
+    f"{'End   (B)':<10} | {dist_B_target:<10.4f} | {dist_B_actual:<10.4f} | {pmf_B_kt:<10.4f} | {pmf_B_kt * RT_kcal:<15.4f}"
+)
 print("-" * 60)
 print(f"Delta G (A -> B): {dG_kcal:.4f} +/- {error_dG_kcal:.4f} kcal/mol")
 print("-" * 60)
@@ -89,16 +95,33 @@ print("-" * 60)
 # Plotting
 # =============================================================================
 plt.figure(figsize=(8, 5))
-plt.errorbar(dist, pmf_kcal, yerr=err_kt*RT_kcal, fmt='-', color='black', ecolor='lightgray', label='PMF Profile')
+plt.errorbar(
+    dist,
+    pmf_kcal,
+    yerr=err_kt * RT_kcal,
+    fmt="-",
+    color="black",
+    ecolor="lightgray",
+    label="PMF Profile",
+)
 
 # ポイントのハイライト
-plt.scatter([dist_A_actual], [pmf_A_kt * RT_kcal], color='blue', s=100, zorder=5, label='Start (A)')
-plt.scatter([dist_B_actual], [pmf_B_kt * RT_kcal], color='red', s=100, zorder=5, label='End (B)')
+plt.scatter(
+    [dist_A_actual],
+    [pmf_A_kt * RT_kcal],
+    color="blue",
+    s=100,
+    zorder=5,
+    label="Start (A)",
+)
+plt.scatter(
+    [dist_B_actual], [pmf_B_kt * RT_kcal], color="red", s=100, zorder=5, label="End (B)"
+)
 
 plt.title(f"PMF Profile with Selected Points\nDelta G = {dG_kcal:.2f} kcal/mol")
 plt.xlabel("Distance (nm)")
 plt.ylabel("PMF (kcal/mol)")
-plt.grid(True, linestyle='--', alpha=0.6)
+plt.grid(True, linestyle="--", alpha=0.6)
 plt.legend()
 plt.tight_layout()
 

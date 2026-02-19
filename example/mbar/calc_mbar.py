@@ -10,17 +10,14 @@ from pathlib import Path
 kconst = 100
 subsample = True
 
-path_list = sorted(
-    Path(f"./").glob(f"rep*"),
-    key=lambda x: float(x.name.split("_")[-2])
-)
+path_list = sorted(Path("./").glob("rep*"), key=lambda x: float(x.name.split("_")[-2]))
 
 with open("metadata.dat", "w") as f:
     for trial in path_list:
         try:
             # target_distance = float(trial.name.split("_")[-2]) * 0.1
             target_dihedral = float(trial.name.split("_")[-2])
-        except:
+        except Exception:
             continue
 
         # us1_pullx.xvg から us5... まで探す
@@ -121,10 +118,10 @@ for k in range(K):
 
     if N_k[k] > r_kn.shape[1]:
         new_size = max(N_k[k], r_kn.shape[1] * 2)
-        r_kn = np.pad(r_kn, ((0,0), (0, new_size - r_kn.shape[1])), 'constant')
-        u_kn = np.pad(u_kn, ((0,0), (0, new_size - u_kn.shape[1])), 'constant')
+        r_kn = np.pad(r_kn, ((0, 0), (0, new_size - r_kn.shape[1])), "constant")
+        u_kn = np.pad(u_kn, ((0, 0), (0, new_size - u_kn.shape[1])), "constant")
 
-    r_kn[k, 0:N_k[k]] = raw_data[indices]
+    r_kn[k, 0 : N_k[k]] = raw_data[indices]
 
     if k % 10 == 0:
         print(f"Processed window {k}/{K} (Samples: {N_k[k]})")
@@ -157,7 +154,7 @@ range_width = dist_max - dist_min
 # データ密度に応じてビン幅を調整（ここでは少し粗めの 0.03 nm 程度から試す）
 target_bin_width = 0.03
 nbins = int(range_width / target_bin_width)
-nbins = max(5, min(nbins, 50)) # ビン数が少なすぎず多すぎないように制限
+nbins = max(5, min(nbins, 50))  # ビン数が少なすぎず多すぎないように制限
 
 print(f"Auto-detected range: {dist_min:.4f} nm - {dist_max:.4f} nm")
 print(f"Set nbins to: {nbins}")
@@ -166,11 +163,13 @@ print("Evaluating reduced potential energy matrix...")
 u_kln = np.zeros([K, K, N_max])
 for k in range(K):
     # k番目のシミュレーションのデータを取り出す
-    r = r_kn[k, :N_k[k]]
+    r = r_kn[k, : N_k[k]]
     # 全ウィンドウ l でのエネルギーを計算
     # diff[l, n] = r[n] - r0_k[l]
     diff = r[np.newaxis, :] - r0_k[:, np.newaxis]
-    u_kln[k, :, :N_k[k]] = u_kn[k, :N_k[k]] + beta * 0.5 * K_k[:, np.newaxis] * (diff**2)
+    u_kln[k, :, : N_k[k]] = u_kn[k, : N_k[k]] + beta * 0.5 * K_k[:, np.newaxis] * (
+        diff**2
+    )
 
 # =============================================================================
 # Run MBAR
@@ -186,13 +185,17 @@ r_n = pymbar.utils.kn_to_n(r_kn, N_k=N_k)
 u_n = pymbar.utils.kn_to_n(u_kn, N_k=N_k)
 
 histogram_parameters = {"bin_edges": bin_edges}
-fes.generate_fes(u_n, r_n, fes_type="histogram", histogram_parameters=histogram_parameters)
+fes.generate_fes(
+    u_n, r_n, fes_type="histogram", histogram_parameters=histogram_parameters
+)
 # fes.generate_fes(u_kn, r_n, fes_type="histogram", histogram_parameters=histogram_parameters, n_bootstraps=100)
 
 print("Computing FES...")
 # 念のためエラー計算なしでトライ
 try:
-    results = fes.get_fes(bin_centers, reference_point="from-lowest", uncertainty_method="analytical")
+    results = fes.get_fes(
+        bin_centers, reference_point="from-lowest", uncertainty_method="analytical"
+    )
     # results = fes.get_fes(bin_centers, reference_point="from-lowest", uncertainty_method="bootstrap")
     # results = fes.get_fes(bin_centers, reference_point="from-lowest", uncertainty_method="bootstrap", n_bootstraps=100, bootstrap_solver_protocol="robust")
 except Exception as e:
@@ -216,4 +219,3 @@ for i in range(nbins):
 
 np.savetxt("pmf_output.dat", out_data, header="Dihedral(degree) PMF(kT) Error(kT)")
 print("\nDone! Saved to pmf_output.dat")
-

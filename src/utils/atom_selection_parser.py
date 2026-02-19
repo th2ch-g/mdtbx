@@ -3,8 +3,26 @@ from typing import List, Union, Dict, Protocol, runtime_checkable, Set
 from dataclasses import dataclass
 
 PROTEIN_RESNAMES: Set[str] = {
-    "ALA", "ARG", "ASN", "ASP", "CYS", "GLN", "GLU", "GLY", "HIS", "ILE",
-    "LEU", "LYS", "MET", "PHE", "PRO", "SER", "THR", "TRP", "TYR", "VAL",
+    "ALA",
+    "ARG",
+    "ASN",
+    "ASP",
+    "CYS",
+    "GLN",
+    "GLU",
+    "GLY",
+    "HIS",
+    "ILE",
+    "LEU",
+    "LYS",
+    "MET",
+    "PHE",
+    "PRO",
+    "SER",
+    "THR",
+    "TRP",
+    "TYR",
+    "VAL",
 }
 
 WATER_RESNAMES: Set[str] = {"HOH", "WAT", "SOL"}
@@ -68,7 +86,8 @@ class Chain(SelectionNode):
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
         chain = mol.get("chain")
-        if not isinstance(chain, str): return False
+        if not isinstance(chain, str):
+            return False
         return any(fnmatch.fnmatch(chain, p) for p in self.names)
 
 
@@ -78,7 +97,8 @@ class ResName(SelectionNode):
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
         resname = mol.get("resname")
-        if not isinstance(resname, str): return False
+        if not isinstance(resname, str):
+            return False
         return any(fnmatch.fnmatch(resname, p) for p in self.names)
 
 
@@ -97,7 +117,8 @@ class Name(SelectionNode):
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
         name = mol.get("name")
-        if not isinstance(name, str): return False
+        if not isinstance(name, str):
+            return False
         # fnmatchを使用してワイルドカード(*)に対応
         return any(fnmatch.fnmatch(name, p) for p in self.names)
 
@@ -204,14 +225,16 @@ class SelectionParser:
         start_pos = self.pos
 
         def is_id_char(c: str) -> bool:
-            return c.isalnum() or c == '*'
+            return c.isalnum() or c == "*"
 
         if self.pos < len(self.text) and is_id_char(self.text[self.pos]):
             self.pos += 1
             while self.pos < len(self.text) and is_id_char(self.text[self.pos]):
                 self.pos += 1
             return self.text[start_pos : self.pos]
-        raise ParseError(f"Expected alphanumeric characters or '*' at position {self.pos}")
+        raise ParseError(
+            f"Expected alphanumeric characters or '*' at position {self.pos}"
+        )
 
     def _parse_digit1(self) -> str:
         start_pos = self.pos
