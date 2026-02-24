@@ -70,6 +70,7 @@ ruff = "*"
 setuptools = "<81" # for mdtraj 1.9.9
 pymbar = { version = "*", extras = ["jax"] }
 gmx_MMPBSA = "*"
+pydssp = "*"
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
