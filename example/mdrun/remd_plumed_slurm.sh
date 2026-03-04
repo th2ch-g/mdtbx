@@ -14,10 +14,10 @@ module load $TOOLS/plumed-2.10.0/build/lib/plumed/modulefile
 module load gcc/13.3.0 cuda/12.9 cmake/3.31.6 openmpi/5.0.7
 export PATH="$TOOLS/gromacs/2022.5-mpi-plumed/gromacs-2022.5/bin:$PATH"
 
-OMP=1
-MPI=16
 REPLEX=500
 N_REPLICA=16
+OMP=1
+MPI=$N_REPLICA
 DEFFNM="grest" # or rest2, reus
 SIMULATION_CONTINUE=true
 SIMULATION_OVERWRITE=false
