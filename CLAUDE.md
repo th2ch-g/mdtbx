@@ -19,6 +19,10 @@ pixi install
 pixi run mdtbx <subcommand>
 pixi run gmx ...           # mdtbx cmd gmx ... の短縮形
 
+# テスト
+pixi run test              # 全テスト実行
+pixi run test-fast         # 最初の失敗で停止 (-x)
+
 # コードフォーマット・Lint
 pixi run r                 # ruff format + ruff check を一括実行
 pixi run ruff-format       # フォーマットのみ
@@ -42,8 +46,21 @@ src/
   cli.py         # argparseサブコマンドの登録・ディスパッチ
   config.py      # グローバル定数(水密度、Gaussian設定、MAXWARN等)
   logger.py      # ロガー生成ユーティリティ
-  utils/         # 各サブコマンドの実装(build/analysis/general)
+  utils/         # 汎用ユーティリティ(mod_mdp, convert, rmfile等)
+  build/         # 系構築サブコマンド(addace, amb2gro, gen_posres等)
+  trajectory/    # 軌跡処理サブコマンド(fit, trjcat, pacs_trjcat等)
+  analysis/      # 解析サブコマンド(extract_str, extract_ave_str等)
   cv/            # Collective Variable計算(comdist, rmsd, pca等)
+
+tests/
+  conftest.py    # 共有fixture・PyMOLモック設定
+  fixtures/      # テストデータ(sample.mdp, sample.top, sample.pdb)
+  test_utils/    # src/utils/ のテスト
+  test_build/    # src/build/ のテスト
+  test_trajectory/ # src/trajectory/ のテスト
+  test_analysis/ # src/analysis/ のテスト
+  test_cv/       # src/cv/ のテスト
+  test_cli.py    # 全サブコマンドのCLI登録確認
 
 pymol-plugins/
   pymol_plugins/ # PyMOLプラグイン(builder, visualizer, selector等)
@@ -54,7 +71,7 @@ install_scripts/ # Gromacs/PLUMED等の手動インストールスクリプト
 
 ### サブコマンドの追加パターン
 
-各モジュール(`src/utils/*.py`, `src/cv/*.py`)は以下の2関数を実装する:
+各モジュール(`src/build/*.py`, `src/trajectory/*.py`, `src/analysis/*.py`, `src/cv/*.py`, `src/utils/*.py`)は以下の2関数を実装する:
 
 ```python
 def add_subcmd(subparsers):
@@ -64,7 +81,25 @@ def run(args):
     # 実装本体
 ```
 
-`cli.py` に `add_subcmd` 呼び出しと `elif sys.argv[1] == "..."` の分岐を追加して登録する。
+`cli.py` に以下の2箇所を追加して登録する:
+
+```python
+# 1. importブロック (カテゴリに応じて選択)
+from .build import <name>       # 系構築
+from .trajectory import <name>  # 軌跡処理
+from .analysis import <name>    # 解析
+from .cv import <name>          # CV計算
+from .utils import <name>       # 汎用
+
+# 2. add_subcmdの呼び出し
+<name>.add_subcmd(subparsers)
+```
+
+モジュール内で `src/utils/` のパーサーを使う場合は `..utils.` で参照する:
+```python
+from ..utils.atom_selection_parser import AtomSelector
+from ..utils.parse_top import GromacsTopologyParser
+```
 
 ### 設定 (`src/config.py`)
 
