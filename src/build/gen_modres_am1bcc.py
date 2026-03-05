@@ -58,6 +58,8 @@ def add_subcmd(subparsers):
         "--posttailtype", default="N", type=str, help="Atom name of Posttail"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     # ref: https://ambermd.org/tutorials/basic/tutorial5/index.php

@@ -58,6 +58,8 @@ def add_subcmd(subparsers):
         "--no-resnr", action="store_true", help="Do not run gmx editconf -resnr 1"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     # ref: https://zenn.dev/kh01734/articles/012380a58949d1

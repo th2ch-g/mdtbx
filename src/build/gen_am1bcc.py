@@ -40,6 +40,8 @@ def add_subcmd(subparsers):
 
     parser.add_argument("-c", "--charge", default=0, type=int, help="Charge")
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     filetype = Path(args.structure).suffix[1:]

@@ -5,33 +5,19 @@ from pathlib import Path
 
 n_frame = 100
 
-for npy in Path("cvs/comdist/").glob("*.npy"):
-    a = np.load(npy)
+# (directory, last_dim) pairs: comdist is scalar (1), comvec is 3D vector (3)
+targets = [
+    ("cvs/comdist/", 1),
+    ("cvs/comvec/", 3),
+]
 
-    print(a.shape)
+for cv_dir, ndim in targets:
+    for npy in Path(cv_dir).glob("*.npy"):
+        a = np.load(npy)
+        print(f"{npy}: {a.shape}", end=" -> ")
 
-    total_frame = a.shape[0]
-    total_frame = total_frame - 1
+        total_frame = a.shape[0] - 1  # drop first frame
+        a = a[1:].reshape(total_frame // n_frame, n_frame, ndim)
 
-    a = a[1:].reshape(total_frame // n_frame, n_frame, 1)
-
-    print(a.shape)
-
-    prefix = npy.stem
-    np.save(f"{prefix}_reshaped.npy", a)
-
-
-for npy in Path("cvs/comvec/").glob("*.npy"):
-    a = np.load(npy)
-
-    print(a.shape)
-
-    total_frame = a.shape[0]
-    total_frame = total_frame - 1
-
-    a = a[1:].reshape(total_frame // n_frame, n_frame, 3)
-
-    print(a.shape)
-
-    prefix = npy.stem
-    np.save(f"{prefix}_reshaped.npy", a)
+        print(a.shape)
+        np.save(f"{npy.stem}_reshaped.npy", a)

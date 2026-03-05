@@ -49,6 +49,8 @@ def add_subcmd(subparsers):
         help="Index file (.ndx)",
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     if args.gmx:
@@ -63,8 +65,8 @@ def run(args):
         import mdtraj as md
 
         trj = md.load(args.trajectory, top=args.topology)
-        ave_crds = trj.xyz.mean(axis=0)
+        ave_xyz = trj.xyz.mean(axis=0, keepdims=True)  # (1, n_atoms, 3)
+        avg_trj = md.Trajectory(ave_xyz, trj.topology)
         atom_indices = trj.top.select(args.selection)
-        final_trj = ave_crds[atom_indices]
-        final_trj.save_pdb(args.output)
+        avg_trj.atom_slice(atom_indices).save_pdb(args.output)
     LOGGER.info("Done")

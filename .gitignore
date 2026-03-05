@@ -196,3 +196,4 @@ cython_debug/
 .pixi
 
 !/sample/build
+!/src/build

@@ -1,7 +1,7 @@
 import argparse
 
-from .atom_selection_parser import AtomSelector
-from .parse_top import GromacsTopologyParser
+from ..utils.atom_selection_parser import AtomSelector
+from ..utils.parse_top import GromacsTopologyParser
 from ..config import *  # NOQA
 from ..logger import generate_logger
 
@@ -39,6 +39,8 @@ def add_subcmd(subparsers):
         type=str,
         help="Output file prefix (This also will be constant name)",
     )
+
+    parser.set_defaults(func=run)
 
 
 def run(args):

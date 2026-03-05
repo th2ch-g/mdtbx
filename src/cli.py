@@ -10,36 +10,38 @@ from .utils import convert
 from .utils import mod_mdp
 from .utils import shell_hook
 from .utils import cmd
-from .utils import mv_crds_mol2
-from .utils import print_perf
 from .utils import show_mdtraj
 from .utils import show_npy
+from .utils import partial_tempering
 
 # build utils
-from .utils import addace
-from .utils import addnme
-from .utils import add_ndx
-from .utils import calc_ion_conc
-from .utils import centering_gro
-from .utils import find_bond
-from .utils import gen_am1bcc
-from .utils import gen_resp
-from .utils import gen_modres_am1bcc
-from .utils import gen_modres_resp
-from .utils import gen_posres
-from .utils import gen_distres
-from .utils import modeling_cf
-from .utils import amb2gro
-from .utils import build_solution
-from .utils import partial_tempering
-from .utils import gen_temperatures
+from .build import addace
+from .build import addnme
+from .build import add_ndx
+from .build import mv_crds_mol2
+from .build import calc_ion_conc
+from .build import centering_gro
+from .build import find_bond
+from .build import gen_am1bcc
+from .build import gen_resp
+from .build import gen_modres_am1bcc
+from .build import gen_modres_resp
+from .build import gen_posres
+from .build import gen_distres
+from .build import modeling_cf
+from .build import amb2gro
+from .build import build_solution
+from .build import gen_temperatures
+
+# trajectory utils
+from .trajectory import trjcat
+from .trajectory import fit
+from .trajectory import pacs_trjcat
+from .trajectory import print_perf
 
 # analysis utils
-from .utils import trjcat
-from .utils import fit
-from .utils import pacs_trjcat
-from .utils import extract_ave_str
-from .utils import extract_str
+from .analysis import extract_ave_str
+from .analysis import extract_str
 
 from .cv import comdist
 from .cv import comvec
@@ -120,132 +122,10 @@ def cli() -> None:
 
     args = parser.parse_args()
 
-    if len(sys.argv) == 1:
+    if not hasattr(args, "func"):
         LOGGER.error(f"use {sys.argv[0]} --help")
         sys.exit(1)
+
     LOGGER.info(f"{sys.argv[1]} called")
-
-    if sys.argv[1] == "rmfile":
-        rmfile.run(args)
-
-    elif sys.argv[1] == "addace":
-        addace.run(args)
-
-    elif sys.argv[1] == "addnme":
-        addnme.run(args)
-
-    elif sys.argv[1] == "mv_crds_mol2":
-        mv_crds_mol2.run(args)
-
-    elif sys.argv[1] == "trjcat":
-        trjcat.run(args)
-
-    elif sys.argv[1] == "fit":
-        fit.run(args)
-
-    elif sys.argv[1] == "pacs_trjcat":
-        pacs_trjcat.run(args)
-
-    elif sys.argv[1] == "convert":
-        convert.run(args)
-
-    elif sys.argv[1] == "centering_gro":
-        centering_gro.run(args)
-
-    elif sys.argv[1] == "amb2gro":
-        amb2gro.run(args)
-
-    elif sys.argv[1] == "find_bond":
-        find_bond.run(args)
-
-    elif sys.argv[1] == "mod_mdp":
-        mod_mdp.run(args)
-
-    elif sys.argv[1] == "gen_am1bcc":
-        gen_am1bcc.run(args)
-
-    elif sys.argv[1] == "gen_resp":
-        gen_resp.run(args)
-
-    elif sys.argv[1] == "gen_modres_am1bcc":
-        gen_modres_am1bcc.run(args)
-
-    elif sys.argv[1] == "gen_modres_resp":
-        gen_modres_resp.run(args)
-
-    elif sys.argv[1] == "gen_posres":
-        gen_posres.run(args)
-
-    elif sys.argv[1] == "gen_distres":
-        gen_distres.run(args)
-
-    elif sys.argv[1] == "modeling_cf":
-        modeling_cf.run(args)
-
-    elif sys.argv[1] == "add_ndx":
-        add_ndx.run(args)
-
-    elif sys.argv[1] == "extract_ave_str":
-        extract_ave_str.run(args)
-
-    elif sys.argv[1] == "extract_str":
-        extract_str.run(args)
-
-    elif sys.argv[1] == "show_mdtraj":
-        show_mdtraj.run(args)
-
-    elif sys.argv[1] == "show_npy":
-        show_npy.run(args)
-
-    elif sys.argv[1] == "print_perf":
-        print_perf.run(args)
-
-    elif sys.argv[1] == "shell_hook":
-        shell_hook.run(args)
-
-    elif sys.argv[1] == "cmd":
-        cmd.run(args)
-
-    elif sys.argv[1] == "partial_tempering":
-        partial_tempering.run(args)
-
-    elif sys.argv[1] == "gen_temperatures":
-        gen_temperatures.run(args)
-
-    elif sys.argv[1] == "calc_ion_conc":
-        calc_ion_conc.run(args)
-
-    # elif sys.argv[1] == "build_membrane":
-    #     build_membrane.run(args)
-
-    elif sys.argv[1] == "build_solution":
-        build_solution.run(args)
-
-    elif sys.argv[1] == "comdist":
-        comdist.run(args)
-
-    elif sys.argv[1] == "comvec":
-        comvec.run(args)
-
-    elif sys.argv[1] == "mindist":
-        mindist.run(args)
-
-    elif sys.argv[1] == "rmsd":
-        rmsd.run(args)
-
-    elif sys.argv[1] == "rmsf":
-        rmsf.run(args)
-
-    elif sys.argv[1] == "pca":
-        pca.run(args)
-
-    elif sys.argv[1] == "xyz":
-        xyz.run(args)
-
-    elif sys.argv[1] == "densmap":
-        densmap.run(args)
-
-    else:
-        print(f"Unknown command: {sys.argv[1]}")
-
+    args.func(args)
     LOGGER.info(f"{sys.argv[1]} finished")

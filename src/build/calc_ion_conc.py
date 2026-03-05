@@ -57,6 +57,14 @@ def add_subcmd(subparsers):
     # cubic: calculate from system volume(assume cubic system)
     # water: calculate from water volume(recomended if lipid system)
     # optimize: consider charge of system
+    parser.add_argument(
+        "--net_charge",
+        default=0,
+        type=int,
+        help="Net charge of the solute (used with --method optimize)",
+    )
+
+    parser.set_defaults(func=run)
 
 
 def get_boxsize_from_pdb(args) -> tuple[float, float, float]:  # angstrom^3
@@ -112,7 +120,24 @@ def run(args):
             # volume = num_water * TIP3P_VOLUME * 1000
             LOGGER.info(f"Volume of water molecules: {volume}")
             ionnum = calc_ion_conc_from_volume(volume, args.concentration)
-        else:
-            raise NotImplementedError
+        else:  # optimize: neutralize system charge then add salt
+            boxsize = get_boxsize_from_pdb(args)
+            volume = boxsize[0] * boxsize[1] * boxsize[2]
+            LOGGER.info(f"Volume of system: {volume}")
+            net_charge = getattr(args, "net_charge", 0)
+            salt_num = calc_ion_conc_from_volume(volume, args.concentration)
+            # Add counter-ions to neutralize, then add salt ions
+            if net_charge > 0:
+                cation_num = salt_num
+                anion_num = salt_num + net_charge
+            elif net_charge < 0:
+                cation_num = salt_num + abs(net_charge)
+                anion_num = salt_num
+            else:
+                cation_num = salt_num
+                anion_num = salt_num
+            LOGGER.info(f"Net charge: {net_charge}")
+            LOGGER.info(f"Cation num: {cation_num}, Anion num: {anion_num}")
+            ionnum = cation_num  # report cation count as primary value
     LOGGER.info(f"Number of ions that should be added: # {ionnum}")
     print(f"ionnum: {ionnum}")

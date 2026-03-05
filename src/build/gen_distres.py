@@ -77,6 +77,8 @@ def add_subcmd(subparsers):
         help="Upper bound2 [nm] Use multiple value if multiple selection. Single value will be applied to all selection if single value is given",
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     # generate posres.itp

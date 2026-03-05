@@ -82,6 +82,8 @@ def add_subcmd(subparsers):
         "--keepfiles", action="store_true", help="Keep intermediate files"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     # tleap

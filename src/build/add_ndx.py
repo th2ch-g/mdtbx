@@ -38,6 +38,8 @@ def add_subcmd(subparsers):
         "-o", "--output", default="index.ndx", type=str, help="Output index file"
     )
 
+    parser.set_defaults(func=run)
+
 
 def make_default_index(args):
     cmd = f"echo q | gmx make_ndx -f {args.gro} -o {args.output}"

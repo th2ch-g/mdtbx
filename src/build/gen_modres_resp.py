@@ -79,6 +79,8 @@ def add_subcmd(subparsers):
         "--threads", default=16, type=int, help="Number of threads for Gaussian"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     # ref: https://qiita.com/tacoma/items/02474d9aaa99b903e4ee

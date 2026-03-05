@@ -80,6 +80,8 @@ def add_subcmd(subparsers):
         help="Simulation type: 0=NPT, 1=NVT (Note: only NPT is fully supported)",
     )
 
+    parser.set_defaults(func=run)
+
 
 def calc_mu(nw, np_val, temp, fener):
     return (A0 + A1 * temp) * nw + (B0 + B1 * temp) * np_val - temp * fener

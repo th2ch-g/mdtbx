@@ -56,6 +56,8 @@ def add_subcmd(subparsers):
         help="Output file name",
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     cmd.load(args.structure, "target")

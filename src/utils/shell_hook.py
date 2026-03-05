@@ -11,11 +11,13 @@ def add_subcmd(subparsers):
     """
     mdtbx shell_hook
     """
-    _parser = subparsers.add_parser(
+    parser = subparsers.add_parser(
         "shell_hook",
         help="Generate shell hook",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+
+    parser.set_defaults(func=run)
 
 
 def run(args):

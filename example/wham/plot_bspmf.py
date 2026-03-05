@@ -45,13 +45,6 @@ def plot_bootstrap_pmf(result_file="bsResult.xvg", output_file="pmf_bootstrap.pn
     # 保存
     fig.tight_layout()
     fig.savefig(output_file, dpi=300)
-
-    # ax.set_title("")
-    # ax.set_xlabel("")
-    # ax.set_ylabel("")
-    # ax.tick_params(axis='both', labelbottom=False, labelleft=False)
-    # plt.savefig(output_file.replace(".png", "_no_title.png"), dpi=300, transparent=True)
-
     plt.close(fig)
     print(f"Saved plot to {output_file}")
 

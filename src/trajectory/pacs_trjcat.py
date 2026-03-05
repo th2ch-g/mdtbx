@@ -85,6 +85,8 @@ def add_subcmd(subparsers):
         help="Keep cycle trajectory (e.g. trial001/cycle000/prd_all.xtc)",
     )
 
+    parser.set_defaults(func=run)
+
 
 def check_cycle(args):
     cmd = f"ls {args.trial_dir} | grep cycle | wc -l"

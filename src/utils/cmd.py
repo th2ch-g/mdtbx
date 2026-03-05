@@ -25,6 +25,8 @@ def add_subcmd(subparsers):
         help="The command and its arguments to execute.",
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     if not args.command:

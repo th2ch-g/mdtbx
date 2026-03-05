@@ -19,6 +19,8 @@ def add_subcmd(subparsers):
 
     parser.add_argument("npy", type=str, help="npy file")
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     npy = np.load(args.npy)

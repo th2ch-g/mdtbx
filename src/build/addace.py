@@ -25,6 +25,8 @@ def add_subcmd(subparsers):
         "-o", "--output_prefix", default="out_ace", type=str, help="Output file prefix"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     cmd.load(args.structure, "target")

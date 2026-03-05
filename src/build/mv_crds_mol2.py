@@ -40,6 +40,8 @@ def add_subcmd(subparsers):
         help="Output mol2 file",
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     atomname2crds = {}

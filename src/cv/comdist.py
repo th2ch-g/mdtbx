@@ -57,6 +57,8 @@ def add_subcmd(subparsers):
         help="Index file (.ndx)",
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     if args.gmx:

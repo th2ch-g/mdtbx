@@ -38,6 +38,8 @@ def add_subcmd(subparsers):
         "--no-editconf", action="store_true", help="Do not run gmx editconf"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     if args.type == "parmed":

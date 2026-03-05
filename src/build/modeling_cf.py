@@ -24,6 +24,8 @@ def add_subcmd(subparsers):
         "-s", "--sequence", required=True, type=str, help="amino acid sequence"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     # colabfold command check

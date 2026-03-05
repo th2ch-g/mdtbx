@@ -34,6 +34,8 @@ def add_subcmd(subparsers):
         type=str,
     )
 
+    parser.set_defaults(func=run)
+
 
 def parse_log_file(log_path):
     data = {

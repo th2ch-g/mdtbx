@@ -47,6 +47,8 @@ def add_subcmd(subparsers):
         "-o", "--output", type=str, default="mindist.npy", help="Output file (.npy)"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     trj = md.load(args.trajectory, top=args.topology)

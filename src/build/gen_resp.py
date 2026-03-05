@@ -52,6 +52,8 @@ def add_subcmd(subparsers):
         "--no-opt", action="store_true", help="Do not optimize structure"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     filetype = Path(args.structure).suffix[1:]
@@ -92,7 +94,7 @@ def run(args):
         LOGGER.info("structure_optimization.log generated")
 
         # single point
-        cmd = f"obabel -i {GAUSSIAN_CMD} structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
+        cmd = f"obabel -i gout structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
         subprocess.run(cmd, shell=True, check=True)
 
     else:

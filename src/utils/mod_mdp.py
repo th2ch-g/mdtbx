@@ -35,6 +35,8 @@ def add_subcmd(subparsers):
         "-lj", "--ljust", type=int, default=23, help="Ljust for new variable line"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     for mdp in Path(args.path).glob("*.mdp"):

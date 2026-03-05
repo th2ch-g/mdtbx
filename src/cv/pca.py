@@ -84,6 +84,8 @@ def add_subcmd(subparsers):
         "-o", "--output", type=str, default="pca.npy", help="Output file (.npy)"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     if args.gmx:
@@ -127,8 +129,8 @@ def run(args):
         trj.superpose(
             ref,
             0,
-            atom_indices=atom_indices_fit_ref,
-            ref_atom_indices=atom_indices_fit_trj,
+            atom_indices=atom_indices_fit_trj,
+            ref_atom_indices=atom_indices_fit_ref,
         )
         atom_indices_cal = trj.top.select(args.selection_cal_trj)
         pca_model = PCA(n_components=args.n_components)
