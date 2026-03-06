@@ -1,3 +1,9 @@
+# References:
+# - Tutorial 34: Solvation with 3D-RISM
+#   https://ambermd.org/tutorials/advanced/tutorial34/index.html
+# - Tutorial 40: 1D-RISM and 3D-RISM
+#   https://ambermd.org/tutorials/advanced/tutorial40/index.php
+
 import argparse
 import os
 import shutil
