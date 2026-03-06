@@ -16,6 +16,7 @@ from .utils import partial_tempering
 
 # build utils
 from .build import addace
+from .build import addh
 from .build import addnme
 from .build import add_ndx
 from .build import mv_crds_mol2
@@ -31,6 +32,8 @@ from .build import gen_distres
 from .build import modeling_cf
 from .build import amb2gro
 from .build import build_solution
+from .build import build_vacuum
+from .build import place_solvent
 from .build import gen_temperatures
 
 # trajectory utils
@@ -78,6 +81,7 @@ def cli() -> None:
     subparsers = parser.add_subparsers()
 
     addace.add_subcmd(subparsers)
+    addh.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
     add_ndx.add_subcmd(subparsers)
     mv_crds_mol2.add_subcmd(subparsers)
@@ -110,6 +114,8 @@ def cli() -> None:
 
     # build_membrane.add_subcmd(subparsers)
     build_solution.add_subcmd(subparsers)
+    build_vacuum.add_subcmd(subparsers)
+    place_solvent.add_subcmd(subparsers)
 
     comdist.add_subcmd(subparsers)
     comvec.add_subcmd(subparsers)

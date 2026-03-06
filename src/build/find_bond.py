@@ -56,6 +56,13 @@ def add_subcmd(subparsers):
         help="Output file name",
     )
 
+    parser.add_argument(
+        "-op",
+        "--output-pdb",
+        type=str,
+        help="Output PDB file with CYS renamed to CYM for SS-bonded residues",
+    )
+
     parser.set_defaults(func=run)
 
 
@@ -88,3 +95,18 @@ def run(args):
         else:
             LOGGER.info(f"{len(bonds)} bonds found")
             print(bonds_str)
+
+    if args.output_pdb is not None:
+        if len(bonds) == 0:
+            LOGGER.info("No SS-bond found; saving original structure to output PDB")
+            cmd.save(args.output_pdb, "target")
+        else:
+            bonded_resi = set()
+            for res1, res2 in bonds:
+                bonded_resi.add(res1)
+                bonded_resi.add(res2)
+            for resi in bonded_resi:
+                cmd.alter(f"target and resn CYS and resi {resi}", "resn='CYM'")
+                LOGGER.info(f"CYS resi {resi} renamed to CYM")
+            cmd.save(args.output_pdb, "target")
+            LOGGER.info(f"{args.output_pdb} generated")
