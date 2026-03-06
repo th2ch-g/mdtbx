@@ -46,11 +46,17 @@ src/
   cli.py         # argparseサブコマンドの登録・ディスパッチ
   config.py      # グローバル定数(水密度、Gaussian設定、MAXWARN等)
   logger.py      # ロガー生成ユーティリティ
-  utils/         # 汎用ユーティリティ(mod_mdp, convert, rmfile等)
-  build/         # 系構築サブコマンド(addace, amb2gro, gen_posres等)
-  trajectory/    # 軌跡処理サブコマンド(fit, trjcat, pacs_trjcat等)
-  analysis/      # 解析サブコマンド(extract_str, extract_ave_str等)
-  cv/            # Collective Variable計算(comdist, rmsd, pca等)
+  utils/         # 汎用ユーティリティ(mod_mdp, convert, rmfile, cmd, shell_hook, show_mdtraj, show_npy, partial_tempering)
+               # ※ atom_selection_parser.py, parse_top.py はサブコマンドでなくライブラリユーティリティ
+  build/         # 系構築サブコマンド(addace, addnme, add_ndx, mv_crds_mol2, calc_ion_conc, centering_gro,
+               #   find_bond, gen_am1bcc, gen_resp, gen_modres_am1bcc, gen_modres_resp, gen_posres,
+               #   gen_distres, modeling_cf, amb2gro, build_solution, gen_temperatures)
+               # ※ addh.py, mutate.py, place_solvent.py は未登録(cli.pyへの追加が必要)
+  trajectory/    # 軌跡処理サブコマンド(fit, trjcat, pacs_trjcat, print_perf)
+               # ※ opt_perf.py は未登録
+  analysis/      # 解析サブコマンド(extract_str, extract_ave_str)
+               # ※ contactmap.py, distmat.py は未登録
+  cv/            # Collective Variable計算(comdist, comvec, densmap, mindist, rmsd, rmsf, xyz, pca)
 
 tests/
   conftest.py    # 共有fixture・PyMOLモック設定
