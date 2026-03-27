@@ -25,9 +25,31 @@ from pymol import cmd
 
 SUPPORTED_AI_TYPES = {"claude", "codex"}
 AI_TIMEOUT_SEC = 180
+AI_MAX_ATTEMPTS = 5
 AI_JOB_COUNTER = count(1)
 AI_JOBS: dict[int, dict[str, object]] = {}
 AI_JOBS_LOCK = threading.Lock()
+PYMOL_SPECIAL_COMMAND_PREFIXES = (
+    "@",
+    "/",
+)
+PYMOL_SPECIAL_COMMANDS = {
+    "python",
+    "python end",
+    "embed",
+    "skip",
+    "util.cbag",
+    "util.cbaw",
+    "util.cbao",
+}
+
+
+class _AIResponseFeedbackError(RuntimeError):
+    """Retryable error that should be fed back to the AI."""
+
+    def __init__(self, message: str, response: str) -> None:
+        super().__init__(message)
+        self.response = response
 
 
 def _capture_scene_png(image_path: Path) -> None:
@@ -100,6 +122,39 @@ Rules:
 - If you return PyMOL commands, use a single ```pymol fenced block.
 - Keep the output minimal and directly executable in the current session.
 - Do not use shell commands.
+"""
+
+
+def _build_feedback_prompt(
+    instruction: str,
+    scene_context: str,
+    image_path: Path,
+    previous_response: str,
+    error_message: str,
+    attempt: int,
+) -> str:
+    """Build a retry prompt that includes execution feedback."""
+    base_prompt = _build_prompt(instruction, scene_context, image_path)
+    return f"""{base_prompt}
+
+The previous response did not succeed in the live PyMOL session.
+This is retry attempt {attempt} of {AI_MAX_ATTEMPTS}.
+
+Previous response:
+```text
+{previous_response}
+```
+
+Feedback from the failed attempt:
+{error_message}
+
+Return a corrected full replacement response that completes the original request
+in the current session.
+
+Additional rules:
+- Do not repeat the same failing code unchanged.
+- Assume the previous attempt may have partially modified the scene.
+- Return only executable code, exactly as in the original rules.
 """
 
 
@@ -371,6 +426,27 @@ def _run_codex(prompt: str, image_path: Path) -> str:
     return result.stdout
 
 
+def _request_ai_response(ai_type: str, prompt: str, image_path: Path) -> str:
+    if ai_type == "claude":
+        return _run_claude(prompt, image_path)
+    return _run_codex(prompt, image_path)
+
+
+def _capture_ai_context() -> tuple[Path, str]:
+    image_dir = Path(tempfile.mkdtemp(prefix="pymol-ai-"))
+    image_path = image_dir / "pymol_scene.png"
+    _capture_scene_png(image_path)
+    return image_path, _get_scene_context()
+
+
+def _cleanup_ai_context(image_path: Path) -> None:
+    try:
+        image_path.unlink(missing_ok=True)
+        image_path.parent.rmdir()
+    except OSError:
+        pass
+
+
 def _register_ai_job(job_id: int, ai_type: str, instruction: str) -> None:
     with AI_JOBS_LOCK:
         AI_JOBS[job_id] = {
@@ -378,6 +454,8 @@ def _register_ai_job(job_id: int, ai_type: str, instruction: str) -> None:
             "type": ai_type,
             "instruction": instruction,
             "status": "running",
+            "attempts": 0,
+            "max_attempts": AI_MAX_ATTEMPTS,
         }
 
 
@@ -408,65 +486,160 @@ def _execute_blocks(blocks: list[tuple[str, str]]) -> None:
         for line in code.splitlines():
             line = line.strip()
             if line and not line.startswith("#"):
+                _validate_pymol_command(line)
                 cmd.do(line)
+
+
+def _validate_pymol_command(line: str) -> None:
+    stripped = line.strip()
+    if not stripped or stripped.startswith("#"):
+        return
+
+    if stripped.startswith(PYMOL_SPECIAL_COMMAND_PREFIXES):
+        return
+
+    normalized = stripped.lower()
+    if normalized in PYMOL_SPECIAL_COMMANDS:
+        return
+
+    command = stripped.split(maxsplit=1)[0].rstrip(",").lower()
+    if command in PYMOL_SPECIAL_COMMANDS:
+        return
+    if command in cmd.keyword:
+        return
+
+    raise RuntimeError(
+        f"Unknown or unsupported PyMOL command: {command!r} in line: {line}"
+    )
 
 
 def _run_ai_job(
     job_id: int,
     ai_type: str,
     instruction: str,
-    prompt: str,
-    image_path: str,
 ) -> None:
-    try:
-        response = (
-            _run_claude(prompt, Path(image_path))
-            if ai_type == "claude"
-            else _run_codex(prompt, Path(image_path))
-        )
-        response = response.strip()
-        _update_ai_job(job_id, status="completed", response=response)
-        print(f" [ai:{job_id}] Response received ({len(response)} chars).")
+    previous_response = ""
+    feedback_error = ""
 
-        blocks = [
-            (lang, code)
-            for lang, code in _extract_code(response)
-            if _has_executable_content(lang, code)
-        ]
-        if not blocks:
-            _update_ai_job(job_id, status="no_code")
-            print(f" [ai:{job_id}] No executable code found in response.")
-            print(f" [ai:{job_id}] AI response:\n{response}")
-            return
-
-        _update_ai_job(job_id, status="executing", blocks=len(blocks))
-        print(f" [ai:{job_id}] Executing {len(blocks)} block(s).")
-        _execute_blocks(blocks)
-        _update_ai_job(job_id, status="done")
-        print(f" [ai:{job_id}] Done.")
-    except FileNotFoundError:
-        _update_ai_job(job_id, status="error", error=f"'{ai_type}' command not found")
-        print(
-            f" [ai:{job_id}] Error: '{ai_type}' command not found. "
-            "Make sure it is installed and available in PATH."
-        )
-    except subprocess.TimeoutExpired:
-        _update_ai_job(job_id, status="error", error=f"timeout ({AI_TIMEOUT_SEC}s)")
-        print(f" [ai:{job_id}] Error: AI command timed out ({AI_TIMEOUT_SEC}s).")
-    except RuntimeError as exc:
-        _update_ai_job(job_id, status="error", error=str(exc))
-        print(f" [ai:{job_id}] Error: {exc}")
-    except Exception as exc:  # noqa: BLE001
-        error = f"{type(exc).__name__}: {exc}"
-        _update_ai_job(job_id, status="error", error=error)
-        print(f" [ai:{job_id}] Error while applying response: {error}")
-        print(traceback.format_exc().rstrip())
-    finally:
+    for attempt in range(1, AI_MAX_ATTEMPTS + 1):
+        image_path: Path | None = None
         try:
-            Path(image_path).unlink(missing_ok=True)
-            Path(image_path).parent.rmdir()
-        except OSError:
-            pass
+            image_path, scene_context = _capture_ai_context()
+            prompt = (
+                _build_prompt(instruction, scene_context, image_path)
+                if attempt == 1
+                else _build_feedback_prompt(
+                    instruction=instruction,
+                    scene_context=scene_context,
+                    image_path=image_path,
+                    previous_response=previous_response,
+                    error_message=feedback_error,
+                    attempt=attempt,
+                )
+            )
+            _update_ai_job(
+                job_id,
+                status="running" if attempt == 1 else "retrying",
+                attempts=attempt,
+            )
+            print(f" [ai:{job_id}] Attempt {attempt}/{AI_MAX_ATTEMPTS}.")
+
+            try:
+                response = _request_ai_response(ai_type, prompt, image_path).strip()
+            except FileNotFoundError:
+                _update_ai_job(
+                    job_id,
+                    status="error",
+                    error=f"'{ai_type}' command not found",
+                    attempts=attempt,
+                )
+                print(
+                    f" [ai:{job_id}] Error: '{ai_type}' command not found. "
+                    "Make sure it is installed and available in PATH."
+                )
+                return
+            except subprocess.TimeoutExpired:
+                _update_ai_job(
+                    job_id,
+                    status="error",
+                    error=f"timeout ({AI_TIMEOUT_SEC}s)",
+                    attempts=attempt,
+                )
+                print(
+                    f" [ai:{job_id}] Error: AI command timed out ({AI_TIMEOUT_SEC}s)."
+                )
+                return
+            except RuntimeError as exc:
+                _update_ai_job(job_id, status="error", error=str(exc), attempts=attempt)
+                print(f" [ai:{job_id}] Error: {exc}")
+                return
+
+            _update_ai_job(job_id, response=response)
+            print(f" [ai:{job_id}] Response received ({len(response)} chars).")
+
+            blocks = [
+                (lang, code)
+                for lang, code in _extract_code(response)
+                if _has_executable_content(lang, code)
+            ]
+            if not blocks:
+                raise _AIResponseFeedbackError(
+                    "No executable code found in the AI response. "
+                    "Return directly executable PyMOL commands or Python code.",
+                    response,
+                )
+
+            _update_ai_job(job_id, status="executing", blocks=len(blocks))
+            print(f" [ai:{job_id}] Executing {len(blocks)} block(s).")
+            try:
+                _execute_blocks(blocks)
+            except Exception as exc:  # noqa: BLE001
+                error = f"{type(exc).__name__}: {exc}"
+                raise _AIResponseFeedbackError(
+                    "Applying the previous response failed.\n"
+                    f"{error}\n"
+                    f"{traceback.format_exc().rstrip()}",
+                    response,
+                ) from exc
+
+            _update_ai_job(job_id, status="done", attempts=attempt, error=None)
+            print(f" [ai:{job_id}] Done on attempt {attempt}.")
+            return
+        except _AIResponseFeedbackError as exc:
+            previous_response = exc.response
+            feedback_error = str(exc)
+            if attempt >= AI_MAX_ATTEMPTS:
+                _update_ai_job(
+                    job_id,
+                    status="error",
+                    error=feedback_error,
+                    response=previous_response,
+                    attempts=attempt,
+                )
+                print(
+                    f" [ai:{job_id}] Error after {attempt} attempts: {feedback_error}"
+                )
+                return
+
+            _update_ai_job(
+                job_id,
+                status="retrying",
+                error=feedback_error,
+                response=previous_response,
+                attempts=attempt,
+            )
+            print(f" [ai:{job_id}] Attempt {attempt} failed. Sending feedback.")
+            print(f" [ai:{job_id}] Feedback: {feedback_error}")
+            continue
+        except Exception as exc:  # noqa: BLE001
+            error = f"{type(exc).__name__}: {exc}"
+            _update_ai_job(job_id, status="error", error=error, attempts=attempt)
+            print(f" [ai:{job_id}] Error while applying response: {error}")
+            print(traceback.format_exc().rstrip())
+            return
+        finally:
+            if image_path is not None:
+                _cleanup_ai_context(image_path)
 
 
 def _submit_ai_request(
@@ -486,12 +659,6 @@ def _submit_ai_request(
         return
 
     use_async = _normalize_bool_arg(async_, default=True)
-    image_dir = Path(tempfile.mkdtemp(prefix="pymol-ai-"))
-    image_path = image_dir / "pymol_scene.png"
-    _capture_scene_png(image_path)
-    scene_context = _get_scene_context()
-    prompt = _build_prompt(instruction.strip(), scene_context, image_path)
-
     job_id = next(AI_JOB_COUNTER)
     _register_ai_job(job_id, ai_type, instruction.strip())
 
@@ -499,12 +666,11 @@ def _submit_ai_request(
         f" [ai:{job_id}] Using {ai_type}. "
         f"{'Queued asynchronously' if use_async else 'Running synchronously'}: {instruction!r}"
     )
-    print(f" [ai:{job_id}] Screenshot saved to {image_path}")
 
     if use_async:
         worker = threading.Thread(
             target=_run_ai_job,
-            args=(job_id, ai_type, instruction.strip(), prompt, str(image_path)),
+            args=(job_id, ai_type, instruction.strip()),
             daemon=True,
             name=f"pymol-ai-{job_id}",
         )
@@ -515,7 +681,7 @@ def _submit_ai_request(
         )
         return
 
-    _run_ai_job(job_id, ai_type, instruction.strip(), prompt, str(image_path))
+    _run_ai_job(job_id, ai_type, instruction.strip())
 
 
 def claude_cmd(instruction: str, async_: str = "1") -> None:
@@ -550,7 +716,12 @@ def ai_status(job_id: str = "all") -> None:
         status = job.get("status", "unknown")
         ai_type = job.get("type", "?")
         instruction = job.get("instruction", "")
-        print(f" [ai:{job['id']}] {status} ({ai_type}) {instruction}")
+        attempts = job.get("attempts", 0)
+        max_attempts = job.get("max_attempts", AI_MAX_ATTEMPTS)
+        print(
+            f" [ai:{job['id']}] {status} "
+            f"(attempt {attempts}/{max_attempts}, {ai_type}) {instruction}"
+        )
         if status == "error" and job.get("error"):
             print(f" [ai:{job['id']}] error: {job['error']}")
 
