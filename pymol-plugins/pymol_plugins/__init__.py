@@ -3,8 +3,11 @@ from .selector import *  # NoQA
 from .builder import *  # NoQA
 from .visualizer import *  # NoQA
 from .arrow import *  # NoQA
+from .pca import *  # NoQA
 from .alias import *  # NoQA
 from .ai import *  # NoQA
+from . import morph as _morph_plugin
+_morph_plugin.__init_plugin__()
 
 
 # similar to alignto
