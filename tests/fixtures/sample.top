@@ -1,0 +1,57 @@
+; Minimal GROMACS topology for testing
+
+[ defaults ]
+; nbfunc  comb-rule  gen-pairs  fudgeLJ  fudgeQQ
+1         2          yes        0.5      0.8333
+
+[ atomtypes ]
+; name  at.num  mass    charge  ptype  sigma        epsilon
+CT      6       12.011  0.000   A      3.39967e-01  4.57730e-01
+OW      8       15.999  0.000   A      3.15061e-01  6.36386e-01
+HW      1        1.008  0.000   A      0.00000e+00  0.00000e+00
+
+[ moleculetype ]
+; Name  nrexcl
+Protein 3
+
+[ atoms ]
+;   nr  type  resnr  residue  atom  cgnr  charge   mass
+    1   CT    1      ALA      N     1     -0.4157  14.007
+    2   CT    1      ALA      CA    2      0.0337  12.011
+    3   CT    1      ALA      CB    3     -0.1823  12.011
+    4   CT    1      ALA      C     4      0.5973  12.011
+    5   CT    1      ALA      O     5     -0.5679  15.999
+    6   CT    2      GLY      N     6     -0.4157  14.007
+    7   CT    2      GLY      CA    7      0.0337  12.011
+    8   CT    2      GLY      C     8      0.5973  12.011
+    9   CT    2      GLY      O     9     -0.5679  15.999
+
+[ bonds ]
+; ai  aj  funct
+  1   2   1
+  2   3   1
+  2   4   1
+  4   5   1
+  4   6   1
+  6   7   1
+  7   8   1
+  8   9   1
+
+[ moleculetype ]
+; Name  nrexcl
+SOL     1
+
+[ atoms ]
+;   nr  type  resnr  residue  atom  cgnr  charge   mass
+    1   OW    1      SOL      OW    1     -0.834   15.999
+    2   HW    1      SOL      HW1   2      0.417    1.008
+    3   HW    1      SOL      HW2   3      0.417    1.008
+
+[ system ]
+; Name
+Test System
+
+[ molecules ]
+; Compound  #mols
+Protein     1
+SOL         3

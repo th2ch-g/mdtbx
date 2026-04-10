@@ -28,14 +28,7 @@ def plot_pmf(input_file="profile.xvg", output_file="pmf_plot.png"):
     # 保存
     fig.tight_layout()
     fig.savefig(output_file, dpi=300)
-
-    # ax.set_title("")
-    # ax.set_xlabel("")
-    # ax.set_ylabel("")
-    # ax.tick_params(axis='both', labelbottom=False, labelleft=False)
-    # plt.savefig(output_file.replace(".png", "_no_title.png"), dpi=300, transparent=True)
-
-    plt.close(fig)  # メモリ解放のためclose
+    plt.close(fig)
 
 
 # 実行

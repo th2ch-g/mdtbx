@@ -6,6 +6,7 @@ SUBMIT_SCRIPT="$TOOLS/mdtbx/example/mdrun/remd_slurm.sh"
 TOPOLOGY="gmx.top"
 INDEX="index.ndx"
 ITP="*.itp"
+MAXWARN=10
 
 source /home/apps/Modules/init/bash
 module purge
@@ -51,12 +52,12 @@ do
     sed -i -e "s/TARGET_DISTANCE/${TARGET_DISTANCE}/g" rep${rep}/reus.mdp
     cp $SUBMIT_SCRIPT rep${rep}/
     gmx_mpi grompp \
-        -f reus.mdp \
-        -c gmx.gro \
-        -n index.ndx \
-        -p gmx.top \
+        -f rep${rep}/reus.mdp \
+        -c rep${rep}/gmx.gro \
+        -n rep${rep}/index.ndx \
+        -p rep${rep}/gmx.top \
         -maxwarn ${MAXWARN} \
-        -o reus.tpr
+        -o rep${rep}/reus.tpr
 done
 
 rm -f target_structures_distances.txt

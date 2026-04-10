@@ -1,97 +1,63 @@
-import numpy as np
+import argparse
+
 import matplotlib.pyplot as plt
-import sys
+import numpy as np
 
-# ==========================================
-# 設定
-# ==========================================
-input_file = sys.argv[1]
-output_image = "pmf_profile.png"
+GAS_CONSTANT = 0.0019872041  # kcal/(mol·K)
 
-# 温度設定 (計算時と同じ温度を指定してください)
-temperature = 310.0  # Kelvin
 
-# 単位変換係数の計算 (kT -> kcal/mol)
-# ガス定数 R = 0.0019872 kcal/(mol·K)
-gas_constant = 0.0019872041
-kT_to_kcal = gas_constant * temperature
+def main():
+    parser = argparse.ArgumentParser(description="Plot PMF profile from MBAR output")
+    parser.add_argument("input_file", help="PMF data file (e.g. pmf_output.dat)")
+    parser.add_argument(
+        "--output", default="pmf_profile.png", help="Output image filename"
+    )
+    parser.add_argument(
+        "--temperature", type=float, default=310.0, help="Temperature [K]"
+    )
+    parser.add_argument("--ymax", type=float, default=None, help="Y-axis upper limit")
+    args = parser.parse_args()
 
-print(f"Temperature: {temperature} K")
-print(f"Conversion factor (1 kT): {kT_to_kcal:.4f} kcal/mol")
+    kT_to_kcal = GAS_CONSTANT * args.temperature
+    print(f"Temperature: {args.temperature} K  |  1 kT = {kT_to_kcal:.4f} kcal/mol")
 
-# ==========================================
-# データの読み込み
-# ==========================================
-try:
-    data = np.loadtxt(input_file)
-    r = data[:, 0]  # 1列目: 距離 (nm)
-    pmf_kT = data[:, 1]  # 2列目: PMF (kT)
-    error_kT = data[:, 2]  # 3列目: 誤差 (kT)
-except FileNotFoundError:
-    print(f"Error: {input_file} が見つかりません。")
-    exit()
+    try:
+        data = np.loadtxt(args.input_file)
+    except FileNotFoundError:
+        print(f"Error: {args.input_file} not found.")
+        raise SystemExit(1)
 
-# 単位変換を実行
-pmf_kcal = pmf_kT * kT_to_kcal
-error_kcal = error_kT * kT_to_kcal
+    r = data[:, 0]
+    pmf_kcal = data[:, 1] * kT_to_kcal
+    error_kcal = data[:, 2] * kT_to_kcal
 
-# ==========================================
-# プロットの作成
-# ==========================================
-fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.fill_between(
+        r,
+        pmf_kcal - error_kcal,
+        pmf_kcal + error_kcal,
+        color="#1f77b4",
+        alpha=0.3,
+        linewidth=0,
+        label="Standard Error",
+    )
+    ax.plot(r, pmf_kcal, color="#1f77b4", linewidth=2.5, label="PMF")
+    ax.set_title(
+        f"Potential of Mean Force (T={int(args.temperature)}K)",
+        fontsize=16,
+        fontweight="bold",
+    )
+    ax.set_xlabel("Reaction Coordinate", fontsize=14)
+    ax.set_ylabel("Free Energy (kcal/mol)", fontsize=14)
+    if args.ymax is not None:
+        ax.set_ylim(top=args.ymax)
+    ax.grid(True, linestyle=":", alpha=0.6)
+    ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
+    ax.legend(fontsize=12, loc="best", frameon=True, framealpha=0.9)
+    fig.tight_layout()
+    fig.savefig(args.output, dpi=300)
+    print(f"Saved: {args.output}")
 
-# 1. 誤差範囲を塗りつぶし (Shaded Error Bar)
-# kcal/mol なので少し線や色を濃いめに見やすく設定
-ax.fill_between(
-    r,
-    pmf_kcal - error_kcal,
-    pmf_kcal + error_kcal,
-    color="#1f77b4",
-    alpha=0.3,
-    linewidth=0,
-    label="Standard Error",
-)
 
-# 2. PMFのメインライン
-ax.plot(r, pmf_kcal, color="#1f77b4", linewidth=2.5, label="PMF")
-
-# ==========================================
-# 装飾
-# ==========================================
-ax.set_title(
-    f"Potential of Mean Force (T={int(temperature)}K)", fontsize=16, fontweight="bold"
-)
-ax.set_xlabel("Dihedral (nm)", fontsize=14)
-ax.set_ylabel("Free Energy (kcal/mol)", fontsize=14)
-
-plt.ylim(0, 9)
-
-# # ゼロライン（基準線）を引く
-# ax.axhline(0, color='gray', linestyle='--', linewidth=1, alpha=0.7)
-
-# グリッド線
-ax.grid(True, linestyle=":", alpha=0.6)
-
-# 軸の文字サイズと目盛りの向き
-ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
-
-# 凡例
-ax.legend(fontsize=12, loc="best", frameon=True, framealpha=0.9)
-
-# 余白の調整
-plt.tight_layout()
-
-# ==========================================
-# 保存
-# ==========================================
-plt.savefig(output_image, dpi=300)
-print(f"グラフを保存しました: {output_image}")
-
-ax.set_title("")
-ax.set_xlabel("")
-ax.set_ylabel("")
-ax.tick_params(axis="both", labelbottom=False, labelleft=False)
-legend = ax.get_legend()
-if legend:
-    legend.remove()
-plt.savefig(output_image.replace(".png", "_no_title.png"), dpi=300, transparent=True)
+if __name__ == "__main__":
+    main()

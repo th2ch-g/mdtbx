@@ -15,6 +15,8 @@ def add_subcmd(subparsers):
     )
     parser.add_argument("--path", type=str, help="Path to the directory", default=".")
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     for suffix in ["#*#", "*cpt", "mdout.mdp"]:

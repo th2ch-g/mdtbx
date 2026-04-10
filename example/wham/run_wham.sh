@@ -6,9 +6,10 @@ ls -1 rep*/*_pullf.xvg > tmp_pullf.dat
 ls -1 rep*/*_pullx.xvg > tmp_pullx.dat
 
 # for angle
+# Use -ix for pull coordinate or -if for pull force files
 mdtbx cmd gmx wham \
     -it tmp_tpr.dat \
-    -ix tmp_pullx.dat \ # or -if tmp_pullf.dat
+    -ix tmp_pullx.dat \
     -o profile.xvg \
     -hist hist.xvg \
     -unit kCal \

@@ -32,6 +32,8 @@ def add_subcmd(subparsers):
         "-o", "--output", type=str, default="output.top", help="Output struxture file"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     selector = AtomSelector(args.selection)

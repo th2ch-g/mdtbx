@@ -19,6 +19,8 @@ def add_subcmd(subparsers):
 
     parser.add_argument("topology", type=str, help="Topology file (.gro, .pdb)")
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     top = md.load(args.topology)

@@ -1,4 +1,5 @@
 import argparse
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -25,20 +26,21 @@ def add_subcmd(subparsers):
         help="The command and its arguments to execute.",
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     if not args.command:
         LOGGER.error("No command provided to run.")
         return
 
-    project_root = Path(__file__).parent.parent.parent
-    command_str = " ".join(args.command)
-
-    pixi_cmd = f"pixi run --manifest-path {project_root} {command_str}"
+    project_root = Path(__file__).parent.parent.parent.resolve()
+    pixi_cmd = ["pixi", "run", "--manifest-path", str(project_root), *args.command]
+    command_str = shlex.join(args.command)
 
     LOGGER.info(f"Executing command in pixi environment: {command_str}")
     try:
-        subprocess.run(pixi_cmd, shell=True, check=True)
+        subprocess.run(pixi_cmd, check=True, cwd=project_root)
         LOGGER.info("Command finished successfully.")
     except subprocess.CalledProcessError as e:
         LOGGER.error(f"Command failed with exit code {e.returncode}.")

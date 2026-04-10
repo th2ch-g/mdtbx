@@ -4,6 +4,7 @@ from .builder import *  # NoQA
 from .visualizer import *  # NoQA
 from .arrow import *  # NoQA
 from .alias import *  # NoQA
+from .ai import *  # NoQA
 
 
 # similar to alignto

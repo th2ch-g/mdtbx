@@ -51,6 +51,8 @@ def add_subcmd(subparsers):
         "-o", "--output", type=str, default="rmsf.npy", help="Output file (.npy)"
     )
 
+    parser.set_defaults(func=run)
+
 
 def run(args):
     if args.gmx:
