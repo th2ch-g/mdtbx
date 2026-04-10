@@ -35,6 +35,8 @@ def test_all_subcommands_registered():
     "subcmd",
     [
         "addace",
+        "addh",
+        "mutate",
         "addnme",
         "add_ndx",
         "mv_crds_mol2",
@@ -60,6 +62,7 @@ def test_all_subcommands_registered():
         "show_mdtraj",
         "show_npy",
         "print_perf",
+        "opt_perf",
         "shell_hook",
         "partial_tempering",
         "gen_temperatures",
@@ -67,6 +70,7 @@ def test_all_subcommands_registered():
         "build_solution",
         "build_vacuum",
         "place_solvent",
+        "contactmap",
         "comdist",
         "comvec",
         "mindist",
@@ -75,6 +79,7 @@ def test_all_subcommands_registered():
         "xyz",
         "pca",
         "densmap",
+        "distmap",
     ],
 )
 def test_subcommand_help(subcmd):

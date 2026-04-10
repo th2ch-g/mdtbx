@@ -9,6 +9,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+!example/build/
+!example/build/mutate.sh
 develop-eggs/
 dist/
 downloads/

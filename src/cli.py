@@ -35,17 +35,20 @@ from .build import build_solution
 from .build import build_vacuum
 from .build import place_solvent
 from .build import gen_temperatures
+from .build import mutate
 
 # trajectory utils
 from .trajectory import trjcat
 from .trajectory import fit
 from .trajectory import pacs_trjcat
 from .trajectory import print_perf
+from .trajectory import opt_perf
 
 # analysis utils
 from .analysis import extract_ave_str
 from .analysis import extract_str
 
+from .cv import contactmap
 from .cv import comdist
 from .cv import comvec
 from .cv import mindist
@@ -54,6 +57,7 @@ from .cv import rmsf
 from .cv import xyz
 from .cv import pca
 from .cv import densmap
+from .cv import distmap
 
 LOGGER = generate_logger(__name__)
 
@@ -82,6 +86,7 @@ def cli() -> None:
 
     addace.add_subcmd(subparsers)
     addh.add_subcmd(subparsers)
+    mutate.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
     add_ndx.add_subcmd(subparsers)
     mv_crds_mol2.add_subcmd(subparsers)
@@ -107,6 +112,7 @@ def cli() -> None:
     show_mdtraj.add_subcmd(subparsers)
     show_npy.add_subcmd(subparsers)
     print_perf.add_subcmd(subparsers)
+    opt_perf.add_subcmd(subparsers)
     shell_hook.add_subcmd(subparsers)
     partial_tempering.add_subcmd(subparsers)
     gen_temperatures.add_subcmd(subparsers)
@@ -117,6 +123,7 @@ def cli() -> None:
     build_vacuum.add_subcmd(subparsers)
     place_solvent.add_subcmd(subparsers)
 
+    contactmap.add_subcmd(subparsers)
     comdist.add_subcmd(subparsers)
     comvec.add_subcmd(subparsers)
     mindist.add_subcmd(subparsers)
@@ -125,6 +132,7 @@ def cli() -> None:
     xyz.add_subcmd(subparsers)
     pca.add_subcmd(subparsers)
     densmap.add_subcmd(subparsers)
+    distmap.add_subcmd(subparsers)
 
     args = parser.parse_args()
 
