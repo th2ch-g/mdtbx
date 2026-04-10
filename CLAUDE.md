@@ -9,6 +9,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 依存ツール: AMBER, PyMOL, OpenBabel, Gromacs, Gaussian16
 力場: ff14SB, TIP3P, GAFF2, Lipid21, GLYCAM06-j
 
+## 設計哲学
+
+各サブコマンドは**1つの機能のみ**を担当し、なるべく小さく保つ。複雑なタスクは複数サブコマンドを連携させて実現する。
+
+```bash
+# Good: combine small subcommands to build a pipeline
+pixi run mdtbx addh --input protein.pdb --output protein_h.pdb
+pixi run mdtbx gen_am1bcc --input ligand.mol2 --output ligand.mol2
+pixi run mdtbx build_solution --receptor protein_h.pdb --ligand ligand.mol2
+pixi run mdtbx fit --trajectory md.xtc --output fitted.xtc
+pixi run mdtbx rmsd --trajectory fitted.xtc --output rmsd.npy
+```
+
+新しいサブコマンドを追加する際は「既存コマンドの組み合わせで実現できないか」を先に検討すること。
+
 ## 開発コマンド
 
 ```bash
