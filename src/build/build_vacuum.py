@@ -1,5 +1,6 @@
 import argparse
 import subprocess
+from pathlib import Path
 
 from ..config import SYSTEM_NAME  # NOQA
 from ..logger import generate_logger
@@ -73,6 +74,9 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+
     addprecmd = args.addprecmd if args.addprecmd else ""
     addpostcmd = args.addpostcmd if args.addpostcmd else ""
 
@@ -87,7 +91,7 @@ def run(args):
         SYSTEM_NAME=SYSTEM_NAME,
         input=args.input,
         addpostcmd=addpostcmd,
-        outdir=args.outdir,
+        outdir=str(outdir),
     )
 
     with open("tleap.in", "w") as f:

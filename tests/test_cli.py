@@ -65,6 +65,8 @@ def test_all_subcommands_registered():
         "gen_temperatures",
         "cmd",
         "build_solution",
+        "build_vacuum",
+        "place_solvent",
         "comdist",
         "comvec",
         "mindist",

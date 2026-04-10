@@ -17,7 +17,7 @@ pixi install
 
 # CLIの実行
 pixi run mdtbx <subcommand>
-pixi run gmx ...           # mdtbx cmd gmx ... の短縮形
+pixi run gmx ...           # gromacs gmx バイナリを直接実行(pixi環境のgromacsを使用)
 
 # テスト
 pixi run test              # 全テスト実行
@@ -48,10 +48,10 @@ src/
   logger.py      # ロガー生成ユーティリティ
   utils/         # 汎用ユーティリティ(mod_mdp, convert, rmfile, cmd, shell_hook, show_mdtraj, show_npy, partial_tempering)
                # ※ atom_selection_parser.py, parse_top.py はサブコマンドでなくライブラリユーティリティ
-  build/         # 系構築サブコマンド(addace, addnme, add_ndx, mv_crds_mol2, calc_ion_conc, centering_gro,
+  build/         # 系構築サブコマンド(addace, addh, addnme, add_ndx, mv_crds_mol2, calc_ion_conc, centering_gro,
                #   find_bond, gen_am1bcc, gen_resp, gen_modres_am1bcc, gen_modres_resp, gen_posres,
-               #   gen_distres, modeling_cf, amb2gro, build_solution, gen_temperatures)
-               # ※ addh.py, mutate.py, place_solvent.py は未登録(cli.pyへの追加が必要)
+               #   gen_distres, modeling_cf, amb2gro, build_solution, build_vacuum, place_solvent, gen_temperatures)
+               # ※ mutate.py は未登録(cli.pyへの追加が必要)
   trajectory/    # 軌跡処理サブコマンド(fit, trjcat, pacs_trjcat, print_perf)
                # ※ opt_perf.py は未登録
   analysis/      # 解析サブコマンド(extract_str, extract_ave_str)

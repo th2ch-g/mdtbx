@@ -10,6 +10,21 @@ CONST_HATENA = 1
 CONST_FUNCT = 1
 
 
+def _ensure_list(values):
+    if isinstance(values, (list, tuple)):
+        return list(values)
+    return [values]
+
+
+def _expand_bounds(values, n_selection, label):
+    values = _ensure_list(values)
+    if len(values) == 1:
+        return [values[0] for _ in range(n_selection)]
+    if len(values) != n_selection:
+        raise ValueError(f"number of selection and {label} should be same")
+    return values
+
+
 def add_subcmd(subparsers):
     """
     mdtbx gen_distres -g structure.gro -p topology.top
@@ -53,7 +68,7 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "-lo",
         "--lower_bound",
-        default=0.0,
+        default=[0.0],
         type=float,
         nargs="*",
         help="Lower bound [nm]. Use multiple value if multiple selection. Single value will be applied to all selection if single value is given",
@@ -62,7 +77,7 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "-up1",
         "--upper_bound1",
-        default=0.3,
+        default=[0.3],
         type=float,
         nargs="*",
         help="Upper bound1 [nm] Use multiple value if multiple selection. Single value will be applied to all selection if single value is given",
@@ -71,7 +86,7 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "-up2",
         "--upper_bound2",
-        default=0.4,
+        default=[0.4],
         type=float,
         nargs="*",
         help="Upper bound2 [nm] Use multiple value if multiple selection. Single value will be applied to all selection if single value is given",
@@ -82,35 +97,20 @@ def add_subcmd(subparsers):
 
 def run(args):
     # generate posres.itp
-    atom_selector1 = args.selection1.split(",")
-    atom_selector2 = args.selection2.split(",")
-    assert len(atom_selector1) == len(atom_selector2), (
-        "number of selection should be same for both selection1 and selection2"
+    atom_selector1 = [s.strip() for s in args.selection1.split(",") if s.strip()]
+    atom_selector2 = [s.strip() for s in args.selection2.split(",") if s.strip()]
+    if len(atom_selector1) != len(atom_selector2):
+        raise ValueError(
+            "number of selection should be same for both selection1 and selection2"
+        )
+
+    lower_bound = _expand_bounds(args.lower_bound, len(atom_selector1), "lower bound")
+    upper_bound1 = _expand_bounds(
+        args.upper_bound1, len(atom_selector1), "upper bound1"
     )
-
-    if len(args.lower_bound) != 1:
-        assert len(atom_selector1) == len(args.lower_bound), (
-            "number of selection and lower bound should be same"
-        )
-        lower_bound = args.lower_bound
-    else:
-        lower_bound = [args.lower_bound[0] for _ in range(len(atom_selector1))]
-
-    if len(args.upper_bound1) != 1:
-        assert len(atom_selector1) == len(args.upper_bound1), (
-            "number of selection and upper bound1 should be same"
-        )
-        upper_bound1 = args.upper_bound1
-    else:
-        upper_bound1 = [args.upper_bound1[0] for _ in range(len(atom_selector1))]
-
-    if len(args.upper_bound2) != 1:
-        assert len(atom_selector1) == len(args.upper_bound2), (
-            "number of selection and upper bound2 should be same"
-        )
-        upper_bound2 = args.upper_bound2
-    else:
-        upper_bound2 = [args.upper_bound2[0] for _ in range(len(atom_selector1))]
+    upper_bound2 = _expand_bounds(
+        args.upper_bound2, len(atom_selector1), "upper bound2"
+    )
 
     gro = md.load(args.gro)
     target_atom_indices1 = []
@@ -118,13 +118,15 @@ def run(args):
 
     for i in range(len(atom_selector1)):
         sele1 = gro.top.select(atom_selector1[i])
-        assert len(sele1) == 1, (
-            f"selection {atom_selector1[i]} should be single atom: {sele1}"
-        )
+        if len(sele1) != 1:
+            raise ValueError(
+                f"selection {atom_selector1[i]} should be single atom: {sele1}"
+            )
         sele2 = gro.top.select(atom_selector2[i])
-        assert len(sele2) == 1, (
-            f"selection {atom_selector2[i]} should be single atom: {sele2}"
-        )
+        if len(sele2) != 1:
+            raise ValueError(
+                f"selection {atom_selector2[i]} should be single atom: {sele2}"
+            )
 
         # index start from 0
         target_atom_indices1.append(sele1[0] + 1)

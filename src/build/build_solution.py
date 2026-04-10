@@ -73,7 +73,7 @@ def add_subcmd(subparsers):
 
     parser.add_argument(
         "--template-tleap",
-        default=Path(__file__).parent / "template_tleap.in",
+        default=str(Path(__file__).parent.parent / "utils" / "template_tleap.in"),
         type=str,
         help="Template file for tleap",
     )
@@ -86,6 +86,9 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+
     # tleap
     lines = []
     with open(args.template_tleap) as f:
@@ -98,8 +101,8 @@ def run(args):
                         f"{SYSTEM_NAME} = loadpdb {args.input}",  # NOQA
                     )
                 else:
-                    LOGGER.warn("No input structure")
-                    LOGGER.warn("System will be water system")
+                    LOGGER.warning("No input structure")
+                    LOGGER.warning("System will be water system")
                     line = line.replace(
                         "LOADPDB",
                         f"{SYSTEM_NAME} = createunit '{SYSTEM_NAME}'",  # NOQA
@@ -107,7 +110,7 @@ def run(args):
             if "SYSTEM_NAME" in line:
                 line = line.replace("SYSTEM_NAME", SYSTEM_NAME)  # NOQA
             if "OUT_DIR" in line:
-                line = line.replace("OUT_DIR", args.outdir)
+                line = line.replace("OUT_DIR", str(outdir))
             if "BOX_SIZE" in line:
                 line = line.replace("BOX_SIZE", " ".join(map(str, args.boxsize)))
             if "LIGAND_PARAMS" in line:
