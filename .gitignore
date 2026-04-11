@@ -201,3 +201,5 @@ cython_debug/
 !/src/build
 
 TODO.md
+
+ref/
