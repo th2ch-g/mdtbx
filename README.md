@@ -14,7 +14,7 @@ Toolbox for MD simulation
   - [ ] Langevin Dynamics
   - [ ] Simulated Tempering
   - [ ] Simulated Annealing
-  - [ ] T-REMD
+  - [x] T-REMD
   - [ ] 2D-REMD
   - [x] REST
   - [x] REUS
@@ -43,8 +43,10 @@ Toolbox for MD simulation
 - Analysis
   - [x] trjconv/trjcat
   - [x] fit
+  - [x] contactmap
   - [x] comdist
   - [x] comvec
+  - [x] distmap
   - [x] mindist
   - [x] rmsd
   - [x] rmsf
@@ -52,19 +54,19 @@ Toolbox for MD simulation
   - [x] PCA
   - [x] densmap
   - [ ] tICA
-  - [ ] RISM/3D-RISM
+  - [x] RISM/3D-RISM
   - [ ] Elastic Network Model
   - [ ] Normal Mode analysis
   - [ ] Relaxation Mode analysis
   - [ ] Go model
-  - [ ] PCA Vector visualization
+  - [x] PCA Vector visualization
 
 - Kinetic analysis
   - [x] MSM
   - [ ] TRAM
 
 - Build system
-  - [ ] Vacuum
+  - [x] Vacuum
   - [x] Solution
   - [x] Membrane
   - [x] Protein Modeling
