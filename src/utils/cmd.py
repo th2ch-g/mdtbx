@@ -40,7 +40,7 @@ def run(args):
 
     LOGGER.info(f"Executing command in pixi environment: {command_str}")
     try:
-        subprocess.run(pixi_cmd, check=True, cwd=project_root)
+        subprocess.run(pixi_cmd, check=True)
         LOGGER.info("Command finished successfully.")
     except subprocess.CalledProcessError as e:
         LOGGER.error(f"Command failed with exit code {e.returncode}.")
