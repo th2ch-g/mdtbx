@@ -74,6 +74,8 @@ pymbar = { version = "*", extras = ["jax"] }
 gmx_MMPBSA = "*"
 pydssp = "*"
 meeko = "*"
+pdb2pqr = "*"
+biopython = "*"
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
