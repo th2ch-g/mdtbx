@@ -75,6 +75,8 @@ Toolbox for MD simulation
   - [x] Partial Chage
   - [ ] Martini
   - [ ] QM/MM
+  - [ ] AutoDock Vina
+
 
 </details>
 
@@ -98,7 +100,7 @@ docker build -t mdtbx .
 
 ## Update
 ```bash
-pixi run update
+export PIXI_FROZEN=false; pixi run update
 ```
 
 ## Usage

@@ -46,6 +46,7 @@ mafft = "*"
 aliview = "*"
 maxit = "*"
 openmm = "*"
+vina = "*"
 
 [tool.pixi.pypi-dependencies]
 mdtbx = { path = ".", editable = true }
@@ -72,6 +73,7 @@ setuptools = "<81" # for mdtraj 1.9.9
 pymbar = { version = "*", extras = ["jax"] }
 gmx_MMPBSA = "*"
 pydssp = "*"
+meeko = "*"
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
