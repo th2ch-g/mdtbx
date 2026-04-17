@@ -102,6 +102,9 @@ ln -s $PWD/.pixi/envs/default/bin/pymol $BIN
 
 # for docker users
 docker build -t mdtbx .
+
+# for developers
+pre-commit install
 ```
 
 ## Update
