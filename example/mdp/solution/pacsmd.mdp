@@ -42,4 +42,3 @@ comm_grps               = System
 gen-vel                 = yes
 gen-temp                = 310
 gen-seed                = -1
-

@@ -18,8 +18,8 @@ PROTEIN_RESNAMES: Set[str] = {
     "MET",
     "PHE",
     "PRO",
-    "SER",
-    "THR",
+    "SET",
+    "THE",
     "TRP",
     "TYR",
     "VAL",
@@ -551,7 +551,7 @@ if __name__ == "__main__":
     error_cases = [
         "resid 10 to",
         "resname and",
-        "protein andd name",
+        "protein and name",
         "( resid 1",
         "name ca cb and",
     ]

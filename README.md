@@ -1,4 +1,5 @@
 # mdtbx
+
 Toolbox for MD simulation
 
 - Build system quickly
@@ -9,6 +10,7 @@ Toolbox for MD simulation
 <details> <summary> Supported Features </summary>
 
 - Sampling
+
   - [x] cMD
   - [ ] Brownian Dynamics
   - [ ] Langevin Dynamics
@@ -31,6 +33,7 @@ Toolbox for MD simulation
   - [ ] Weighted Ensemble
 
 - Free energy calculation
+
   - [ ] MMPBSA
   - [x] MBAR
   - [x] WHAM
@@ -41,6 +44,7 @@ Toolbox for MD simulation
   - [ ] ERmod
 
 - Analysis
+
   - [x] trjconv/trjcat
   - [x] fit
   - [x] contactmap
@@ -62,6 +66,7 @@ Toolbox for MD simulation
   - [x] PCA Vector visualization
 
 - Kinetic analysis
+
   - [x] MSM
   - [ ] TRAM
 
@@ -72,21 +77,22 @@ Toolbox for MD simulation
   - [x] Protein Modeling
   - [x] Modified Residue
   - [x] Make index group
-  - [x] Partial Chage
+  - [x] Partial Charge
   - [ ] Martini
   - [ ] QM/MM
   - [ ] AutoDock Vina
 
-
 </details>
 
 ## Assumptions
+
 - System build Tools: AMBER, PyMOL, OpenBabel
 - Simulation Tools: Gromacs, AMBER, Gaussian16
 - ForceField: ff14SB, TIP3P, GAFF2, Lipid21, GLYCAM06-j
 
 ## Install
-~~~bash
+
+```bash
 # for pixi users
 export PIXI_FROZEN=false
 pixi install
@@ -96,15 +102,17 @@ ln -s $PWD/.pixi/envs/default/bin/pymol $BIN
 
 # for docker users
 docker build -t mdtbx .
-~~~
+```
 
 ## Update
+
 ```bash
 export PIXI_FROZEN=false; pixi run update
 ```
 
 ## Usage
-~~~bash
+
+```bash
 # for pixi users
 pixi run mdtbx ...
 pixi run gmx ... # equal to pixi run mdtbx cmd gmx ...
@@ -112,4 +120,4 @@ pixi run gmx ... # equal to pixi run mdtbx cmd gmx ...
 # for docker users
 docker run -it --rm mdtbx mdtbx ...
 docker run -it --rm mdtbx gmx ... # equal to docker run -it --rm mdtbx mdtbx cmd gmx ...
-~~~
+```

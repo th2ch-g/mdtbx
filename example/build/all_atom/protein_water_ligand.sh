@@ -4,7 +4,7 @@ set -e
 input_structure="template.pdb"
 out_dir="${PWD}/gmx"
 
-mdtbx cmd pymol -c -p <<EOF
+mdtbx cmd pymol -c -p << EOF
 import pymol_plugins
 from pymol_plugins import *
 cmd.load("${input_structure}")
@@ -46,4 +46,4 @@ cp mdrun_slurm.sh ${out_dir}/
 rm -f leap.parm7 leap.rst7 leap.pdb gmx.pdb
 rm -f ace_nme.pdb ace.pdb
 
-echo done
+echo "done"

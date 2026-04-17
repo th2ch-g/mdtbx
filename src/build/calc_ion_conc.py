@@ -55,7 +55,7 @@ def add_subcmd(subparsers):
     )
 
     # cubic: calculate from system volume(assume cubic system)
-    # water: calculate from water volume(recomended if lipid system)
+    # water: calculate from water volume(recommended if lipid system)
     # optimize: consider charge of system
     parser.add_argument(
         "--net_charge",

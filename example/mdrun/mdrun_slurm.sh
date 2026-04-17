@@ -10,7 +10,7 @@ set -e
 
 source $MODULESHOME/init/bash
 module purge
-module load cmake/3.31.6  gcc/13.3.0 cuda/12.9
+module load cmake/3.31.6 gcc/13.3.0 cuda/12.9
 export PATH="$TOOLS/gromacs/2025.1/gromacs-2025.1/bin:$PATH"
 
 SIMULATION_CONTINUE=true
@@ -74,8 +74,7 @@ fi
 restart_gro="mini.gro"
 
 # nvt npt
-for i in {1..6};
-do
+for i in {1..6}; do
     if [[ $SIMULATION_OVERWRITE == "true" || ! -f "eq${i}.gro" ]]; then
         if [[ $SIMULATION_OVERWRITE == "true" || $SIMULATION_CONTINUE == "false" || ! -f "eq${i}.tpr" ]]; then
             $GMX_CMD grompp \
@@ -97,8 +96,7 @@ do
 done
 
 # production
-for i in $(seq 1 ${PRODUCTION_STEPS});
-do
+for i in $(seq 1 ${PRODUCTION_STEPS}); do
     if [[ $SIMULATION_OVERWRITE == "true" || ! -f "${PRD_PREXIX}${i}.gro" ]]; then
         # Use restraints option with force=0 for system converted by acpype
         #   restraints force is 0 during production MD
@@ -111,7 +109,7 @@ do
                 -p gmx.top \
                 -maxwarn ${MAXWARN} \
                 -o ${PRD_PREXIX}${i}.tpr
-                # -r gmx.gro \
+            # -r gmx.gro \
         fi
         if [[ $SIMULATION_CONTINUE == "true" && $SIMULATION_OVERWRITE == "false" ]]; then
             $GMX_CMD mdrun -v -deffnm ${PRD_PREXIX}${i} ${MDRUN_OPTION} -cpi ${PRD_PREXIX}${i}.cpt
@@ -129,4 +127,4 @@ rm -f \#*
 rm -f mini.xtc mini.trr
 rm -f eq{1..6}.xtc eq{1..6}.trr
 
-echo done
+echo "done"

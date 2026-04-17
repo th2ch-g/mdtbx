@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import deeptime
 import numpy as np
 from matplotlib import pyplot as plt
@@ -140,7 +141,7 @@ for n_clusters in n_clusters_list:
                 print("msm estimator fit")
                 msm_model = msm_estimator.fit(count_model).fetch_model()
             except Exception as e:
-                print("Error occured")
+                print("Error occurred")
                 print(e)
                 continue
 

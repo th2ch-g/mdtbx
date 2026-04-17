@@ -35,6 +35,7 @@ echo "Preparing ${N_REPLICA} T-REMD replicas"
 echo "Temperatures: ${TEMPERATURES[*]}"
 
 shopt -s nullglob
+# shellcheck disable=SC2206
 itp_files=(${ITP_GLOB})
 shopt -u nullglob
 

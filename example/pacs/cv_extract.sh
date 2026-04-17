@@ -4,8 +4,7 @@ set -e
 mkdir -p cvs/comdist
 mkdir -p cvs/comvec
 
-for i in {1..15};
-do
+for i in {1..15}; do
     mdtbx comdist \
         -p trial$i/trial001/rmmol_top.gro \
         -t trial$i/trial001/prd_all.xtc \
@@ -23,4 +22,4 @@ do
         --gmx
 done
 
-echo done
+echo "done"

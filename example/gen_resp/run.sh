@@ -16,4 +16,4 @@ mdtbx gen_resp \
     -m 1 \
     -c 0
 
-echo done
+echo "done"

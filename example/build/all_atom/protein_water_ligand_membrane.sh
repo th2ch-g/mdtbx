@@ -61,4 +61,4 @@ rm -f ace.pdb \
     packmol.log \
     gmx.pdb
 
-echo done
+echo "done"

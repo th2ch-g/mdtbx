@@ -25,4 +25,4 @@ mdtbx cmd python3 plot_bspmf.py
 
 rm -f tmp_tpr.dat tmp_pullf.dat tmp_pullx.dat
 
-echo done
+echo "done"

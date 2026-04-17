@@ -9,4 +9,4 @@ cd USalign
 make -j $thread
 ./USalign -v
 
-echo done
+echo "done"

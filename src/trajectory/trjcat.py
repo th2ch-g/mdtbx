@@ -83,7 +83,7 @@ def run(args):
     # if not args.no_editconf:
     #     cmd = "gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1"
     #     subprocess.run(cmd, shell=True, check=True)
-    #     LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 runned")
+    #     LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 run")
 
     # trjcat -> trjconv
     c_cmd = "c\n" * args.num_of_step

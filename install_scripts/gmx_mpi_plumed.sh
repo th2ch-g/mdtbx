@@ -26,7 +26,7 @@ echo 1 | plumed patch -p # select 1: gromacs-2022.5
 mkdir build
 cd build
 
-# see compling option in https://manual.gromacs.org/current/install-guide/index.html
+# see compiling option in https://manual.gromacs.org/current/install-guide/index.html
 
 cmake .. \
     -DGMX_MPI=ON \
@@ -47,4 +47,4 @@ make -j $thread
 # make check -j $thread
 make install -j $thread
 
-echo done
+echo "done"

@@ -370,7 +370,7 @@ cluster_1d(
 )
 
 
-# ## 1D: Plot Histgram of $d$
+# ## 1D: Plot Histogram of $d$
 #
 def plot_hist_1d_per_trial(
     params: Parameters,
@@ -592,7 +592,7 @@ def build_msm_1d(
                 with open(count_result_pkl, "wb") as f:
                     pickle.dump(count_result, f)
 
-                # save cluster center coordinates and corresponding stationary destribution
+                # save cluster center coordinates and corresponding stationary distribution
                 n_clusters_in_clustering = len(clustering_model.cluster_centers)
                 n_clusters_in_msm = msm_model.n_states
                 cluster_centers = clustering_model.cluster_centers
@@ -1306,7 +1306,7 @@ def cluster_3d(
 cluster_3d(params=params)
 
 
-# 3D: Plot Histgram of $d$
+# 3D: Plot Histogram of $d$
 def plot_hist_3d(
     params: Parameters,
     n_clusters: int,
@@ -1503,7 +1503,7 @@ def build_msm_3d(
             with open(count_result_pkl, "wb") as f:
                 pickle.dump(count_result, f)
 
-            # save cluster center coordinates and corresponding stationary destribution
+            # save cluster center coordinates and corresponding stationary distribution
             n_clusters_in_clustering = len(clustering_model.cluster_centers)
             n_clusters_in_msm = msm_model.prior.n_states
             cluster_centers = clustering_model.cluster_centers

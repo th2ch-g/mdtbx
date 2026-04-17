@@ -22,7 +22,7 @@ mdtbx gen_modres_resp \
     --sepbond2 C7 N2
 cd ..
 
-cat <<EOF | tleap -f -
+cat << EOF | tleap -f -
 source leaprc.protein.ff14SB
 source leaprc.gaff2
 loadAmberPrep   CGX/CGX.prep
@@ -35,5 +35,4 @@ saveamberparm SYS leap.parm7 leap.rst7
 quit
 EOF
 
-
-echo done
+echo "done"

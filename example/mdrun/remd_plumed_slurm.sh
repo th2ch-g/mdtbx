@@ -19,8 +19,11 @@ N_REPLICA=16
 OMP=1
 MPI=$N_REPLICA
 DEFFNM="grest" # or rest2, reus
+# shellcheck disable=SC2034
 SIMULATION_CONTINUE=true
+# shellcheck disable=SC2034
 SIMULATION_OVERWRITE=false
+# shellcheck disable=SC2034
 MAXWARN=10
 
 # for single GPU
@@ -48,6 +51,7 @@ echo "gpus: $SLURM_GPUS_ON_NODE"
 echo "omp: $SLURM_CPUS_PER_TASK"
 echo "mpi: $SLURM_NTASKS"
 
+# shellcheck disable=SC2034
 restart_gro="gmx.gro"
 eval $MPI_CMD \
     ${GMX_CMD} mdrun -deffnm ${DEFFNM} -ntomp $OMP \
@@ -58,4 +62,4 @@ eval $MPI_CMD \
 rm -f *cpt
 rm -f \#*
 
-echo done
+echo "done"

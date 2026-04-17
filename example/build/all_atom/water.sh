@@ -20,4 +20,4 @@ cp mdrun_slurm.sh ${out_dir}/
 
 rm -f leap.parm7 leap.rst7 leap.pdb gmx.pdb
 
-echo done
+echo "done"

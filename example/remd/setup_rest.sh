@@ -20,15 +20,14 @@ export PATH=$TOOLS/gromacs/2022.5-mpi-plumed/gromacs-2022.5/bin:$PATH
 touch plumed.dat
 
 # ref: https://www.ag.kagawa-u.ac.jp/charlesy/2020/02/17/plumed-patched-gromacs%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB/
-for rep in $(seq 1 $N_REPLICA);
-do
+for rep in $(seq 1 $N_REPLICA); do
     mkdir rep${rep}
     cp $STRUCTURE rep${rep}/gmx.gro
     cp $INDEX rep${rep}/index.ndx
     cp $ITP rep${rep}/
     cp $TEMPLATE_MDP rep${rep}/prd.mdp
     touch rep${rep}/plumed.dat
-    LAMBDA=$(awk -v i=$((rep-1)) -v n=$N_REPLICA -v tmin=$TMIN -v tmax=$TMAX 'BEGIN {
+    LAMBDA=$(awk -v i=$((rep - 1)) -v n=$N_REPLICA -v tmin=$TMIN -v tmax=$TMAX 'BEGIN {
         k = log(tmax/tmin) / (n - 1)
         temp_i = tmin * exp(i * k)
         print tmin / temp_i
@@ -47,4 +46,4 @@ do
     rm -f topol.tpr
 done
 
-echo done
+echo "done"

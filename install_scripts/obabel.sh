@@ -17,11 +17,11 @@ cd openbabel-${VERSION}
 mkdir build
 cd build
 
-# see compling options in https://github.com/openbabel/openbabel/blob/master/INSTALL
+# see compiling options in https://github.com/openbabel/openbabel/blob/master/INSTALL
 
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX
 
 make -j $thread
 make install -j $thread
 
-echo done
+echo "done"

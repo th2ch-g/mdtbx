@@ -17,5 +17,4 @@ echo "seq: $seq"
 
 mdtbx modeling_cf -i reference.pdb -s $seq
 
-echo done
-
+echo "done"

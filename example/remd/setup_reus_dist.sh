@@ -16,7 +16,7 @@ export PATH=$TOOLS/gromacs/2022.5-mpi-plumed/gromacs-2022.5/bin:$PATH
 
 touch plumed.dat
 
-cat <<EOF > target_structures_distances.txt
+cat << EOF > target_structures_distances.txt
 init1.gro     15
 init2.gro     18
 init3.gro     21
@@ -38,8 +38,7 @@ EOF
 N_REPLICA=$(wc -l target_structures_distances.txt | awk '{print $1}')
 echo "Number of replicas: ${N_REPLICA}"
 
-for rep in $(seq 1 $N_REPLICA);
-do
+for rep in $(seq 1 $N_REPLICA); do
     STRUCTURE=$(head -n $rep target_structures_distances.txt | tail -n 1 | awk '{print $1}')
     TARGET_DISTANCE=$(head -n $rep target_structures_distances.txt | tail -n 1 | awk '{print $2}')
     mkdir rep${rep}
@@ -62,4 +61,4 @@ done
 
 rm -f target_structures_distances.txt
 
-echo done
+echo "done"

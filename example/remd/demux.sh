@@ -11,4 +11,4 @@ mdtbx cmd demux.pl $MD_LOG $EXTRA
 
 mdtbx cmd gmx trjcat -f rep*/${PREFIX}.xtc -demux replica_index.xvg -o demux_trj.xtc
 
-echo done
+echo "done"

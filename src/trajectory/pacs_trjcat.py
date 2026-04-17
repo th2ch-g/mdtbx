@@ -169,10 +169,7 @@ def run(args):
     c_cmd = "c\n" * n_cycle
 
     # trjcat
-    trj_files = [
-        f"{cycle_dir}/tmp_all_pbc{ext} "
-        for cycle_dir in cycle_dirs
-    ]
+    trj_files = [f"{cycle_dir}/tmp_all_pbc{ext} " for cycle_dir in cycle_dirs]
     trj_files = " ".join(trj_files)
     cmd = f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {args.trial_dir}/tmp_all{ext} -settime"
     subprocess.run(cmd, shell=True, check=True)
@@ -193,7 +190,9 @@ def run(args):
     LOGGER.info(f"{args.trial_dir}/tmp_all{ext} and backup files removed")
 
     if not args.keep_cycle_trj:
-        cycle_outputs = " ".join(f"{cycle_dir}/prd_all{ext}" for cycle_dir in cycle_dirs)
+        cycle_outputs = " ".join(
+            f"{cycle_dir}/prd_all{ext}" for cycle_dir in cycle_dirs
+        )
         cmd = f"rm -f {cycle_outputs}"
         subprocess.run(cmd, shell=True, check=True)
         LOGGER.info("Per-cycle trajectories removed")

@@ -72,4 +72,4 @@ def run(args):
     if not args.no_editconf:
         cmd = f"gmx editconf -f {args.output} -o {args.output} -resnr 1"
         subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"gmx editconf -f {args.output} -o {args.output} -resnr 1 runned")
+        LOGGER.info(f"gmx editconf -f {args.output} -o {args.output} -resnr 1 run")

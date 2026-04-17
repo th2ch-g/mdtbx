@@ -27,4 +27,4 @@ fi
 
 rm -f input_h.pdb ace.pdb ace_nme.pdb cym.pdb bonds.txt
 
-echo done
+echo "done"

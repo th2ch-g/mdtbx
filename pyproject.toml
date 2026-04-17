@@ -33,7 +33,7 @@ rules = "- prefer polars over pandas\n- make charts using altair"
 [tool.pixi.dependencies]
 pymol-open-source = "==3.1.0"
 pytest = ">=8"
-mdtraj = "==1.9.9" # https://github.com/ParmEd/ParmEd/pull/1387
+mdtraj = "==1.9.9"            # https://github.com/ParmEd/ParmEd/pull/1387
 # mdtraj = "==1.11.0"
 deeptime = "==0.4.4"
 ambertools = "*"
@@ -63,7 +63,9 @@ polars = { version = "*", extras = ["all"] }
 pandas = "*"
 jupyterlab = "*"
 jupytext = "*"
-marimo = { version = "*", extras = ["recommended"] } # available if python >= 3.12?
+marimo = { version = "*", extras = [
+    "recommended",
+] } # available if python >= 3.12?
 seaborn = "*"
 scipy = "*"
 optuna = "*"
@@ -80,7 +82,7 @@ biopython = "*"
 [tool.pixi.tasks]
 update = "git pull && pixi install"
 docker_build = "docker build -t mdtbx ."
-jupyter_remote = "jupyter lab --no-browser --port=8889" # ssh -N -L localhost:8888:localhost:8889 HOST1 && open http://localhost:8888
+jupyter_remote = "jupyter lab --no-browser --port=8889"                                                                                                                                                   # ssh -N -L localhost:8888:localhost:8889 HOST1 && open http://localhost:8888
 ruff-format = "ruff format --force-exclude"
 ruff-lint = "ruff check --fix --exit-non-zero-on-fix --force-exclude"
 r = { cmd = "echo OK", depends-on = ["ruff-format", "ruff-lint"] }

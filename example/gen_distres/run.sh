@@ -39,7 +39,7 @@ MGX_O1="resname MGX and name O1"
 MGX_O2="resname MGX and name O2"
 GLY_N="resname GLY and name N and resid 10"
 GLY_N2="resname GLY and name N and resid 20"
-HID_ND1="resname HID and name ND1"
+HID_AND1="resname HID and name AND1"
 HID_N="resname HID and name N"
 GLH_OE1="resname GLH and name OE1"
 GLH_OE2="resname GLH and name OE2"
@@ -52,7 +52,7 @@ mdtbx gen_distres \
     -up2 0.28 0.28 0.30 0.32 0.32 \
     -o distres \
     -s1 "${MGX_O2},${MGX_O2}, ${MGX_O1}, ${MGX_O2},${GLY_N2}" \
-    -s2 "${GLY_N}, ${HID_ND1},${GLH_OE2},${HID_N}, ${GLH_OE1}"
+    -s2 "${GLY_N}, ${HID_AND1},${GLH_OE2},${HID_N}, ${GLH_OE1}"
 
 echo "distres.itp generated and appended to ${TOP}"
 
@@ -75,6 +75,6 @@ echo "distres.itp generated and appended to ${TOP}"
 #     -up2 0.30 \
 #     -o distres_uniform \
 #     -s1 "${MGX_O2},${MGX_O2}" \
-#     -s2 "${GLY_N}, ${HID_ND1}"
+#     -s2 "${GLY_N}, ${HID_AND1}"
 
 echo "All done."

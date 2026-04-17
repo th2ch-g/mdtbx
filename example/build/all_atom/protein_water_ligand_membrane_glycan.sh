@@ -63,4 +63,4 @@ rm -f input_h.pdb ace.pdb ace_nme.pdb cym.pdb bonds.txt \
     *in_EMBED.pdb *in_memembed.log \
     leap_.log packmol-memgen.log packmol.inp packmol.log gmx.pdb
 
-echo done
+echo "done"

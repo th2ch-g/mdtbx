@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code)
+when working with code in this repository.
 
 ## Overview
 
@@ -55,7 +56,7 @@ pixi run jupyter_remote
 
 ## アーキテクチャ
 
-```
+```text
 src/
   __main__.py    # エントリポイント: main() -> cli()
   cli.py         # argparseサブコマンドの登録・ディスパッチ
@@ -92,7 +93,8 @@ install_scripts/ # Gromacs/PLUMED等の手動インストールスクリプト
 
 ### サブコマンドの追加パターン
 
-各モジュール(`src/build/*.py`, `src/trajectory/*.py`, `src/analysis/*.py`, `src/cv/*.py`, `src/utils/*.py`)は以下の2関数を実装する:
+各モジュール(`src/build/*.py`, `src/trajectory/*.py`, `src/analysis/*.py`,
+`src/cv/*.py`, `src/utils/*.py`)は以下の2関数を実装する:
 
 ```python
 def add_subcmd(subparsers):
@@ -117,6 +119,7 @@ from .utils import <name>       # 汎用
 ```
 
 モジュール内で `src/utils/` のパーサーを使う場合は `..utils.` で参照する:
+
 ```python
 from ..utils.atom_selection_parser import AtomSelector
 from ..utils.parse_top import GromacsTopologyParser

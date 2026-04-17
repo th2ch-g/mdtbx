@@ -29,7 +29,7 @@ mdtbx pca \
     -oz cvs/pca_backbone.npz \
     -oa cvs/pca_average.pdb
 
-pymol <<EOF
+pymol << EOF
 load cvs/pca_average.pdb, avg
 hide everything, avg
 show cartoon, avg

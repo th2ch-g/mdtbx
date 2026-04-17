@@ -12,4 +12,4 @@ cd fftw-${VERSION}
 make -j 10
 make install
 
-echo done
+echo "done"

@@ -11,4 +11,4 @@ cmake .. -DOPENMM_ROOT=$TOOLS/mdtbx/.pixi/envs/default -DCMAKE_INSTALL_PREFIX=$P
 make -j 12
 make install
 
-echo done
+echo "done"

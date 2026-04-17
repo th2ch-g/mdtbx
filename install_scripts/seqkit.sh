@@ -9,4 +9,4 @@ wget $URL
 tar -zxvf seqkit_${OS_CPU}.tar.gz
 rm -f seqkit_${OS_CPU}.tar.gz
 
-echo done
+echo "done"

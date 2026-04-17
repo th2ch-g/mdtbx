@@ -10,9 +10,9 @@ function make_file_and_submit() {
     local omp=$4
     local node_shape=$5
 
-mkdir -p gridtest-$part-$num_nodes-$mpi-$omp-$node_shape
-cd gridtest-$part-$num_nodes-$mpi-$omp-$node_shape
-cp ../test.tpr .
+    mkdir -p gridtest-$part-$num_nodes-$mpi-$omp-$node_shape
+    cd gridtest-$part-$num_nodes-$mpi-$omp-$node_shape
+    cp ../test.tpr .
 
     echo "#!/bin/bash
 #PJM -L rscgrp=$part
@@ -37,19 +37,17 @@ mpiexec gmx_mpi mdrun -v -deffnm test \${MDRUN_OPTION}
 echo done
 " > test_mdrun.sh
 
-pjsub test_mdrun.sh
-cd ..
+    pjsub test_mdrun.sh
+    cd ..
 
 }
 
 CORE_PER_NODE=48
 
-for part in fx-small;
-do
-    for num_nodes in 1 2 4 2x2 8 2x2x2 4x2 16 2x2x4 4x4 2x8 24 2x2x6 4x6 2x12;
-    do
-        for omp in 1 2 4 8 16 48;
-        do
+# shellcheck disable=SC2043
+for part in fx-small; do
+    for num_nodes in 1 2 4 2x2 8 2x2x2 4x2 16 2x2x4 4x4 2x8 24 2x2x6 4x6 2x12; do
+        for omp in 1 2 4 8 16 48; do
             if [[ "$num_nodes" == *"x"*"x"* ]]; then
                 a=$(echo $num_nodes | awk -F "x" '{print $1 * $2 * $3}')
             elif [[ "$num_nodes" == *"x"* ]]; then
@@ -61,8 +59,7 @@ do
             mpi=$(echo $a $CORE_PER_NODE $omp | awk '{print $1 * $2 / $3 }')
 
             if [[ "$num_nodes" == *"x"* ]]; then
-                for node_shape in torus mesh;
-                do
+                for node_shape in torus mesh; do
                     make_file_and_submit $part $num_nodes $mpi $omp $node_shape
                 done
             else
@@ -73,5 +70,4 @@ do
     done
 done
 
-
-echo submit done
+echo "submit done"

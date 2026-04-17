@@ -14,7 +14,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TRIAL_HELPER="${SCRIPT_DIR}/run_trial.sh"
 TRIAL_ROOT="$(pwd)/opt_perf_trials"
 
-export INPUT_TPR="$(pwd)/prd.tpr"
+INPUT_TPR="$(pwd)/prd.tpr"
+export INPUT_TPR
 
 mdtbx opt_perf \
     --mdrun-command "bash ${TRIAL_HELPER} {trial_dir} {log_path} {n_gpu} {n_core} {ntomp} {ntmpi} {gpu_ids}" \

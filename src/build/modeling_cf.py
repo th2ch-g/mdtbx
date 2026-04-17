@@ -18,7 +18,9 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument("-i", "--input", type=str, help="input PDB file used as template")
+    parser.add_argument(
+        "-i", "--input", type=str, help="input PDB file used as template"
+    )
 
     parser.add_argument(
         "-s", "--sequence", required=True, type=str, help="amino acid sequence"

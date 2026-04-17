@@ -1,44 +1,43 @@
-'''
+"""
 PyMOL Morphing Command Plugin
 
 Linear coordinate interpolation for Open-Source PyMOL.
-'''
-
-import numpy as np
+"""
 
 
-def morph(sele1, sele2, name=None, state1=1, state2=1,
-          steps=30, superpose=0, _self=None):
-    '''
-DESCRIPTION
+def morph(
+    sele1, sele2, name=None, state1=1, state2=1, steps=30, superpose=0, _self=None
+):
+    """
+    DESCRIPTION
 
-    Generate a morphing trajectory between two conformations using linear
-    coordinate interpolation. Works with Open-Source PyMOL.
+        Generate a morphing trajectory between two conformations using linear
+        coordinate interpolation. Works with Open-Source PyMOL.
 
-USAGE
+    USAGE
 
-    morph sele1, sele2 [, name [, state1 [, state2 [, steps [, superpose ]]]]]
+        morph sele1, sele2 [, name [, state1 [, state2 [, steps [, superpose ]]]]]
 
-ARGUMENTS
+    ARGUMENTS
 
-    sele1     = str: start conformation object/selection
-    sele2     = str: end conformation object/selection
-    name      = str: output object name {default: auto}
-    state1    = int: state of sele1 {default: 1}
-    state2    = int: state of sele2 {default: 1}
-    steps     = int: number of output states {default: 30}
-    superpose = 0/1: align sele1 onto sele2 before morphing {default: 0}
+        sele1     = str: start conformation object/selection
+        sele2     = str: end conformation object/selection
+        name      = str: output object name {default: auto}
+        state1    = int: state of sele1 {default: 1}
+        state2    = int: state of sele2 {default: 1}
+        steps     = int: number of output states {default: 30}
+        superpose = 0/1: align sele1 onto sele2 before morphing {default: 0}
 
-EXAMPLE
+    EXAMPLE
 
-    morph 1ake, 4ake
-    morph open, closed, name=transition, steps=50, superpose=1
-    '''
+        morph 1ache, 4ache
+        morph open, closed, name=transition, steps=50, superpose=1
+    """
     if _self is None:
         from pymol import cmd as _self
 
     if not name:
-        name = _self.get_unused_name('morph')
+        name = _self.get_unused_name("morph")
 
     state1 = int(state1)
     state2 = int(state2)
@@ -52,11 +51,13 @@ EXAMPLE
     coords2 = _self.get_coords(sele2, state2)
 
     if coords1 is None or coords2 is None:
-        print(' morph-error: failed to get coordinates')
+        print(" morph-error: failed to get coordinates")
         return
 
     if coords1.shape != coords2.shape:
-        print(f' morph-error: atom count mismatch ({coords1.shape[0]} vs {coords2.shape[0]})')
+        print(
+            f" morph-error: atom count mismatch ({coords1.shape[0]} vs {coords2.shape[0]})"
+        )
         return
 
     # Build multi-state object: all states share topology from sele1
@@ -74,4 +75,5 @@ EXAMPLE
 
 def __init_plugin__(app=None):
     from pymol import cmd
-    cmd.extend('morph', morph)
+
+    cmd.extend("morph", morph)

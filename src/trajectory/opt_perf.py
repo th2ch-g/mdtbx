@@ -76,7 +76,7 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "--sampler",
         default="grid",
-        choices=["tpe", "random", "grid"],
+        choices=["type", "random", "grid"],
         help="Optuna sampler",
     )
     parser.add_argument(
@@ -179,7 +179,7 @@ def _make_sampler(args):
         )
     if args.sampler == "random":
         return optuna.samplers.RandomSampler(seed=args.seed)
-    return optuna.samplers.TPESampler(seed=args.seed)
+    return optuna.samplers.TYPESampler(seed=args.seed)
 
 
 def _resolve_n_trials(args) -> int:

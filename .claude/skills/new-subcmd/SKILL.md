@@ -12,6 +12,7 @@ mdtbxに新しいargparseサブコマンドを追加するスキル。
 ### ステップ1: ユーザーへの確認
 
 以下をユーザーに確認する:
+
 1. **サブコマンド名** (例: `calc_rmsd`, `gen_topology`) — CLIで `mdtbx <名前>` として呼ぶ
 2. **配置場所**: 機能に応じて選択
    - `src/build/` — 系構築 (addace, amb2gro, gen_posres等と同種)
@@ -27,17 +28,20 @@ mdtbxに新しいargparseサブコマンドを追加するスキル。
 `${SKILL_ROOT}/template.py` を参考に新ファイルを作成する。
 
 必須パターン:
+
 - `add_subcmd(subparsers)` の末尾に必ず `parser.set_defaults(func=run)` を置く
 - `run(args)` が実装本体
 - ロガーは `from ..logger import generate_logger` / `LOGGER = generate_logger(__name__)`
 - `argparse.ArgumentDefaultsHelpFormatter` を使う
-- `src/utils/` のパーサーを使う場合は `from ..utils.atom_selection_parser import AtomSelector` のように参照する
+- `src/utils/` のパーサーを使う場合は
+  `from ..utils.atom_selection_parser import AtomSelector` のように参照する
 
 ### ステップ3: cli.py への登録
 
 `src/cli.py` に2箇所追加:
 
 1. **importブロック** (対応するカテゴリのブロックに追加):
+
    ```python
    from .build import <name>       # build の場合
    from .trajectory import <name>  # trajectory の場合
@@ -47,6 +51,7 @@ mdtbxに新しいargparseサブコマンドを追加するスキル。
    ```
 
 2. **add_subcmdの呼び出し** (同カテゴリのブロックに追加):
+
    ```python
    <name>.add_subcmd(subparsers)
    ```
@@ -54,6 +59,7 @@ mdtbxに新しいargparseサブコマンドを追加するスキル。
 ### ステップ4: テストファイルの作成
 
 `tests/test_<category>/test_<name>.py` にユニットテストを追加する:
+
 - 外部ツール不要な純粋計算関数は直接テスト
 - ファイルI/Oは `tmp_path` fixture を使用
 - 軌跡が必要な場合は `conftest.py` の `trajectory_files` fixture を使用

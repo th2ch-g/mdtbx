@@ -265,7 +265,9 @@ def run(args):
 
             pc = np.loadtxt("proj.xvg")
             if args.output_npz is not None:
-                _save_gmx_pca_metadata(args.output_npz, pc, average_structure_path, args)
+                _save_gmx_pca_metadata(
+                    args.output_npz, pc, average_structure_path, args
+                )
         finally:
             if temporary_average_path is not None:
                 Path(temporary_average_path).unlink(missing_ok=True)

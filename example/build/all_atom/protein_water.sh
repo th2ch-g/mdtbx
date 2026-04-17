@@ -55,4 +55,4 @@ cp mdrun_slurm.sh ${out_dir}/
 rm -f leap.parm7 leap.rst7 leap.pdb gmx.pdb
 rm -f input_h.pdb ace.pdb ace_nme.pdb cym.pdb bonds.txt
 
-echo done
+echo "done"

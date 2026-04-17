@@ -12,4 +12,4 @@ mv ./tmp/termal .
 
 rm -rf termal-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz ./tmp
 
-echo done
+echo "done"

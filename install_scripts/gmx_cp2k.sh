@@ -4,6 +4,7 @@ set -e
 VERSION="2025.1"
 INSTALL_PREFIX="${PWD}/gromacs-${VERSION}/"
 thread=12
+# shellcheck disable=SC2034
 SIMD="AVX_512"
 
 FFT_LIB="/path/to/fftw-3.3.10/lib/libfftw3.la"
@@ -24,11 +25,11 @@ cd gromacs-${VERSION}
 mkdir build
 cd build
 
-# see compling option in https://manual.gromacs.org/current/install-guide/index.html
+# see compiling option in https://manual.gromacs.org/current/install-guide/index.html
 
 cmake .. \
     -DGMX_MPI=ON \
-    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
     -DGMX_GPU=OFF \
     -DGMX_FFT_LIBRARY=fftw3 \
     -DGMX_BUILD_OWN_FFTW=ON \
@@ -38,10 +39,10 @@ cmake .. \
     -DGMXAPI=OFF \
     -DGMX_INSTALL_NBLIB_API=OFF \
     -DGMX_DOUBLE=ON \
-    -DGMX_FFT_LIBRARY=fftw3  \
-    -DFFTWF_LIBRARY=$FFT_LIB  \
-    -DFFTWF_INCLUDE_DIR=$FFT_INCLUDE  \
-    -DGMX_BLAS_USER=$BLRS_USER  \
+    -DGMX_FFT_LIBRARY=fftw3 \
+    -DFFTWF_LIBRARY=$FFT_LIB \
+    -DFFTWF_INCLUDE_DIR=$FFT_INCLUDE \
+    -DGMX_BLAS_USER=$BLRS_USER \
     -DGMX_LAPACK_USER=$LAPACK_USER \
     -DGMX_CP2K=ON \
     -DCP2K_DIR=$CP2K_DIR
@@ -50,4 +51,4 @@ make -j $thread
 # make check -j $thread
 make install -j $thread
 
-echo done
+echo "done"

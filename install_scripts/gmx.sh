@@ -18,7 +18,7 @@ cd gromacs-${VERSION}
 mkdir build
 cd build
 
-# see compling option in https://manual.gromacs.org/current/install-guide/index.html
+# see compiling option in https://manual.gromacs.org/current/install-guide/index.html
 
 cmake .. \
     -DGMX_MPI=OFF \
@@ -26,7 +26,7 @@ cmake .. \
     -DGMX_GPU=CUDA \
     -DGMX_DOUBLE=OFF \
     -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-    -DGMX_SIMD=$SIMD \ # maybe OK to remove
+    -DGMX_SIMD=$SIMD \
     -DGMX_FFT_LIBRARY=fftw3 \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++
@@ -35,4 +35,4 @@ make -j $thread
 # make check -j $thread
 make install -j $thread
 
-echo done
+echo "done"
