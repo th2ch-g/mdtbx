@@ -43,6 +43,7 @@ pixi run test-fast         # 最初の失敗で停止 (-x)
 pixi run r                 # ruff format + ruff check を一括実行
 pixi run ruff-format       # フォーマットのみ
 pixi run ruff-lint         # Lintのみ
+pre-commit run --all-files # 全pre-commitフックを実行
 
 # 更新
 pixi run update            # git pull && pixi install
@@ -66,13 +67,12 @@ src/
                # ※ atom_selection_parser.py, parse_top.py はサブコマンドでなくライブラリユーティリティ
   build/         # 系構築サブコマンド(addace, addh, addnme, add_ndx, mv_crds_mol2, calc_ion_conc, centering_gro,
                #   find_bond, gen_am1bcc, gen_resp, gen_modres_am1bcc, gen_modres_resp, gen_posres,
-               #   gen_distres, modeling_cf, amb2gro, build_solution, build_vacuum, place_solvent, gen_temperatures)
-               # ※ mutate.py は未登録(cli.pyへの追加が必要)
-  trajectory/    # 軌跡処理サブコマンド(fit, trjcat, pacs_trjcat, print_perf)
-               # ※ opt_perf.py は未登録
+               #   gen_distres, modeling_cf, amb2gro, build_solution, build_vacuum, place_solvent,
+               #   gen_temperatures, mutate)
+  trajectory/    # 軌跡処理サブコマンド(fit, trjcat, pacs_trjcat, print_perf, opt_perf)
   analysis/      # 解析サブコマンド(extract_str, extract_ave_str)
-               # ※ contactmap.py, distmat.py は未登録
-  cv/            # Collective Variable計算(comdist, comvec, densmap, mindist, rmsd, rmsf, xyz, pca)
+  cv/            # Collective Variable計算(comdist, comvec, densmap, mindist, rmsd, rmsf, xyz, pca,
+               #   contactmap, distmap)
 
 tests/
   conftest.py    # 共有fixture・PyMOLモック設定
