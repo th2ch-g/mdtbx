@@ -34,8 +34,12 @@ def run(args):
     cmd.remove("oxts")
     LOGGER.info("OXTs removed")
     for chain in cmd.get_chains("target and polymer.protein"):
-        editor.attach_amino_acid(f"last (chain {chain}) and name C", "nme")
-        LOGGER.info(f"NME added to {chain}")
+        if chain:
+            selection = f"last (chain {chain}) and name C"
+        else:
+            selection = "last polymer.protein and name C"
+        editor.attach_amino_acid(selection, "nme")
+        LOGGER.info(f"NME added to chain '{chain}'")
     cmd.set("retain_order", 0)
     cmd.sort()
     cmd.save(f"{args.output_prefix}.pdb")

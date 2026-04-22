@@ -31,8 +31,12 @@ def add_subcmd(subparsers):
 def run(args):
     cmd.load(args.structure, "target")
     for chain in cmd.get_chains("target and polymer.protein"):
-        editor.attach_amino_acid(f"first (chain {chain}) and name N", "ace")
-        LOGGER.info(f"ACE added to {chain}")
+        if chain:
+            selection = f"first (chain {chain}) and name N"
+        else:
+            selection = "first polymer.protein and name N"
+        editor.attach_amino_acid(selection, "ace")
+        LOGGER.info(f"ACE added to chain '{chain}'")
     cmd.set("retain_order", 0)
     cmd.sort()
     cmd.save(f"{args.output_prefix}.pdb")
