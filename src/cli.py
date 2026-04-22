@@ -35,6 +35,7 @@ from .build import build_solution
 from .build import build_vacuum
 from .build import place_solvent
 from .build import gen_temperatures
+from .build import gen_loop_aa
 from .build import mutate
 
 # trajectory utils
@@ -86,6 +87,7 @@ def cli() -> None:
 
     addace.add_subcmd(subparsers)
     addh.add_subcmd(subparsers)
+    gen_loop_aa.add_subcmd(subparsers)
     mutate.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
     add_ndx.add_subcmd(subparsers)
