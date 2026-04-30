@@ -390,6 +390,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ef/af/4fbc8cab944db5d21b7e2a5b8e9211a03a79852b1157e2c102fcc61ac440/pandocfilters-1.5.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/16/32/f8e3c85d1d5250232a5d3477a2a28cc291968ff175caeadaf3cc19ce0e4a/parso-0.8.5-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/99/05/99a31c4851e3310c8787a9528e2ca3f7ab4d9fc1df78b5d301dd9fbaa4d1/pdb2pqr-3.6.2-py2.py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/c0/01defa20702d462b35df5b0eb8d795ff229ff08e2b9f48c16998c1cb3506/pdb_tools-2.6.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/c3/059298687310d527a58bb01f3b1965787ee3b40dce76752eda8b44e9a2c5/pexpect-4.9.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/cb/ac7874b3e5d58441674fb70742e6c374b28b0c7cb988d37d991cde47166c/platformdirs-4.5.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6b/80/1791ac226bb989bef30fe8fde752b2021b6ec5dfd6e880262596aedf4c05/polars-1.34.0-py3-none-any.whl
@@ -769,6 +770,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ef/af/4fbc8cab944db5d21b7e2a5b8e9211a03a79852b1157e2c102fcc61ac440/pandocfilters-1.5.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/16/32/f8e3c85d1d5250232a5d3477a2a28cc291968ff175caeadaf3cc19ce0e4a/parso-0.8.5-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/99/05/99a31c4851e3310c8787a9528e2ca3f7ab4d9fc1df78b5d301dd9fbaa4d1/pdb2pqr-3.6.2-py2.py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/c0/01defa20702d462b35df5b0eb8d795ff229ff08e2b9f48c16998c1cb3506/pdb_tools-2.6.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/c3/059298687310d527a58bb01f3b1965787ee3b40dce76752eda8b44e9a2c5/pexpect-4.9.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/cb/ac7874b3e5d58441674fb70742e6c374b28b0c7cb988d37d991cde47166c/platformdirs-4.5.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6b/80/1791ac226bb989bef30fe8fde752b2021b6ec5dfd6e880262596aedf4c05/polars-1.34.0-py3-none-any.whl
@@ -1147,6 +1149,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ef/af/4fbc8cab944db5d21b7e2a5b8e9211a03a79852b1157e2c102fcc61ac440/pandocfilters-1.5.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/16/32/f8e3c85d1d5250232a5d3477a2a28cc291968ff175caeadaf3cc19ce0e4a/parso-0.8.5-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/99/05/99a31c4851e3310c8787a9528e2ca3f7ab4d9fc1df78b5d301dd9fbaa4d1/pdb2pqr-3.6.2-py2.py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/c0/01defa20702d462b35df5b0eb8d795ff229ff08e2b9f48c16998c1cb3506/pdb_tools-2.6.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/c3/059298687310d527a58bb01f3b1965787ee3b40dce76752eda8b44e9a2c5/pexpect-4.9.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/cb/ac7874b3e5d58441674fb70742e6c374b28b0c7cb988d37d991cde47166c/platformdirs-4.5.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6b/80/1791ac226bb989bef30fe8fde752b2021b6ec5dfd6e880262596aedf4c05/polars-1.34.0-py3-none-any.whl
@@ -7440,7 +7443,7 @@ packages:
 - pypi: ./
   name: mdtbx
   version: 0.1.0
-  sha256: 184570e3f674f22d00f2a6c71d37251763a9b34dcdb39dd1b96dbfa3fcb92b94
+  sha256: 8e5f6bbd96d0d1e721f234f0d1fd8763ca8671b03e17cd454487fca155a7d1b5
   requires_python: ==3.10
 - conda: https://conda.anaconda.org/conda-forge/linux-64/mdtraj-1.9.9-py310h523e8d7_1.conda
   sha256: f8aeffbd29bf9b7eb89020b7b5cbbea7ba961b18f3c1faec55076b2550c50581
@@ -9160,6 +9163,10 @@ packages:
   purls: []
   size: 835080
   timestamp: 1756743041908
+- pypi: https://files.pythonhosted.org/packages/8b/c0/01defa20702d462b35df5b0eb8d795ff229ff08e2b9f48c16998c1cb3506/pdb_tools-2.6.1-py3-none-any.whl
+  name: pdb-tools
+  version: 2.6.1
+  sha256: 62067248e4964931ff0d75104ef655d959bc447e00633eb1f9bfb228a7f9ab5a
 - pypi: https://files.pythonhosted.org/packages/99/05/99a31c4851e3310c8787a9528e2ca3f7ab4d9fc1df78b5d301dd9fbaa4d1/pdb2pqr-3.6.2-py2.py3-none-any.whl
   name: pdb2pqr
   version: 3.6.2

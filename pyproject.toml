@@ -78,6 +78,7 @@ pydssp = "*"
 meeko = "*"
 pdb2pqr = "*"
 biopython = "*"
+pdb-tools = "*"
 
 [tool.pixi.tasks]
 update = "git pull && pixi install"
