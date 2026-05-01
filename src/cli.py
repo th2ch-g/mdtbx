@@ -34,6 +34,7 @@ from .build import amb2gro
 from .build import build_solution
 from .build import build_vacuum
 from .build import place_solvent
+from .build import place
 from .build import gen_temperatures
 from .build import gen_loop_aa
 from .build import mutate
@@ -124,6 +125,7 @@ def cli() -> None:
     build_solution.add_subcmd(subparsers)
     build_vacuum.add_subcmd(subparsers)
     place_solvent.add_subcmd(subparsers)
+    place.add_subcmd(subparsers)
 
     contactmap.add_subcmd(subparsers)
     comdist.add_subcmd(subparsers)
