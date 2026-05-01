@@ -38,6 +38,7 @@ from .build import place
 from .build import gen_temperatures
 from .build import gen_loop_aa
 from .build import mutate
+from .build import fill_chainname
 
 # trajectory utils
 from .trajectory import trjcat
@@ -90,6 +91,7 @@ def cli() -> None:
     addh.add_subcmd(subparsers)
     gen_loop_aa.add_subcmd(subparsers)
     mutate.add_subcmd(subparsers)
+    fill_chainname.add_subcmd(subparsers)
     addnme.add_subcmd(subparsers)
     add_ndx.add_subcmd(subparsers)
     mv_crds_mol2.add_subcmd(subparsers)

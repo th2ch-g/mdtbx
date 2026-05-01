@@ -37,6 +37,7 @@ def test_all_subcommands_registered():
         "addace",
         "addh",
         "mutate",
+        "fill_chainname",
         "addnme",
         "add_ndx",
         "mv_crds_mol2",
