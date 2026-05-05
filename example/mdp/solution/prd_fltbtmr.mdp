@@ -1,7 +1,7 @@
-;define                  = -DPOSRES -DPOSRES_FC=0.0 -DPOSRES_FC_LIPID=0.0 ; Use restraints if acpype is used
+;define                  = -DPOSRES -DPOSRES_FC=0.0; Use restraints if acpype is used
 integrator              = md
 dt                      = 0.002
-nsteps                  = 5000000
+nsteps                  = 50000000
 nstxout-compressed      = 1000
 nstxout                 = 0
 nstvout                 = 0
@@ -26,7 +26,7 @@ tau_t                   = 1.0
 ref_t                   = 310
 ;
 pcoupl                  = C-rescale
-pcoupltype              = semiisotropic
+pcoupltype              = isotropic
 tau_p                   = 5.0
 compressibility         = 4.5e-5  4.5e-5
 ref_p                   = 1.0     1.0
@@ -38,3 +38,19 @@ continuation            = yes
 nstcomm                 = 100
 comm_mode               = linear
 comm_grps               = System
+;
+pull                    = yes
+pull-ngroups            = 2
+pull-ncoords            = 1
+pull-group1-name        = TARGET1
+pull-group2-name        = TARGET2
+pull-coord1-type        = flat-bottom
+pull-coord1-geometry    = distance
+pull-coord1-groups      = 1 2
+pull-coord1-dim         = Y Y Y
+pull-coord1-init        = 5.0
+pull-coord1-k           = 100
+pull_coord1_start       = no
+pull-pbc-ref-prev-step-com = yes
+pull_group1_pbcatom        = 1
+pull_group2_pbcatom        = 5947

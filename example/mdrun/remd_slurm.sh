@@ -14,7 +14,7 @@ module load gcc/13.3.0 cuda/12.9 cmake/3.31.6 openmpi/5.0.7
 module load /home/hori/works/tools/hpc_sdk/modulefiles/nvhpc/25.7
 export PATH="$TOOLS/gromacs/2025.1-mpi/gromacs-2025.1/bin:$PATH"
 
-REPLEX=500
+REPLEX=1000
 N_REPLICA=16
 OMP=1
 MPI=$N_REPLICA
