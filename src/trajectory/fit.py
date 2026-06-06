@@ -1,8 +1,8 @@
 import argparse
 import mdtraj as md
-import subprocess
 
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -57,19 +57,14 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        if args.index is None:
-            INDEX_OPT = ""
-        else:
-            INDEX_OPT = f"-n {args.index}"
+        INDEX_OPT = f"-n {args.index}"
         # cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc nojump -center"
         cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc {args.pbc} {INDEX_OPT} -center"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"{args.output} generated")
+        run_cmd(cmd)
         cmd = f"echo {args.selection} System | gmx trjconv -f tmp.xtc -s {args.topology} -o {args.output} -fit rot+trans {INDEX_OPT}"
-        subprocess.run(cmd, shell=True, check=True)
+        run_cmd(cmd)
         cmd = "rm -f tmp.xtc"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("tmp.xtc removed")
+        run_cmd(cmd, log="tmp.xtc removed")
     else:
         trj = md.load(args.file, top=args.topology)
         ref = md.load(args.topology)

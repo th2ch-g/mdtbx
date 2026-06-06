@@ -1,8 +1,9 @@
 import argparse
 from pathlib import Path
-import subprocess
-from ..config import *  # NOQA
+import sys
+from ..config import SYSTEM_NAME
 from ..logger import generate_logger
+from ..utils.tleap import run_tleap
 from .calc_ion_conc import calc_ion_conc_from_volume
 
 LOGGER = generate_logger(__name__)
@@ -10,7 +11,7 @@ LOGGER = generate_logger(__name__)
 
 def add_subcmd(subparsers):
     """
-    mdtbx build_solution -f input_structure.pdb -o output_structure.pdb --ion_conc 0.15 --cation Na+ --anion Cl- --ligparam FRCMOD:LIB --boxsize 100 100 100
+    mdtbx build_solution -i input_structure.pdb -o ./outdir --ion_conc 0.15 --cation Na+ --anion Cl- --ligparam FRCMOD:LIB --boxsize 100 100 100
     """
     parser = subparsers.add_parser(
         "build_solution",
@@ -115,8 +116,11 @@ def run(args):
                 line = line.replace("BOX_SIZE", " ".join(map(str, args.boxsize)))
             if "LIGAND_PARAMS" in line:
                 if args.ligparam is not None:
-                    frcmod = args.ligparam.split(":")[0]
-                    lib = args.ligparam.split(":")[1]
+                    parts = args.ligparam.split(":")
+                    if len(parts) != 2:
+                        LOGGER.error("--ligparam must be in FRCMOD:LIB format")
+                        sys.exit(1)
+                    frcmod, lib = parts
                     cmd = f"""
 loadamberparams {frcmod}
 loadoff {lib}
@@ -157,16 +161,8 @@ addionsrand {SYSTEM_NAME} {args.anion} 0
             lines.append(line)
 
     cmd_tleap = "\n".join(lines)
-    with open("tleap.in", "w") as f:
-        f.write(cmd_tleap)
-    cmd = "tleap -f tleap.in"
-    subprocess.run(cmd, shell=True, check=True)
+    run_tleap(cmd_tleap, keepfiles=args.keepfiles)
 
     LOGGER.info(
         f"{args.outdir}/leap.parm7 {args.outdir}/leap.rst7 {args.outdir}/leap.pdb generated"
     )
-
-    if not args.keepfiles:
-        cmd = "rm -f leap.log tleap.in"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("leap.log tleap.in removed")

@@ -4,6 +4,7 @@ import mdtraj as md
 import numpy as np
 
 from ..logger import generate_logger
+from ..utils.common_args import add_output_arg, add_topology_arg
 
 LOGGER = generate_logger(__name__)
 
@@ -18,9 +19,7 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
-    )
+    add_topology_arg(parser)
     parser.add_argument(
         "-t",
         "--trajectory",
@@ -34,9 +33,7 @@ def add_subcmd(subparsers):
         default="protein and name CA",
         help="MDtraj selection for representative atoms (typically one atom per residue)",
     )
-    parser.add_argument(
-        "-o", "--output", type=str, default="distmap.npy", help="Output file (.npy)"
-    )
+    add_output_arg(parser, default="distmap.npy")
 
     parser.set_defaults(func=run)
 
@@ -65,9 +62,13 @@ def load_representative_coordinates(
     return coordinates
 
 
-def calculate_distance_map(coordinates: np.ndarray) -> np.ndarray:
+def pairwise_distances(coordinates: np.ndarray) -> np.ndarray:
     diff = coordinates[:, :, None, :] - coordinates[:, None, :, :]
-    return np.linalg.norm(diff, axis=-1).mean(axis=0)
+    return np.linalg.norm(diff, axis=-1)
+
+
+def calculate_distance_map(coordinates: np.ndarray) -> np.ndarray:
+    return pairwise_distances(coordinates).mean(axis=0)
 
 
 def run(args):

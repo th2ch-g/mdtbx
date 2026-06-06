@@ -7,12 +7,12 @@
 import argparse
 import os
 import shutil
-import subprocess
 import tempfile
 from pathlib import Path
 
 import numpy as np
 
+from ..utils.proc import run_cmd
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -218,7 +218,7 @@ def _run_rism1d(solvent_model, temperature, workdir):
 
     rism1d_cmd = f"rism1d {xvv_stem} > {xvv_stem}.out 2>&1"
     LOGGER.info(f"Running 1D-RISM to generate xvv file ({solvent_model}) ...")
-    subprocess.run(rism1d_cmd, shell=True, check=True, cwd=workdir)
+    run_cmd(rism1d_cmd, cwd=workdir)
 
     if not os.path.exists(xvv_path):
         raise RuntimeError(
@@ -272,7 +272,7 @@ def _run_rism3d_snglpnt(prmtop, coord, xvv_path, args, workdir):
 
     LOGGER.info("Running rism3d.snglpnt ...")
     LOGGER.info(f"  Command: {' '.join(rism_cmd)}")
-    subprocess.run(rism_cmd, check=True, cwd=workdir)
+    run_cmd(rism_cmd, cwd=workdir)
 
 
 def _run_sander_rism(prmtop, coord, args, workdir):
@@ -306,7 +306,7 @@ def _run_sander_rism(prmtop, coord, args, workdir):
     ]
 
     LOGGER.info("Running sander with 3D-RISM ...")
-    subprocess.run(sander_cmd, check=True, cwd=workdir)
+    run_cmd(sander_cmd, cwd=workdir)
 
 
 # ---------------------------------------------------------------------------
@@ -456,9 +456,9 @@ def _extract_peaks_greedy(
 def _write_pdb(coords, gvalues, solvent, output_path):
     """溶媒サイト座標を PDB 形式で書き出す。
 
-    occupancy に g(r) の初期値を、B-factor に配置順の g(r) を記録する。
+    occupancy には定数 1.00 を、B-factor に各サイトの g(r) 値を記録する。
     原子番号・残基番号が PDB フォーマットの上限を超える場合は
-    モジュロで折り返す。
+    モジュロで 1 始まりの範囲に折り返す。
     """
     atom_name = "O" if solvent == "water" else "X"
     resname = "WAT" if solvent == "water" else "SOL"
@@ -470,8 +470,8 @@ def _write_pdb(coords, gvalues, solvent, output_path):
         )
         for i, (coord, gval) in enumerate(zip(coords, gvalues), start=1):
             x, y, z = coord
-            serial = i % 100000  # ATOM serial は 5 桁まで
-            resseq = i % 10000  # 残基番号は 4 桁まで
+            serial = (i - 1) % 99999 + 1  # ATOM serial は 5 桁まで (1..99999)
+            resseq = (i - 1) % 9999 + 1  # 残基番号は 4 桁まで (1..9999)
             f.write(
                 f"HETATM{serial:5d}  {atom_name:<3s} {resname} A"
                 f"{resseq:4d}    "

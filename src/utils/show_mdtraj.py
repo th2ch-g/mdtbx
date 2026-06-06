@@ -1,7 +1,6 @@
 import argparse
 import mdtraj as md
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -24,5 +23,5 @@ def add_subcmd(subparsers):
 
 def run(args):
     top = md.load(args.topology)
-    atoms, bonds = top.top.to_dataframe()
+    atoms, _ = top.top.to_dataframe()
     print(atoms)

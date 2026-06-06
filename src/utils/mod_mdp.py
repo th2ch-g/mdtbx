@@ -1,7 +1,6 @@
 import argparse
 from pathlib import Path
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -46,7 +45,7 @@ def run(args):
                 if exclude in mdp.name:
                     LOGGER.info(f"{mdp} excluded")
                     key_skip = True
-                    continue
+                    break
         if key_skip:
             continue
         mod_mdp(args.target_variable, args.new_value, mdp, args.ljust)
@@ -61,9 +60,9 @@ def mod_mdp(target_variable, new_value, mdp, ljust):
             if line_.startswith(";"):
                 new_lines.append(line)
                 continue
-            if line_.startswith(target_variable):
-                current_value = line_.split("=")[1].strip()
-                new_line = line.replace(current_value, new_value)
+            key, sep, _rest = line_.partition("=")
+            if sep and key.strip() == target_variable:
+                new_line = f"{key.rstrip()} = {new_value}\n"
                 new_lines.append(new_line)
                 added_key = True
             else:

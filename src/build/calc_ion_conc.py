@@ -1,7 +1,7 @@
 import argparse
 import re
 
-from ..config import *  # NOQA
+from ..config import AVOGADRO_CONST, WATER_VOLUME
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -69,11 +69,10 @@ def add_subcmd(subparsers):
 
 def get_boxsize_from_pdb(args) -> tuple[float, float, float]:  # angstrom^3
     with open(args.pdb) as f:
-        for idx, line in enumerate(f):
+        for line in f:
             line = line.rstrip()
             if "CRYST" in line:
                 parsed = re.findall(r"\S+", line)
-                print(parsed)
                 return float(parsed[1]), float(parsed[2]), float(parsed[3])
     raise Exception("CRYST line not found")
 
@@ -81,9 +80,14 @@ def get_boxsize_from_pdb(args) -> tuple[float, float, float]:  # angstrom^3
 def get_water_number_from_pdb(args) -> int:
     count = 0
     with open(args.pdb) as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
-            if "O" in line and args.water_name in line:
+        for line in f:
+            if not (line.startswith("ATOM") or line.startswith("HETATM")):
+                continue
+            # Parse fixed PDB columns: atom name (cols 13-16) and residue name (cols 18-20).
+            atom_name = line[12:16].strip()
+            res_name = line[17:20].strip()
+            # Count one oxygen per water molecule regardless of residue name.
+            if res_name == args.water_name and atom_name.startswith("O"):
                 count += 1
     return count
 
@@ -124,7 +128,7 @@ def run(args):
             boxsize = get_boxsize_from_pdb(args)
             volume = boxsize[0] * boxsize[1] * boxsize[2]
             LOGGER.info(f"Volume of system: {volume}")
-            net_charge = getattr(args, "net_charge", 0)
+            net_charge = args.net_charge
             salt_num = calc_ion_conc_from_volume(volume, args.concentration)
             # Add counter-ions to neutralize, then add salt ions
             if net_charge > 0:
@@ -138,6 +142,10 @@ def run(args):
                 anion_num = salt_num
             LOGGER.info(f"Net charge: {net_charge}")
             LOGGER.info(f"Cation num: {cation_num}, Anion num: {anion_num}")
-            ionnum = cation_num  # report cation count as primary value
+            LOGGER.info(
+                f"Number of ions that should be added: cation # {cation_num}, anion # {anion_num}"
+            )
+            print(f"cation_num: {cation_num}, anion_num: {anion_num}")
+            return
     LOGGER.info(f"Number of ions that should be added: # {ionnum}")
     print(f"ionnum: {ionnum}")

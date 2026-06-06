@@ -1,7 +1,6 @@
 import argparse
 import numpy as np
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)

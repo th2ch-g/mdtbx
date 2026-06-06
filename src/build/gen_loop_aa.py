@@ -1,8 +1,7 @@
 import argparse
-import subprocess
-from pathlib import Path
 
 from ..logger import generate_logger
+from ..utils.tleap import run_tleap
 
 LOGGER = generate_logger(__name__)
 
@@ -39,9 +38,15 @@ quit
 
 def _to_three_letter(sequence: str) -> list[str]:
     """Convert one-letter or space-separated three-letter sequence to list of three-letter codes."""
-    if " " in sequence:
-        return sequence.upper().split()
-    return [ONE_TO_THREE[aa] for aa in sequence.upper()]
+    tokens = sequence.upper().split()
+    three_letter_codes = set(ONE_TO_THREE.values())
+    # Treat tokens verbatim when every token is a valid three-letter code. This
+    # covers 'ALA CYS GLY' and a single real residue 'ALA', while still expanding
+    # 'AGS' (one-letter codes A,G,S) and 'ACGST' character by character.
+    if tokens and all(t in three_letter_codes for t in tokens):
+        return tokens
+    # Otherwise treat the concatenated characters as one-letter codes.
+    return [ONE_TO_THREE[aa] for aa in "".join(tokens)]
 
 
 def add_subcmd(subparsers):
@@ -103,10 +108,5 @@ def run(args):
         output=args.output,
     )
 
-    Path("tleap.in").write_text(tleap_input)
-    subprocess.run("tleap -f tleap.in", shell=True, check=True)
+    run_tleap(tleap_input, keepfiles=args.keepfiles)
     LOGGER.info(f"{args.output} generated")
-
-    if not args.keepfiles:
-        subprocess.run("rm -f leap.log tleap.in", shell=True, check=True)
-        LOGGER.info("leap.log tleap.in removed")

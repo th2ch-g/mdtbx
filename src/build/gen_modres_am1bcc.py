@@ -1,9 +1,8 @@
 import argparse
-import subprocess
 from pathlib import Path
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -64,9 +63,11 @@ def add_subcmd(subparsers):
 def run(args):
     # ref: https://ambermd.org/tutorials/basic/tutorial5/index.php
     filetype = Path(args.structure).suffix[1:]
+    # antechamber uses "mdl" as the format flag for MDL .mol files
+    if filetype == "mol":
+        filetype = "mdl"
     cmd = f"antechamber -fi {filetype} -i {args.structure} -bk {args.resname} -fo ac -o {args.resname}.ac -c bcc -at amber -pf y -s 2 -nc {args.charge} -m {args.multiplicity}"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.ac generated")
+    run_cmd(cmd, log=f"{args.resname}.ac generated")
 
     if args.mainchain is not None:
         main_chain = "\n".join([f"MAIN_CHAIN {mc}" for mc in args.mainchain])
@@ -92,24 +93,21 @@ CHARGE {args.charge}
         f.write(mc)
 
     cmd = f"prepgen -i {args.resname}.ac -o {args.resname}.prepin -m {args.resname}.mc -rn {args.resname}"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.prepin generated")
+    run_cmd(cmd, log=f"{args.resname}.prepin generated")
 
     cmd = f"parmchk2 -i {args.resname}.prepin -f prepi -o {args.resname}_1.frcmod -a Y -p {Path(__file__).parent.parent.parent}/.pixi/envs/default/dat/leap/parm/parm10.dat"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}_1.frcmod generated")
+    run_cmd(cmd, log=f"{args.resname}_1.frcmod generated")
 
     lines = []
     with open(f"{args.resname}_1.frcmod") as f:
-        for idx, line in enumerate(f):
+        for line in f:
             line = line.rstrip()
             if "ATTN" not in line:
                 lines.append(line)
     content = "\n".join(lines)
     with open(f"{args.resname}_1.frcmod", "w") as f:
-        f.writelines(content)
+        f.write(content + "\n")
     LOGGER.info(f"{args.resname}_1.frcmod updated")
 
     cmd = f"parmchk2 -i {args.resname}.prepin -f prepi -o {args.resname}_2.frcmod -s gaff2"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}_2.frcmod generated")
+    run_cmd(cmd, log=f"{args.resname}_2.frcmod generated")

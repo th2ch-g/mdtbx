@@ -3,7 +3,8 @@ import argparse
 import numpy as np
 
 from ..logger import generate_logger
-from .distmap import load_representative_coordinates
+from ..utils.common_args import add_output_arg, add_topology_arg
+from .distmap import load_representative_coordinates, pairwise_distances
 
 LOGGER = generate_logger(__name__)
 
@@ -18,9 +19,7 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
-    )
+    add_topology_arg(parser)
     parser.add_argument(
         "-t",
         "--trajectory",
@@ -40,13 +39,7 @@ def add_subcmd(subparsers):
         default=6.0,
         help="Contact cutoff in angstrom",
     )
-    parser.add_argument(
-        "-o",
-        "--output",
-        type=str,
-        default="contactmap.npy",
-        help="Output file (.npy)",
-    )
+    add_output_arg(parser, default="contactmap.npy")
 
     parser.set_defaults(func=run)
 
@@ -66,8 +59,7 @@ def run(args):
     if coordinates is None:
         return
 
-    diff = coordinates[:, :, None, :] - coordinates[:, None, :, :]
-    distance_matrices = np.linalg.norm(diff, axis=-1)
+    distance_matrices = pairwise_distances(coordinates)
     contact_map = calculate_contact_map(distance_matrices, args.cutoff)
 
     LOGGER.info(f"Contact map shape: {contact_map.shape}")

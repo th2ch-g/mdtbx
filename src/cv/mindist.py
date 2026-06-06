@@ -3,8 +3,12 @@ import mdtraj as md
 import numpy as np
 import itertools
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.common_args import (
+    add_output_arg,
+    add_topology_arg,
+    add_trajectory_arg,
+)
 
 LOGGER = generate_logger(__name__)
 
@@ -19,16 +23,8 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
-    )
-    parser.add_argument(
-        "-t",
-        "--trajectory",
-        type=str,
-        required=True,
-        help="Trajectory file (.xtc, .trr)",
-    )
+    add_topology_arg(parser)
+    add_trajectory_arg(parser)
     parser.add_argument(
         "-s1",
         "--selection1",
@@ -43,9 +39,7 @@ def add_subcmd(subparsers):
         required=True,
         help="Selection 2 (MDtraj Atom selection language)",
     )
-    parser.add_argument(
-        "-o", "--output", type=str, default="mindist.npy", help="Output file (.npy)"
-    )
+    add_output_arg(parser, default="mindist.npy")
 
     parser.set_defaults(func=run)
 
@@ -55,6 +49,13 @@ def run(args):
 
     selection1_indices = trj.top.select(args.selection1)
     selection2_indices = trj.top.select(args.selection2)
+
+    if len(selection1_indices) == 0:
+        LOGGER.error(f"No atoms selected by: {args.selection1}")
+        return
+    if len(selection2_indices) == 0:
+        LOGGER.error(f"No atoms selected by: {args.selection2}")
+        return
 
     atom_pairs = list(itertools.product(selection1_indices, selection2_indices))
 

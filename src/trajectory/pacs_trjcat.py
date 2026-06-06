@@ -1,8 +1,9 @@
 import argparse
-import subprocess
 from pathlib import Path
 
 from ..logger import generate_logger
+from ..utils.gmx import gmx_index_flag
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -115,10 +116,7 @@ def run(args):
     if args.ref_structure == DEFAULT_TOPOLOGY:
         args.ref_structure = str(cycle_dirs[0] / "replica001" / "rmmol_top.tpr")
 
-    if args.index is not None:
-        INDEX_OPTION = f"-n {args.index}"
-    else:
-        INDEX_OPTION = ""
+    INDEX_OPTION = gmx_index_flag(args.index)
 
     ext = Path(args.trjname).suffix
 
@@ -127,12 +125,10 @@ def run(args):
 
     # topology conversion
     cmd = f"echo {args.keep_selection} | gmx convert-tpr -s {args.ref_structure} {INDEX_OPTION} -o {args.trial_dir}/rmmol_top.tpr"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("rmmol_top.tpr generated")
+    run_cmd(cmd, log="rmmol_top.tpr generated")
 
     cmd = f"gmx editconf -f {args.trial_dir}/rmmol_top.tpr -o {args.trial_dir}/rmmol_top.gro"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("rmmol_top.gro generated")
+    run_cmd(cmd, log="rmmol_top.gro generated")
 
     c_cmd = "c\n" * n_replica
     for cycle_index, cycle_dir in enumerate(cycle_dirs):
@@ -144,27 +140,22 @@ def run(args):
             ]
             trj_files = " ".join(trj_files)
             cmd = f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {cycle_dir}/tmp_all{ext} -settime"
-            subprocess.run(cmd, shell=True, check=True)
-            LOGGER.info(f"{cycle_dir}/tmp_all{ext} generated")
+            run_cmd(cmd, log=f"{cycle_dir}/tmp_all{ext} generated")
         else:
             trj_file = f"{cycle_dir}/replica001/{args.trjname}"
             cmd = f"cp {trj_file} {cycle_dir}/tmp_all{ext}"
-            subprocess.run(cmd, shell=True, check=True)
-            LOGGER.info(f"{cycle_dir}/tmp_all{ext} copied")
+            run_cmd(cmd, log=f"{cycle_dir}/tmp_all{ext} copied")
 
         # trjconv
-        cmd = f"echo {args.centering_selection} System | gmx trjconv -f {cycle_dir}/tmp_all{ext} -s {args.ref_structure} {INDEX_OPTION} -o {cycle_dir}/tmp_all_pbc{ext} -center -pbc {args.pbc}"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"{cycle_dir}/prd_all{ext} generated")
+        cmd = f"echo {args.centering_selection} System | gmx trjconv -f {cycle_dir}/tmp_all{ext} -s {args.ref_structure} {INDEX_OPTION} -o {cycle_dir}/tmp_all_pbc{ext} -center -pbc {args.pbc} -skip {args.skip}"
+        run_cmd(cmd, log=f"{cycle_dir}/prd_all{ext} generated")
 
         cmd = f"echo {args.fit_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {cycle_dir}/tmp_all_pbc{ext} -s {args.ref_structure} {INDEX_OPTION} -o {cycle_dir}/prd_all{ext} -center -fit rot+trans"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"{cycle_dir}/prd_all{ext} generated")
+        run_cmd(cmd, log=f"{cycle_dir}/prd_all{ext} generated")
 
         # rm
         cmd = f"rm -f {cycle_dir}/tmp_all{ext} {cycle_dir}/\\#*"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"{cycle_dir}/tmp_all{ext} and backup files removed")
+        run_cmd(cmd, log=f"{cycle_dir}/tmp_all{ext} and backup files removed")
 
     c_cmd = "c\n" * n_cycle
 
@@ -172,27 +163,22 @@ def run(args):
     trj_files = [f"{cycle_dir}/tmp_all_pbc{ext} " for cycle_dir in cycle_dirs]
     trj_files = " ".join(trj_files)
     cmd = f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {args.trial_dir}/tmp_all{ext} -settime"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.trial_dir}/tmp_all{ext} generated")
+    run_cmd(cmd, log=f"{args.trial_dir}/tmp_all{ext} generated")
 
     # trjconv
     cmd = f"echo {args.centering_selection} System | gmx trjconv -f {args.trial_dir}/tmp_all{ext} -s {args.ref_structure} {INDEX_OPTION} -o {args.trial_dir}/tmp_all_pbc{ext} -center -pbc {args.pbc}"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.trial_dir}/tmp_all_pbc{ext} generated")
+    run_cmd(cmd, log=f"{args.trial_dir}/tmp_all_pbc{ext} generated")
 
     cmd = f"echo {args.fit_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.trial_dir}/tmp_all_pbc{ext} -s {args.ref_structure} {INDEX_OPTION} -o {args.trial_dir}/prd_all{ext} -center -fit rot+trans"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.trial_dir}/prd_all{ext} generated")
+    run_cmd(cmd, log=f"{args.trial_dir}/prd_all{ext} generated")
 
     # rm
     cmd = f"rm -f {args.trial_dir}/cycle*/tmp_all_pbc{ext} {args.trial_dir}/tmp_all{ext} {args.trial_dir}/tmp_all_pbc{ext} {args.trial_dir}/\\#*"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.trial_dir}/tmp_all{ext} and backup files removed")
+    run_cmd(cmd, log=f"{args.trial_dir}/tmp_all{ext} and backup files removed")
 
     if not args.keep_cycle_trj:
         cycle_outputs = " ".join(
             f"{cycle_dir}/prd_all{ext}" for cycle_dir in cycle_dirs
         )
         cmd = f"rm -f {cycle_outputs}"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("Per-cycle trajectories removed")
+        run_cmd(cmd, log="Per-cycle trajectories removed")

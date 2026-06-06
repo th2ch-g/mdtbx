@@ -1,6 +1,5 @@
 import fnmatch
 from typing import List, Union, Dict, Protocol, runtime_checkable, Set
-from dataclasses import dataclass
 
 PROTEIN_RESNAMES: Set[str] = {
     "ALA",
@@ -18,8 +17,8 @@ PROTEIN_RESNAMES: Set[str] = {
     "MET",
     "PHE",
     "PRO",
-    "SET",
-    "THE",
+    "SER",
+    "THR",
     "TRP",
     "TYR",
     "VAL",
@@ -28,6 +27,8 @@ PROTEIN_RESNAMES: Set[str] = {
 WATER_RESNAMES: Set[str] = {"HOH", "WAT", "SOL"}
 
 BACKBONE_ATOM_NAMES: Set[str] = {"N", "CA", "C", "O", "OXT"}
+
+ION_NAMES: Set[str] = {"NA", "CL", "K", "MG", "ZN", "CA"}
 
 
 @runtime_checkable
@@ -153,9 +154,15 @@ class Ion(SelectionNode):
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
         name = mol.get("name")
         resname = mol.get("resname")
-        if isinstance(name, str) and name in {"NA", "CL", "K", "MG", "ZN", "CA"}:
+        if isinstance(resname, str) and resname in ION_NAMES:
             return True
-        if isinstance(resname, str) and resname in {"NA", "CL", "K", "MG", "ZN", "CA"}:
+        # Fall back to the atom name only when the residue is not a known protein
+        # residue, so a protein alpha-carbon (name "CA") is not misread as calcium.
+        if (
+            isinstance(name, str)
+            and name in ION_NAMES
+            and not (isinstance(resname, str) and resname in PROTEIN_RESNAMES)
+        ):
             return True
         return False
 
@@ -463,7 +470,6 @@ def parse_selection(selection_string: str) -> Union[SelectionNode, str]:
         return str(e)
 
 
-@dataclass
 class AtomSelector:
     def __init__(self, selection_string: str) -> None:
         self.selection_string = selection_string
@@ -478,9 +484,6 @@ class AtomSelector:
             raise ValueError(f"Failed to parse selection string: {self._error}")
 
     def eval(self, mol: Dict[str, Union[str, int]]) -> bool:
-        if self._error:
-            print(f"Cannot evaluate: parsing failed with error: {self._error}")
-            return False
         if self.parsed_selection is None:
             raise RuntimeError("Selection was not successfully parsed.")
 

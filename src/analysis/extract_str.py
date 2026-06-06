@@ -1,8 +1,15 @@
 import argparse
-import subprocess
+import sys
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.common_args import (
+    add_output_arg,
+    add_selection_arg,
+    add_topology_arg,
+    add_trajectory_arg,
+)
+from ..utils.gmx import gmx_index_flag
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -17,32 +24,16 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
-    )
-    parser.add_argument(
-        "-t",
-        "--trajectory",
-        type=str,
-        required=True,
-        help="Trajectory file (.xtc, .trr)",
-    )
-    parser.add_argument(
-        "-s",
-        "--selection",
-        type=str,
-        required=True,
-        help="Selection (MDtraj atom selection language)",
-    )
+    add_topology_arg(parser)
+    add_trajectory_arg(parser)
+    add_selection_arg(parser)
     parser.add_argument(
         "--time",
         type=int,
         required=True,
         help="Time to extract structure",
     )
-    parser.add_argument(
-        "-o", "--output", type=str, default="target.pdb", help="Output struxture file"
-    )
+    add_output_arg(parser, default="target.pdb", help="Output struxture file")
     parser.add_argument(
         "--gmx",
         action="store_true",
@@ -60,17 +51,17 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        if args.index is not None:
-            INDEX_OPTION = f"-n {args.index}"
-        else:
-            INDEX_OPTION = ""
+        INDEX_OPTION = gmx_index_flag(args.index)
         cmd = f"gmx trjconv -s {args.topology} -f {args.trajectory} -o {args.output} -b {args.time} -e {args.time} {INDEX_OPTION}"
-        subprocess.run(cmd, input=f"{args.selection}\n", shell=True, check=True)
+        run_cmd(cmd, input=f"{args.selection}\n")
     else:
         # mdtraj
         import mdtraj as md
 
         trj = md.load(args.trajectory, top=args.topology)
+        if not (1 <= args.time <= trj.n_frames):
+            LOGGER.error(f"--time {args.time} is out of range (1 to {trj.n_frames})")
+            sys.exit(1)
         trj = trj[args.time - 1]
         atom_indices = trj.top.select(args.selection)
         final_trj = trj.atom_slice(atom_indices)

@@ -19,7 +19,7 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
+        "-p", "--topology", type=str, required=True, help="GROMACS topology file (.top)"
     )
     parser.add_argument(
         "-s",
@@ -29,7 +29,11 @@ def add_subcmd(subparsers):
         help="Selection (Custom atom selection language)",
     )
     parser.add_argument(
-        "-o", "--output", type=str, default="output.top", help="Output struxture file"
+        "-o",
+        "--output",
+        type=str,
+        default="output.top",
+        help="Output topology file (.top)",
     )
 
     parser.set_defaults(func=run)
@@ -61,10 +65,7 @@ def run(args):
         lines = f.readlines()
 
     for atom in selected_atoms:
-        LOGGER.info(f"atom: {atom}")
         atom_type = atom["atom_type"]
-        # pattern = fr'^(\s*(?:\S+\s+){4}){atom_name}(\s+)'
-        # replacement = fr'\1{atom_name}_\2'
         pattern = rf"^(\s*(?:\S+\s+){{1}}){re.escape(atom_type)}(?=\s|$)"
         replacement = rf"\g<1>{atom_type}_"
         atom_linenumber = atom["linenumber"]

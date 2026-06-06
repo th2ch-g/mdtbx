@@ -1,7 +1,7 @@
 import argparse
-import subprocess
 
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -15,10 +15,6 @@ def add_subcmd(subparsers):
         help="Concatenate trajectories",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-
-    # parser.add_argument(
-    #     "-s", "--skip", default=1, type=int, help="Number of frames to skip"
-    # )
 
     parser.add_argument(
         "-k", "--keep_selection", default="non-Water", type=str, help="Keep selection"
@@ -65,25 +61,13 @@ def run(args):
     # ref: https://zenn.dev/kh01734/articles/012380a58949d1
     # make new represent topology
     cmd = f"echo {args.keep_selection} | gmx convert-tpr -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.tpr"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("rmmol_top.tpr generated")
+    run_cmd(cmd, log="rmmol_top.tpr generated")
 
-    if not args.no_resnr:
+    if args.no_resnr:
         cmd = "gmx editconf -f rmmol_top.tpr -o rmmol_top.gro"
     else:
         cmd = "gmx editconf -f rmmol_top.tpr -o rmmol_top.gro -resnr 1"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("rmmol_top.gro generated")
-
-    # make gro with trjconv
-    # cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}1.gro -s {args.prefix}1.tpr -n {args.index} -o rmmol_top.gro -center"
-    # subprocess.run(cmd, shell=True, check=True)
-    # LOGGER.info("rmmol_top.gro generated")
-    #
-    # if not args.no_editconf:
-    #     cmd = "gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1"
-    #     subprocess.run(cmd, shell=True, check=True)
-    #     LOGGER.info("gmx editconf -f rmmol_top.gro -o rmmol_top.gro -resnr 1 run")
+    run_cmd(cmd, log="rmmol_top.gro generated")
 
     # trjcat -> trjconv
     c_cmd = "c\n" * args.num_of_step
@@ -93,16 +77,13 @@ def run(args):
     cmd = (
         f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {args.prefix}_all.xtc -settime"
     )
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.prefix}_all.xtc generated")
+    run_cmd(cmd, log=f"{args.prefix}_all.xtc generated")
 
     if args.pbc == "cluster":
         cmd = f"echo {args.centering_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s {args.prefix}1.tpr -n {args.index} -o {args.prefix}_all_rmmol.xtc -skip {args.skip} -pbc {args.pbc} -center"
     else:
         cmd = f"echo {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.prefix}_all.xtc -s {args.prefix}1.tpr -n {args.index} -o {args.prefix}_all_rmmol.xtc -skip {args.skip} -pbc {args.pbc} -center"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.prefix}_all_rmmol.xtc generated")
+    run_cmd(cmd, log=f"{args.prefix}_all_rmmol.xtc generated")
 
-    cmd = f"rm -f {args.prefix}_all.xtc \#*"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.prefix}_all.xtc and backup files removed")
+    cmd = rf"rm -f {args.prefix}_all.xtc \#*"
+    run_cmd(cmd, log=f"{args.prefix}_all.xtc and backup files removed")

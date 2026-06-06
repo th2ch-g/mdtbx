@@ -3,6 +3,7 @@ import argparse
 from pymol import cmd as pymol_cmd
 
 from ..logger import generate_logger
+from ..utils.pymol_session import pymol_session
 
 LOGGER = generate_logger(__name__)
 
@@ -116,41 +117,39 @@ def _validate_user_chainnames(
 def run(args):
     object_name = "target"
 
-    pymol_cmd.reinitialize()
-    pymol_cmd.load(args.structure, object_name)
+    with pymol_session(pymol_cmd, args.structure, name=object_name):
+        used = {c for c in pymol_cmd.get_chains(object_name) if c}
+        LOGGER.info(f"Existing chain IDs: {sorted(used) if used else '(none)'}")
 
-    used = {c for c in pymol_cmd.get_chains(object_name) if c}
-    LOGGER.info(f"Existing chain IDs: {sorted(used) if used else '(none)'}")
+        atoms = _collect_blank_atoms(object_name)
+        if not atoms:
+            LOGGER.info("No blank-chain atoms found; saving structure as-is")
+            pymol_cmd.save(args.output, object_name)
+            LOGGER.info(f"{args.output} generated")
+            return
 
-    atoms = _collect_blank_atoms(object_name)
-    if not atoms:
-        LOGGER.info("No blank-chain atoms found; saving structure as-is")
+        blocks = _split_into_blocks(
+            atoms,
+            max_resi_gap=args.max_resi_gap,
+            use_segi=not args.ignore_segi,
+        )
+        LOGGER.info(f"Found {len(blocks)} blank-chain block(s) to fill")
+
+        if args.chainname is not None:
+            _validate_user_chainnames(args.chainname, used, len(blocks))
+            assigned_ids = list(args.chainname)
+        else:
+            assigned_ids = []
+            for _ in blocks:
+                new_id = _next_chain_id(used)
+                used.add(new_id)
+                assigned_ids.append(new_id)
+
+        for block, new_id in zip(blocks, assigned_ids):
+            sel = "index " + "+".join(str(i) for i in block)
+            pymol_cmd.alter(f"({object_name}) and ({sel})", f"chain='{new_id}'")
+            LOGGER.info(f"Assigned chain '{new_id}' to {len(block)} atom(s)")
+
+        pymol_cmd.sort()
         pymol_cmd.save(args.output, object_name)
         LOGGER.info(f"{args.output} generated")
-        return
-
-    blocks = _split_into_blocks(
-        atoms,
-        max_resi_gap=args.max_resi_gap,
-        use_segi=not args.ignore_segi,
-    )
-    LOGGER.info(f"Found {len(blocks)} blank-chain block(s) to fill")
-
-    if args.chainname is not None:
-        _validate_user_chainnames(args.chainname, used, len(blocks))
-        assigned_ids = list(args.chainname)
-    else:
-        assigned_ids = []
-        for _ in blocks:
-            new_id = _next_chain_id(used)
-            used.add(new_id)
-            assigned_ids.append(new_id)
-
-    for block, new_id in zip(blocks, assigned_ids):
-        sel = "index " + "+".join(str(i) for i in block)
-        pymol_cmd.alter(f"({object_name}) and ({sel})", f"chain='{new_id}'")
-        LOGGER.info(f"Assigned chain '{new_id}' to {len(block)} atom(s)")
-
-    pymol_cmd.sort()
-    pymol_cmd.save(args.output, object_name)
-    LOGGER.info(f"{args.output} generated")

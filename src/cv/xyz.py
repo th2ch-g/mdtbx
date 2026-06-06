@@ -2,8 +2,13 @@ import argparse
 import mdtraj as md
 import numpy as np
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.common_args import (
+    add_output_arg,
+    add_selection_arg,
+    add_topology_arg,
+    add_trajectory_arg,
+)
 
 LOGGER = generate_logger(__name__)
 
@@ -18,26 +23,10 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
-    )
-    parser.add_argument(
-        "-t",
-        "--trajectory",
-        type=str,
-        required=True,
-        help="Trajectory file (.xtc, .trr)",
-    )
-    parser.add_argument(
-        "-s",
-        "--selection",
-        type=str,
-        required=True,
-        help="Selection (MDtraj Atom selection language)",
-    )
-    parser.add_argument(
-        "-o", "--output", type=str, default="comdist.npy", help="Output file (.npy)"
-    )
+    add_topology_arg(parser)
+    add_trajectory_arg(parser)
+    add_selection_arg(parser, help="Selection (MDtraj Atom selection language)")
+    add_output_arg(parser, default="xyz.npy")
 
     parser.set_defaults(func=run)
 

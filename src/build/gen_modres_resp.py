@@ -1,9 +1,9 @@
 import argparse
-import subprocess
 from pathlib import Path
 
-from ..config import *  # NOQA
+from ..config import GAUSSIAN_CMD, SINGLE_POINT_CALCULATION
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -60,12 +60,6 @@ def add_subcmd(subparsers):
     )
 
     parser.add_argument(
-        "--postatomname",
-        type=str,
-        help="Post atom name for connection",
-    )
-
-    parser.add_argument(
         "-m", "--multiplicity", default=1, type=int, help="Multiplicity"
     )
 
@@ -87,45 +81,10 @@ def run(args):
     # hint: Check Structure as PDB before running. You can check by antechamber or obabel
     # hint: Need cap atom for specifying SEP_BOND
 
-    # filetype = Path(args.structure).suffix[1:]
-    # cmd = f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
-    # subprocess.run(cmd, shell=True, check=True)
-    #
-    # with open("structure_optimization.gjf") as ref:
-    #     lines = ref.readlines()
-    #
-    # lines[0] = "%chk=structure_optimization.chk\n"
-    # lines[1] = f"%mem={args.memory}GB\n"
-    # lines.insert(2, f"%nprocshared={args.threads}\n")
-    # lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
-    #
-    # for idx, line in enumerate(lines):
-    #     line = line.strip()
-    #     if len(line.split()) == 2:
-    #         try:
-    #             _charge = int(line.split()[0])
-    #             _multiplicity = int(line.split()[1])
-    #             target_idx = idx
-    #             lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
-    #             break
-    #         except Exception:
-    #             continue
-    #
-    # with open("structure_optimization.gjf", "w") as f:
-    #     f.writelines(lines)
-    #
-    # cmd = f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
-    # subprocess.run(cmd, shell=True, check=True)
-    # LOGGER.info("structure_optimization.log generated")
-    #
-    # # single point
-    # cmd = f"obabel -i {GAUSSIAN_CMD} structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
-    # subprocess.run(cmd, shell=True, check=True)
-
     # single point calculation
     filetype = Path(args.structure).suffix[1:]
     cmd = f"obabel -i {filetype} {args.structure} -o gjf > single_point_calculation.gjf"
-    subprocess.run(cmd, shell=True, check=True)
+    run_cmd(cmd)
 
     with open("single_point_calculation.gjf") as ref:
         lines = ref.readlines()
@@ -153,16 +112,13 @@ def run(args):
     cmd = (
         f"{GAUSSIAN_CMD} < single_point_calculation.gjf > single_point_calculation.log"  # NOQA
     )
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("single_point_calculation.log generated")
+    run_cmd(cmd, log="single_point_calculation.log generated")
 
     cmd = f"antechamber -fi gout -i single_point_calculation.log -fo ac -o {args.resname}.ac -pf y -rn {args.resname} -at amber -s 2 -nc {args.charge} -m {args.multiplicity}"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.ac generated")
+    run_cmd(cmd, log=f"{args.resname}.ac generated")
 
     cmd = f"espgen -i single_point_calculation.log -o {args.resname}.esp"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.esp generated")
+    run_cmd(cmd, log=f"{args.resname}.esp generated")
 
     atom_charges = "\n".join(
         [
@@ -197,37 +153,24 @@ RESIDUE_SYMBOL: {args.resname}
         f.write(content)
 
     cmd = f"residuegen {args.resname}.in"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.prep generated")
+    run_cmd(cmd, log=f"{args.resname}.prep generated")
 
     cmd = f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_parm10.frcmod -s parm10"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}_parm10.frcmod generated")
+    run_cmd(cmd, log=f"{args.resname}_parm10.frcmod generated")
 
     lines = []
     with open(f"{args.resname}_parm10.frcmod") as f:
-        for idx, line in enumerate(f):
+        for line in f:
             line = line.rstrip()
             if "ATTN" not in line:
                 lines.append(line)
     content = "\n".join(lines)
     with open(f"{args.resname}_parm10.frcmod", "w") as f:
-        f.writelines(content)
+        f.write(content + "\n")
     LOGGER.info(f"{args.resname}_parm10.frcmod updated")
 
     cmd = f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_gaff2.frcmod -s gaff2"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}_gaff2.frcmod generated")
-
-    # if args.postatomname is not None:
-    #     section = None
-    #     with open(f"{args.resname}.prep") as f:
-    #         for idx, line in enumerate(f):
-    #             line = line.rstrip()
-    #             if line.startwith("CORRECT"):
-    #                 section = "CORRECT"
-    #                 continue
-    #             if args.resname in line:
+    run_cmd(cmd, log=f"{args.resname}_gaff2.frcmod generated")
 
     LOGGER.warning(f"You need to modify {args.resname}.prep manually.")
     LOGGER.warning("Like ' 18  C8    C     E' => ' 18  C8    C     M'")

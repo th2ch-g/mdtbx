@@ -1,8 +1,10 @@
 import argparse
+
 from pymol import cmd
 
-from ..config import *  # NOQA
+from ..config import SYSTEM_NAME
 from ..logger import generate_logger
+from ..utils.pymol_session import pymol_session
 
 LOGGER = generate_logger(__name__)
 
@@ -67,46 +69,63 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    cmd.load(args.structure, "target")
-    pairs = cmd.find_pairs(args.selection1, args.selection2, cutoff=args.cutoff)
-    bonds_set = set()
-    bonds = []
-    for idx1, idx2 in pairs:
-        if idx1[1] in bonds_set or idx2[1] in bonds_set:
-            continue
-        bonds_set.add(idx1[1])
-        bonds_set.add(idx2[1])
-        tmp = []
-        cmd.iterate_state(1, f"index {idx1[1]}", "tmp.append(resi)", space=locals())
-        cmd.iterate_state(1, f"index {idx2[1]}", "tmp.append(resi)", space=locals())
-        bonds.append(tmp)
-    bonds_str_lines = []
-    for res1, res2 in bonds:
-        bonds_str_lines.append(f"bond {SYSTEM_NAME}.{res1}.SG {SYSTEM_NAME}.{res2}.SG")  # NOQA
-    bonds_str = "\n".join(bonds_str_lines)
+    with pymol_session(cmd, args.structure):
+        pairs = cmd.find_pairs(args.selection1, args.selection2, cutoff=args.cutoff)
+        bonds_set = set()
+        # Keep the bonded SG atom indices together with their resi so the CYM rename
+        # can target each residue uniquely (atom index), avoiding cross-chain CYS
+        # with the same residue number being renamed by accident.
+        bonds = []
+        for idx1, idx2 in pairs:
+            if idx1[1] in bonds_set or idx2[1] in bonds_set:
+                continue
+            bonds_set.add(idx1[1])
+            bonds_set.add(idx2[1])
+            tmp = []
+            cmd.iterate_state(1, f"index {idx1[1]}", "tmp.append(resi)", space=locals())
+            cmd.iterate_state(1, f"index {idx2[1]}", "tmp.append(resi)", space=locals())
+            bonds.append(
+                {
+                    "index1": idx1[1],
+                    "index2": idx2[1],
+                    "resi1": tmp[0],
+                    "resi2": tmp[1],
+                }
+            )
+        bonds_str_lines = []
+        for bond in bonds:
+            bonds_str_lines.append(
+                f"bond {SYSTEM_NAME}.{bond['resi1']}.SG {SYSTEM_NAME}.{bond['resi2']}.SG"  # NOQA
+            )
+        bonds_str = "\n".join(bonds_str_lines)
 
-    if args.output is not None:
-        with open(args.output, "w") as f:
-            f.write(bonds_str)
-        LOGGER.info(f"{args.output} generated")
-    else:
-        if len(bonds) == 0:
-            LOGGER.info("No bond found")
+        if args.output is not None:
+            with open(args.output, "w") as f:
+                f.write(bonds_str)
+            LOGGER.info(f"{args.output} generated")
         else:
-            LOGGER.info(f"{len(bonds)} bonds found")
-            print(bonds_str)
+            if len(bonds) == 0:
+                LOGGER.info("No bond found")
+            else:
+                LOGGER.info(f"{len(bonds)} bonds found")
+                print(bonds_str)
 
-    if args.output_pdb is not None:
-        if len(bonds) == 0:
-            LOGGER.info("No SS-bond found; saving original structure to output PDB")
-            cmd.save(args.output_pdb, "target")
-        else:
-            bonded_resi = set()
-            for res1, res2 in bonds:
-                bonded_resi.add(res1)
-                bonded_resi.add(res2)
-            for resi in bonded_resi:
-                cmd.alter(f"target and resn CYS and resi {resi}", "resn='CYM'")
-                LOGGER.info(f"CYS resi {resi} renamed to CYM")
-            cmd.save(args.output_pdb, "target")
-            LOGGER.info(f"{args.output_pdb} generated")
+        if args.output_pdb is not None:
+            if len(bonds) == 0:
+                LOGGER.info("No SS-bond found; saving original structure to output PDB")
+                cmd.save(args.output_pdb, "target")
+            else:
+                # Rename only the residues that actually own a bonded SG atom.
+                # Target by the SG atom index (byres) so a CYS in another chain that
+                # happens to share the residue number is left untouched.
+                bonded_indices = set()
+                for bond in bonds:
+                    bonded_indices.add(bond["index1"])
+                    bonded_indices.add(bond["index2"])
+                for idx in sorted(bonded_indices):
+                    cmd.alter(
+                        f"target and resn CYS and byres (index {idx})", "resn='CYM'"
+                    )
+                    LOGGER.info(f"CYS SG (index {idx}) residue renamed to CYM")
+                cmd.save(args.output_pdb, "target")
+                LOGGER.info(f"{args.output_pdb} generated")

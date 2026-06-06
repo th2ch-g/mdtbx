@@ -1,6 +1,5 @@
 import argparse
 import re
-from ..config import *  # NOQA
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -43,44 +42,51 @@ def add_subcmd(subparsers):
     parser.set_defaults(func=run)
 
 
-def run(args):
-    atomname2crds = {}
+def _replace_atom_coords(line, new_crds):
+    """Replace only the x/y/z coordinate fields of a mol2 ATOM line.
 
+    Rewrites by token span from right to left so earlier spans stay valid,
+    preserving the surrounding column layout and avoiding the fragile
+    substring substitution (replace via dummy tokens) used previously.
+    """
+    matches = list(re.finditer(r"\S+", line))
+    for ci in (4, 3, 2):
+        m = matches[ci]
+        line = line[: m.start()] + new_crds[ci - 2] + line[m.end() :]
+    return line
+
+
+def run(args):
+    # First pass: map atom name -> xyz tokens from the coordinate mol2.
+    atomname2crds = {}
     section = None
     with open(args.coordinates) as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
-            if line.startwith("@TRIPOS>"):
+        for line in f:
+            line = line.rstrip("\n")
+            if line.startswith("@<TRIPOS>"):
                 section = line
                 continue
-            if section == "@TRIPOS>ATOM":
+            if section == "@<TRIPOS>ATOM":
                 parsed = re.findall(r"\S+", line)
-                atomname = parsed[1]
-                crds = parsed[2:5]
-                atomname2crds[atomname] = crds
+                atomname2crds[parsed[1]] = parsed[2:5]
 
+    # Second pass: copy the reference verbatim, swapping only ATOM coordinates.
     section = None
-    dummy = ["XXX", "YYY", "ZZZ"]
     new_lines = []
     with open(args.reference) as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
-            if line.startwith("@TRIPOS>"):
+        for line in f:
+            line = line.rstrip("\n")
+            if line.startswith("@<TRIPOS>"):
                 section = line
                 new_lines.append(line)
                 continue
-            if section == "@TRIPOS>ATOM":
+            if section == "@<TRIPOS>ATOM":
                 parsed = re.findall(r"\S+", line)
-                atomname = parsed[1]
-                old_crds = parsed[2:5]
-                new_crds = atomname2crds[atomname]
-                for i in range(len(old_crds)):
-                    line = line.replace(old_crds[i], dummy[i], 1)
-                for i in range(len(old_crds)):
-                    line = line.replace(dummy[i], new_crds[i], 1)
+                new_lines.append(_replace_atom_coords(line, atomname2crds[parsed[1]]))
+            else:
                 new_lines.append(line)
 
     with open(args.output, "w") as f:
-        f.writelines(new_lines)
+        f.write("\n".join(new_lines) + "\n")
 
     LOGGER.info(f"{args.output} updated")

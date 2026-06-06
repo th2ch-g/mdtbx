@@ -1,8 +1,7 @@
 import argparse
-import subprocess
 from pathlib import Path
 
-from ..config import *  # NOQA
+from ..utils.proc import run_cmd
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -44,27 +43,24 @@ def add_subcmd(subparsers):
 def run(args):
     if args.type == "parmed":
         cmd = f"amb2gro_top_gro.py -p {args.parm} -c {args.rst} -t gmx.top -g gmx.gro -b gmx.pdb"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("gmx.gro generated")
+        run_cmd(cmd, log="gmx.gro generated")
         LOGGER.info("gmx.top generated")
         LOGGER.info("gmx.pdb generated")
     # acpype may create wrong gro file
     # because of overflow of residue numbers or atom numbers
     elif args.type == "acpype":
         cmd = f"acpype -p {args.parm} -x {args.rst}"
-        subprocess.run(cmd, shell=True, check=True)
+        run_cmd(cmd)
         stem = Path(args.parm).stem
         cmd = f"cp {stem}.amb2gmx/{stem}_GMX.gro gmx.gro"
-        subprocess.run(cmd, shell=True, check=True)
+        run_cmd(cmd)
         cmd = f"cp {stem}.amb2gmx/{stem}_GMX.top gmx.top"
-        subprocess.run(cmd, shell=True, check=True)
+        run_cmd(cmd)
         LOGGER.info("gmx.gro generated")
         LOGGER.info("gmx.top generated")
         cmd = f"rm -rf {stem}.amb2gmx/"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"{stem}.amb2gmx/ removed")
+        run_cmd(cmd, log=f"{stem}.amb2gmx/ removed")
 
     if not args.no_editconf:
         cmd = "gmx editconf -f gmx.gro -o gmx.gro -resnr 1"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("gmx editconf -f gmx.gro -o gmx.gro -resnr 1 run")
+        run_cmd(cmd, log="gmx editconf -f gmx.gro -o gmx.gro -resnr 1 run")

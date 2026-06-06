@@ -60,11 +60,13 @@ pixi run jupyter_remote
 ```text
 src/
   __main__.py    # エントリポイント: main() -> cli()
-  cli.py         # argparseサブコマンドの登録・ディスパッチ
+  cli.py         # サブコマンドの自動登録(pkgutil走査)・ディスパッチ
   config.py      # グローバル定数(水密度、Gaussian設定、MAXWARN等)
   logger.py      # ロガー生成ユーティリティ
   utils/         # 汎用ユーティリティ(mod_mdp, convert, rmfile, cmd, shell_hook, show_mdtraj, show_npy, partial_tempering)
-               # ※ atom_selection_parser.py, parse_top.py はサブコマンドでなくライブラリユーティリティ
+               # ※ サブコマンドでない共有ライブラリ/ヘルパ(add_subcmd なし=自動登録の対象外):
+               #   atom_selection_parser, parse_top, proc(run_cmd), tleap(run_tleap),
+               #   gmx(gmx_index_flag/to_gmx_index/gmx_tempfile), pymol_session, common_args
   build/         # 系構築サブコマンド(addace, addh, addnme, add_ndx, mv_crds_mol2, calc_ion_conc, centering_gro,
                #   find_bond, gen_am1bcc, gen_resp, gen_modres_am1bcc, gen_modres_resp, gen_posres,
                #   gen_distres, modeling_cf, amb2gro, build_solution, build_vacuum, place_solvent,
@@ -104,25 +106,21 @@ def run(args):
     # 実装本体
 ```
 
-`cli.py` に以下の2箇所を追加して登録する:
+`cli.py` は起動時に各カテゴリパッケージ(`build`/`trajectory`/`analysis`/`cv`/`utils`)を
+走査し、`add_subcmd` を持つモジュールを**自動登録**する。新サブコマンドは正しいディレクトリに
+モジュールを置くだけで登録され、`cli.py` の編集は不要(`add_subcmd` を持たないライブラリ/
+ヘルパは自動的にスキップされる)。
 
-```python
-# 1. importブロック (カテゴリに応じて選択)
-from .build import <name>       # 系構築
-from .trajectory import <name>  # 軌跡処理
-from .analysis import <name>    # 解析
-from .cv import <name>          # CV計算
-from .utils import <name>       # 汎用
-
-# 2. add_subcmdの呼び出し
-<name>.add_subcmd(subparsers)
-```
-
-モジュール内で `src/utils/` のパーサーを使う場合は `..utils.` で参照する:
+モジュール内で共有ヘルパ・パーサーを使う場合は `..utils.` で参照する:
 
 ```python
 from ..utils.atom_selection_parser import AtomSelector
 from ..utils.parse_top import GromacsTopologyParser
+from ..utils.proc import run_cmd                 # subprocess 実行 + 成功ログ
+from ..utils.tleap import run_tleap              # tleap.in 書込→実行→後片付け
+from ..utils.gmx import gmx_index_flag, to_gmx_index, gmx_tempfile
+from ..utils.pymol_session import pymol_session  # cmd を渡して reinitialize+load
+from ..utils.common_args import add_topology_arg, add_trajectory_arg, add_output_arg
 ```
 
 ### 設定 (`src/config.py`)
@@ -130,7 +128,7 @@ from ..utils.parse_top import GromacsTopologyParser
 - `MAXWARN`: grompp の最大警告数
 - `GAUSSIAN_CMD`, `STRUCTURE_OPTIMIZATION`, `SINGLE_POINT_CALCULATION`: Gaussian設定
 - 各水モデル(TIP3P/TIP4P/TIP5P/OPC)の密度・体積定数
-- 起動時に `.pixi/envs/default/bin` をPATHに追加する
+- ※ PATH への `.pixi/envs/default/bin` 追加と `pymol_plugins` 読込の副作用は `src/__init__.py` に集約済み(config.py は定数のみ)
 
 ## 環境管理
 

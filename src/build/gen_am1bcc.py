@@ -1,9 +1,8 @@
 import argparse
-import subprocess
 from pathlib import Path
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -45,13 +44,14 @@ def add_subcmd(subparsers):
 
 def run(args):
     filetype = Path(args.structure).suffix[1:]
+    # antechamber uses "mdl" as the format flag for MDL .mol files
+    if filetype == "mol":
+        filetype = "mdl"
     cmd = f"antechamber -i {args.structure} -fi {filetype} -o {args.resname}.mol2 -fo mol2 -c bcc -s 2 -nc {args.charge} -m {args.multiplicity} -rn {args.resname} -pf y"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.mol2 generated")
+    run_cmd(cmd, log=f"{args.resname}.mol2 generated")
 
     cmd = f"parmchk2 -i {args.resname}.mol2 -f mol2 -o {args.resname}.frcmod -s gaff2"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.frcmod generated")
+    run_cmd(cmd, log=f"{args.resname}.frcmod generated")
 
     cmd_tleap = f"""
 source leaprc.gaff2
@@ -61,9 +61,7 @@ saveoff {args.resname} {args.resname}.lib
 quit
     """
     cmd = f"echo '{cmd_tleap}' | tleap -f -"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.lib generated")
+    run_cmd(cmd, log=f"{args.resname}.lib generated")
 
     cmd = "rm -f leap.log"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("leap.log removed")
+    run_cmd(cmd, log="leap.log removed")

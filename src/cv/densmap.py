@@ -1,9 +1,15 @@
 import argparse
 import numpy as np
-import subprocess
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.common_args import (
+    add_output_arg,
+    add_selection_arg,
+    add_topology_arg,
+    add_trajectory_arg,
+)
+from ..utils.gmx import gmx_index_flag
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -20,26 +26,16 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
+    add_topology_arg(parser)
+    add_trajectory_arg(parser)
+    add_selection_arg(
+        parser,
+        help=(
+            "Selection. MDtraj Atom selection language for the MDtraj path; "
+            "with --gmx this must be a Gromacs index group name or number"
+        ),
     )
-    parser.add_argument(
-        "-t",
-        "--trajectory",
-        type=str,
-        required=True,
-        help="Trajectory file (.xtc, .trr)",
-    )
-    parser.add_argument(
-        "-s",
-        "--selection",
-        type=str,
-        required=True,
-        help="Selection (MDtraj Atom selection language)",
-    )
-    parser.add_argument(
-        "-o", "--output", type=str, default="densmap.npy", help="Output file (.npy)"
-    )
+    add_output_arg(parser, default="densmap.npy")
     parser.add_argument(
         "--bins", type=int, default=100, help="Number of bins along each axis"
     )
@@ -65,17 +61,17 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        if args.index is not None:
-            INDEX_FILE = f"-n {args.index}"
-        else:
-            INDEX_FILE = ""
-        cmd = f"gmx densmap -f {args.trajectory} -s {args.topology} {INDEX_FILE} -od densmap.dat"
-        subprocess.run(cmd, input=f"{args.selection}\n", shell=True, check=True)
-        densmap = np.loadtxt("densmap.dat")
-        # X = a[0, 1:]
-        # Y = a[1:, 0]
-        # dens = a[1:, 1]
-        # c = ax.pcolormesh(X, Y, dens)
+        INDEX_FILE = gmx_index_flag(args.index)
+        cmd = f"gmx densmap -f {args.trajectory} -s {args.topology} {INDEX_FILE} -od tmp_densmap.dat"
+        run_cmd(cmd, input=f"{args.selection}\n")
+        # densmap.dat layout: a[0, 1:] = X axis, a[1:, 0] = Y axis, a[1:, 1:] = density
+        a = np.loadtxt("tmp_densmap.dat")
+        run_cmd("rm -f tmp_densmap.dat", log="Removed tmp_densmap.dat")
+        # Save in the same [counts, edges0, edges1] object-array form as the MDtraj path
+        densmap = np.empty(3, dtype=object)
+        densmap[0] = a[1:, 1:]
+        densmap[1] = a[0, 1:]
+        densmap[2] = a[1:, 0]
     else:
         import mdtraj as md
 

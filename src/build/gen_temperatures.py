@@ -16,6 +16,8 @@ D0 = 1.1677
 D1 = 0.002976
 KB = 0.008314  # kJ/mol/K
 MAXITER = 100
+INTEGRATION_STEPS = 100  # number of steps for the numerical integration in myintegral
+SIGMA_WINDOW = 5  # integration window expressed as a multiple of sigma
 
 
 def add_subcmd(subparsers):
@@ -83,8 +85,8 @@ def add_subcmd(subparsers):
     parser.set_defaults(func=run)
 
 
-def calc_mu(nw, np_val, temp, fener):
-    return (A0 + A1 * temp) * nw + (B0 + B1 * temp) * np_val - temp * fener
+def calc_mu(nw, n_prot_atoms, temp, fener):
+    return (A0 + A1 * temp) * nw + (B0 + B1 * temp) * n_prot_atoms - temp * fener
 
 
 def myeval(m12, s12, cc, u):
@@ -94,8 +96,8 @@ def myeval(m12, s12, cc, u):
 
 def myintegral(m12, s12, cc):
     int_val = 0.0
-    umax = m12 + 5 * s12
-    du = umax / 100.0
+    umax = m12 + SIGMA_WINDOW * s12
+    du = umax / float(INTEGRATION_STEPS)
 
     u = 0.0
     while u < umax:
@@ -104,6 +106,71 @@ def myintegral(m12, s12, cc):
         u += du
 
     return du * int_val / (s12 * math.sqrt(2 * math.pi))
+
+
+def _print_summary(args, npp, nh, nc, vc, ndf, flex_ener):
+    print("Summary of input and derived variables:")
+    print(f"Pdes: {args.pdes}")
+    print(f"Temperature range: {args.tlow} - {args.thigh}")
+    print(f"Number of water molecules: {args.nw}")
+    print(f"Number of protein atoms: {args.np}")
+    if npp > 0:
+        print(f"Including all H: ~ {npp}")
+    print(f"Number of hydrogens in protein: ~ {nh}")
+    print(f"Number of constraints: ~ {nc}")
+    print(f"Number of vsites: ~ {vc}")
+    print(f"Number of degrees of freedom: ~ {ndf}")
+    print(f"Energy loss due to constraints: {flex_ener:.2f} (kJ/mol K)")
+    print("-" * 40)
+
+
+def _print_table(args, t_list, mu_list, sigma_list, mm_list, ss_list, p_list):
+    # The last interval is forced to end at thigh, so its exchange probability
+    # is fixed by the temperature range rather than by pdes. Flag it when it
+    # deviates from the requested pdes so the deviation is not silently hidden.
+    last_clamped = (
+        len(p_list) > 0
+        and t_list[-1] == args.thigh
+        and abs(p_list[-1] - args.pdes) > args.tol
+    )
+
+    print("\nTemperatures and Energies")
+    print(
+        f"{'Index':<5} {'Temp (K)':<10} {'mu':<10} {'sigma':<10} {'mu12':<10} {'sigma12':<10} {'P12':<10}"
+    )
+
+    for k in range(len(t_list)):
+        idx = k + 1
+        temp = t_list[k]
+        mu = mu_list[k]
+        sigma = sigma_list[k]
+
+        if k == 0:
+            print(f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f}")
+        else:
+            # Previous interval values
+            prev_mu12 = mm_list[k - 1]
+            prev_sig12 = ss_list[k - 1]
+            prev_p = p_list[k - 1]
+            mark = "*" if (last_clamped and k == len(t_list) - 1) else ""
+            print(
+                f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f} {prev_mu12:<10.1f} {prev_sig12:<10.2f} {prev_p:<10.4f}{mark}"
+            )
+
+    if last_clamped:
+        print(
+            "* Last interval ends at thigh; its exchange probability "
+            f"({p_list[-1]:.4f}) is fixed by the temperature range, not pdes ({args.pdes})."
+        )
+        LOGGER.info(
+            "Last interval clamped to thigh=%s; P12=%.4f deviates from pdes=%s",
+            args.thigh,
+            p_list[-1],
+            args.pdes,
+        )
+
+    print("\nTemperature list for scripting:")
+    print(", ".join([f"{t:.2f}" for t in t_list]))
 
 
 def run(args):
@@ -147,19 +214,7 @@ def run(args):
     ndf = (9 - args.wc) * args.nw + 3 * args.np - nc - vc
     flex_ener = 0.5 * KB * (nc + vc + args.wc * args.nw)
 
-    print("Summary of input and derived variables:")
-    print(f"Pdes: {args.pdes}")
-    print(f"Temperature range: {args.tlow} - {args.thigh}")
-    print(f"Number of water molecules: {args.nw}")
-    print(f"Number of protein atoms: {args.np}")
-    if npp > 0:
-        print(f"Including all H: ~ {npp}")
-    print(f"Number of hydrogens in protein: ~ {nh}")
-    print(f"Number of constraints: ~ {nc}")
-    print(f"Number of vsites: ~ {vc}")
-    print(f"Number of degrees of freedom: ~ {ndf}")
-    print(f"Energy loss due to constraints: {flex_ener:.2f} (kJ/mol K)")
-    print("-" * 40)
+    _print_summary(args, npp, nh, nc, vc, ndf, flex_ener)
 
     # Main loop
     t_list = [args.tlow]
@@ -235,28 +290,4 @@ def run(args):
         mu_list.append(calc_mu(args.nw, nprot, t2, flex_ener))
         sigma_list.append(math.sqrt(ndf) * (D0 + D1 * t2))
 
-    # Output table
-    print("\nTemperatures and Energies")
-    print(
-        f"{'Index':<5} {'Temp (K)':<10} {'mu':<10} {'sigma':<10} {'mu12':<10} {'sigma12':<10} {'P12':<10}"
-    )
-
-    for k in range(len(t_list)):
-        idx = k + 1
-        temp = t_list[k]
-        mu = mu_list[k]
-        sigma = sigma_list[k]
-
-        if k == 0:
-            print(f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f}")
-        else:
-            # Previous interval values
-            prev_mu12 = mm_list[k - 1]
-            prev_sig12 = ss_list[k - 1]
-            prev_p = p_list[k - 1]
-            print(
-                f"{idx:<5} {temp:<10.2f} {mu:<10.0f} {sigma:<10.2f} {prev_mu12:<10.1f} {prev_sig12:<10.2f} {prev_p:<10.4f}"
-            )
-
-    print("\nTemperature list for scripting:")
-    print(", ".join([f"{t:.2f}" for t in t_list]))
+    _print_table(args, t_list, mu_list, sigma_list, mm_list, ss_list, p_list)

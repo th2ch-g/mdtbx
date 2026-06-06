@@ -4,8 +4,14 @@ import tempfile
 
 import numpy as np
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.common_args import (
+    add_output_arg,
+    add_topology_arg,
+    add_trajectory_arg,
+)
+from ..utils.gmx import gmx_index_flag
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -17,26 +23,42 @@ def _select_atoms(topology, selection, label):
     return atom_indices
 
 
-def _save_pca_metadata(output_npz, pc, pca_model, trj, atom_indices_cal, args):
-    atom_names = np.array([trj.top.atom(index).name for index in atom_indices_cal])
+def _per_atom_metadata(topology, atom_indices):
+    atom_names = np.array([topology.atom(index).name for index in atom_indices])
     residue_ids = np.array(
-        [trj.top.atom(index).residue.resSeq for index in atom_indices_cal]
+        [topology.atom(index).residue.resSeq for index in atom_indices]
     )
     residue_names = np.array(
-        [trj.top.atom(index).residue.name for index in atom_indices_cal]
+        [topology.atom(index).residue.name for index in atom_indices]
     )
     chain_ids = np.array(
-        [trj.top.atom(index).residue.chain.index for index in atom_indices_cal]
+        [topology.atom(index).residue.chain.index for index in atom_indices]
     )
+    return atom_names, residue_ids, residue_names, chain_ids
 
+
+def _save_pca_npz(
+    output_npz,
+    pc,
+    components,
+    explained_variance,
+    explained_variance_ratio,
+    mean_xyz,
+    atom_indices,
+    topology,
+    args,
+):
+    atom_names, residue_ids, residue_names, chain_ids = _per_atom_metadata(
+        topology, atom_indices
+    )
     np.savez(
         output_npz,
         scores=pc,
-        components=pca_model.components_.reshape(pca_model.n_components_, -1, 3),
-        explained_variance=pca_model.explained_variance_,
-        explained_variance_ratio=pca_model.explained_variance_ratio_,
-        mean_xyz=pca_model.mean_.reshape(-1, 3),
-        atom_indices=atom_indices_cal,
+        components=components,
+        explained_variance=explained_variance,
+        explained_variance_ratio=explained_variance_ratio,
+        mean_xyz=mean_xyz,
+        atom_indices=atom_indices,
         atom_names=atom_names,
         residue_ids=residue_ids,
         residue_names=residue_names,
@@ -52,6 +74,20 @@ def _save_pca_metadata(output_npz, pc, pca_model, trj, atom_indices_cal, args):
         selection_fit_ref=args.selection_fit_ref,
     )
     LOGGER.info(f"Saved PCA metadata to {output_npz}")
+
+
+def _save_pca_metadata(output_npz, pc, pca_model, trj, atom_indices_cal, args):
+    _save_pca_npz(
+        output_npz,
+        pc,
+        pca_model.components_.reshape(pca_model.n_components_, -1, 3),
+        pca_model.explained_variance_,
+        pca_model.explained_variance_ratio_,
+        pca_model.mean_.reshape(-1, 3),
+        atom_indices_cal,
+        trj.top,
+        args,
+    )
 
 
 def _extract_values_from_xvg(path, n_values):
@@ -82,39 +118,23 @@ def _save_gmx_pca_metadata(output_npz, pc, average_structure_path, args):
         raise ValueError("Not enough eigenvector frames in eigenvec.trr")
 
     atom_indices = np.arange(average_trj.n_atoms)
-    atom_names = np.array([atom.name for atom in average_trj.top.atoms])
-    residue_ids = np.array([atom.residue.resSeq for atom in average_trj.top.atoms])
-    residue_names = np.array([atom.residue.name for atom in average_trj.top.atoms])
-    chain_ids = np.array([atom.residue.chain.index for atom in average_trj.top.atoms])
     eigenvalue_sum = eigenvalues.sum()
     if np.isclose(eigenvalue_sum, 0.0):
         explained_variance_ratio = np.zeros_like(eigenvalues)
     else:
         explained_variance_ratio = eigenvalues / eigenvalue_sum
 
-    np.savez(
+    _save_pca_npz(
         output_npz,
-        scores=pc,
-        components=components,
-        explained_variance=eigenvalues,
-        explained_variance_ratio=explained_variance_ratio,
-        mean_xyz=average_trj.xyz[0],
-        atom_indices=atom_indices,
-        atom_names=atom_names,
-        residue_ids=residue_ids,
-        residue_names=residue_names,
-        chain_ids=chain_ids,
-        coordinate_unit="nm",
-        unit_scale_to_angstrom=10.0,
-        topology_path=args.topology,
-        trajectory_path=args.trajectory,
-        reference_path=args.reference,
-        selection_cal_trj=args.selection_cal_trj,
-        selection_cal_ref=args.selection_cal_ref,
-        selection_fit_trj=args.selection_fit_trj,
-        selection_fit_ref=args.selection_fit_ref,
+        pc,
+        components,
+        eigenvalues,
+        explained_variance_ratio,
+        average_trj.xyz[0],
+        atom_indices,
+        average_trj.top,
+        args,
     )
-    LOGGER.info(f"Saved PCA metadata to {output_npz}")
 
 
 def add_subcmd(subparsers):
@@ -127,16 +147,8 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
-    )
-    parser.add_argument(
-        "-t",
-        "--trajectory",
-        type=str,
-        required=True,
-        help="Trajectory file (.xtc, .trr)",
-    )
+    add_topology_arg(parser)
+    add_trajectory_arg(parser)
     parser.add_argument(
         "-r",
         "--reference",
@@ -190,9 +202,7 @@ def add_subcmd(subparsers):
         default=None,
         help="Index file (.ndx)",
     )
-    parser.add_argument(
-        "-o", "--output", type=str, default="pca.npy", help="Output file (.npy)"
-    )
+    add_output_arg(parser, default="pca.npy")
     parser.add_argument(
         "-oz",
         "--output_npz",
@@ -217,14 +227,9 @@ def run(args):
 
     if args.gmx:
         # gmx
-        import subprocess
-
         temporary_average_path = None
 
-        if args.index is not None:
-            INDEX_OPTION = f"-n {args.index}"
-        else:
-            INDEX_OPTION = ""
+        INDEX_OPTION = gmx_index_flag(args.index)
 
         if args.output_average is not None:
             average_structure_path = args.output_average
@@ -245,23 +250,19 @@ def run(args):
                 f"-xvg none -o eigenval.xvg -v eigenvec.trr {AVERAGE_OPTION}"
             )
             LOGGER.info("gmx covar started")
-            subprocess.run(
+            run_cmd(
                 cmd,
                 input=f"{args.selection_fit_trj}\n{args.selection_cal_trj}\n",
-                shell=True,
-                check=True,
+                log="gmx covar finished",
             )
-            LOGGER.info("gmx covar finished")
 
             cmd = f"gmx anaeig -s {args.topology} -f {args.trajectory} {INDEX_OPTION} -v eigenvec.trr -proj proj.xvg -xvg none -eig eigenval.xvg -first 1 -last {args.n_components}"
             LOGGER.info("gmx anaeig started")
-            subprocess.run(
+            run_cmd(
                 cmd,
                 input=f"{args.selection_fit_trj}\n{args.selection_cal_trj}\n",
-                shell=True,
-                check=True,
+                log="gmx anaeig finished",
             )
-            LOGGER.info("gmx anaeig finished")
 
             pc = np.loadtxt("proj.xvg")
             if args.output_npz is not None:

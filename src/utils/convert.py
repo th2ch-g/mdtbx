@@ -1,7 +1,7 @@
 import argparse
 import mdtraj as md
 from pymol import cmd
-from ..config import *  # NOQA
+
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -22,7 +22,7 @@ def add_subcmd(subparsers):
         "--structure",
         required=True,
         type=str,
-        help="Structure file (cat be parsed in PyMOL or MDtraj)",
+        help="Structure file (can be parsed in PyMOL or MDtraj)",
     )
 
     parser.add_argument(

@@ -1,9 +1,10 @@
 import argparse
-import subprocess
+import sys
 from pathlib import Path
 
-from ..config import SYSTEM_NAME  # NOQA
+from ..config import SYSTEM_NAME
 from ..logger import generate_logger
+from ..utils.tleap import run_tleap
 
 LOGGER = generate_logger(__name__)
 
@@ -82,7 +83,11 @@ def run(args):
 
     ligand_params = ""
     if args.ligparam:
-        frcmod, lib = args.ligparam.split(":")
+        parts = args.ligparam.split(":")
+        if len(parts) != 2:
+            LOGGER.error("--ligparam must be in FRCMOD:LIB format")
+            sys.exit(1)
+        frcmod, lib = parts
         ligand_params = f"loadamberparams {frcmod}\nloadoff {lib}"
 
     tleap_input = TLEAP_TEMPLATE.format(
@@ -94,15 +99,8 @@ def run(args):
         outdir=str(outdir),
     )
 
-    with open("tleap.in", "w") as f:
-        f.write(tleap_input)
-
-    subprocess.run("tleap -f tleap.in", shell=True, check=True)
+    run_tleap(tleap_input, keepfiles=args.keepfiles)
 
     LOGGER.info(
         f"{args.outdir}/leap.parm7 {args.outdir}/leap.rst7 {args.outdir}/leap.pdb generated"
     )
-
-    if not args.keepfiles:
-        subprocess.run("rm -f leap.log tleap.in", shell=True, check=True)
-        LOGGER.info("leap.log tleap.in removed")

@@ -8,7 +8,7 @@ NOTE: sys.modules へのモック注入は他のどの src インポートより
 import sys
 from unittest.mock import MagicMock
 
-# config.py が `import pymol_plugins` を実行し、
+# src/__init__.py が `import pymol_plugins` を実行し、
 # find_bond.py / convert.py が `from pymol import cmd` を実行するため、
 # テスト環境では PyMOL GUI なしで動作できるようモックする。
 sys.modules["pymol_plugins"] = MagicMock()

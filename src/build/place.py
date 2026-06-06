@@ -134,75 +134,62 @@ def min_interchain_distance(coords1: np.ndarray, coords2: np.ndarray) -> float:
 def run(args):
     from pymol import cmd as pymol_cmd
 
-    pymol_cmd.reinitialize()
-    pymol_cmd.load(args.pdb1, "mol1")
-    pymol_cmd.load(args.pdb2, "mol2")
+    from ..utils.pymol_session import pymol_session
 
-    com1 = np.array(pymol_cmd.centerofmass("mol1"))
-    com2 = np.array(pymol_cmd.centerofmass("mol2"))
-    LOGGER.info(f"mol1 COM (input): {com1}")
-    LOGGER.info(f"mol2 COM (input): {com2}")
+    with pymol_session(pymol_cmd) as pymol_cmd:
+        pymol_cmd.load(args.pdb1, "mol1")
+        pymol_cmd.load(args.pdb2, "mol2")
 
-    # 1. center mol1 at origin
-    pymol_cmd.translate(list(-com1), "mol1", camera=0)
+        com1 = np.array(pymol_cmd.centerofmass("mol1"))
+        com2 = np.array(pymol_cmd.centerofmass("mol2"))
+        LOGGER.info(f"mol1 COM (input): {com1}")
+        LOGGER.info(f"mol2 COM (input): {com2}")
 
-    # 2. center mol2 at origin (so rotation is around its own COM)
-    pymol_cmd.translate(list(-com2), "mol2", camera=0)
+        # 1. center mol1 at origin
+        pymol_cmd.translate(list(-com1), "mol1", camera=0)
 
-    # 3. rotate mol2 with a seeded random rotation (4x4 TTT matrix)
-    R = random_rotation_matrix(args.seed)
-    ttt = [
-        R[0, 0],
-        R[0, 1],
-        R[0, 2],
-        0.0,
-        R[1, 0],
-        R[1, 1],
-        R[1, 2],
-        0.0,
-        R[2, 0],
-        R[2, 1],
-        R[2, 2],
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-    ]
-    pymol_cmd.transform_selection("mol2", ttt)
-    LOGGER.info(f"mol2 rotated with seed {args.seed}")
+        # 2. center mol2 at origin (so rotation is around its own COM)
+        pymol_cmd.translate(list(-com2), "mol2", camera=0)
 
-    # 4. translate mol2 by distance d along a seeded random direction
-    direction = random_unit_vector(args.seed)
-    translation = direction * float(args.distance)
-    pymol_cmd.translate(list(translation), "mol2", camera=0)
-    LOGGER.info(
-        f"mol2 translated by {translation} (direction={direction}, |t|={args.distance})"
-    )
+        # 3. rotate mol2 with a seeded random rotation (4x4 TTT matrix)
+        R = random_rotation_matrix(args.seed)
+        ttt_matrix = np.eye(4)
+        ttt_matrix[:3, :3] = R
+        ttt = ttt_matrix.flatten().tolist()
+        pymol_cmd.transform_selection("mol2", ttt)
+        LOGGER.info(f"mol2 rotated with seed {args.seed}")
 
-    com1_new = np.array(pymol_cmd.centerofmass("mol1"))
-    com2_new = np.array(pymol_cmd.centerofmass("mol2"))
-    LOGGER.info(f"mol1 COM (placed): {com1_new}")
-    LOGGER.info(f"mol2 COM (placed): {com2_new}")
-    LOGGER.info(f"COM-COM distance: {np.linalg.norm(com2_new - com1_new):.3f} A")
-
-    # Clash check on the placed coordinates (heavy + hydrogen, all atoms).
-    coords1 = np.asarray(pymol_cmd.get_coords("mol1"))
-    coords2 = np.asarray(pymol_cmd.get_coords("mol2"))
-    min_dist = min_interchain_distance(coords1, coords2)
-    LOGGER.info(f"min inter-chain atom distance: {min_dist:.3f} A")
-
-    if min_dist < args.clash_cutoff:
-        msg = (
-            f"serious clash detected: min inter-chain distance "
-            f"{min_dist:.3f} A < cutoff {args.clash_cutoff} A"
+        # 4. translate mol2 by distance d along a seeded random direction
+        direction = random_unit_vector(args.seed)
+        translation = direction * float(args.distance)
+        pymol_cmd.translate(list(translation), "mol2", camera=0)
+        LOGGER.info(
+            f"mol2 translated by {translation} (direction={direction}, |t|={args.distance})"
         )
-        if args.ignore:
-            LOGGER.warning(msg + " (continuing because --ignore is set)")
-        else:
-            LOGGER.error(msg + " (use --ignore to write the PDB anyway)")
-            sys.exit(1)
 
-    pymol_cmd.create("placed", "mol1 or mol2")
-    pymol_cmd.save(args.output, "placed")
-    LOGGER.info(f"{args.output} generated")
+        com1_new = np.array(pymol_cmd.centerofmass("mol1"))
+        com2_new = np.array(pymol_cmd.centerofmass("mol2"))
+        LOGGER.info(f"mol1 COM (placed): {com1_new}")
+        LOGGER.info(f"mol2 COM (placed): {com2_new}")
+        LOGGER.info(f"COM-COM distance: {np.linalg.norm(com2_new - com1_new):.3f} A")
+
+        # Clash check on the placed coordinates (heavy + hydrogen, all atoms).
+        coords1 = np.asarray(pymol_cmd.get_coords("mol1"))
+        coords2 = np.asarray(pymol_cmd.get_coords("mol2"))
+        min_dist = min_interchain_distance(coords1, coords2)
+        LOGGER.info(f"min inter-chain atom distance: {min_dist:.3f} A")
+
+        if min_dist < args.clash_cutoff:
+            msg = (
+                f"serious clash detected: min inter-chain distance "
+                f"{min_dist:.3f} A < cutoff {args.clash_cutoff} A"
+            )
+            if args.ignore:
+                LOGGER.warning(msg + " (continuing because --ignore is set)")
+            else:
+                LOGGER.error(msg + " (use --ignore to write the PDB anyway)")
+                sys.exit(1)
+
+        pymol_cmd.create("placed", "mol1 or mol2")
+        pymol_cmd.save(args.output, "placed")
+        LOGGER.info(f"{args.output} generated")

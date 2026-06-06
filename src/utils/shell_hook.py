@@ -1,7 +1,6 @@
 import argparse
 from pathlib import Path
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -21,32 +20,33 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    project_root = Path(__file__).parent.parent.parent
     hook = f"""
 ----- BEGIN OF MDTBX SHELL HOOK -----
 # for alias
 shopt -s expand_aliases
-alias mdtbx="pixi run --manifest-path {Path(__file__).parent.parent.parent} mdtbx"
-alias pymol="pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol"
-alias python3="pixi run --manifest-path {Path(__file__).parent.parent.parent} python3"
+alias mdtbx="pixi run --manifest-path {project_root} mdtbx"
+alias pymol="pixi run --manifest-path {project_root} pymol"
+alias python3="pixi run --manifest-path {project_root} python3"
 
-for export
-export PATH={Path(__file__).parent.parent.parent}/.pixi/envs/default/bin:$PATH
+# for export
+export PATH={project_root}/.pixi/envs/default/bin:$PATH
 
 # for link
-ln -s {Path(__file__).parent.parent.parent}/.pixi/envs/default/bin/mdtbx .
-ln -s {Path(__file__).parent.parent.parent}/.pixi/envs/default/bin/pymol .
+ln -s {project_root}/.pixi/envs/default/bin/mdtbx .
+ln -s {project_root}/.pixi/envs/default/bin/pymol .
 
 # for function
 mdtbx() {{
-    pixi run --manifest-path {Path(__file__).parent.parent.parent} mdtbx "$@"
+    pixi run --manifest-path {project_root} mdtbx "$@"
 }}
 
 pymol() {{
-    pixi run --manifest-path {Path(__file__).parent.parent.parent} pymol "$@"
+    pixi run --manifest-path {project_root} pymol "$@"
 }}
 
 python3() {{
-    pixi run --manifest-path {Path(__file__).parent.parent.parent} python3 "$@"
+    pixi run --manifest-path {project_root} python3 "$@"
 }}
 
 # pymol template

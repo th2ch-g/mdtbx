@@ -4,6 +4,7 @@ from pathlib import Path
 from pymol import cmd as pymol_cmd
 
 from ..logger import generate_logger
+from ..utils.pymol_session import pymol_session
 
 LOGGER = generate_logger(__name__)
 
@@ -29,8 +30,8 @@ SUPPORTED_MUTANTS = {
     "MET",
     "PHE",
     "PRO",
-    "SET",
-    "THE",
+    "SER",
+    "THR",
     "TRP",
     "TYR",
     "VAL",
@@ -120,25 +121,24 @@ def run(args):
     object_name = "target"
     selection_name = "_mutate_input"
 
-    pymol_cmd.reinitialize()
-    pymol_cmd.load(str(structure_path), object_name)
-    pymol_cmd.select(selection_name, f"({object_name}) and ({args.selection})")
+    with pymol_session(pymol_cmd, str(structure_path), name=object_name):
+        pymol_cmd.select(selection_name, f"({object_name}) and ({args.selection})")
 
-    residue_count = _count_selected_residues(selection_name)
-    if residue_count != 1:
-        raise ValueError(
-            f"Selection must match exactly one residue, but got {residue_count}: {args.selection}"
-        )
+        residue_count = _count_selected_residues(selection_name)
+        if residue_count != 1:
+            raise ValueError(
+                f"Selection must match exactly one residue, but got {residue_count}: {args.selection}"
+            )
 
-    pymol_cmd.wizard("mutagenesis")
-    wizard = pymol_cmd.get_wizard()
-    wizard.set_mode(mutant)
-    wizard.set_hyd(args.hydrogens)
-    wizard.do_select(selection_name)
-    if args.rotamer > 1:
-        pymol_cmd.frame(args.rotamer)
-    wizard.apply()
-    pymol_cmd.set_wizard()
-    pymol_cmd.save(str(output_pdb), object_name)
+        pymol_cmd.wizard("mutagenesis")
+        wizard = pymol_cmd.get_wizard()
+        wizard.set_mode(mutant)
+        wizard.set_hyd(args.hydrogens)
+        wizard.do_select(selection_name)
+        if args.rotamer > 1:
+            pymol_cmd.frame(args.rotamer)
+        wizard.apply()
+        pymol_cmd.set_wizard()
+        pymol_cmd.save(str(output_pdb), object_name)
 
     LOGGER.info(f"{output_pdb} generated")

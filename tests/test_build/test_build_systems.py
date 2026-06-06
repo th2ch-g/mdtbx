@@ -10,17 +10,25 @@ def _parse_args(add_subcmd, argv):
     return parser.parse_args(argv)
 
 
+def _fake_tleap_factory():
+    """Capture the tleap input passed to run_tleap (which is mocked out)."""
+    calls = {}
+
+    def fake_run_tleap(input_text, *, keepfiles=False, extra_cleanup=()):
+        calls["input_text"] = input_text
+        calls["keepfiles"] = keepfiles
+
+    return calls, fake_run_tleap
+
+
 def test_build_solution_default_template_exists_and_outdir_is_created(
     tmp_path, monkeypatch
 ):
-    commands = []
-
-    def fake_run(command, shell, check):
-        commands.append(command)
+    calls, fake = _fake_tleap_factory()
 
     outdir = tmp_path / "build_solution" / "output"
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(build_solution.subprocess, "run", fake_run)
+    monkeypatch.setattr(build_solution, "run_tleap", fake)
 
     args = _parse_args(build_solution.add_subcmd, ["build_solution", "-o", str(outdir)])
 
@@ -29,19 +37,15 @@ def test_build_solution_default_template_exists_and_outdir_is_created(
     build_solution.run(args)
 
     assert outdir.exists()
-    assert (tmp_path / "tleap.in").exists()
-    assert commands[0] == "tleap -f tleap.in"
+    assert "input_text" in calls
 
 
 def test_build_vacuum_creates_outdir(tmp_path, sample_pdb_path, monkeypatch):
-    commands = []
-
-    def fake_run(command, shell, check):
-        commands.append(command)
+    calls, fake = _fake_tleap_factory()
 
     outdir = tmp_path / "build_vacuum" / "output"
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(build_vacuum.subprocess, "run", fake_run)
+    monkeypatch.setattr(build_vacuum, "run_tleap", fake)
 
     args = _parse_args(
         build_vacuum.add_subcmd,
@@ -51,5 +55,4 @@ def test_build_vacuum_creates_outdir(tmp_path, sample_pdb_path, monkeypatch):
     build_vacuum.run(args)
 
     assert outdir.exists()
-    assert (tmp_path / "tleap.in").exists()
-    assert commands[0] == "tleap -f tleap.in"
+    assert "input_text" in calls

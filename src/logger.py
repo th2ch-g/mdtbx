@@ -6,10 +6,12 @@ def generate_logger(logger_name: str) -> Logger:
     logfmt = "%(levelname)-9s %(asctime)s \
             [%(filename)s.%(funcName)s.%(lineno)d] %(message)s"
     datefmt = "%Y-%m-%d %H:%M:%S"
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
-    stream_handler.setFormatter(Formatter(logfmt, datefmt=datefmt))
-    logger.addHandler(stream_handler)
+    if not logger.handlers:
+        stream_handler = StreamHandler()
+        stream_handler.setLevel(DEBUG)
+        stream_handler.setFormatter(Formatter(logfmt, datefmt=datefmt))
+        logger.addHandler(stream_handler)
     logger.setLevel(DEBUG)
+    logger.propagate = False
 
     return logger

@@ -3,12 +3,13 @@ import csv
 import json
 import math
 import os
-import subprocess
+import sys
 from pathlib import Path
 
 import optuna
 
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 from .print_perf import parse_log_file
 
 LOGGER = generate_logger(__name__)
@@ -76,7 +77,7 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "--sampler",
         default="grid",
-        choices=["type", "random", "grid"],
+        choices=["tpe", "random", "grid"],
         help="Optuna sampler",
     )
     parser.add_argument(
@@ -179,7 +180,7 @@ def _make_sampler(args):
         )
     if args.sampler == "random":
         return optuna.samplers.RandomSampler(seed=args.seed)
-    return optuna.samplers.TYPESampler(seed=args.seed)
+    return optuna.samplers.TPESampler(seed=args.seed)
 
 
 def _resolve_n_trials(args) -> int:
@@ -215,8 +216,12 @@ def _build_command_template(args) -> str:
     return command
 
 
+def _gpu_id_list(n_gpu: int) -> list[int]:
+    return list(range(n_gpu))
+
+
 def _gpu_ids(n_gpu: int) -> str:
-    return "".join(str(i) for i in range(n_gpu))
+    return "".join(str(i) for i in _gpu_id_list(n_gpu))
 
 
 def _format_command(
@@ -309,7 +314,7 @@ def run(args):
         env["MDTBX_GPU_IDS"] = _gpu_ids(params["n_gpu"])
         if args.gpu_env == "cuda_visible_devices":
             env["CUDA_VISIBLE_DEVICES"] = ",".join(
-                str(i) for i in range(params["n_gpu"])
+                str(i) for i in _gpu_id_list(params["n_gpu"])
             )
 
         trial.set_user_attr("command", command)
@@ -324,7 +329,7 @@ def run(args):
             params["ntmpi"],
         )
 
-        subprocess.run(command, shell=True, check=True, cwd=trial_dir, env=env)
+        run_cmd(command, cwd=trial_dir, env=env)
 
         parsed = parse_log_file(log_path)
         if parsed is None or parsed["performance"] is None:
@@ -333,6 +338,9 @@ def run(args):
 
     study.optimize(objective, n_trials=n_trials)
 
+    if all(t.state != optuna.trial.TrialState.COMPLETE for t in study.trials):
+        LOGGER.error("No trial completed successfully; nothing to report")
+        sys.exit(1)
     best_trial = study.best_trial
     output_path = Path(args.output)
     output_path.write_text(

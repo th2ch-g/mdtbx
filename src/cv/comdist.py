@@ -1,10 +1,17 @@
 import argparse
 import mdtraj as md
 import numpy as np
-import subprocess
 
-from ..config import *  # NOQA
+from pathlib import Path
+
 from ..logger import generate_logger
+from ..utils.common_args import (
+    add_output_arg,
+    add_topology_arg,
+    add_trajectory_arg,
+)
+from ..utils.gmx import gmx_index_flag
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -19,16 +26,8 @@ def add_subcmd(subparsers):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument(
-        "-p", "--topology", type=str, required=True, help="Topology file (.gro, .pdb)"
-    )
-    parser.add_argument(
-        "-t",
-        "--trajectory",
-        type=str,
-        required=True,
-        help="Trajectory file (.xtc, .trr)",
-    )
+    add_topology_arg(parser)
+    add_trajectory_arg(parser)
     parser.add_argument(
         "-s1",
         "--selection1",
@@ -43,9 +42,7 @@ def add_subcmd(subparsers):
         required=True,
         help="Selection 2 (MDtraj Atom selection language)",
     )
-    parser.add_argument(
-        "-o", "--output", type=str, default="comdist.npy", help="Output file (.npy)"
-    )
+    add_output_arg(parser, default="comdist.npy")
 
     parser.add_argument(
         "--gmx", action="store_true", help="Use Gromacs instead of MDtraj"
@@ -62,18 +59,15 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        if args.index is not None:
-            INDEX_FILE = f"-n {args.index}"
-        else:
-            INDEX_FILE = ""
+        INDEX_FILE = gmx_index_flag(args.index)
         cmd = f"gmx distance -f {args.trajectory} -s {args.topology} {INDEX_FILE} -oxyz tmp_interCOM_xyz.xvg -xvg none -pbc no -select 'com of group {args.selection1} plus com of group {args.selection2}'"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("Saved to tmp_interCOM_xyz.xvg")
-        inter_com_xyz = np.loadtxt("tmp_interCOM_xyz.xvg")
-        comdist = np.linalg.norm(inter_com_xyz[:, [1, 2, 3]], axis=1)
-        cmd = "rm -f tmp_interCOM_xyz.xvg"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("Removed tmp_interCOM_xyz.xvg")
+        run_cmd(cmd, log="Saved to tmp_interCOM_xyz.xvg")
+        try:
+            inter_com_xyz = np.loadtxt("tmp_interCOM_xyz.xvg")
+            comdist = np.linalg.norm(inter_com_xyz[:, [1, 2, 3]], axis=1)
+        finally:
+            Path("tmp_interCOM_xyz.xvg").unlink(missing_ok=True)
+            LOGGER.info("Removed tmp_interCOM_xyz.xvg")
     else:
         trj = md.load(args.trajectory, top=args.topology)
         com1 = md.compute_center_of_mass(
@@ -82,9 +76,7 @@ def run(args):
         com2 = md.compute_center_of_mass(
             trj.atom_slice(trj.topology.select(args.selection2))
         )
-        comdist = np.array(
-            [np.linalg.norm(com1[i] - com2[i]) for i in range(len(com1))]
-        )
+        comdist = np.linalg.norm(com1 - com2, axis=1)
     LOGGER.info(f"COM distance: {np.mean(comdist):.3f} +/- {np.std(comdist):.3f}")
     np.save(args.output, comdist)
     LOGGER.info(f"Saved to {args.output}")

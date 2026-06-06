@@ -1,8 +1,8 @@
 import argparse
-import subprocess
 import shutil
 from pathlib import Path
 
+from ..utils.proc import run_cmd
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -46,14 +46,12 @@ def run(args):
     else:
         # make tmp directory for template input
         Path("tmp_template").mkdir(parents=True, exist_ok=True)
-        cmd = f"cp {args.input} tmp_template/temp.pdb"
-        subprocess.run(cmd, shell=True, check=True)
+        shutil.copy(args.input, "tmp_template/temp.pdb")
         LOGGER.info("tmp_template/temp.pdb copied")
         cmd = "colabfold_batch --custom-template-path tmp_template/ --num-models 1 --templates input.fasta results_modeled_cf --amber"
 
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("results_modeled_cf/ generated")
+    run_cmd(cmd, log="results_modeled_cf/ generated")
 
-    cmd = "rm -rf input.fasta tmp_template/"
-    subprocess.run(cmd, shell=True, check=True)
+    Path("input.fasta").unlink(missing_ok=True)
+    shutil.rmtree("tmp_template", ignore_errors=True)
     LOGGER.info("input.fasta and tmp_template/ removed")

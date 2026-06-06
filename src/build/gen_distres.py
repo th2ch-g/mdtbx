@@ -1,7 +1,7 @@
 import argparse
 import mdtraj as md
 
-from ..config import *  # NOQA
+from ..utils.common_args import add_topology_arg
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -37,16 +37,14 @@ def add_subcmd(subparsers):
 
     parser.add_argument("-g", "--gro", required=True, type=str, help="GRO file (.gro)")
 
-    parser.add_argument(
-        "-p", "--topology", required=True, type=str, help="Topology file (.top)"
-    )
+    add_topology_arg(parser, help="Topology file (.top)")
 
     parser.add_argument(
         "-s1",
         "--selection1",
         required=True,
         type=str,
-        help="Selection for distance restraints. (MDtraj atom selection language). Use camma ',' if multiple selection",
+        help="Selection for distance restraints. (MDtraj atom selection language). Use comma ',' if multiple selection",
     )
 
     parser.add_argument(
@@ -54,7 +52,7 @@ def add_subcmd(subparsers):
         "--selection2",
         required=True,
         type=str,
-        help="Selection for distance restraints. (MDtraj atom selection language). Use camma ',' if multiple selection",
+        help="Selection for distance restraints. (MDtraj atom selection language). Use comma ',' if multiple selection",
     )
 
     parser.add_argument(
@@ -128,7 +126,7 @@ def run(args):
                 f"selection {atom_selector2[i]} should be single atom: {sele2}"
             )
 
-        # index start from 0
+        # convert 0-based mdtraj index to 1-based GROMACS atom id
         target_atom_indices1.append(sele1[0] + 1)
         target_atom_indices2.append(sele2[0] + 1)
 

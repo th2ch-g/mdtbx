@@ -35,6 +35,16 @@ class GromacsTopologyParser:
 
                 if line.startswith("[") and line.endswith("]"):
                     section = line[1:-1].strip()
+                    # Close the current moleculetype block when a post-block main
+                    # section (system/molecules) begins, so its end_line is the
+                    # block boundary rather than EOF (which would otherwise point
+                    # inside [ molecules ] for the last moleculetype).
+                    if (
+                        section in ("system", "molecules")
+                        and current_moleculetype is not None
+                        and moleculetype_dict[current_moleculetype].end_line is None
+                    ):
+                        moleculetype_dict[current_moleculetype].end_line = idx - 1
                     current_section = section
                     start_line_section = idx
                     continue
@@ -52,6 +62,8 @@ class GromacsTopologyParser:
                     current_moleculetype = moleculetype_name
 
                 if current_section == "atoms":
+                    if current_moleculetype is None:
+                        continue
                     splits = line.split()
                     atom_index = int(splits[0])
                     atom_type = splits[1]
@@ -72,7 +84,11 @@ class GromacsTopologyParser:
                     }
 
                     moleculetype_dict[current_moleculetype].atoms.append(atom)
-        moleculetype_dict[current_moleculetype].end_line = idx
+        if (
+            current_moleculetype is not None
+            and moleculetype_dict[current_moleculetype].end_line is None
+        ):
+            moleculetype_dict[current_moleculetype].end_line = idx
 
         self.topology_file = topology_file
         self.all_moleculetypes = all_moleculetypes

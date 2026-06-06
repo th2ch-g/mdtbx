@@ -1,8 +1,9 @@
 import argparse
+
 from pymol import cmd, editor
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.pymol_session import pymol_session
 
 LOGGER = generate_logger(__name__)
 
@@ -29,52 +30,56 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    cmd.load(args.structure, "target")
-    cmd.select("oxts", "name OXT")
-    cmd.remove("oxts")
-    LOGGER.info("OXTs removed")
-    for chain in cmd.get_chains("target and polymer.protein"):
-        if chain:
-            selection = f"last (chain {chain}) and name C"
-        else:
-            selection = "last polymer.protein and name C"
-        editor.attach_amino_acid(selection, "nme")
-        LOGGER.info(f"NME added to chain '{chain}'")
-    cmd.set("retain_order", 0)
-    cmd.sort()
-    cmd.save(f"{args.output_prefix}.pdb")
+    output = f"{args.output_prefix}.pdb"
+    with pymol_session(cmd, args.structure):
+        cmd.select("oxts", "name OXT")
+        cmd.remove("oxts")
+        LOGGER.info("OXTs removed")
+        for chain in cmd.get_chains("target and polymer.protein"):
+            if chain:
+                selection = f"last (chain {chain}) and name C"
+            else:
+                selection = "last polymer.protein and name C"
+            editor.attach_amino_acid(selection, "nme")
+            LOGGER.info(f"NME added to chain '{chain}'")
+        cmd.set("retain_order", 0)
+        cmd.sort()
+        cmd.save(output)
 
-    with open(f"{args.output_prefix}.pdb") as ref:
-        lines = ref.readlines()
+    # Post-process the PDB once in memory: read -> edit the list -> write once.
+    # Re-enumerating the file on disk while insert/pop-ing the in-memory list
+    # desynchronizes indices, so `lines` is the single mutable source of truth.
+    with open(output) as f:
+        lines = f.readlines()
 
-    with open(f"{args.output_prefix}.pdb") as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
+    # 1) Rename NME cap atom names (HH3x -> Hx, CH3 -> C), preserving columns.
+    for i, line in enumerate(lines):
+        if "NME" in line:
+            for k in range(1, 4):
+                lines[i] = lines[i].replace(f"HH3{k}", f" H{k} ", 1)
+            lines[i] = lines[i].replace("CH3", "C  ", 1)
 
-            if "NME" in line:
-                for target_idx in range(1, 3 + 1):
-                    lines[idx] = lines[idx].replace(
-                        f"HH3{target_idx}", f" H{target_idx} ", 1
-                    )
+    # 2) Insert a TER after each NME residue's last hydrogen (H3). Walk in
+    #    reverse so earlier insertions do not shift later target indices.
+    for i in range(len(lines) - 1, -1, -1):
+        if (
+            lines[i].startswith(("ATOM", "HETATM"))
+            and "NME" in lines[i]
+            and lines[i][12:16].strip() == "H3"
+        ):
+            lines.insert(i + 1, "TER\n")
 
-                lines[idx] = lines[idx].replace("CH3", "C  ", 1)
+    # 3) Drop a stray TER immediately before an NME backbone nitrogen so the cap
+    #    stays bonded to the preceding residue. Match the atom-name column: a bare
+    #    `"N" in line` is always true because the residue name NME contains 'N'.
+    for i in range(len(lines) - 1, 0, -1):
+        if (
+            lines[i].startswith(("ATOM", "HETATM"))
+            and "NME" in lines[i]
+            and lines[i][12:16].strip() == "N"
+            and lines[i - 1].startswith("TER")
+        ):
+            lines.pop(i - 1)
 
-    with open(f"{args.output_prefix}.pdb", "w") as f:
-        f.writelines(lines)
-
-    with open(f"{args.output_prefix}.pdb") as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
-            if "NME" in line and "H3" in line:
-                print("insert! ", line)
-                lines.insert(idx + 1, "TER\n")
-
-    with open(f"{args.output_prefix}.pdb") as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
-            if "NME" in line and "N" in line and "TER" in lines[idx - 1]:
-                print("remove! ", line)
-                lines.pop(idx - 1)
-
-    with open(f"{args.output_prefix}.pdb", "w") as f:
+    with open(output, "w") as f:
         f.writelines(lines)

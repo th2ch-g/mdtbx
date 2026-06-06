@@ -1,8 +1,9 @@
 import argparse
+
 from pymol import cmd, editor
 
-from ..config import *  # NOQA
 from ..logger import generate_logger
+from ..utils.pymol_session import pymol_session
 
 LOGGER = generate_logger(__name__)
 
@@ -29,17 +30,17 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    cmd.load(args.structure, "target")
-    for chain in cmd.get_chains("target and polymer.protein"):
-        if chain:
-            selection = f"first (chain {chain}) and name N"
-        else:
-            selection = "first polymer.protein and name N"
-        editor.attach_amino_acid(selection, "ace")
-        LOGGER.info(f"ACE added to chain '{chain}'")
-    cmd.set("retain_order", 0)
-    cmd.sort()
-    cmd.save(f"{args.output_prefix}.pdb")
+    with pymol_session(cmd, args.structure):
+        for chain in cmd.get_chains("target and polymer.protein"):
+            if chain:
+                selection = f"first (chain {chain}) and name N"
+            else:
+                selection = "first polymer.protein and name N"
+            editor.attach_amino_acid(selection, "ace")
+            LOGGER.info(f"ACE added to chain '{chain}'")
+        cmd.set("retain_order", 0)
+        cmd.sort()
+        cmd.save(f"{args.output_prefix}.pdb")
 
     with open(f"{args.output_prefix}.pdb") as ref:
         lines = ref.readlines()

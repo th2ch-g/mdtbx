@@ -1,9 +1,10 @@
 import argparse
-import subprocess
 from pathlib import Path
 
-from ..config import *  # NOQA
+from ..config import GAUSSIAN_CMD, SINGLE_POINT_CALCULATION, STRUCTURE_OPTIMIZATION
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
+from ..utils.tleap import run_tleap
 
 LOGGER = generate_logger(__name__)
 
@@ -62,7 +63,7 @@ def run(args):
         cmd = (
             f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
         )
-        subprocess.run(cmd, shell=True, check=True)
+        run_cmd(cmd)
 
         with open("structure_optimization.gjf") as ref:
             lines = ref.readlines()
@@ -90,16 +91,15 @@ def run(args):
         cmd = (
             f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
         )
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info("structure_optimization.log generated")
+        run_cmd(cmd, log="structure_optimization.log generated")
 
         # single point
         cmd = f"obabel -i gout structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
-        subprocess.run(cmd, shell=True, check=True)
+        run_cmd(cmd)
 
     else:
         cmd = f"obabel -i {filetype} {args.structure} -o gjf > single_point_calculation.gjf"
-        subprocess.run(cmd, shell=True, check=True)
+        run_cmd(cmd)
 
     with open("single_point_calculation.gjf") as ref:
         lines = ref.readlines()
@@ -127,22 +127,18 @@ def run(args):
     cmd = (
         f"{GAUSSIAN_CMD} < single_point_calculation.gjf > single_point_calculation.log"  # NOQA
     )
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("single_point_calculation.log generated")
+    run_cmd(cmd, log="single_point_calculation.log generated")
 
     # RESP
     cmd = f"antechamber -i single_point_calculation.log -fi gout -o {args.resname}.mol2 -fo mol2 -c resp -at gaff2 -nc {args.charge} -m {args.multiplicity} -rn {args.resname} -pf y"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.mol2 generated")
+    run_cmd(cmd, log=f"{args.resname}.mol2 generated")
 
     cmd = "rm -f QOUT esout punch qout"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("QOUT esout punch qout removed")
+    run_cmd(cmd, log="QOUT esout punch qout removed")
 
     # parmchk2
     cmd = f"parmchk2 -i {args.resname}.mol2 -f mol2 -o {args.resname}.frcmod -s gaff2"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.resname}.frcmod generated")
+    run_cmd(cmd, log=f"{args.resname}.frcmod generated")
 
     # tleap
     cmd_tleap = f"""
@@ -152,12 +148,5 @@ loadamberparams {args.resname}.frcmod
 saveoff {args.resname} {args.resname}.lib
 quit
     """
-    with open("tleap.in", "w") as f:
-        f.write(cmd_tleap)
-    cmd = "tleap -f tleap.in"
-    subprocess.run(cmd, shell=True, check=True)
+    run_tleap(cmd_tleap)
     LOGGER.info(f"{args.resname}.lib generated")
-
-    cmd = "rm -f leap.log tleap.in"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("leap.log tleap.in removed")

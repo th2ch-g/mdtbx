@@ -1,8 +1,8 @@
 import argparse
-import subprocess
 from pathlib import Path
 
-from ..config import *  # NOQA
+from ..config import MAXWARN
+from ..utils.proc import run_cmd
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -57,19 +57,18 @@ def add_subcmd(subparsers):
 
 def run(args):
     dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
-    cmd = f"gmx grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.topology} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("tmp.tpr generated")
+    cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.topology} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
+    run_cmd(cmd, log="tmp.tpr generated")
 
-    cmd = f"echo {args.centering_selection} System | gmx trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {args.output} -pbc mol -center"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info(f"{args.output} generated")
+    cmd = f"echo {args.centering_selection} System | {args.gmx} trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {args.output} -pbc mol -center"
+    run_cmd(cmd, log=f"{args.output} generated")
 
     cmd = "rm -f tmp.tpr"
-    subprocess.run(cmd, shell=True, check=True)
-    LOGGER.info("tmp.tpr removed")
+    run_cmd(cmd, log="tmp.tpr removed")
 
     if not args.no_editconf:
-        cmd = f"gmx editconf -f {args.output} -o {args.output} -resnr 1"
-        subprocess.run(cmd, shell=True, check=True)
-        LOGGER.info(f"gmx editconf -f {args.output} -o {args.output} -resnr 1 run")
+        cmd = f"{args.gmx} editconf -f {args.output} -o {args.output} -resnr 1"
+        run_cmd(
+            cmd,
+            log=f"{args.gmx} editconf -f {args.output} -o {args.output} -resnr 1 run",
+        )

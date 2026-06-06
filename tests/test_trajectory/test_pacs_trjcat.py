@@ -20,10 +20,10 @@ def test_run_uses_trajectory_extension_for_cleanup(tmp_path, monkeypatch):
 
     commands = []
 
-    def fake_run(command, shell, check):
+    def fake_run_cmd(command, *, log=None, check=True, **kwargs):
         commands.append(command)
 
-    monkeypatch.setattr(pacs_trjcat.subprocess, "run", fake_run)
+    monkeypatch.setattr(pacs_trjcat, "run_cmd", fake_run_cmd)
 
     args = Namespace(
         trial_dir=str(trial_dir),
