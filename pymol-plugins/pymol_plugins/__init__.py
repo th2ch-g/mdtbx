@@ -46,12 +46,36 @@ cmd.extend("set_movo", set_movo)
 
 
 def comdist(selection1, selection2):
+    cmd.delete("com1 com2 comdist1-2")
     cmd.pseudoatom("com1", selection1)
     cmd.pseudoatom("com2", selection2)
     cmd.distance("comdist1-2", "com1", "com2")
 
 
 cmd.extend("comdist", comdist)
+
+
+def comangle(selection1, selection2, selection3):
+    cmd.delete("coma1 coma2 coma3 comangle1-2-3")
+    cmd.pseudoatom("coma1", selection1)
+    cmd.pseudoatom("coma2", selection2)
+    cmd.pseudoatom("coma3", selection3)
+    cmd.angle("comangle1-2-3", "coma1", "coma2", "coma3")
+
+
+cmd.extend("comangle", comangle)
+
+
+def comdihedral(selection1, selection2, selection3, selection4):
+    cmd.delete("comd1 comd2 comd3 comd4 comdihedral1-2-3-4")
+    cmd.pseudoatom("comd1", selection1)
+    cmd.pseudoatom("comd2", selection2)
+    cmd.pseudoatom("comd3", selection3)
+    cmd.pseudoatom("comd4", selection4)
+    cmd.dihedral("comdihedral1-2-3-4", "comd1", "comd2", "comd3", "comd4")
+
+
+cmd.extend("comdihedral", comdihedral)
 
 
 # use gui for instead
