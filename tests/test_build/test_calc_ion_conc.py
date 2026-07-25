@@ -47,6 +47,14 @@ class TestCalcIonConcFromVolume:
         n2 = calc_ion_conc_from_volume(1e6, 0.20)
         assert abs(n2 - 2 * n1) <= 1
 
+    @pytest.mark.parametrize(
+        ("volume", "concentration"),
+        [(-1.0, 0.15), (1e6, -0.15), (float("nan"), 0.15)],
+    )
+    def test_invalid_inputs_raise(self, volume, concentration):
+        with pytest.raises(ValueError):
+            calc_ion_conc_from_volume(volume, concentration)
+
 
 class TestGetBoxsizeFromPdb:
     def test_reads_cryst_line(self, sample_pdb_path):
@@ -63,6 +71,14 @@ class TestGetBoxsizeFromPdb:
         pdb.write_text("ATOM      1  CA  ALA A   1       0.000   0.000   0.000\n")
         args = types.SimpleNamespace(pdb=str(pdb))
         with pytest.raises(Exception, match="CRYST"):
+            get_boxsize_from_pdb(args)
+
+    def test_ignores_cryst_text_outside_cryst1_record(self, tmp_path):
+        pdb = tmp_path / "remark.pdb"
+        pdb.write_text("REMARK CRYST values are unavailable\n")
+        args = types.SimpleNamespace(pdb=str(pdb))
+
+        with pytest.raises(ValueError, match="CRYST1"):
             get_boxsize_from_pdb(args)
 
 

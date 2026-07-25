@@ -5,6 +5,7 @@ cv/comdist のユニットテスト
 """
 
 import types
+from pathlib import Path
 
 import numpy as np
 
@@ -60,3 +61,28 @@ class TestComdistRun:
 
         dist = np.load(str(out))
         assert np.allclose(dist, 0.0, atol=1e-6)
+
+    def test_gmx_single_frame_output(self, tmp_path, monkeypatch):
+        from src.cv import comdist
+
+        monkeypatch.chdir(tmp_path)
+
+        def fake_run_cmd(command, **_kwargs):
+            output = command[command.index("-oxyz") + 1]
+            Path(output).write_text("0.0 1.0 2.0 2.0\n")
+
+        monkeypatch.setattr(comdist, "run_cmd", fake_run_cmd)
+        out = tmp_path / "comdist_gmx.npy"
+        args = types.SimpleNamespace(
+            topology="topol.tpr",
+            trajectory="traj.xtc",
+            selection1="Group1",
+            selection2="Group2",
+            output=str(out),
+            gmx=True,
+            index=None,
+        )
+
+        comdist.run(args)
+
+        assert np.load(out).tolist() == [3.0]

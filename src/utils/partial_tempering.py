@@ -3,7 +3,6 @@ import re
 
 from .atom_selection_parser import AtomSelector
 from .parse_top import GromacsTopologyParser
-from ..config import *  # NOQA
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)

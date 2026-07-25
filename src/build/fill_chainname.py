@@ -78,11 +78,10 @@ def _split_into_blocks(
     prev_segi: str | None = None
     for idx, resv, segi in atoms:
         boundary = prev_resv is None
-        if not boundary:
-            if use_segi and segi != prev_segi:
-                boundary = True
-            elif resv - prev_resv > max_resi_gap:
-                boundary = True
+        if not boundary and (
+            (use_segi and segi != prev_segi) or resv - prev_resv > max_resi_gap
+        ):
+            boundary = True
         if boundary:
             blocks.append([])
         blocks[-1].append(idx)
@@ -145,7 +144,7 @@ def run(args):
                 used.add(new_id)
                 assigned_ids.append(new_id)
 
-        for block, new_id in zip(blocks, assigned_ids):
+        for block, new_id in zip(blocks, assigned_ids, strict=True):
             sel = "index " + "+".join(str(i) for i in block)
             pymol_cmd.alter(f"({object_name}) and ({sel})", f"chain='{new_id}'")
             LOGGER.info(f"Assigned chain '{new_id}' to {len(block)} atom(s)")

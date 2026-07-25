@@ -2,7 +2,7 @@ import warnings
 
 warnings.simplefilter("ignore")
 
-from .cli import cli  # NOQA
+from .cli import cli  # noqa: E402
 
 
 def main():

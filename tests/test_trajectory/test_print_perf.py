@@ -84,3 +84,9 @@ class TestParseLogFile:
         data = parse_log_file(log)
         assert data["version"] == "N/A"
         assert data["hostname"] == "N/A"
+
+    def test_malformed_performance_returns_none(self, tmp_path):
+        log = tmp_path / "malformed.log"
+        log.write_text("Performance: not-a-number\n")
+
+        assert parse_log_file(log) is None

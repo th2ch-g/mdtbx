@@ -69,6 +69,11 @@ class TestGenTemperaturesRun:
         with pytest.raises(ValueError, match="Pdes"):
             run(args)
 
+    @pytest.mark.parametrize("pdes", [0.0, 1.0])
+    def test_pdes_endpoints_raise(self, pdes):
+        with pytest.raises(ValueError, match="Pdes"):
+            run(self._base_args(pdes=pdes))
+
     def test_thigh_must_be_greater_than_tlow(self):
         """thigh <= tlow のとき ValueError を送出すること"""
         args = self._base_args(tlow=350.0, thigh=300.0)
@@ -86,6 +91,14 @@ class TestGenTemperaturesRun:
         args = self._base_args(np=0)
         with pytest.raises(ValueError, match="protein atoms"):
             run(args)
+
+    def test_negative_water_count_raises(self):
+        with pytest.raises(ValueError, match="water molecules"):
+            run(self._base_args(nw=-1))
+
+    def test_non_positive_tolerance_raises(self):
+        with pytest.raises(ValueError, match="Tolerance"):
+            run(self._base_args(tol=0.0))
 
     def test_nvt_not_supported(self):
         """alg=1（NVT）は未対応なので ValueError を送出すること"""

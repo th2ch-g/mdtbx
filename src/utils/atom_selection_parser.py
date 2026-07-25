@@ -158,13 +158,11 @@ class Ion(SelectionNode):
             return True
         # Fall back to the atom name only when the residue is not a known protein
         # residue, so a protein alpha-carbon (name "CA") is not misread as calcium.
-        if (
+        return (
             isinstance(name, str)
             and name in ION_NAMES
             and not (isinstance(resname, str) and resname in PROTEIN_RESNAMES)
-        ):
-            return True
-        return False
+        )
 
 
 class Backbone(SelectionNode):
@@ -256,8 +254,8 @@ class SelectionParser:
         s = self._parse_digit1()
         try:
             return int(s)
-        except ValueError:
-            raise ParseError(f"Invalid unsigned integer: {s}")
+        except ValueError as exc:
+            raise ParseError(f"Invalid unsigned integer: {s}") from exc
 
     def _parse_identifier(self) -> str:
         identifier = self._parse_alphanumeric1()

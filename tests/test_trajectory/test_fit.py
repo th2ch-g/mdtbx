@@ -5,6 +5,7 @@ MDtraj を使った軌跡フィッティングをテストする（gmx=False パ
 """
 
 import types
+from pathlib import Path
 
 
 class TestFitRun:
@@ -53,3 +54,31 @@ class TestFitRun:
         fitted = md.load(str(out), top=trajectory_files["pdb"])
         original_n_atoms = trajectory_files["traj"].n_atoms
         assert fitted.n_atoms == original_n_atoms
+
+    def test_gmx_uses_unique_temporary_path(self, tmp_path, monkeypatch):
+        from src.trajectory import fit
+
+        calls = []
+
+        def fake_run_cmd(command, **kwargs):
+            calls.append((command, kwargs["input"]))
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(fit, "run_cmd", fake_run_cmd)
+        args = types.SimpleNamespace(
+            file="trajectory with spaces.xtc",
+            topology="topology with spaces.tpr",
+            output=str(tmp_path / "fitted.xtc"),
+            selection="Protein",
+            gmx=True,
+            pbc="mol",
+            index="index with spaces.ndx",
+        )
+
+        fit.run(args)
+
+        assert len(calls) == 2
+        assert all(isinstance(command, list) for command, _input in calls)
+        assert all(input_text == "Protein\nSystem\n" for _command, input_text in calls)
+        centered_path = Path(calls[0][0][calls[0][0].index("-o") + 1])
+        assert not centered_path.exists()

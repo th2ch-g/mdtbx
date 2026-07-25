@@ -7,7 +7,7 @@ from ..utils.common_args import (
     add_topology_arg,
     add_trajectory_arg,
 )
-from ..utils.gmx import gmx_index_flag
+from ..utils.gmx import gmx_index_args, gmx_tempfile
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -44,9 +44,26 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        INDEX_OPTION = gmx_index_flag(args.index)
-        cmd = f"gmx covar -s {args.topology} -f {args.trajectory} -o eigenval.xvg -v eigenvec.trr -av {args.output} {INDEX_OPTION}"
-        run_cmd(cmd, input=f"{args.selection}\n")
+        with (
+            gmx_tempfile(".xvg") as eigenvalue_path,
+            gmx_tempfile(".trr") as eigenvector_path,
+        ):
+            cmd = [
+                "gmx",
+                "covar",
+                "-s",
+                args.topology,
+                "-f",
+                args.trajectory,
+                "-o",
+                eigenvalue_path,
+                "-v",
+                eigenvector_path,
+                "-av",
+                args.output,
+                *gmx_index_args(args.index),
+            ]
+            run_cmd(cmd, input=f"{args.selection}\n{args.selection}\n")
     else:
         # mdtraj
         import mdtraj as md

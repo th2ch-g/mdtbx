@@ -43,8 +43,8 @@ def add_subcmd(subparsers):
 
 
 def make_default_index(args):
-    cmd = f"echo q | gmx make_ndx -f {args.gro} -o {args.output}"
-    run_cmd(cmd, log=f"{args.output} newly generated")
+    cmd = ["gmx", "make_ndx", "-f", args.gro, "-o", args.output]
+    run_cmd(cmd, input="q\n", log=f"{args.output} newly generated")
 
 
 def count_index_group(args) -> int:
@@ -76,13 +76,18 @@ def add_index(args):
     LOGGER.info(f"Target selection in make_ndx: {target_atom_indices=}")
     count = count_index_group(args)
     LOGGER.info(f"Number of Current index group: {count=}")
-    cmd = f"""
-echo '
-{target_atom_indices}
-name {count} {args.name}
-q
-' | gmx make_ndx -f {args.gro} -n {args.index} -o {args.output}"""
-    run_cmd(cmd, log=f"{args.output} updated")
+    cmd = [
+        "gmx",
+        "make_ndx",
+        "-f",
+        args.gro,
+        "-n",
+        args.index,
+        "-o",
+        args.output,
+    ]
+    command_input = f"{target_atom_indices}\nname {count} {args.name}\nq\n"
+    run_cmd(cmd, input=command_input, log=f"{args.output} updated")
 
 
 def run(args):

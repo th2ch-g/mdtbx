@@ -68,6 +68,7 @@ def test_default_seed_is_42():
     )
     assert args.seed == 42
     assert args.output == "placed.pdb"
+    assert args.max_attempts == 1
 
 
 def test_required_args_missing():
@@ -80,6 +81,38 @@ def test_min_interchain_distance_basic():
     coords2 = np.array([[3.0, 0.0, 0.0], [11.0, 0.0, 0.0]])
     # min pair: (10,0,0) and (11,0,0) -> 1.0
     assert place.min_interchain_distance(coords1, coords2) == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize(
+    ("coords1", "coords2"),
+    [
+        (np.empty((0, 3)), np.zeros((1, 3))),
+        (np.zeros((1, 2)), np.zeros((1, 3))),
+        (np.zeros((1, 3)), np.empty((0, 3))),
+    ],
+)
+def test_min_interchain_distance_rejects_invalid_coordinates(coords1, coords2):
+    with pytest.raises(ValueError):
+        place.min_interchain_distance(coords1, coords2)
+
+
+@pytest.mark.parametrize(
+    "extra_args",
+    [
+        ["--distance=-1"],
+        ["-d", "1", "--clash_cutoff", "0"],
+        ["-d", "1", "--seed=-1"],
+        ["-d", "1", "--max-attempts", "0"],
+    ],
+)
+def test_run_rejects_invalid_numeric_inputs(extra_args):
+    args = _parse_args(
+        place.add_subcmd,
+        ["place", "-1", "a.pdb", "-2", "b.pdb", *extra_args],
+    )
+
+    with pytest.raises(ValueError):
+        place.run(args)
 
 
 def _install_fake_pymol(monkeypatch, coords1, coords2, *, distance=30.0):
@@ -193,6 +226,52 @@ def test_run_warns_on_clash_with_ignore(monkeypatch, tmp_path, caplog):
     )
     place.run(args)
     # PDB must be written despite the clash
+    fake_cmd.save.assert_called_once_with(str(tmp_path / "out.pdb"), "placed")
+
+
+def test_run_retries_clashing_placement(monkeypatch, tmp_path):
+    fake_cmd = MagicMock()
+    fake_cmd.centerofmass.side_effect = [
+        [1.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0],
+        [0.0, 0.0, 0.0],
+        [30.0, 0.0, 0.0],
+        [4.0, 5.0, 6.0],
+        [0.0, 0.0, 0.0],
+        [30.0, 0.0, 0.0],
+    ]
+    fake_cmd.get_coords.side_effect = [
+        np.array([[0.0, 0.0, 0.0]]),
+        np.array([[0.5, 0.0, 0.0]]),
+        np.array([[0.0, 0.0, 0.0]]),
+        np.array([[30.0, 0.0, 0.0]]),
+    ]
+    fake_pymol = MagicMock()
+    fake_pymol.cmd = fake_cmd
+    monkeypatch.setitem(__import__("sys").modules, "pymol", fake_pymol)
+
+    args = _parse_args(
+        place.add_subcmd,
+        [
+            "place",
+            "-1",
+            "a.pdb",
+            "-2",
+            "b.pdb",
+            "-d",
+            "30",
+            "--max-attempts",
+            "2",
+            "-o",
+            str(tmp_path / "out.pdb"),
+        ],
+    )
+
+    place.run(args)
+
+    assert fake_cmd.load.call_count == 3
+    fake_cmd.delete.assert_called_once_with("mol2")
+    assert fake_cmd.transform_selection.call_count == 2
     fake_cmd.save.assert_called_once_with(str(tmp_path / "out.pdb"), "placed")
 
 

@@ -80,7 +80,7 @@ def parse_log_file(log_path):
             elif "Performance:" in line:
                 data["performance"] = float(line.split()[1])
 
-    except (IOError, IndexError) as e:
+    except (OSError, IndexError, ValueError) as e:
         LOGGER.error(f"Error parsing {log_path}: {e}")
         return None
 

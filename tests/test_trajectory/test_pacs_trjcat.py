@@ -40,5 +40,7 @@ def test_run_uses_trajectory_extension_for_cleanup(tmp_path, monkeypatch):
 
     pacs_trjcat.run(args)
 
-    assert any("tmp_all.trr" in command for command in commands)
-    assert not any("tmp_all.xtc" in command for command in commands)
+    rendered_commands = [" ".join(map(str, command)) for command in commands]
+    assert any("tmp_all.trr" in command for command in rendered_commands)
+    assert not any("tmp_all.xtc" in command for command in rendered_commands)
+    assert all(isinstance(command, list) for command in commands)

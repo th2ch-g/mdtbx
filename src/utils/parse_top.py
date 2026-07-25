@@ -1,15 +1,15 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
 class MoleculeType:
     name: str
-    atoms: list
+    atoms: list[dict[str, str | int]]
     start_line: int
-    end_line: int
+    end_line: int | None
 
 
-@dataclass
 class GromacsTopologyParser:
     def __init__(self, topology_file: str):
         # main section: defaults, atomtypes,moleculetype, system
@@ -20,9 +20,9 @@ class GromacsTopologyParser:
         current_section = None
         start_line_section = None
         current_moleculetype = None
-        with open(topology_file) as f:
-            for idx, line in enumerate(f):
-                line = line.strip()
+        with Path(topology_file).open() as f:
+            for idx, raw_line in enumerate(f):
+                line = raw_line.partition(";")[0].strip()
 
                 if line == "":
                     continue
@@ -97,7 +97,7 @@ class GromacsTopologyParser:
     def get_all_moleculetypes(self) -> list[str]:
         return self.all_moleculetypes
 
-    def get_atoms_in(self, moleculetypes: str) -> list[dict[str, str]]:
+    def get_atoms_in(self, moleculetypes: str) -> list[dict[str, str | int]]:
         return self.moleculetype_dict[moleculetypes].atoms
 
     def get_insert_linenumber_in(self, moleculetypes: str) -> int:

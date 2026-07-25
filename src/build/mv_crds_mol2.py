@@ -38,6 +38,12 @@ def add_subcmd(subparsers):
         type=str,
         help="Output mol2 file",
     )
+    parser.add_argument(
+        "--match-by",
+        choices=["name", "index"],
+        default="name",
+        help="Atom field used to match the coordinate and reference files",
+    )
 
     parser.set_defaults(func=run)
 
@@ -50,6 +56,8 @@ def _replace_atom_coords(line, new_crds):
     substring substitution (replace via dummy tokens) used previously.
     """
     matches = list(re.finditer(r"\S+", line))
+    if len(matches) < 5:
+        raise ValueError(f"Malformed MOL2 atom line: {line!r}")
     for ci in (4, 3, 2):
         m = matches[ci]
         line = line[: m.start()] + new_crds[ci - 2] + line[m.end() :]
@@ -57,8 +65,11 @@ def _replace_atom_coords(line, new_crds):
 
 
 def run(args):
-    # First pass: map atom name -> xyz tokens from the coordinate mol2.
-    atomname2crds = {}
+    match_by = getattr(args, "match_by", "name")
+    key_index = 1 if match_by == "name" else 0
+
+    # First pass: map the requested atom field to xyz tokens.
+    atomkey2crds = {}
     section = None
     with open(args.coordinates) as f:
         for line in f:
@@ -68,11 +79,21 @@ def run(args):
                 continue
             if section == "@<TRIPOS>ATOM":
                 parsed = re.findall(r"\S+", line)
-                atomname2crds[parsed[1]] = parsed[2:5]
+                if not parsed:
+                    continue
+                if len(parsed) < 5:
+                    raise ValueError(f"Malformed MOL2 atom line: {line!r}")
+                atom_key = parsed[key_index]
+                if atom_key in atomkey2crds:
+                    raise ValueError(
+                        f"Duplicate atom {match_by} in coordinate MOL2: {atom_key}"
+                    )
+                atomkey2crds[atom_key] = parsed[2:5]
 
     # Second pass: copy the reference verbatim, swapping only ATOM coordinates.
     section = None
     new_lines = []
+    reference_atom_keys = set()
     with open(args.reference) as f:
         for line in f:
             line = line.rstrip("\n")
@@ -82,9 +103,31 @@ def run(args):
                 continue
             if section == "@<TRIPOS>ATOM":
                 parsed = re.findall(r"\S+", line)
-                new_lines.append(_replace_atom_coords(line, atomname2crds[parsed[1]]))
+                if not parsed:
+                    new_lines.append(line)
+                    continue
+                if len(parsed) < 5:
+                    raise ValueError(f"Malformed MOL2 atom line: {line!r}")
+                atom_key = parsed[key_index]
+                if atom_key in reference_atom_keys:
+                    raise ValueError(
+                        f"Duplicate atom {match_by} in reference MOL2: {atom_key}"
+                    )
+                if atom_key not in atomkey2crds:
+                    raise ValueError(
+                        f"Atom {match_by} {atom_key} is missing from coordinate MOL2"
+                    )
+                reference_atom_keys.add(atom_key)
+                new_lines.append(_replace_atom_coords(line, atomkey2crds[atom_key]))
             else:
                 new_lines.append(line)
+
+    extra_atom_keys = set(atomkey2crds) - reference_atom_keys
+    if extra_atom_keys:
+        extras = ", ".join(sorted(extra_atom_keys))
+        raise ValueError(
+            f"Coordinate MOL2 has atom {match_by}s missing from reference MOL2: {extras}"
+        )
 
     with open(args.output, "w") as f:
         f.write("\n".join(new_lines) + "\n")

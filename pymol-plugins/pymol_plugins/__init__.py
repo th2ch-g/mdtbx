@@ -1,11 +1,14 @@
+import re
+
 from pymol import cmd
-from .selector import *  # NoQA
-from .builder import *  # NoQA
-from .visualizer import *  # NoQA
-from .arrow import *  # NoQA
-from .pca import *  # NoQA
-from .alias import *  # NoQA
-from .ai import *  # NoQA
+
+from .selector import *  # noqa: F403
+from .builder import *  # noqa: F403
+from .visualizer import *  # noqa: F403
+from .arrow import *  # noqa: F403
+from .pca import *  # noqa: F403
+from .alias import *  # noqa: F403
+from .ai import *  # noqa: F403
 from . import morph as _morph_plugin
 
 _morph_plugin.__init_plugin__()
@@ -15,6 +18,8 @@ _morph_plugin.__init_plugin__()
 # but super has a different algorithm from alignto
 def super_all():
     obj_list = cmd.get_object_list("all")
+    if not obj_list:
+        return
     for obj in obj_list[1:]:
         cmd.super(obj, obj_list[0])
     cmd.zoom(obj_list[0])
@@ -27,12 +32,20 @@ def ls_res(selection):
     residues = set()
     cmd.iterate_state(1, selection, "residues.add((resi, resn))", space=locals())
     residue_list = list(residues)
-    residue_list.sort(key=lambda x: int(x[0]))
+    residue_list.sort(key=_residue_sort_key)
     for resi, resn in residue_list:
         print(f" Residue: {resi}  Name: {resn}")
 
 
 cmd.extend("ls_res", ls_res)
+
+
+def _residue_sort_key(residue):
+    resi = residue[0]
+    match = re.fullmatch(r"([+-]?\d+)(.*)", resi)
+    if match is None:
+        return 1, 0, resi
+    return 0, int(match.group(1)), match.group(2)
 
 
 # set translate command

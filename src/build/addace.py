@@ -4,6 +4,7 @@ from pymol import cmd, editor
 
 from ..logger import generate_logger
 from ..utils.pymol_session import pymol_session
+from .pdb_caps import normalize_methyl_hydrogen_names
 
 LOGGER = generate_logger(__name__)
 
@@ -43,17 +44,10 @@ def run(args):
         cmd.save(f"{args.output_prefix}.pdb")
 
     with open(f"{args.output_prefix}.pdb") as ref:
-        lines = ref.readlines()
-
-    with open(f"{args.output_prefix}.pdb") as f:
-        for idx, line in enumerate(f):
-            line = line.rstrip()
-
-            if "ACE" in line:
-                for target_idx in range(1, 3 + 1):
-                    lines[idx] = lines[idx].replace(
-                        f"HH3{target_idx}", f" H{target_idx} ", 1
-                    )
+        lines = [
+            normalize_methyl_hydrogen_names(line) if "ACE" in line else line
+            for line in ref
+        ]
 
     with open(f"{args.output_prefix}.pdb", "w") as f:
         f.writelines(lines)

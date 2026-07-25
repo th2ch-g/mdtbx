@@ -1,4 +1,5 @@
 import argparse
+import math
 import re
 
 from ..config import AVOGADRO_CONST, WATER_VOLUME
@@ -71,10 +72,10 @@ def get_boxsize_from_pdb(args) -> tuple[float, float, float]:  # angstrom^3
     with open(args.pdb) as f:
         for line in f:
             line = line.rstrip()
-            if "CRYST" in line:
+            if line.startswith("CRYST1"):
                 parsed = re.findall(r"\S+", line)
                 return float(parsed[1]), float(parsed[2]), float(parsed[3])
-    raise Exception("CRYST line not found")
+    raise ValueError("CRYST1 line not found")
 
 
 def get_water_number_from_pdb(args) -> int:
@@ -93,18 +94,20 @@ def get_water_number_from_pdb(args) -> int:
 
 
 def calc_ion_conc_from_volume(volume: float, concentration: float) -> int:
+    if not math.isfinite(volume) or volume < 0:
+        raise ValueError("Volume must be a finite non-negative value")
+    if not math.isfinite(concentration) or concentration < 0:
+        raise ValueError("Concentration must be a finite non-negative value")
     # concentration [M] = concentration [mol/L]
     # volume [A^3] = volume x 10^-3 [nm^3] = volume x 10^-3 x 10^-24 [L]
     # AVOGADRO = 6.022 * 10^23 [mol^-1]
     # -> concentration [M] * volume [A^3] * 1/10000
-    ionnum = volume * concentration * AVOGADRO_CONST // 10000  # NOQA
-    ionnum = int(ionnum)
-    return ionnum
+    return int(volume * concentration * AVOGADRO_CONST // 10000)
 
 
 def run(args):
     if args.pdb is None and args.volume is None:
-        raise Exception("pdb or volume is required")
+        raise ValueError("pdb or volume is required")
 
     if args.volume is not None:
         ionnum = calc_ion_conc_from_volume(args.volume, args.concentration)
@@ -120,7 +123,7 @@ def run(args):
         elif args.method == "water":
             num_water = get_water_number_from_pdb(args)
             LOGGER.info(f"Number of water molecules: # {num_water}")
-            volume = num_water * WATER_VOLUME * 1000  # NOQA # convert from nm^3 to A^3
+            volume = num_water * WATER_VOLUME * 1000  # convert from nm^3 to A^3
             # volume = num_water * TIP3P_VOLUME * 1000
             LOGGER.info(f"Volume of water molecules: {volume}")
             ionnum = calc_ion_conc_from_volume(volume, args.concentration)

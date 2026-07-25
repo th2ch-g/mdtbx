@@ -66,7 +66,31 @@ def run(args):
     # antechamber uses "mdl" as the format flag for MDL .mol files
     if filetype == "mol":
         filetype = "mdl"
-    cmd = f"antechamber -fi {filetype} -i {args.structure} -bk {args.resname} -fo ac -o {args.resname}.ac -c bcc -at amber -pf y -s 2 -nc {args.charge} -m {args.multiplicity}"
+    cmd = [
+        "antechamber",
+        "-fi",
+        filetype,
+        "-i",
+        args.structure,
+        "-bk",
+        args.resname,
+        "-fo",
+        "ac",
+        "-o",
+        f"{args.resname}.ac",
+        "-c",
+        "bcc",
+        "-at",
+        "amber",
+        "-pf",
+        "y",
+        "-s",
+        "2",
+        "-nc",
+        str(args.charge),
+        "-m",
+        str(args.multiplicity),
+    ]
     run_cmd(cmd, log=f"{args.resname}.ac generated")
 
     if args.mainchain is not None:
@@ -92,10 +116,36 @@ CHARGE {args.charge}
     with open(f"{args.resname}.mc", "w") as f:
         f.write(mc)
 
-    cmd = f"prepgen -i {args.resname}.ac -o {args.resname}.prepin -m {args.resname}.mc -rn {args.resname}"
+    cmd = [
+        "prepgen",
+        "-i",
+        f"{args.resname}.ac",
+        "-o",
+        f"{args.resname}.prepin",
+        "-m",
+        f"{args.resname}.mc",
+        "-rn",
+        args.resname,
+    ]
     run_cmd(cmd, log=f"{args.resname}.prepin generated")
 
-    cmd = f"parmchk2 -i {args.resname}.prepin -f prepi -o {args.resname}_1.frcmod -a Y -p {Path(__file__).parent.parent.parent}/.pixi/envs/default/dat/leap/parm/parm10.dat"
+    parm10_path = (
+        Path(__file__).parent.parent.parent
+        / ".pixi/envs/default/dat/leap/parm/parm10.dat"
+    )
+    cmd = [
+        "parmchk2",
+        "-i",
+        f"{args.resname}.prepin",
+        "-f",
+        "prepi",
+        "-o",
+        f"{args.resname}_1.frcmod",
+        "-a",
+        "Y",
+        "-p",
+        str(parm10_path),
+    ]
     run_cmd(cmd, log=f"{args.resname}_1.frcmod generated")
 
     lines = []
@@ -109,5 +159,15 @@ CHARGE {args.charge}
         f.write(content + "\n")
     LOGGER.info(f"{args.resname}_1.frcmod updated")
 
-    cmd = f"parmchk2 -i {args.resname}.prepin -f prepi -o {args.resname}_2.frcmod -s gaff2"
+    cmd = [
+        "parmchk2",
+        "-i",
+        f"{args.resname}.prepin",
+        "-f",
+        "prepi",
+        "-o",
+        f"{args.resname}_2.frcmod",
+        "-s",
+        "gaff2",
+    ]
     run_cmd(cmd, log=f"{args.resname}_2.frcmod generated")

@@ -4,6 +4,11 @@ from pathlib import Path
 from ..config import GAUSSIAN_CMD, SINGLE_POINT_CALCULATION
 from ..logger import generate_logger
 from ..utils.proc import run_cmd
+from .gaussian import (
+    configure_gaussian_input,
+    convert_to_gaussian_input,
+    run_gaussian,
+)
 
 LOGGER = generate_logger(__name__)
 
@@ -81,51 +86,69 @@ def run(args):
     # hint: Check Structure as PDB before running. You can check by antechamber or obabel
     # hint: Need cap atom for specifying SEP_BOND
 
-    # single point calculation
     filetype = Path(args.structure).suffix[1:]
-    cmd = f"obabel -i {filetype} {args.structure} -o gjf > single_point_calculation.gjf"
-    run_cmd(cmd)
-
-    with open("single_point_calculation.gjf") as ref:
-        lines = ref.readlines()
-
-    lines[0] = "%chk=single_point_calculation.chk\n"
-    lines[1] = f"%mem={args.memory}GB\n"
-    lines.insert(2, f"%nprocshared={args.threads}\n")
-    lines.insert(3, f"{SINGLE_POINT_CALCULATION}\n")  # NOQA
-
-    for idx, line in enumerate(lines):
-        line = line.strip()
-        if len(line.split()) == 2:
-            try:
-                _charge = int(line.split()[0])
-                _multiplicity = int(line.split()[1])
-                target_idx = idx
-                lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
-                break
-            except Exception:
-                continue
-
-    with open("single_point_calculation.gjf", "w") as f:
-        f.writelines(lines)
-
-    cmd = (
-        f"{GAUSSIAN_CMD} < single_point_calculation.gjf > single_point_calculation.log"  # NOQA
+    convert_to_gaussian_input(
+        args.structure,
+        filetype,
+        "single_point_calculation.gjf",
     )
-    run_cmd(cmd, log="single_point_calculation.log generated")
+    configure_gaussian_input(
+        "single_point_calculation.gjf",
+        checkpoint="single_point_calculation.chk",
+        memory_gb=args.memory,
+        threads=args.threads,
+        route=SINGLE_POINT_CALCULATION,
+        charge=args.charge,
+        multiplicity=args.multiplicity,
+    )
+    run_gaussian(
+        GAUSSIAN_CMD,
+        "single_point_calculation.gjf",
+        "single_point_calculation.log",
+    )
+    LOGGER.info("single_point_calculation.log generated")
 
-    cmd = f"antechamber -fi gout -i single_point_calculation.log -fo ac -o {args.resname}.ac -pf y -rn {args.resname} -at amber -s 2 -nc {args.charge} -m {args.multiplicity}"
+    cmd = [
+        "antechamber",
+        "-fi",
+        "gout",
+        "-i",
+        "single_point_calculation.log",
+        "-fo",
+        "ac",
+        "-o",
+        f"{args.resname}.ac",
+        "-pf",
+        "y",
+        "-rn",
+        args.resname,
+        "-at",
+        "amber",
+        "-s",
+        "2",
+        "-nc",
+        str(args.charge),
+        "-m",
+        str(args.multiplicity),
+    ]
     run_cmd(cmd, log=f"{args.resname}.ac generated")
 
-    cmd = f"espgen -i single_point_calculation.log -o {args.resname}.esp"
+    cmd = [
+        "espgen",
+        "-i",
+        "single_point_calculation.log",
+        "-o",
+        f"{args.resname}.esp",
+    ]
     run_cmd(cmd, log=f"{args.resname}.esp generated")
 
-    atom_charges = "\n".join(
-        [
-            f"{atom_charge.split(':')[0]} {atom_charge.split(':')[1]}"
-            for atom_charge in args.atomcharge
-        ]
-    )
+    atom_charges = []
+    for atom_charge in args.atomcharge:
+        atom_name, separator, charge = atom_charge.partition(":")
+        if not separator or not atom_name or not charge:
+            raise ValueError("--atomcharge values must use ATOM:CHARGE format")
+        atom_charges.append(f"{atom_name} {charge}")
+    atom_charges = "\n".join(atom_charges)
     if args.sepbond1 is not None:
         sep_bond1 = f"SEP_BOND {args.sepbond1[0]} {args.sepbond1[1]}"
     else:
@@ -152,10 +175,20 @@ RESIDUE_SYMBOL: {args.resname}
     with open(f"{args.resname}.in", "w") as f:
         f.write(content)
 
-    cmd = f"residuegen {args.resname}.in"
+    cmd = ["residuegen", f"{args.resname}.in"]
     run_cmd(cmd, log=f"{args.resname}.prep generated")
 
-    cmd = f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_parm10.frcmod -s parm10"
+    cmd = [
+        "parmchk2",
+        "-i",
+        f"{args.resname}.prep",
+        "-f",
+        "prepi",
+        "-o",
+        f"{args.resname}_parm10.frcmod",
+        "-s",
+        "parm10",
+    ]
     run_cmd(cmd, log=f"{args.resname}_parm10.frcmod generated")
 
     lines = []
@@ -169,7 +202,17 @@ RESIDUE_SYMBOL: {args.resname}
         f.write(content + "\n")
     LOGGER.info(f"{args.resname}_parm10.frcmod updated")
 
-    cmd = f"parmchk2 -i {args.resname}.prep -f prepi -o {args.resname}_gaff2.frcmod -s gaff2"
+    cmd = [
+        "parmchk2",
+        "-i",
+        f"{args.resname}.prep",
+        "-f",
+        "prepi",
+        "-o",
+        f"{args.resname}_gaff2.frcmod",
+        "-s",
+        "gaff2",
+    ]
     run_cmd(cmd, log=f"{args.resname}_gaff2.frcmod generated")
 
     LOGGER.warning(f"You need to modify {args.resname}.prep manually.")

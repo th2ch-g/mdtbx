@@ -1,4 +1,5 @@
 import argparse
+import shutil
 from pathlib import Path
 
 from ..utils.proc import run_cmd
@@ -42,25 +43,36 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.type == "parmed":
-        cmd = f"amb2gro_top_gro.py -p {args.parm} -c {args.rst} -t gmx.top -g gmx.gro -b gmx.pdb"
+        cmd = [
+            "amb2gro_top_gro.py",
+            "-p",
+            args.parm,
+            "-c",
+            args.rst,
+            "-t",
+            "gmx.top",
+            "-g",
+            "gmx.gro",
+            "-b",
+            "gmx.pdb",
+        ]
         run_cmd(cmd, log="gmx.gro generated")
         LOGGER.info("gmx.top generated")
         LOGGER.info("gmx.pdb generated")
     # acpype may create wrong gro file
     # because of overflow of residue numbers or atom numbers
     elif args.type == "acpype":
-        cmd = f"acpype -p {args.parm} -x {args.rst}"
+        cmd = ["acpype", "-p", args.parm, "-x", args.rst]
         run_cmd(cmd)
         stem = Path(args.parm).stem
-        cmd = f"cp {stem}.amb2gmx/{stem}_GMX.gro gmx.gro"
-        run_cmd(cmd)
-        cmd = f"cp {stem}.amb2gmx/{stem}_GMX.top gmx.top"
-        run_cmd(cmd)
+        generated_dir = Path(f"{stem}.amb2gmx")
+        shutil.copy2(generated_dir / f"{stem}_GMX.gro", "gmx.gro")
+        shutil.copy2(generated_dir / f"{stem}_GMX.top", "gmx.top")
         LOGGER.info("gmx.gro generated")
         LOGGER.info("gmx.top generated")
-        cmd = f"rm -rf {stem}.amb2gmx/"
-        run_cmd(cmd, log=f"{stem}.amb2gmx/ removed")
+        shutil.rmtree(generated_dir)
+        LOGGER.info(f"{generated_dir}/ removed")
 
     if not args.no_editconf:
-        cmd = "gmx editconf -f gmx.gro -o gmx.gro -resnr 1"
+        cmd = ["gmx", "editconf", "-f", "gmx.gro", "-o", "gmx.gro", "-resnr", "1"]
         run_cmd(cmd, log="gmx editconf -f gmx.gro -o gmx.gro -resnr 1 run")

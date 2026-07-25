@@ -2,6 +2,7 @@ import argparse
 import mdtraj as md
 
 from ..logger import generate_logger
+from ..utils.gmx import gmx_index_args, gmx_tempfile
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -57,14 +58,36 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        INDEX_OPT = f"-n {args.index}"
-        # cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc nojump -center"
-        cmd = f"echo {args.selection} System | gmx trjconv -f {args.file} -s {args.topology} -o tmp.xtc -pbc {args.pbc} {INDEX_OPT} -center"
-        run_cmd(cmd)
-        cmd = f"echo {args.selection} System | gmx trjconv -f tmp.xtc -s {args.topology} -o {args.output} -fit rot+trans {INDEX_OPT}"
-        run_cmd(cmd)
-        cmd = "rm -f tmp.xtc"
-        run_cmd(cmd, log="tmp.xtc removed")
+        with gmx_tempfile(".xtc") as centered_path:
+            cmd = [
+                "gmx",
+                "trjconv",
+                "-f",
+                args.file,
+                "-s",
+                args.topology,
+                "-o",
+                centered_path,
+                "-pbc",
+                args.pbc,
+                *gmx_index_args(args.index),
+                "-center",
+            ]
+            run_cmd(cmd, input=f"{args.selection}\nSystem\n")
+            cmd = [
+                "gmx",
+                "trjconv",
+                "-f",
+                centered_path,
+                "-s",
+                args.topology,
+                "-o",
+                args.output,
+                "-fit",
+                "rot+trans",
+                *gmx_index_args(args.index),
+            ]
+            run_cmd(cmd, input=f"{args.selection}\nSystem\n")
     else:
         trj = md.load(args.file, top=args.topology)
         ref = md.load(args.topology)

@@ -2,11 +2,8 @@ from collections import defaultdict
 from pymol import cmd, editor
 
 
-def addace(selection: str = None):
-    if selection is None:
-        selection = ""
-    else:
-        selection = " and " + selection
+def addace(selection: str | None = None):
+    selection = "" if selection is None else " and " + selection
     editor.attach_amino_acid(f"first (polymer.protein {selection}) and name N", "ace")
     print("ACE added")
     cmd.rebuild()
@@ -22,11 +19,8 @@ sed -i -e 's/3HH3 ACE/ H3  ACE/g' b.pdb
 """
 
 
-def addnme(selection: str = None):
-    if selection is None:
-        selection = ""
-    else:
-        selection = " and " + selection
+def addnme(selection: str | None = None):
+    selection = "" if selection is None else " and " + selection
     cmd.select("oxts", f"name OXT {selection}")
     cmd.remove("oxts")
     print("OXT atoms removed")

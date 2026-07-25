@@ -4,6 +4,7 @@ from pymol import cmd, editor
 
 from ..logger import generate_logger
 from ..utils.pymol_session import pymol_session
+from .pdb_caps import normalize_methyl_hydrogen_names
 
 LOGGER = generate_logger(__name__)
 
@@ -52,11 +53,10 @@ def run(args):
     with open(output) as f:
         lines = f.readlines()
 
-    # 1) Rename NME cap atom names (HH3x -> Hx, CH3 -> C), preserving columns.
+    # 1) Rename NME cap atom names (xHH3/HH3x -> Hx, CH3 -> C), preserving columns.
     for i, line in enumerate(lines):
         if "NME" in line:
-            for k in range(1, 4):
-                lines[i] = lines[i].replace(f"HH3{k}", f" H{k} ", 1)
+            lines[i] = normalize_methyl_hydrogen_names(lines[i])
             lines[i] = lines[i].replace("CH3", "C  ", 1)
 
     # 2) Insert a TER after each NME residue's last hydrogen (H3). Walk in

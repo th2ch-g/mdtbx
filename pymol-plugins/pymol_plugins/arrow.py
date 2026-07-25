@@ -70,21 +70,23 @@ def cgo_arrow(
 
     xyz3 = cpv.add(cpv.scale(normal, hlength), xyz2)
 
-    obj = (
-        [cgo.CYLINDER]
-        + xyz1
-        + xyz3
-        + [radius]
-        + color1
-        + color2
-        + [cgo.CONE]
-        + xyz3
-        + xyz2
-        + [hradius, 0.0]
-        + color2
-        + color2
-        + [1.0, 0.0]
-    )
+    obj = [
+        cgo.CYLINDER,
+        *xyz1,
+        *xyz3,
+        radius,
+        *color1,
+        *color2,
+        cgo.CONE,
+        *xyz3,
+        *xyz2,
+        hradius,
+        0.0,
+        *color2,
+        *color2,
+        1.0,
+        0.0,
+    ]
 
     if not name:
         name = cmd.get_unused_name("arrow")

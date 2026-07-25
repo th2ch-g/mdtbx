@@ -480,7 +480,7 @@ def _execute_blocks(blocks: list[tuple[str, str]]) -> None:
 
         print(f" [ai] Executing ({lang}):\n{code}\n")
         if lang == "python":
-            exec(code, {"cmd": cmd, "__builtins__": __builtins__})  # noqa: S102
+            exec(code, {"cmd": cmd, "__builtins__": __builtins__})
             continue
 
         for line in code.splitlines():
@@ -593,7 +593,7 @@ def _run_ai_job(
             print(f" [ai:{job_id}] Executing {len(blocks)} block(s).")
             try:
                 _execute_blocks(blocks)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 error = f"{type(exc).__name__}: {exc}"
                 raise _AIResponseFeedbackError(
                     "Applying the previous response failed.\n"
@@ -631,7 +631,7 @@ def _run_ai_job(
             print(f" [ai:{job_id}] Attempt {attempt} failed. Sending feedback.")
             print(f" [ai:{job_id}] Feedback: {feedback_error}")
             continue
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             error = f"{type(exc).__name__}: {exc}"
             _update_ai_job(job_id, status="error", error=error, attempts=attempt)
             print(f" [ai:{job_id}] Error while applying response: {error}")
@@ -644,7 +644,7 @@ def _run_ai_job(
 
 def _submit_ai_request(
     instruction: str,
-    type: str = "claude",  # noqa: A002
+    type: str = "claude",
     async_: str = "1",
 ) -> None:
     """Send a natural-language request to Claude/Codex and run the result."""

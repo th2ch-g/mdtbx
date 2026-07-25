@@ -5,6 +5,11 @@ from ..config import GAUSSIAN_CMD, SINGLE_POINT_CALCULATION, STRUCTURE_OPTIMIZAT
 from ..logger import generate_logger
 from ..utils.proc import run_cmd
 from ..utils.tleap import run_tleap
+from .gaussian import (
+    configure_gaussian_input,
+    convert_to_gaussian_input,
+    run_gaussian,
+)
 
 LOGGER = generate_logger(__name__)
 
@@ -59,85 +64,96 @@ def add_subcmd(subparsers):
 def run(args):
     filetype = Path(args.structure).suffix[1:]
     if not args.no_opt:
-        # structure optimization
-        cmd = (
-            f"obabel -i {filetype} {args.structure} -o gjf > structure_optimization.gjf"
+        convert_to_gaussian_input(
+            args.structure,
+            filetype,
+            "structure_optimization.gjf",
         )
-        run_cmd(cmd)
-
-        with open("structure_optimization.gjf") as ref:
-            lines = ref.readlines()
-
-        lines[0] = "%chk=structure_optimization.chk\n"
-        lines[1] = f"%mem={args.memory}GB\n"
-        lines.insert(2, f"%nprocshared={args.threads}\n")
-        lines.insert(3, f"{STRUCTURE_OPTIMIZATION}\n")  # NOQA
-
-        for idx, line in enumerate(lines):
-            line = line.strip()
-            if len(line.split()) == 2:
-                try:
-                    _charge = int(line.split()[0])
-                    _multiplicity = int(line.split()[1])
-                    target_idx = idx
-                    lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
-                    break
-                except Exception:
-                    continue
-
-        with open("structure_optimization.gjf", "w") as f:
-            f.writelines(lines)
-
-        cmd = (
-            f"{GAUSSIAN_CMD} < structure_optimization.gjf > structure_optimization.log"  # NOQA
+        configure_gaussian_input(
+            "structure_optimization.gjf",
+            checkpoint="structure_optimization.chk",
+            memory_gb=args.memory,
+            threads=args.threads,
+            route=STRUCTURE_OPTIMIZATION,
+            charge=args.charge,
+            multiplicity=args.multiplicity,
         )
-        run_cmd(cmd, log="structure_optimization.log generated")
+        run_gaussian(
+            GAUSSIAN_CMD,
+            "structure_optimization.gjf",
+            "structure_optimization.log",
+        )
+        LOGGER.info("structure_optimization.log generated")
 
-        # single point
-        cmd = f"obabel -i gout structure_optimization.log -o gjf > single_point_calculation.gjf"  # NOQA
-        run_cmd(cmd)
+        convert_to_gaussian_input(
+            "structure_optimization.log",
+            "gout",
+            "single_point_calculation.gjf",
+        )
 
     else:
-        cmd = f"obabel -i {filetype} {args.structure} -o gjf > single_point_calculation.gjf"
-        run_cmd(cmd)
+        convert_to_gaussian_input(
+            args.structure,
+            filetype,
+            "single_point_calculation.gjf",
+        )
 
-    with open("single_point_calculation.gjf") as ref:
-        lines = ref.readlines()
-
-    lines[0] = "%chk=single_point_calculation.chk\n"
-    lines[1] = f"%mem={args.memory}GB\n"
-    lines.insert(2, f"%nprocshared={args.threads}\n")
-    lines.insert(3, f"{SINGLE_POINT_CALCULATION}\n")  # NOQA
-
-    for idx, line in enumerate(lines):
-        line = line.strip()
-        if len(line.split()) == 2:
-            try:
-                _charge = int(line.split()[0])
-                _multiplicity = int(line.split()[1])
-                target_idx = idx
-                lines[target_idx] = f"{args.charge} {args.multiplicity}\n"
-                break
-            except Exception:
-                continue
-
-    with open("single_point_calculation.gjf", "w") as f:
-        f.writelines(lines)
-
-    cmd = (
-        f"{GAUSSIAN_CMD} < single_point_calculation.gjf > single_point_calculation.log"  # NOQA
+    configure_gaussian_input(
+        "single_point_calculation.gjf",
+        checkpoint="single_point_calculation.chk",
+        memory_gb=args.memory,
+        threads=args.threads,
+        route=SINGLE_POINT_CALCULATION,
+        charge=args.charge,
+        multiplicity=args.multiplicity,
     )
-    run_cmd(cmd, log="single_point_calculation.log generated")
+    run_gaussian(
+        GAUSSIAN_CMD,
+        "single_point_calculation.gjf",
+        "single_point_calculation.log",
+    )
+    LOGGER.info("single_point_calculation.log generated")
 
-    # RESP
-    cmd = f"antechamber -i single_point_calculation.log -fi gout -o {args.resname}.mol2 -fo mol2 -c resp -at gaff2 -nc {args.charge} -m {args.multiplicity} -rn {args.resname} -pf y"
+    cmd = [
+        "antechamber",
+        "-i",
+        "single_point_calculation.log",
+        "-fi",
+        "gout",
+        "-o",
+        f"{args.resname}.mol2",
+        "-fo",
+        "mol2",
+        "-c",
+        "resp",
+        "-at",
+        "gaff2",
+        "-nc",
+        str(args.charge),
+        "-m",
+        str(args.multiplicity),
+        "-rn",
+        args.resname,
+        "-pf",
+        "y",
+    ]
     run_cmd(cmd, log=f"{args.resname}.mol2 generated")
 
-    cmd = "rm -f QOUT esout punch qout"
-    run_cmd(cmd, log="QOUT esout punch qout removed")
+    for path in ("QOUT", "esout", "punch", "qout"):
+        Path(path).unlink(missing_ok=True)
+    LOGGER.info("QOUT esout punch qout removed")
 
-    # parmchk2
-    cmd = f"parmchk2 -i {args.resname}.mol2 -f mol2 -o {args.resname}.frcmod -s gaff2"
+    cmd = [
+        "parmchk2",
+        "-i",
+        f"{args.resname}.mol2",
+        "-f",
+        "mol2",
+        "-o",
+        f"{args.resname}.frcmod",
+        "-s",
+        "gaff2",
+    ]
     run_cmd(cmd, log=f"{args.resname}.frcmod generated")
 
     # tleap

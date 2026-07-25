@@ -3,6 +3,7 @@ from pathlib import Path
 
 from ..logger import generate_logger
 from ..utils.proc import run_cmd
+from ..utils.tleap import run_tleap
 
 LOGGER = generate_logger(__name__)
 
@@ -47,10 +48,42 @@ def run(args):
     # antechamber uses "mdl" as the format flag for MDL .mol files
     if filetype == "mol":
         filetype = "mdl"
-    cmd = f"antechamber -i {args.structure} -fi {filetype} -o {args.resname}.mol2 -fo mol2 -c bcc -s 2 -nc {args.charge} -m {args.multiplicity} -rn {args.resname} -pf y"
+    cmd = [
+        "antechamber",
+        "-i",
+        args.structure,
+        "-fi",
+        filetype,
+        "-o",
+        f"{args.resname}.mol2",
+        "-fo",
+        "mol2",
+        "-c",
+        "bcc",
+        "-s",
+        "2",
+        "-nc",
+        str(args.charge),
+        "-m",
+        str(args.multiplicity),
+        "-rn",
+        args.resname,
+        "-pf",
+        "y",
+    ]
     run_cmd(cmd, log=f"{args.resname}.mol2 generated")
 
-    cmd = f"parmchk2 -i {args.resname}.mol2 -f mol2 -o {args.resname}.frcmod -s gaff2"
+    cmd = [
+        "parmchk2",
+        "-i",
+        f"{args.resname}.mol2",
+        "-f",
+        "mol2",
+        "-o",
+        f"{args.resname}.frcmod",
+        "-s",
+        "gaff2",
+    ]
     run_cmd(cmd, log=f"{args.resname}.frcmod generated")
 
     cmd_tleap = f"""
@@ -60,8 +93,5 @@ loadamberparams {args.resname}.frcmod
 saveoff {args.resname} {args.resname}.lib
 quit
     """
-    cmd = f"echo '{cmd_tleap}' | tleap -f -"
-    run_cmd(cmd, log=f"{args.resname}.lib generated")
-
-    cmd = "rm -f leap.log"
-    run_cmd(cmd, log="leap.log removed")
+    run_tleap(cmd_tleap)
+    LOGGER.info(f"{args.resname}.lib generated")

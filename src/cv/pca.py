@@ -10,7 +10,7 @@ from ..utils.common_args import (
     add_topology_arg,
     add_trajectory_arg,
 )
-from ..utils.gmx import gmx_index_flag
+from ..utils.gmx import gmx_index_args
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -98,12 +98,31 @@ def _extract_values_from_xvg(path, n_values):
     return values[:n_values]
 
 
-def _save_gmx_pca_metadata(output_npz, pc, average_structure_path, args):
+def _load_gmx_projections(path, n_components):
+    values = np.loadtxt(path, ndmin=2)
+    if values.shape[1] == n_components + 1:
+        return values[:, 1:]
+    if values.shape[1] != n_components:
+        raise ValueError(
+            f"Unexpected projection columns in {path}: "
+            f"expected {n_components} scores with an optional time column"
+        )
+    return values
+
+
+def _save_gmx_pca_metadata(
+    output_npz,
+    pc,
+    average_structure_path,
+    eigenvector_path,
+    eigenvalue_path,
+    args,
+):
     import mdtraj as md
 
     average_trj = md.load(average_structure_path)
-    eigenvec_trj = md.load("eigenvec.trr", top=average_structure_path)
-    eigenvalues = _extract_values_from_xvg("eigenval.xvg", args.n_components)
+    eigenvec_trj = md.load(eigenvector_path, top=average_structure_path)
+    eigenvalues = _extract_values_from_xvg(eigenvalue_path, args.n_components)
 
     time = getattr(eigenvec_trj, "time", None)
     if time is None or len(time) == 0:
@@ -222,33 +241,42 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    if args.n_components < 1:
+        raise ValueError("--n_components must be positive")
     if args.selection_fit_ref is None:
         args.selection_fit_ref = args.selection_fit_trj
 
     if args.gmx:
-        # gmx
-        temporary_average_path = None
+        with tempfile.TemporaryDirectory(prefix="mdtbx-pca-", dir=".") as temp_dir:
+            temp_path = Path(temp_dir)
+            eigenvalue_path = temp_path / "eigenval.xvg"
+            eigenvector_path = temp_path / "eigenvec.trr"
+            projection_path = temp_path / "proj.xvg"
 
-        INDEX_OPTION = gmx_index_flag(args.index)
+            if args.output_average is not None:
+                average_structure_path = Path(args.output_average)
+            elif args.output_npz is not None:
+                average_structure_path = temp_path / "average.pdb"
+            else:
+                average_structure_path = None
 
-        if args.output_average is not None:
-            average_structure_path = args.output_average
-        elif args.output_npz is not None:
-            with tempfile.NamedTemporaryFile(suffix=".pdb", delete=False) as tmp_file:
-                average_structure_path = tmp_file.name
-            temporary_average_path = average_structure_path
-        else:
-            average_structure_path = None
-
-        if average_structure_path is not None:
-            AVERAGE_OPTION = f"-av {average_structure_path}"
-        else:
-            AVERAGE_OPTION = ""
-        try:
-            cmd = (
-                f"gmx covar -s {args.topology} -f {args.trajectory} {INDEX_OPTION} "
-                f"-xvg none -o eigenval.xvg -v eigenvec.trr {AVERAGE_OPTION}"
-            )
+            cmd = [
+                "gmx",
+                "covar",
+                "-s",
+                args.topology,
+                "-f",
+                args.trajectory,
+                *gmx_index_args(args.index),
+                "-xvg",
+                "none",
+                "-o",
+                str(eigenvalue_path),
+                "-v",
+                str(eigenvector_path),
+            ]
+            if average_structure_path is not None:
+                cmd.extend(["-av", str(average_structure_path)])
             LOGGER.info("gmx covar started")
             run_cmd(
                 cmd,
@@ -256,7 +284,27 @@ def run(args):
                 log="gmx covar finished",
             )
 
-            cmd = f"gmx anaeig -s {args.topology} -f {args.trajectory} {INDEX_OPTION} -v eigenvec.trr -proj proj.xvg -xvg none -eig eigenval.xvg -first 1 -last {args.n_components}"
+            cmd = [
+                "gmx",
+                "anaeig",
+                "-s",
+                args.topology,
+                "-f",
+                args.trajectory,
+                *gmx_index_args(args.index),
+                "-v",
+                str(eigenvector_path),
+                "-proj",
+                str(projection_path),
+                "-xvg",
+                "none",
+                "-eig",
+                str(eigenvalue_path),
+                "-first",
+                "1",
+                "-last",
+                str(args.n_components),
+            ]
             LOGGER.info("gmx anaeig started")
             run_cmd(
                 cmd,
@@ -264,14 +312,16 @@ def run(args):
                 log="gmx anaeig finished",
             )
 
-            pc = np.loadtxt("proj.xvg")
+            pc = _load_gmx_projections(projection_path, args.n_components)
             if args.output_npz is not None:
                 _save_gmx_pca_metadata(
-                    args.output_npz, pc, average_structure_path, args
+                    args.output_npz,
+                    pc,
+                    average_structure_path,
+                    eigenvector_path,
+                    eigenvalue_path,
+                    args,
                 )
-        finally:
-            if temporary_average_path is not None:
-                Path(temporary_average_path).unlink(missing_ok=True)
     else:
         # mdtraj
         import mdtraj as md

@@ -1,7 +1,9 @@
 import argparse
+import shlex
 from pathlib import Path
 
 from ..config import MAXWARN
+from ..utils.gmx import gmx_tempfile
 from ..utils.proc import run_cmd
 from ..logger import generate_logger
 
@@ -57,18 +59,63 @@ def add_subcmd(subparsers):
 
 def run(args):
     dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
-    cmd = f"{args.gmx} grompp -f {dummy_mdp_path} -c {args.structure} -r {args.structure} -p {args.topology} -n {args.index} -maxwarn {MAXWARN} -o tmp.tpr"  # NOQA
-    run_cmd(cmd, log="tmp.tpr generated")
+    gmx_command = shlex.split(args.gmx)
+    if not gmx_command:
+        raise ValueError("--gmx must not be empty")
+    with gmx_tempfile(".tpr") as topology_path:
+        cmd = [
+            *gmx_command,
+            "grompp",
+            "-f",
+            str(dummy_mdp_path),
+            "-c",
+            args.structure,
+            "-r",
+            args.structure,
+            "-p",
+            args.topology,
+            "-n",
+            args.index,
+            "-maxwarn",
+            str(MAXWARN),
+            "-o",
+            topology_path,
+        ]
+        run_cmd(cmd, log=f"{topology_path} generated")
 
-    cmd = f"echo {args.centering_selection} System | {args.gmx} trjconv -f {args.structure} -s tmp.tpr -n {args.index} -o {args.output} -pbc mol -center"
-    run_cmd(cmd, log=f"{args.output} generated")
-
-    cmd = "rm -f tmp.tpr"
-    run_cmd(cmd, log="tmp.tpr removed")
-
-    if not args.no_editconf:
-        cmd = f"{args.gmx} editconf -f {args.output} -o {args.output} -resnr 1"
+        cmd = [
+            *gmx_command,
+            "trjconv",
+            "-f",
+            args.structure,
+            "-s",
+            topology_path,
+            "-n",
+            args.index,
+            "-o",
+            args.output,
+            "-pbc",
+            "mol",
+            "-center",
+        ]
         run_cmd(
             cmd,
-            log=f"{args.gmx} editconf -f {args.output} -o {args.output} -resnr 1 run",
+            input=f"{args.centering_selection}\nSystem\n",
+            log=f"{args.output} generated",
+        )
+
+    if not args.no_editconf:
+        cmd = [
+            *gmx_command,
+            "editconf",
+            "-f",
+            args.output,
+            "-o",
+            args.output,
+            "-resnr",
+            "1",
+        ]
+        run_cmd(
+            cmd,
+            log=f"{args.output} residue numbers reset",
         )

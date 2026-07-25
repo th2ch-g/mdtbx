@@ -39,9 +39,9 @@ cmd.extend("ray_png", ray_png)
 
 def load_as(pdb_files: str, model_name="target"):
     print(f"loading {pdb_files} as {model_name}")
-    for path in Path(".").glob(pdb_files):
+    for path in Path().glob(pdb_files):
         print(path)
-        cmd.load(path, model_name)
+        cmd.load(str(path), model_name)
 
 
 cmd.extend("load_as", load_as)

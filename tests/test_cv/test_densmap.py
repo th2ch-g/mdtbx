@@ -5,6 +5,7 @@ MDtraj を使った 2D 密度マップ計算をテストする（gmx=False パ�
 """
 
 import types
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -80,3 +81,30 @@ class TestDensmapRun:
         total_ref = int(counts_ref.sum())
         expected = traj.n_frames * traj.n_atoms
         assert total_ref == expected
+
+    def test_gmx_uses_temporary_output(self, tmp_path, monkeypatch):
+        from src.cv import densmap
+
+        monkeypatch.chdir(tmp_path)
+
+        def fake_run_cmd(command, **_kwargs):
+            output = command[command.index("-od") + 1]
+            Path(output).write_text("0 1 2\n3 4 5\n6 7 8\n")
+
+        monkeypatch.setattr(densmap, "run_cmd", fake_run_cmd)
+        out = tmp_path / "densmap_gmx.npy"
+        args = types.SimpleNamespace(
+            topology="topology.tpr",
+            trajectory="trajectory.xtc",
+            selection="Water",
+            output=str(out),
+            bins=10,
+            axis="xy",
+            gmx=True,
+            index=None,
+        )
+
+        densmap.run(args)
+
+        assert out.exists()
+        assert not list(tmp_path.glob("tmp*.dat"))

@@ -55,7 +55,7 @@ def mod_mdp(target_variable, new_value, mdp, ljust):
     new_lines = []
     added_key = False
     with open(mdp) as f:
-        for idx, line in enumerate(f):
+        for line in f:
             line_ = line.strip()
             if line_.startswith(";"):
                 new_lines.append(line)

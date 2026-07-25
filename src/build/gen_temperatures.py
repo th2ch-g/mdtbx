@@ -175,14 +175,20 @@ def _print_table(args, t_list, mu_list, sigma_list, mm_list, ss_list, p_list):
 
 def run(args):
     # Input validation
-    if not (0 <= args.pdes <= 1):
-        raise ValueError("Exchange probability Pdes must be between 0 and 1")
+    if not (0 < args.pdes < 1):
+        raise ValueError(
+            "Exchange probability Pdes must be greater than 0 and less than 1"
+        )
     if args.thigh <= args.tlow:
         raise ValueError("Upper temperature limit must be greater than lower limit")
     if args.tlow <= 0 or args.thigh <= 0:
         raise ValueError("Temperatures must be > 0")
-    if args.np == 0:
-        raise ValueError("Number of protein atoms cannot be zero")
+    if args.np <= 0:
+        raise ValueError("Number of protein atoms must be positive")
+    if args.nw < 0:
+        raise ValueError("Number of water molecules cannot be negative")
+    if args.tol <= 0:
+        raise ValueError("Tolerance must be positive")
     if args.alg != 0:
         # LOGGER.warning("Only NPT (Alg=0) is fully supported as per original implementation.")
         raise ValueError("Can not do constant volume yet!")

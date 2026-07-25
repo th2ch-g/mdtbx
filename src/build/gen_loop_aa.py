@@ -100,7 +100,7 @@ def run(args):
     residues = _to_three_letter(args.sequence)
 
     if args.cap:
-        residues = ["ACE"] + residues + ["NME"]
+        residues = ["ACE", *residues, "NME"]
 
     tleap_input = TLEAP_TEMPLATE.format(
         ff=args.ff,

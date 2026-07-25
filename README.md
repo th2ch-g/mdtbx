@@ -124,3 +124,19 @@ pixi run gmx ... # equal to pixi run mdtbx cmd gmx ...
 docker run -it --rm mdtbx mdtbx ...
 docker run -it --rm mdtbx gmx ... # equal to docker run -it --rm mdtbx mdtbx cmd gmx ...
 ```
+
+### Enhanced workflows
+
+```bash
+# Retry deterministic placements until a non-clashing orientation is found.
+pixi run mdtbx place -1 chain_a.pdb -2 chain_b.pdb -d 30 \
+  --max-attempts 20 --seed 42 -o placed.pdb
+
+# Match MOL2 atoms by atom index when atom names are duplicated.
+pixi run mdtbx mv_crds_mol2 -r reference.mol2 -c coordinates.mol2 \
+  --match-by index -o updated.mol2
+
+# Choose the final trajectory path and retain the pre-PBC concatenation.
+pixi run mdtbx trjcat -n 10 --prefix prd -o fitted.xtc \
+  --keep-concatenated
+```

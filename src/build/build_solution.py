@@ -93,23 +93,23 @@ def run(args):
     # tleap
     lines = []
     with open(args.template_tleap) as f:
-        for idx, line in enumerate(f):
+        for line in f:
             line = line.rstrip()
             if "LOADPDB" in line:
                 if args.input is not None:
                     line = line.replace(
                         "LOADPDB",
-                        f"{SYSTEM_NAME} = loadpdb {args.input}",  # NOQA
+                        f"{SYSTEM_NAME} = loadpdb {args.input}",
                     )
                 else:
                     LOGGER.warning("No input structure")
                     LOGGER.warning("System will be water system")
                     line = line.replace(
                         "LOADPDB",
-                        f"{SYSTEM_NAME} = createunit '{SYSTEM_NAME}'",  # NOQA
+                        f"{SYSTEM_NAME} = createunit '{SYSTEM_NAME}'",
                     )
             if "SYSTEM_NAME" in line:
-                line = line.replace("SYSTEM_NAME", SYSTEM_NAME)  # NOQA
+                line = line.replace("SYSTEM_NAME", SYSTEM_NAME)
             if "OUT_DIR" in line:
                 line = line.replace("OUT_DIR", str(outdir))
             if "BOX_SIZE" in line:
@@ -129,10 +129,7 @@ loadoff {lib}
                 else:
                     line = ""
             if "WATER_MODEL" in line:
-                if "solvatebox" in line:
-                    water_name = args.water.upper()
-                else:
-                    water_name = args.water
+                water_name = args.water.upper() if "solvatebox" in line else args.water
                 line = line.replace("WATER_MODEL", water_name)
             if "ADDION" in line:
                 if args.noions:
@@ -146,7 +143,7 @@ loadoff {lib}
                     cmd = f"""
 addionsrand {SYSTEM_NAME} {args.cation} {ion_num}
 addionsrand {SYSTEM_NAME} {args.anion} 0
-                    """  # NOQA
+                    """
                     line = line.replace("ADDION", cmd)
             if "ADDPRECMD" in line:
                 if args.addprecmd is not None:

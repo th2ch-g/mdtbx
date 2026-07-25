@@ -285,7 +285,7 @@ def run(args):
     args.ntomp = _validate_candidates("ntomp", args.ntomp)
     args.ntmpi = _validate_candidates("ntmpi", args.ntmpi)
 
-    workdir = Path(args.workdir)
+    workdir = Path(args.workdir).expanduser().resolve()
     workdir.mkdir(parents=True, exist_ok=True)
 
     sampler = _make_sampler(args)

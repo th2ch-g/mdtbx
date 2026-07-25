@@ -8,7 +8,7 @@ from ..utils.common_args import (
     add_topology_arg,
     add_trajectory_arg,
 )
-from ..utils.gmx import gmx_index_flag
+from ..utils.gmx import gmx_index_args
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -51,8 +51,21 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        INDEX_OPTION = gmx_index_flag(args.index)
-        cmd = f"gmx trjconv -s {args.topology} -f {args.trajectory} -o {args.output} -b {args.time} -e {args.time} {INDEX_OPTION}"
+        cmd = [
+            "gmx",
+            "trjconv",
+            "-s",
+            args.topology,
+            "-f",
+            args.trajectory,
+            "-o",
+            args.output,
+            "-b",
+            str(args.time),
+            "-e",
+            str(args.time),
+            *gmx_index_args(args.index),
+        ]
         run_cmd(cmd, input=f"{args.selection}\n")
     else:
         # mdtraj

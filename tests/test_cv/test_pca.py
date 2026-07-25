@@ -5,9 +5,23 @@ MDtraj + scikit-learn を使った PCA をテストする（gmx=False パス）�
 """
 
 import types
+import shutil
 
 import numpy as np
 import pytest
+
+
+def _mock_gmx_outputs(
+    monkeypatch, eigenvector_source, eigenvalue_source, projection_source
+):
+    def fake_run(command, **_kwargs):
+        if command[1] == "covar":
+            shutil.copy2(eigenvalue_source, command[command.index("-o") + 1])
+            shutil.copy2(eigenvector_source, command[command.index("-v") + 1])
+        elif command[1] == "anaeig":
+            shutil.copy2(projection_source, command[command.index("-proj") + 1])
+
+    monkeypatch.setattr("subprocess.run", fake_run)
 
 
 class TestPcaRun:
@@ -168,10 +182,12 @@ class TestPcaRun:
         eigenval_path.write_text("1 4.0\n2 1.0\n")
         proj_path.write_text("0.1 0.2\n0.3 0.4\n")
 
-        def fake_run(*_args, **_kwargs):
-            return None
-
-        monkeypatch.setattr("subprocess.run", fake_run)
+        _mock_gmx_outputs(
+            monkeypatch,
+            eigenvec_path,
+            eigenval_path,
+            proj_path,
+        )
 
         args = types.SimpleNamespace(
             topology=trajectory_files["pdb"],
@@ -199,6 +215,7 @@ class TestPcaRun:
         assert data["atom_names"].shape == (traj.n_atoms,)
         assert data["explained_variance"].tolist() == pytest.approx([4.0, 1.0])
         assert data["explained_variance_ratio"].tolist() == pytest.approx([0.8, 0.2])
+        assert not list(tmp_path.glob("mdtbx-pca-*"))
 
     def test_output_npz_with_gmx_single_component(
         self, trajectory_files, tmp_path, monkeypatch
@@ -236,10 +253,12 @@ class TestPcaRun:
         eigenval_path.write_text("1 4.0\n")
         proj_path.write_text("0.1\n0.3\n")
 
-        def fake_run(*_args, **_kwargs):
-            return None
-
-        monkeypatch.setattr("subprocess.run", fake_run)
+        _mock_gmx_outputs(
+            monkeypatch,
+            eigenvec_path,
+            eigenval_path,
+            proj_path,
+        )
 
         args = types.SimpleNamespace(
             topology=trajectory_files["pdb"],
@@ -262,3 +281,22 @@ class TestPcaRun:
 
         assert data["explained_variance"].tolist() == pytest.approx([4.0])
         assert data["explained_variance_ratio"].tolist() == pytest.approx([1.0])
+
+    def test_rejects_non_positive_component_count(self, trajectory_files, tmp_path):
+        from src.cv.pca import run
+
+        args = self._make_args(trajectory_files, tmp_path / "pca.npy", n_components=0)
+
+        with pytest.raises(ValueError, match="n_components"):
+            run(args)
+
+
+def test_load_gmx_projections_removes_time_column(tmp_path):
+    from src.cv.pca import _load_gmx_projections
+
+    projections = tmp_path / "proj.xvg"
+    projections.write_text("0.0 1.0 2.0\n1.0 3.0 4.0\n")
+
+    values = _load_gmx_projections(projections, n_components=2)
+
+    assert values.tolist() == [[1.0, 2.0], [3.0, 4.0]]

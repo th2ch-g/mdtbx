@@ -93,3 +93,28 @@ class TestOptPerfRun:
         assert command.count("{ntmpi}") == 1
         assert "{log_path}" in command
         assert "{ntomp}" in command
+
+    def test_relative_workdir_uses_absolute_log_path(self, tmp_path, monkeypatch):
+        from src.trajectory.opt_perf import run
+
+        script = tmp_path / "fake_mdrun.sh"
+        script.write_text(
+            '#!/bin/sh\nlog_path="$1"\nprintf "Performance: 1.0 0.0\\n" > "$log_path"\n'
+        )
+        script.chmod(0o755)
+        monkeypatch.chdir(tmp_path)
+
+        args = self._make_args(script, tmp_path)
+        args.workdir = "trials"
+        args.output = "best.json"
+        args.history_output = "history.csv"
+        args.n_gpu = [1]
+        args.n_core = [1]
+        args.ntomp = [1]
+        args.ntmpi = [1]
+        run(args)
+
+        best = json.loads((tmp_path / "best.json").read_text())
+        expected_log = tmp_path / "trials" / "trial_0000" / "md.log"
+        assert best["log_path"] == str(expected_log)
+        assert expected_log.exists()

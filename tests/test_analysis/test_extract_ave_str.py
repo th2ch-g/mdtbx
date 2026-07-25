@@ -80,3 +80,30 @@ class TestExtractAveStrRun:
 
         assert np.all(ave.xyz >= traj.xyz.min(axis=0) - 1e-6)
         assert np.all(ave.xyz <= traj.xyz.max(axis=0) + 1e-6)
+
+    def test_gmx_supplies_both_selection_prompts(self, tmp_path, monkeypatch):
+        from src.analysis import extract_ave_str
+
+        captured = {}
+
+        def fake_run_cmd(command, **kwargs):
+            captured["command"] = command
+            captured["input"] = kwargs["input"]
+
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(extract_ave_str, "run_cmd", fake_run_cmd)
+        args = types.SimpleNamespace(
+            topology="topology.tpr",
+            trajectory="trajectory.xtc",
+            selection="Backbone",
+            output=str(tmp_path / "average.pdb"),
+            gmx=True,
+            index=None,
+        )
+
+        extract_ave_str.run(args)
+
+        assert captured["command"][:2] == ["gmx", "covar"]
+        assert captured["input"] == "Backbone\nBackbone\n"
+        assert not list(tmp_path.glob("tmp*.xvg"))
+        assert not list(tmp_path.glob("tmp*.trr"))

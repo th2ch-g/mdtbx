@@ -1,12 +1,15 @@
 from pymol import cmd
 
 
+def _select(name, expression, model):
+    if model is not None:
+        expression = f"({expression}) and ({model})"
+    cmd.select(name, expression)
+
+
 def select_protein(model=None):
     common = "polymer.protein or (resn ACE) or (resn NME)"
-    if model is None:
-        cmd.select("prot", common)
-    else:
-        cmd.select("prot", f"{common} & {model}")
+    _select("prot", common, model)
 
 
 cmd.extend("select_protein", select_protein)
@@ -14,10 +17,7 @@ cmd.extend("select_protein", select_protein)
 
 def select_water(model=None):
     common = "(resn TIP3P or resn HOH or resn OPC or resn TIP3 or resn WAT or resn TP3)"
-    if model is None:
-        cmd.select("water", common)
-    else:
-        cmd.select("water", f"{common} & {model}")
+    _select("water", common, model)
 
 
 cmd.extend("select_water", select_water)
@@ -25,10 +25,7 @@ cmd.extend("select_water", select_water)
 
 def select_ion(model=None):
     common = "(resn K\\+ or resn Na\\+ or resn Cl- or resn CL or resn Cl or resn K or resn Na or resn NA)"
-    if model is None:
-        cmd.select("ion", common)
-    else:
-        cmd.select("ion", f"{common} & {model}")
+    _select("ion", common, model)
 
 
 cmd.extend("select_ion", select_ion)
@@ -36,10 +33,7 @@ cmd.extend("select_ion", select_ion)
 
 def select_lipid(model=None):
     common = "(resn PC or resn PA or resn OL or resn CHL)"
-    if model is None:
-        cmd.select("lipid", common)
-    else:
-        cmd.select("lipid", f"{common} & {model}")
+    _select("lipid", common, model)
 
 
 cmd.extend("select_lipid", select_lipid)
@@ -47,10 +41,7 @@ cmd.extend("select_lipid", select_lipid)
 
 def select_nonh(model=None):
     common = "not name H*"
-    if model is None:
-        cmd.select("nonh", common)
-    else:
-        cmd.select("nonh", f"{common} & {model}")
+    _select("nonh", common, model)
 
 
 cmd.extend("select_nonh", select_nonh)
@@ -63,7 +54,7 @@ def select_template():
     select_water()
     select_ion()
     cmd.hide("everything", "ion or water or lipid")
-    cmd.select("None")
+    cmd.deselect()
 
 
 cmd.extend("select_template", select_template)

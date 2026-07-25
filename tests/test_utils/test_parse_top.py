@@ -77,3 +77,19 @@ class TestGromacsTopologyParser:
         """存在しないモジュール名は KeyError になること"""
         with pytest.raises(KeyError):
             parser.get_atoms_in("NONEXISTENT")
+
+    def test_section_headers_allow_inline_comments(self, tmp_path):
+        topology = tmp_path / "inline-comment.top"
+        topology.write_text(
+            "[ moleculetype ] ; molecule definition\n"
+            "Protein 3\n"
+            "[ atoms ] ; atom records\n"
+            "1 CT 1 ALA CA 1 0.0 12.0 ; alpha carbon\n"
+            "[ system ] ; system name\n"
+            "Example\n"
+        )
+
+        parsed = GromacsTopologyParser(str(topology))
+
+        assert parsed.get_all_moleculetypes() == ["Protein"]
+        assert parsed.get_atoms_in("Protein")[0]["name"] == "CA"

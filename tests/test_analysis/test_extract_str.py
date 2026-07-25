@@ -68,3 +68,30 @@ class TestExtractStrRun:
         import numpy as np
 
         assert not np.allclose(t1.xyz, t2.xyz)
+
+    def test_gmx_uses_argv_and_text_input(self, tmp_path, monkeypatch):
+        from src.analysis import extract_str
+
+        captured = {}
+
+        def fake_run_cmd(command, **kwargs):
+            captured["command"] = command
+            captured["input"] = kwargs["input"]
+
+        monkeypatch.setattr(extract_str, "run_cmd", fake_run_cmd)
+        args = types.SimpleNamespace(
+            topology="topology with spaces.tpr",
+            trajectory="trajectory with spaces.xtc",
+            selection="Protein",
+            time=10,
+            output=str(tmp_path / "frame.pdb"),
+            gmx=True,
+            index="index with spaces.ndx",
+        )
+
+        extract_str.run(args)
+
+        assert captured["command"][:2] == ["gmx", "trjconv"]
+        assert "topology with spaces.tpr" in captured["command"]
+        assert "index with spaces.ndx" in captured["command"]
+        assert captured["input"] == "Protein\n"

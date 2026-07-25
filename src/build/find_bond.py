@@ -95,7 +95,7 @@ def run(args):
         bonds_str_lines = []
         for bond in bonds:
             bonds_str_lines.append(
-                f"bond {SYSTEM_NAME}.{bond['resi1']}.SG {SYSTEM_NAME}.{bond['resi2']}.SG"  # NOQA
+                f"bond {SYSTEM_NAME}.{bond['resi1']}.SG {SYSTEM_NAME}.{bond['resi2']}.SG"
             )
         bonds_str = "\n".join(bonds_str_lines)
 

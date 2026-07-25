@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from ..logger import generate_logger
-from ..utils.gmx import gmx_index_flag
+from ..utils.gmx import gmx_index_args, remove_gmx_backups
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -116,69 +116,188 @@ def run(args):
     if args.ref_structure == DEFAULT_TOPOLOGY:
         args.ref_structure = str(cycle_dirs[0] / "replica001" / "rmmol_top.tpr")
 
-    INDEX_OPTION = gmx_index_flag(args.index)
-
     ext = Path(args.trjname).suffix
+    if not ext:
+        raise ValueError("--trjname must have a file extension")
+    if args.skip < 1:
+        raise ValueError("--skip must be positive")
 
     n_cycle = len(cycle_dirs)
     n_replica = len(_list_subdirs(cycle_dirs[0], "replica"))
+    trial_dir = Path(args.trial_dir)
+    output_topology = trial_dir / "rmmol_top.tpr"
+    output_structure = trial_dir / "rmmol_top.gro"
 
     # topology conversion
-    cmd = f"echo {args.keep_selection} | gmx convert-tpr -s {args.ref_structure} {INDEX_OPTION} -o {args.trial_dir}/rmmol_top.tpr"
-    run_cmd(cmd, log="rmmol_top.tpr generated")
+    cmd = [
+        "gmx",
+        "convert-tpr",
+        "-s",
+        args.ref_structure,
+        *gmx_index_args(args.index),
+        "-o",
+        str(output_topology),
+    ]
+    run_cmd(cmd, input=f"{args.keep_selection}\n", log="rmmol_top.tpr generated")
 
-    cmd = f"gmx editconf -f {args.trial_dir}/rmmol_top.tpr -o {args.trial_dir}/rmmol_top.gro"
+    cmd = [
+        "gmx",
+        "editconf",
+        "-f",
+        str(output_topology),
+        "-o",
+        str(output_structure),
+    ]
     run_cmd(cmd, log="rmmol_top.gro generated")
 
     c_cmd = "c\n" * n_replica
     for cycle_index, cycle_dir in enumerate(cycle_dirs):
+        combined_path = cycle_dir / f"tmp_all{ext}"
+        pbc_path = cycle_dir / f"tmp_all_pbc{ext}"
+        cycle_output = cycle_dir / f"prd_all{ext}"
         # trjcat
         if cycle_index != 0:
             trj_files = [
-                f"{cycle_dir}/replica{replica:03}/{args.trjname} "
+                str(cycle_dir / f"replica{replica:03}" / args.trjname)
                 for replica in range(1, n_replica + 1)
             ]
-            trj_files = " ".join(trj_files)
-            cmd = f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {cycle_dir}/tmp_all{ext} -settime"
-            run_cmd(cmd, log=f"{cycle_dir}/tmp_all{ext} generated")
+            cmd = [
+                "gmx",
+                "trjcat",
+                "-f",
+                *trj_files,
+                "-o",
+                str(combined_path),
+                "-settime",
+            ]
+            run_cmd(cmd, input=c_cmd, log=f"{combined_path} generated")
         else:
-            trj_file = f"{cycle_dir}/replica001/{args.trjname}"
-            cmd = f"cp {trj_file} {cycle_dir}/tmp_all{ext}"
-            run_cmd(cmd, log=f"{cycle_dir}/tmp_all{ext} copied")
+            trj_file = cycle_dir / "replica001" / args.trjname
+            cmd = ["cp", str(trj_file), str(combined_path)]
+            run_cmd(cmd, log=f"{combined_path} copied")
 
         # trjconv
-        cmd = f"echo {args.centering_selection} System | gmx trjconv -f {cycle_dir}/tmp_all{ext} -s {args.ref_structure} {INDEX_OPTION} -o {cycle_dir}/tmp_all_pbc{ext} -center -pbc {args.pbc} -skip {args.skip}"
-        run_cmd(cmd, log=f"{cycle_dir}/prd_all{ext} generated")
+        cmd = [
+            "gmx",
+            "trjconv",
+            "-f",
+            str(combined_path),
+            "-s",
+            args.ref_structure,
+            *gmx_index_args(args.index),
+            "-o",
+            str(pbc_path),
+            "-center",
+            "-pbc",
+            args.pbc,
+            "-skip",
+            str(args.skip),
+        ]
+        run_cmd(
+            cmd,
+            input=f"{args.centering_selection}\nSystem\n",
+            log=f"{pbc_path} generated",
+        )
 
-        cmd = f"echo {args.fit_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {cycle_dir}/tmp_all_pbc{ext} -s {args.ref_structure} {INDEX_OPTION} -o {cycle_dir}/prd_all{ext} -center -fit rot+trans"
-        run_cmd(cmd, log=f"{cycle_dir}/prd_all{ext} generated")
+        cmd = [
+            "gmx",
+            "trjconv",
+            "-f",
+            str(pbc_path),
+            "-s",
+            args.ref_structure,
+            *gmx_index_args(args.index),
+            "-o",
+            str(cycle_output),
+            "-center",
+            "-fit",
+            "rot+trans",
+        ]
+        run_cmd(
+            cmd,
+            input=(
+                f"{args.fit_selection}\n"
+                f"{args.centering_selection}\n"
+                f"{args.keep_selection}\n"
+            ),
+            log=f"{cycle_output} generated",
+        )
 
         # rm
-        cmd = f"rm -f {cycle_dir}/tmp_all{ext} {cycle_dir}/\\#*"
-        run_cmd(cmd, log=f"{cycle_dir}/tmp_all{ext} and backup files removed")
+        combined_path.unlink(missing_ok=True)
+        remove_gmx_backups(cycle_dir)
+        LOGGER.info(f"{combined_path} and GROMACS backup files removed")
 
     c_cmd = "c\n" * n_cycle
+    combined_path = trial_dir / f"tmp_all{ext}"
+    pbc_path = trial_dir / f"tmp_all_pbc{ext}"
+    output_path = trial_dir / f"prd_all{ext}"
 
     # trjcat
-    trj_files = [f"{cycle_dir}/tmp_all_pbc{ext} " for cycle_dir in cycle_dirs]
-    trj_files = " ".join(trj_files)
-    cmd = f"echo '{c_cmd}' | gmx trjcat -f {trj_files} -o {args.trial_dir}/tmp_all{ext} -settime"
-    run_cmd(cmd, log=f"{args.trial_dir}/tmp_all{ext} generated")
+    trj_files = [str(cycle_dir / f"tmp_all_pbc{ext}") for cycle_dir in cycle_dirs]
+    cmd = [
+        "gmx",
+        "trjcat",
+        "-f",
+        *trj_files,
+        "-o",
+        str(combined_path),
+        "-settime",
+    ]
+    run_cmd(cmd, input=c_cmd, log=f"{combined_path} generated")
 
     # trjconv
-    cmd = f"echo {args.centering_selection} System | gmx trjconv -f {args.trial_dir}/tmp_all{ext} -s {args.ref_structure} {INDEX_OPTION} -o {args.trial_dir}/tmp_all_pbc{ext} -center -pbc {args.pbc}"
-    run_cmd(cmd, log=f"{args.trial_dir}/tmp_all_pbc{ext} generated")
+    cmd = [
+        "gmx",
+        "trjconv",
+        "-f",
+        str(combined_path),
+        "-s",
+        args.ref_structure,
+        *gmx_index_args(args.index),
+        "-o",
+        str(pbc_path),
+        "-center",
+        "-pbc",
+        args.pbc,
+    ]
+    run_cmd(
+        cmd,
+        input=f"{args.centering_selection}\nSystem\n",
+        log=f"{pbc_path} generated",
+    )
 
-    cmd = f"echo {args.fit_selection} {args.centering_selection} {args.keep_selection} | gmx trjconv -f {args.trial_dir}/tmp_all_pbc{ext} -s {args.ref_structure} {INDEX_OPTION} -o {args.trial_dir}/prd_all{ext} -center -fit rot+trans"
-    run_cmd(cmd, log=f"{args.trial_dir}/prd_all{ext} generated")
+    cmd = [
+        "gmx",
+        "trjconv",
+        "-f",
+        str(pbc_path),
+        "-s",
+        args.ref_structure,
+        *gmx_index_args(args.index),
+        "-o",
+        str(output_path),
+        "-center",
+        "-fit",
+        "rot+trans",
+    ]
+    run_cmd(
+        cmd,
+        input=(
+            f"{args.fit_selection}\n{args.centering_selection}\n{args.keep_selection}\n"
+        ),
+        log=f"{output_path} generated",
+    )
 
     # rm
-    cmd = f"rm -f {args.trial_dir}/cycle*/tmp_all_pbc{ext} {args.trial_dir}/tmp_all{ext} {args.trial_dir}/tmp_all_pbc{ext} {args.trial_dir}/\\#*"
-    run_cmd(cmd, log=f"{args.trial_dir}/tmp_all{ext} and backup files removed")
+    for cycle_dir in cycle_dirs:
+        (cycle_dir / f"tmp_all_pbc{ext}").unlink(missing_ok=True)
+    combined_path.unlink(missing_ok=True)
+    pbc_path.unlink(missing_ok=True)
+    remove_gmx_backups(trial_dir)
+    LOGGER.info(f"{combined_path} and GROMACS backup files removed")
 
     if not args.keep_cycle_trj:
-        cycle_outputs = " ".join(
-            f"{cycle_dir}/prd_all{ext}" for cycle_dir in cycle_dirs
-        )
-        cmd = f"rm -f {cycle_outputs}"
-        run_cmd(cmd, log="Per-cycle trajectories removed")
+        for cycle_dir in cycle_dirs:
+            (cycle_dir / f"prd_all{ext}").unlink(missing_ok=True)
+        LOGGER.info("Per-cycle trajectories removed")

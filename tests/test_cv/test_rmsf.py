@@ -5,6 +5,7 @@ MDtraj を使った RMSF 計算をテストする（gmx=False パス）。
 """
 
 import types
+from pathlib import Path
 
 import numpy as np
 
@@ -94,3 +95,27 @@ class TestRmsfRun:
         )
         rmsf = np.load(str(out))
         assert np.allclose(rmsf, 0.0, atol=1e-6)
+
+    def test_gmx_single_value_output(self, tmp_path, monkeypatch):
+        from src.cv import rmsf
+
+        monkeypatch.chdir(tmp_path)
+
+        def fake_run_cmd(command, **_kwargs):
+            output = command[command.index("-o") + 1]
+            Path(output).write_text("1 0.25\n")
+
+        monkeypatch.setattr(rmsf, "run_cmd", fake_run_cmd)
+        out = tmp_path / "rmsf_gmx.npy"
+        args = types.SimpleNamespace(
+            topology="topol.tpr",
+            trajectory="traj.xtc",
+            selection="Protein",
+            output=str(out),
+            gmx=True,
+            resolution="atom",
+        )
+
+        rmsf.run(args)
+
+        assert np.load(out).tolist() == [0.25]

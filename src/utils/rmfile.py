@@ -2,7 +2,6 @@ from pathlib import Path
 import argparse
 
 from ..logger import generate_logger
-from .proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -20,7 +19,6 @@ def add_subcmd(subparsers):
 
 def run(args):
     for suffix in ["#*#", "*.cpt", "mdout.mdp"]:
-        # for p in Path(args.path).glob(suffix):
         for p in Path(args.path).rglob(suffix):
-            cmd = f"rm -f '{p}'"
-            run_cmd(cmd, log=f"{p} removed")
+            p.unlink(missing_ok=True)
+            LOGGER.info(f"{p} removed")

@@ -8,7 +8,7 @@ from ..utils.common_args import (
     add_topology_arg,
     add_trajectory_arg,
 )
-from ..utils.gmx import gmx_index_flag
+from ..utils.gmx import gmx_index_args, gmx_tempfile
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -61,12 +61,21 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        INDEX_FILE = gmx_index_flag(args.index)
-        cmd = f"gmx densmap -f {args.trajectory} -s {args.topology} {INDEX_FILE} -od tmp_densmap.dat"
-        run_cmd(cmd, input=f"{args.selection}\n")
-        # densmap.dat layout: a[0, 1:] = X axis, a[1:, 0] = Y axis, a[1:, 1:] = density
-        a = np.loadtxt("tmp_densmap.dat")
-        run_cmd("rm -f tmp_densmap.dat", log="Removed tmp_densmap.dat")
+        with gmx_tempfile(".dat") as density_path:
+            cmd = [
+                "gmx",
+                "densmap",
+                "-f",
+                args.trajectory,
+                "-s",
+                args.topology,
+                *gmx_index_args(args.index),
+                "-od",
+                density_path,
+            ]
+            run_cmd(cmd, input=f"{args.selection}\n")
+            # Layout: first row is X, first column is Y, and the body is density.
+            a = np.loadtxt(density_path)
         # Save in the same [counts, edges0, edges1] object-array form as the MDtraj path
         densmap = np.empty(3, dtype=object)
         densmap[0] = a[1:, 1:]

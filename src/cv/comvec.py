@@ -1,8 +1,7 @@
 import argparse
-import mdtraj as md
 import numpy as np
 
-from pathlib import Path
+import mdtraj as md
 
 from ..logger import generate_logger
 from ..utils.common_args import (
@@ -10,7 +9,7 @@ from ..utils.common_args import (
     add_topology_arg,
     add_trajectory_arg,
 )
-from ..utils.gmx import gmx_index_flag
+from ..utils.gmx import gmx_index_args, gmx_tempfile
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -56,18 +55,30 @@ def add_subcmd(subparsers):
 
 def run(args):
     if args.gmx:
-        INDEX_FILE = gmx_index_flag(args.index)
-        cmd = f"gmx distance -f {args.trajectory} -s {args.topology} {INDEX_FILE} -oxyz tmp_interCOM_xyz.xvg -xvg none -pbc no -select 'com of group {args.selection1} plus com of group {args.selection2}'"
-        run_cmd(cmd, log="Saved to tmp_interCOM_xyz.xvg")
-        try:
-            inter_com_xyz = np.loadtxt("tmp_interCOM_xyz.xvg")
+        with gmx_tempfile(".xvg") as displacement_path:
+            cmd = [
+                "gmx",
+                "distance",
+                "-f",
+                args.trajectory,
+                "-s",
+                args.topology,
+                *gmx_index_args(args.index),
+                "-oxyz",
+                displacement_path,
+                "-xvg",
+                "none",
+                "-pbc",
+                "no",
+                "-select",
+                f"com of group {args.selection1} plus com of group {args.selection2}",
+            ]
+            run_cmd(cmd, log=f"Saved to {displacement_path}")
+            inter_com_xyz = np.loadtxt(displacement_path, ndmin=2)
             # gmx -oxyz yields pos2 - pos1 (com2 - com1); negate to match the
             # mdtraj branch which returns com1 - com2, so output direction is
             # backend-independent.
             comvec = -inter_com_xyz[:, [1, 2, 3]]
-        finally:
-            Path("tmp_interCOM_xyz.xvg").unlink(missing_ok=True)
-            LOGGER.info("Removed tmp_interCOM_xyz.xvg")
     else:
         trj = md.load(args.trajectory, top=args.topology)
         com1 = md.compute_center_of_mass(
