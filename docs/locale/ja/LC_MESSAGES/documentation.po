@@ -1,0 +1,78 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../documentation.rst:2
+msgid "Documentation and translation"
+msgstr "ドキュメントと翻訳"
+
+#: ../../documentation.rst:5
+msgid "Source layout"
+msgstr "ソース構成"
+
+#: ../../documentation.rst:7
+msgid ""
+"English reStructuredText files under ``docs/`` are the canonical source. Japanese "
+"translations are stored as gettext catalogs under ``docs/locale/ja/LC_MESSAGES/``. "
+"Generated ``.pot`` and ``.mo`` files are not committed."
+msgstr ""
+"``docs/`` 以下の英語reStructuredTextを正本とします。日本語訳はgettextカタログとして "
+"``docs/locale/ja/LC_MESSAGES/`` に保存します。生成される ``.pot`` と ``.mo`` はコミットしません。"
+
+#: ../../documentation.rst:13
+msgid "Build locally"
+msgstr "ローカルビルド"
+
+#: ../../documentation.rst:15
+msgid "Install and build the documentation environment:"
+msgstr "ドキュメント環境をインストールしてビルドします。"
+
+#: ../../documentation.rst:22
+msgid ""
+"The English site is written to ``docs/_build/html/`` and the Japanese site to "
+"``docs/_build/html/ja/``."
+msgstr "英語サイトは ``docs/_build/html/`` 、日本語サイトは ``docs/_build/html/ja/`` に出力されます。"
+
+#: ../../documentation.rst:26
+msgid "Update Japanese catalogs"
+msgstr "日本語カタログの更新"
+
+#: ../../documentation.rst:28
+msgid "After editing English source:"
+msgstr "英語ソースを編集した後に実行します。"
+
+#: ../../documentation.rst:34
+msgid ""
+"Translate new or changed ``msgid`` entries in the corresponding ``.po`` files. Do not "
+"translate commands, file names, option names, paths, or code samples. Preserve "
+"reStructuredText roles and cross-reference targets exactly."
+msgstr ""
+"対応する ``.po`` ファイルで、新規または変更された ``msgid`` "
+"を翻訳します。コマンド、ファイル名、オプション名、パス、コード例は翻訳しません。reStructuredTextのロールと相互参照先はそのまま維持してください。"
+
+#: ../../documentation.rst:39
+msgid "Validate changes"
+msgstr "変更の検証"
+
+#: ../../documentation.rst:47
+msgid ""
+"Both HTML builders treat warnings as errors. Check the English and Japanese "
+"navigation, search, language links, command options, and code blocks before merging."
+msgstr "両方のHTMLビルドで警告をエラーとして扱います。マージ前に英日両版のナビゲーション、検索、言語リンク、コマンドオプション、コードブロックを確認してください。"

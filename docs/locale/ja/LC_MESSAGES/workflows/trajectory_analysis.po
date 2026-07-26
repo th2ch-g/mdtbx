@@ -1,0 +1,123 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../workflows/trajectory_analysis.rst:2
+msgid "Trajectory and collective-variable analysis"
+msgstr "トラジェクトリと集団変数の解析"
+
+#: ../../workflows/trajectory_analysis.rst:5
+msgid "Trajectory preparation"
+msgstr "トラジェクトリの準備"
+
+#: ../../workflows/trajectory_analysis.rst:7
+msgid ""
+"Fit or concatenate trajectories before analysis when periodic-boundary artifacts or "
+"separate production segments are present."
+msgstr "周期境界の影響や複数のproduction segmentがある場合は、解析前にトラジェクトリをfitまたは結合します。"
+
+#: ../../workflows/trajectory_analysis.rst:18
+msgid ""
+"``trjcat`` can retain the concatenated trajectory before the final periodic-boundary "
+"and fitting operations. ``pacs_trjcat`` performs the related operation for PaCS-MD "
+"directory layouts. ``fit`` handles fitting as a separate step."
+msgstr ""
+"``trjcat`` は最終的な周期境界処理とfitの前に、結合済みトラジェクトリを保持できます。 ``pacs_trjcat`` はPaCS-"
+"MDのディレクトリ構成に対応した処理を行います。 ``fit`` ではfitだけを個別に実行できます。"
+
+#: ../../workflows/trajectory_analysis.rst:24
+msgid "Collective variables"
+msgstr "集団変数"
+
+#: ../../workflows/trajectory_analysis.rst:26
+msgid ""
+"Commands in the CV category write NumPy arrays that can be inspected with ``show_npy``"
+" or loaded by Python analysis tools:"
+msgstr "CVカテゴリのコマンドはNumPy配列を出力します。 ``show_npy`` で確認するか、Python解析ツールで読み込めます。"
+
+#: ../../workflows/trajectory_analysis.rst:29
+msgid "``rmsd`` and ``rmsf`` calculate structural deviations and fluctuations."
+msgstr "``rmsd`` と ``rmsf`` は構造偏差と揺らぎを計算します。"
+
+#: ../../workflows/trajectory_analysis.rst:30
+msgid "``comdist`` and ``comvec`` calculate center-of-mass relationships."
+msgstr "``comdist`` と ``comvec`` は重心間の関係を計算します。"
+
+#: ../../workflows/trajectory_analysis.rst:31
+msgid "``mindist`` calculates the minimum distance between selections."
+msgstr "``mindist`` は選択した原子群間の最小距離を計算します。"
+
+#: ../../workflows/trajectory_analysis.rst:32
+msgid "``contactmap`` and ``distmap`` calculate residue-level matrices."
+msgstr "``contactmap`` と ``distmap`` は残基単位の行列を計算します。"
+
+#: ../../workflows/trajectory_analysis.rst:33
+msgid "``densmap`` calculates a two-dimensional density map."
+msgstr "``densmap`` は二次元密度マップを計算します。"
+
+#: ../../workflows/trajectory_analysis.rst:34
+msgid "``xyz`` extracts coordinates."
+msgstr "``xyz`` は座標を抽出します。"
+
+#: ../../workflows/trajectory_analysis.rst:35
+msgid "``pca`` performs principal-component analysis."
+msgstr "``pca`` は主成分分析を実行します。"
+
+#: ../../workflows/trajectory_analysis.rst:37
+msgid "Example:"
+msgstr "例："
+
+#: ../../workflows/trajectory_analysis.rst:47
+msgid ""
+"Selection syntax and defaults differ between commands. Check the command reference "
+"before assuming atom, residue, or mass-weighting behavior."
+msgstr "選択式の構文とデフォルトはコマンドごとに異なります。原子、残基、質量重み付けの挙動はコマンドリファレンスで確認してください。"
+
+#: ../../workflows/trajectory_analysis.rst:51
+msgid "Extract structures"
+msgstr "構造の抽出"
+
+#: ../../workflows/trajectory_analysis.rst:53
+msgid ""
+"Use ``extract_str`` for a specific time and ``extract_ave_str`` for an average "
+"structure. ``show_mdtraj`` prints MDTraj's topology table and helps verify atom "
+"indices and selection fields before analysis."
+msgstr ""
+"特定時刻の構造には ``extract_str`` 、平均構造には ``extract_ave_str`` を使用します。 ``show_mdtraj`` "
+"はMDTrajのトポロジー表を表示し、解析前の原子番号と選択フィールドの確認に利用できます。"
+
+#: ../../workflows/trajectory_analysis.rst:58
+msgid "Performance"
+msgstr "性能"
+
+#: ../../workflows/trajectory_analysis.rst:60
+msgid ""
+"``print_perf`` reads GROMACS log files and prints simulation performance. ``opt_perf``"
+" uses Optuna to compare ``mdrun`` configurations. Performance results depend on the "
+"GROMACS build, hardware, MPI layout, and scheduler allocation, so repeat optimization "
+"on the target machine."
+msgstr ""
+"``print_perf`` はGROMACSログからシミュレーション性能を表示します。 ``opt_perf`` はOptunaで ``mdrun`` "
+"構成を比較します。結果はGROMACSビルド、ハードウェア、MPI構成、スケジューラ割り当てに依存するため、対象マシンごとに最適化してください。"
+
+#: ../../workflows/trajectory_analysis.rst:65
+msgid ""
+"Runnable command examples are available under ``example/cv/`` and ``example/pacs/``."
+msgstr "実行可能なコマンド例は ``example/cv/`` と ``example/pacs/`` にあります。"

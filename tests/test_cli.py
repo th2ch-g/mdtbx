@@ -10,9 +10,10 @@ import pytest
 
 def test_cli_importable():
     """cli モジュールが import エラーなくロードできること"""
-    from src.cli import cli
+    from src.cli import cli, create_parser
 
     assert callable(cli)
+    assert callable(create_parser)
 
 
 def test_all_subcommands_registered():

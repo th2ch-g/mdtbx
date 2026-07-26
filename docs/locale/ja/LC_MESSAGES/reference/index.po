@@ -1,0 +1,33 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../reference/index.rst:2
+msgid "Command reference"
+msgstr "コマンドリファレンス"
+
+#: ../../reference/index.rst:4
+msgid ""
+"This reference is generated from the same ``argparse`` parser used by ``mdtbx``. It "
+"therefore reflects the command names, option names, defaults, choices, and help text "
+"in the installed source."
+msgstr ""
+"このリファレンスは ``mdtbx`` と同じ ``argparse`` "
+"parserから生成されます。そのため、インストール済みソースのコマンド名、オプション名、デフォルト、選択肢、help textを反映します。"

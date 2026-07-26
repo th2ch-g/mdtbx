@@ -1,0 +1,160 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../reference/analysis.rst:2
+msgid "Analysis commands"
+msgstr "解析コマンド"
+
+#: ../../reference/analysis.rst:5
+msgid "analyze_abfe"
+msgstr "analyze_abfe"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx analyze_abfe"
+msgstr "mdtbx analyze_abfe"
+
+#: ../../../<autoprogram>:1
+msgid "options"
+msgstr "オプション"
+
+#: ../../../<autoprogram>:1
+msgid "show this help message and exit"
+msgstr "このヘルプを表示して終了する"
+
+#: ../../../<autoprogram>:1
+msgid "ABFE setup directory"
+msgstr "ABFE setupディレクトリ"
+
+#: ../../../<autoprogram>:1
+msgid "Begin time [ps]"
+msgstr "開始時刻［ps］"
+
+#: ../../../<autoprogram>:1
+msgid "End time [ps]"
+msgstr "終了時刻［ps］"
+
+#: ../../../<autoprogram>:1
+msgid "Override temperature [K]"
+msgstr "温度を上書きする［K］"
+
+#: ../../../<autoprogram>:1
+msgid "Ligand rotational symmetry number"
+msgstr "リガンドの回転対称数"
+
+#: ../../../<autoprogram>:1
+msgid "Additional signed ABFE correction; repeat as needed"
+msgstr "符号付きABFE補正。必要に応じて複数指定可能"
+
+#: ../../../<autoprogram>:1
+msgid "Output JSON file"
+msgstr "出力JSONファイル"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS executable; defaults to the setup executable"
+msgstr "GROMACS実行ファイル。デフォルトでsetup時の実行ファイルを使用する"
+
+#: ../../reference/analysis.rst:13
+msgid "analyze_fep"
+msgstr "analyze_fep"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx analyze_fep"
+msgstr "mdtbx analyze_fep"
+
+#: ../../../<autoprogram>:1
+msgid "FEP setup directory or manifest"
+msgstr "FEP setupディレクトリまたはmanifest"
+
+#: ../../../<autoprogram>:1
+msgid "Beginning time [ps]"
+msgstr "開始時刻［ps］"
+
+#: ../../../<autoprogram>:1
+msgid "Ending time [ps]"
+msgstr "終了時刻［ps］"
+
+#: ../../../<autoprogram>:1
+msgid "Output prefix"
+msgstr "出力prefix"
+
+#: ../../reference/analysis.rst:21
+msgid "analyze_fep_rest"
+msgstr "analyze_fep_rest"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx analyze_fep_rest"
+msgstr "mdtbx analyze_fep_rest"
+
+#: ../../../<autoprogram>:1
+msgid "FEP/REST setup directory or manifest"
+msgstr "FEP/REST setupディレクトリまたはmanifest"
+
+#: ../../../<autoprogram>:1
+msgid "Use every Nth energy sample"
+msgstr "energy sampleをN個ごとに使用する"
+
+#: ../../../<autoprogram>:1
+msgid "Regenerate cached cross-Hamiltonian energies"
+msgstr "cache済みcross-Hamiltonian energyを再生成する"
+
+#: ../../reference/analysis.rst:29
+msgid "extract_ave_str"
+msgstr "extract_ave_str"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx extract_ave_str"
+msgstr "mdtbx extract_ave_str"
+
+#: ../../../<autoprogram>:1
+msgid "Topology file (.gro, .pdb)"
+msgstr "トポロジーファイル（.gro、.pdb）"
+
+#: ../../../<autoprogram>:1
+msgid "Trajectory file (.xtc, .trr)"
+msgstr "トラジェクトリファイル（.xtc、.trr）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection (MDtraj atom selection language)"
+msgstr "選択式（MDTraj原子選択言語）"
+
+#: ../../../<autoprogram>:1
+msgid "Output struxture file"
+msgstr "出力構造ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Use gmx"
+msgstr "gmxを使用する"
+
+#: ../../../<autoprogram>:1
+msgid "Index file (.ndx)"
+msgstr "indexファイル（.ndx）"
+
+#: ../../reference/analysis.rst:37
+msgid "extract_str"
+msgstr "extract_str"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx extract_str"
+msgstr "mdtbx extract_str"
+
+#: ../../../<autoprogram>:1
+msgid "Time to extract structure"
+msgstr "構造を抽出する時刻"

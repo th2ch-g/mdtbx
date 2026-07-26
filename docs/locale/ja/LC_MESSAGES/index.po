@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../index.rst:2
+msgid "mdtbx"
+msgstr "mdtbx"
+
+#: ../../index.rst:4
+msgid ""
+"``mdtbx`` is a command-line toolbox for molecular dynamics workflows. It combines "
+"small, focused commands for system preparation, simulation support, trajectory "
+"processing, collective-variable analysis, and free-energy calculations."
+msgstr ""
+"``mdtbx`` "
+"は分子動力学ワークフロー向けのコマンドラインツールボックスです。系の準備、シミュレーション支援、トラジェクトリ処理、集団変数解析、自由エネルギー計算のための小さく用途を限定したコマンドを提供します。"
+
+#: ../../index.rst:9
+msgid ""
+"The project works with established molecular-simulation tools rather than replacing "
+"them. Common integrations include GROMACS, AMBER Tools, PyMOL, Open Babel, Gaussian, "
+"and PLUMED."
+msgstr ""
+"本プロジェクトは既存の分子シミュレーションツールを置き換えず、それらと連携します。主な連携先はGROMACS、AMBER Tools、PyMOL、Open "
+"Babel、Gaussian、PLUMEDです。"
+
+#: ../../index.rst:14
+msgid "Start here"
+msgstr "はじめに"
+
+#: ../../index.rst:16
+msgid ":doc:`getting_started` explains installation and the command-line model."
+msgstr ":doc:`getting_started` ではインストールとコマンドラインの基本を説明します。"
+
+#: ../../index.rst:17
+msgid ":doc:`workflows/system_building` covers common system-preparation steps."
+msgstr ":doc:`workflows/system_building` では一般的な系の準備手順を説明します。"
+
+#: ../../index.rst:18
+msgid ":doc:`workflows/trajectory_analysis` shows trajectory and CV pipelines."
+msgstr ":doc:`workflows/trajectory_analysis` ではトラジェクトリとCVのパイプラインを示します。"
+
+#: ../../index.rst:19
+msgid ":doc:`workflows/free_energy` covers FEP, FEP/REST, and ABFE."
+msgstr ":doc:`workflows/free_energy` ではFEP、FEP/REST、ABFEを説明します。"
+
+#: ../../index.rst:20
+msgid ":doc:`reference/index` lists every available command and option."
+msgstr ":doc:`reference/index` には利用可能な全コマンドとオプションを掲載します。"
+
+#: ../../index.rst:23
+msgid "Design principle"
+msgstr "設計原則"
+
+#: ../../index.rst:25
+msgid ""
+"Each subcommand performs one focused operation. Compose commands into a pipeline "
+"instead of expecting one command to perform an entire study:"
+msgstr "各サブコマンドは1つの処理に特化しています。1つのコマンドで研究全体を実行せず、複数のコマンドをパイプラインとして組み合わせます。"

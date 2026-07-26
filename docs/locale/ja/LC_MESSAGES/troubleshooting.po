@@ -1,0 +1,104 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../troubleshooting.rst:2
+msgid "Troubleshooting"
+msgstr "トラブルシューティング"
+
+#: ../../troubleshooting.rst:5
+msgid "Command not found"
+msgstr "コマンドが見つからない"
+
+#: ../../troubleshooting.rst:7
+msgid "Run the CLI through the project environment:"
+msgstr "プロジェクト環境からCLIを実行します。"
+
+#: ../../troubleshooting.rst:13
+msgid ""
+"If installation is incomplete, run ``pixi install`` from the repository root. Do not "
+"use an unrelated Python environment."
+msgstr "インストールが不完全な場合はリポジトリルートで ``pixi install`` を実行します。無関係なPython環境は使用しないでください。"
+
+#: ../../troubleshooting.rst:17
+msgid "PyMOL import errors"
+msgstr "PyMOLのインポートエラー"
+
+#: ../../troubleshooting.rst:19
+msgid ""
+"Run ``pixi run pymolrc`` once after installation. Confirm that the generated "
+"``~/.pymolrc`` refers to the current repository. Regenerate it after moving the "
+"repository."
+msgstr ""
+"インストール後に ``pixi run pymolrc`` を一度実行します。生成された ``~/.pymolrc`` "
+"が現在のリポジトリを参照していることを確認し、リポジトリを移動した場合は再生成してください。"
+
+#: ../../troubleshooting.rst:24
+msgid "External executable not found"
+msgstr "外部実行ファイルが見つからない"
+
+#: ../../troubleshooting.rst:26
+msgid ""
+"Some workflows intentionally depend on separately installed software. Confirm the "
+"expected executable with ``command -v`` and read the relevant workflow page. FEP/REST "
+"requires the PLUMED-patched ``gmx_mpi`` rather than the default ``gmx`` binary."
+msgstr ""
+"一部のワークフローは別途インストールしたソフトウェアに依存します。 ``command -v`` "
+"で実行ファイルを確認し、該当するワークフローページを参照してください。FEP/RESTではデフォルトの ``gmx`` ではなくPLUMEDパッチ済み "
+"``gmx_mpi`` が必要です。"
+
+#: ../../troubleshooting.rst:32
+msgid "Unexpected atom selections"
+msgstr "意図しない原子選択"
+
+#: ../../troubleshooting.rst:34
+msgid ""
+"Use ``show_mdtraj`` to inspect topology fields and atom indices. Verify whether the "
+"command expects zero-based MDTraj selections, one-based GROMACS indices, or another "
+"explicitly documented format."
+msgstr ""
+"``show_mdtraj`` でトポロジーフィールドと原子番号を確認します。コマンドが0-basedのMDTraj selection、1-basedのGROMACS "
+"index、または別の明記された形式のどれを必要とするか確認してください。"
+
+#: ../../troubleshooting.rst:39
+msgid "Generated files overwrite prior work"
+msgstr "生成ファイルが既存結果を上書きする"
+
+#: ../../troubleshooting.rst:41
+msgid ""
+"Run each workflow in a dedicated output directory. Inspect ``--output`` and ``--path``"
+" before execution. Preserve manifests and inputs in versioned or archived calculation "
+"directories."
+msgstr ""
+"各ワークフローは専用の出力ディレクトリで実行します。実行前に ``--output`` と ``--path`` "
+"を確認し、manifestと入力をversion管理またはarchiveされた計算ディレクトリに保存してください。"
+
+#: ../../troubleshooting.rst:46
+msgid "Get more diagnostic output"
+msgstr "診断情報を収集する"
+
+#: ../../troubleshooting.rst:48
+msgid ""
+"Re-run the command with the same inputs and capture both standard output and standard "
+"error. Record the command, ``mdtbx --version``, platform, and external tool versions "
+"when reporting a problem."
+msgstr ""
+"同じ入力でコマンドを再実行し、標準出力と標準エラーの両方を保存します。問題を報告する際はコマンド、 ``mdtbx --version`` "
+"、platform、外部ツールのversionを記録してください。"

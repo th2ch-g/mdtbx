@@ -1,0 +1,139 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../workflows/system_building.rst:2
+msgid "System preparation"
+msgstr "系の準備"
+
+#: ../../workflows/system_building.rst:4
+msgid ""
+"``mdtbx`` provides focused commands for preparing proteins, ligands, solvent, and "
+"GROMACS systems. Inspect each intermediate file before continuing to the next stage."
+msgstr ""
+"``mdtbx`` はタンパク質、リガンド、溶媒、GROMACS系を準備するための特化したコマンドを提供します。次の工程へ進む前に各中間ファイルを確認してください。"
+
+#: ../../workflows/system_building.rst:9
+msgid "Protein and ligand preparation"
+msgstr "タンパク質とリガンドの準備"
+
+#: ../../workflows/system_building.rst:11
+msgid ""
+"Typical protein preparation uses ``addh`` followed by optional terminal-cap or "
+"mutation commands:"
+msgstr "一般的なタンパク質準備では ``addh`` を実行し、必要に応じて末端キャップまたは変異コマンドを続けます。"
+
+#: ../../workflows/system_building.rst:20
+msgid ""
+"Use ``mutate`` for a single PyMOL mutagenesis operation and ``fill_chainname`` when a "
+"PDB file has blank chain identifiers."
+msgstr "PyMOLによる1残基の変異には ``mutate`` を、PDBファイルのchain IDが空の場合は ``fill_chainname`` を使用します。"
+
+#: ../../workflows/system_building.rst:23
+msgid ""
+"For a small molecule, ``gen_am1bcc`` creates GAFF2-compatible AM1-BCC parameters. "
+"``gen_resp`` performs a Gaussian-based RESP workflow. ``gen_modres_am1bcc`` and "
+"``gen_modres_resp`` target modified residues; the AM1-BCC modified-residue workflow is"
+" currently work in progress."
+msgstr ""
+"低分子には ``gen_am1bcc`` でGAFF2互換のAM1-BCCパラメータを作成できます。 ``gen_resp`` "
+"はGaussianを用いたRESPワークフローを実行します。 ``gen_modres_am1bcc`` と ``gen_modres_resp`` "
+"は修飾残基向けで、AM1-BCCによる修飾残基ワークフローは開発中です。"
+
+#: ../../workflows/system_building.rst:29
+msgid "Build a solvated system"
+msgstr "溶液系の構築"
+
+#: ../../workflows/system_building.rst:31
+msgid ""
+"``build_solution`` prepares a solvated all-atom system. Input structures must already "
+"have the intended protonation, residue names, chain identifiers, and ligand "
+"parameters:"
+msgstr ""
+"``build_solution`` は溶媒和した全原子系を構築します。入力構造では、プロトン化状態、残基名、chain ID、リガンドパラメータを事前に確定してください。"
+
+#: ../../workflows/system_building.rst:44
+msgid ""
+"Set ``--water-seed`` when reproducible Packmol water placement is required. Use "
+"``build_vacuum`` when no solvent, ions, or periodic box should be added."
+msgstr ""
+"Packmolによる水配置を再現する場合は ``--water-seed`` を設定します。溶媒、イオン、周期境界boxを追加しない場合は ``build_vacuum``"
+" を使用します。"
+
+#: ../../workflows/system_building.rst:48
+msgid "Place structures"
+msgstr "構造の配置"
+
+#: ../../workflows/system_building.rst:50
+msgid ""
+"``place`` applies a random rotation and places two single-chain structures at a "
+"requested distance:"
+msgstr "``place`` はランダム回転を適用し、2つの単鎖構造を指定距離に配置します。"
+
+#: ../../workflows/system_building.rst:63
+msgid ""
+"The seed makes the trial sequence reproducible. Increase ``--max-attempts`` when "
+"placement fails because of clashes."
+msgstr "seedにより試行列を再現できます。衝突によって配置に失敗する場合は ``--max-attempts`` を増やしてください。"
+
+#: ../../workflows/system_building.rst:66
+msgid ""
+"``place_solvent`` uses 3D-RISM solvent distributions. It requires compatible Amber "
+"topology and coordinate files and can retain the generated susceptibility file:"
+msgstr ""
+"``place_solvent`` は3D-RISMの溶媒分布を使用します。互換性のあるAmberトポロジーと座標ファイルが必要で、生成した感受率ファイルを保持できます。"
+
+#: ../../workflows/system_building.rst:80
+msgid "Supporting operations"
+msgstr "補助操作"
+
+#: ../../workflows/system_building.rst:82
+msgid "Use the remaining build commands for targeted transformations:"
+msgstr "その他の系構築コマンドは個別の変換に使用します。"
+
+#: ../../workflows/system_building.rst:84
+msgid "``add_ndx``, ``gen_posres``, and ``gen_distres`` generate GROMACS inputs."
+msgstr "``add_ndx`` 、 ``gen_posres`` 、 ``gen_distres`` はGROMACS入力を生成します。"
+
+#: ../../workflows/system_building.rst:85
+msgid "``amb2gro`` converts Amber files to GROMACS files."
+msgstr "``amb2gro`` はAmberファイルをGROMACSファイルへ変換します。"
+
+#: ../../workflows/system_building.rst:86
+msgid "``mv_crds_mol2`` replaces MOL2 coordinates while retaining reference data."
+msgstr "``mv_crds_mol2`` は参照データを保持しながらMOL2座標を置き換えます。"
+
+#: ../../workflows/system_building.rst:87
+msgid "``calc_ion_conc`` calculates ion counts or concentration."
+msgstr "``calc_ion_conc`` はイオン数または濃度を計算します。"
+
+#: ../../workflows/system_building.rst:88
+msgid "``find_bond`` inspects candidate bonds such as disulfide bonds."
+msgstr "``find_bond`` はジスルフィド結合などの結合候補を調べます。"
+
+#: ../../workflows/system_building.rst:89
+msgid "``gen_temperatures`` generates temperature ladders for replica exchange."
+msgstr "``gen_temperatures`` はレプリカ交換用の温度列を生成します。"
+
+#: ../../workflows/system_building.rst:91
+msgid ""
+"The repository contains complete shell examples under ``example/build/`` and input MDP"
+" templates under ``example/mdp/``."
+msgstr "リポジトリの ``example/build/`` には一連のshell例、 ``example/mdp/`` には入力MDPテンプレートがあります。"

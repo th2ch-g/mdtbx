@@ -1,0 +1,997 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../reference/build.rst:2
+msgid "System-building commands"
+msgstr "系構築コマンド"
+
+#: ../../reference/build.rst:5
+msgid "add_ndx"
+msgstr "add_ndx"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx add_ndx"
+msgstr "mdtbx add_ndx"
+
+#: ../../../<autoprogram>:1
+msgid "options"
+msgstr "オプション"
+
+#: ../../../<autoprogram>:1
+msgid "show this help message and exit"
+msgstr "このヘルプを表示して終了する"
+
+#: ../../../<autoprogram>:1
+msgid "Gro file (.gro)"
+msgstr "GROファイル（.gro）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection for new index group (MDtraj atom selection language)"
+msgstr "新しいindex group用selection（MDTraj原子選択言語）"
+
+#: ../../../<autoprogram>:1
+msgid "Name for new index group"
+msgstr "新しいindex group名"
+
+#: ../../../<autoprogram>:1
+msgid "Input Index file"
+msgstr "入力indexファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Output index file"
+msgstr "出力indexファイル"
+
+#: ../../reference/build.rst:13
+msgid "addace"
+msgstr "addace"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx addace"
+msgstr "mdtbx addace"
+
+#: ../../../<autoprogram>:1
+msgid "Structure file (can be parsed in PyMOL)"
+msgstr "構造ファイル（PyMOLでparse可能）"
+
+#: ../../../<autoprogram>:1
+msgid "Output file prefix"
+msgstr "出力ファイルのプレフィックス"
+
+#: ../../reference/build.rst:21
+msgid "addh"
+msgstr "addh"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx addh"
+msgstr "mdtbx addh"
+
+#: ../../../<autoprogram>:1
+msgid "Input structure file (PDB etc.)"
+msgstr "入力構造ファイル（PDBなど）"
+
+#: ../../../<autoprogram>:1
+msgid "Method for hydrogen addition"
+msgstr "水素付加方法"
+
+#: ../../reference/build.rst:29
+msgid "addnme"
+msgstr "addnme"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx addnme"
+msgstr "mdtbx addnme"
+
+#: ../../reference/build.rst:37
+msgid "amb2gro"
+msgstr "amb2gro"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx amb2gro"
+msgstr "mdtbx amb2gro"
+
+#: ../../../<autoprogram>:1
+msgid "Parameter file (.parm7, .prmtop)"
+msgstr "parameterファイル（.parm7、.prmtop）"
+
+#: ../../../<autoprogram>:1
+msgid "RST file (.rst7, .inpcrd)"
+msgstr "RSTファイル（.rst7、.inpcrd）"
+
+#: ../../../<autoprogram>:1
+msgid "Type of conversion"
+msgstr "変換形式"
+
+#: ../../../<autoprogram>:1
+msgid "Do not run gmx editconf"
+msgstr "gmx editconfを実行しない"
+
+#: ../../reference/build.rst:45
+msgid "build_solution"
+msgstr "build_solution"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx build_solution"
+msgstr "mdtbx build_solution"
+
+#: ../../../<autoprogram>:1
+msgid "Input Structure file (.pdb)"
+msgstr "入力構造ファイル（.pdb）"
+
+#: ../../../<autoprogram>:1
+msgid "Output file path"
+msgstr "出力ファイルのパス"
+
+#: ../../../<autoprogram>:1
+msgid "Water model"
+msgstr "水model"
+
+#: ../../../<autoprogram>:1
+msgid "Ion concentration [M]"
+msgstr "イオン濃度［M］"
+
+#: ../../../<autoprogram>:1
+msgid "Cation name"
+msgstr "陽イオン名"
+
+#: ../../../<autoprogram>:1
+msgid "Anion name"
+msgstr "陰イオン名"
+
+#: ../../../<autoprogram>:1
+msgid "No ions"
+msgstr "イオンを追加しない"
+
+#: ../../../<autoprogram>:1
+msgid "Ligand parameter. e.g. --ligparam FRCMOD:LIB"
+msgstr "リガンドparameter。例：--ligparam FRCMOD:LIB"
+
+#: ../../../<autoprogram>:1
+msgid "Box size [angstrom, angstrom, angstrom]"
+msgstr "boxサイズ［angstrom, angstrom, angstrom］"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Additional pre command before load structure in tleap (e.g. bond SYS.1.SG SYS.2.SG)"
+msgstr "tleapで構造を読み込む前に実行する追加コマンド（例：bond SYS.1.SG SYS.2.SG）"
+
+#: ../../../<autoprogram>:1
+msgid "Additional command after load structure in tleap (e.g. bond SYS.1.SG SYS.2.SG)"
+msgstr "tleapで構造を読み込んだ後に実行する追加コマンド（例：bond SYS.1.SG SYS.2.SG）"
+
+#: ../../../<autoprogram>:1
+msgid "Template file for tleap"
+msgstr "tleap用templateファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Keep intermediate files"
+msgstr "中間ファイルを保持する"
+
+#: ../../../<autoprogram>:1
+msgid "Packmol random seed for water placement"
+msgstr "Packmol水配置の乱数seed"
+
+#: ../../../<autoprogram>:1
+msgid "Packmol intermolecular distance tolerance [angstrom]"
+msgstr "Packmol分子間距離の許容値［angstrom］"
+
+#: ../../reference/build.rst:53
+msgid "build_vacuum"
+msgstr "build_vacuum"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx build_vacuum"
+msgstr "mdtbx build_vacuum"
+
+#: ../../../<autoprogram>:1
+msgid "Input PDB file"
+msgstr "入力PDBファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Output directory"
+msgstr "出力ディレクトリ"
+
+#: ../../../<autoprogram>:1
+msgid "Ligand parameter in FRCMOD:LIB format"
+msgstr "FRCMOD:LIB形式のリガンドparameter"
+
+#: ../../../<autoprogram>:1
+msgid "Additional tleap commands before loadpdb (e.g. source leaprc.GLYCAM_06j-1)"
+msgstr "loadpdb前の追加tleapコマンド（例：source leaprc.GLYCAM_06j-1）"
+
+#: ../../../<autoprogram>:1
+msgid "Additional tleap commands after loadpdb (e.g. SS-bond settings)"
+msgstr "loadpdb後の追加tleapコマンド（例：SS結合設定）"
+
+#: ../../../<autoprogram>:1
+msgid "Keep intermediate files (tleap.in, leap.log)"
+msgstr "中間ファイル（tleap.in、leap.log）を保持する"
+
+#: ../../reference/build.rst:61
+msgid "calc_ion_conc"
+msgstr "calc_ion_conc"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx calc_ion_conc"
+msgstr "mdtbx calc_ion_conc"
+
+#: ../../../<autoprogram>:1
+msgid "PDB file (.pdb)"
+msgstr "PDBファイル（.pdb）"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Volume [A^3] (if this is provided, pdb is not required, directly calculate ion "
+"concentration)"
+msgstr "体積［A^3］（指定時はPDB不要でイオン濃度を直接計算する）"
+
+#: ../../../<autoprogram>:1
+msgid "Water name (e.g. WAT, HOH, TIP3)"
+msgstr "水の名称（例：WAT、HOH、TIP3）"
+
+#: ../../../<autoprogram>:1
+msgid "Method for calculating ion concentration (if pdb is provided)"
+msgstr "イオン濃度の計算方法（PDB指定時）"
+
+#: ../../../<autoprogram>:1
+msgid "Net charge of the solute (used with --method optimize)"
+msgstr "溶質の正味電荷（--method optimizeで使用）"
+
+#: ../../reference/build.rst:69
+msgid "centering_gro"
+msgstr "centering_gro"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx centering_gro"
+msgstr "mdtbx centering_gro"
+
+#: ../../../<autoprogram>:1
+msgid "Structure file (.gro .tpr)"
+msgstr "構造ファイル（.gro、.tpr）"
+
+#: ../../../<autoprogram>:1
+msgid "Topology file (.top)"
+msgstr "トポロジーファイル（.top）"
+
+#: ../../../<autoprogram>:1
+msgid "Centering selection"
+msgstr "centering用selection"
+
+#: ../../../<autoprogram>:1
+msgid "gmx command"
+msgstr "gmxコマンド"
+
+#: ../../../<autoprogram>:1
+msgid "Index file"
+msgstr "インデックスファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Output file name"
+msgstr "出力ファイル名"
+
+#: ../../reference/build.rst:77
+msgid "fill_chainname"
+msgstr "fill_chainname"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx fill_chainname"
+msgstr "mdtbx fill_chainname"
+
+#: ../../../<autoprogram>:1
+msgid "Output PDB file"
+msgstr "出力PDBファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Residue-number gap larger than this starts a new chain block"
+msgstr "この値を超える残基番号の差で新しいchain blockを開始する"
+
+#: ../../../<autoprogram>:1
+msgid "Do not split blank-chain atoms when segi changes"
+msgstr "segiが変わっても空chainの原子を分割しない"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Chain IDs to assign (one per blank-chain block). If omitted, IDs are auto-picked from "
+"A-Z then a-z"
+msgstr "割り当てるchain ID（空chain blockごとに1つ）。省略時はA-Z、続いてa-zから自動選択する"
+
+#: ../../reference/build.rst:85
+msgid "find_bond"
+msgstr "find_bond"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx find_bond"
+msgstr "mdtbx find_bond"
+
+#: ../../../<autoprogram>:1
+msgid "Selection 1 (can be parsed in PyMOL)"
+msgstr "selection 1（PyMOLでparse可能）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection 2 (can be parsed in PyMOL)"
+msgstr "selection 2（PyMOLでparse可能）"
+
+#: ../../../<autoprogram>:1
+msgid "Cutoff distance [angstrom]"
+msgstr "cutoff距離［angstrom］"
+
+#: ../../../<autoprogram>:1
+msgid "Output PDB file with CYS renamed to CYM for SS-bonded residues"
+msgstr "SS結合残基のCYSをCYMへ変更した出力PDB"
+
+#: ../../reference/build.rst:93
+msgid "gen_am1bcc"
+msgstr "gen_am1bcc"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_am1bcc"
+msgstr "mdtbx gen_am1bcc"
+
+#: ../../../<autoprogram>:1
+msgid "Compound(Structure) file (.mol or .mol2)"
+msgstr "化合物構造ファイル（.molまたは.mol2）"
+
+#: ../../../<autoprogram>:1
+msgid "Residue name"
+msgstr "残基名"
+
+#: ../../../<autoprogram>:1
+msgid "Multiplicity"
+msgstr "多重度"
+
+#: ../../../<autoprogram>:1
+msgid "Charge"
+msgstr "Charge"
+
+#: ../../reference/build.rst:101
+msgid "gen_distres"
+msgstr "gen_distres"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_distres"
+msgstr "mdtbx gen_distres"
+
+#: ../../../<autoprogram>:1
+msgid "GRO file (.gro)"
+msgstr "GROファイル（.gro）"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Selection for distance restraints. (MDtraj atom selection language). Use comma ',' if "
+"multiple selection"
+msgstr "distance restraint用selection（MDTraj原子選択言語）。複数の場合はcomma ','で区切る"
+
+#: ../../../<autoprogram>:1
+msgid "Output file prefix (This also will be constant name)"
+msgstr "出力ファイルprefix（定数名にも使用）"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Lower bound [nm]. Use multiple value if multiple selection. Single value will be "
+"applied to all selection if single value is given"
+msgstr "下限［nm］。複数selectionでは複数値を指定でき、値が1つなら全selectionへ適用する"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Upper bound1 [nm] Use multiple value if multiple selection. Single value will be "
+"applied to all selection if single value is given"
+msgstr "上限1［nm］。複数selectionでは複数値を指定でき、値が1つなら全selectionへ適用する"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Upper bound2 [nm] Use multiple value if multiple selection. Single value will be "
+"applied to all selection if single value is given"
+msgstr "上限2［nm］。複数selectionでは複数値を指定でき、値が1つなら全selectionへ適用する"
+
+#: ../../reference/build.rst:109
+msgid "gen_loop_aa"
+msgstr "gen_loop_aa"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_loop_aa"
+msgstr "mdtbx gen_loop_aa"
+
+#: ../../../<autoprogram>:1
+msgid "positional arguments"
+msgstr "位置引数"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Amino acid sequence: one-letter codes (e.g. ACGST) or space-separated three-letter "
+"codes (e.g. 'ALA CYS GLY')"
+msgstr "アミノ酸配列。1文字表記（例：ACGST）または空白区切りの3文字表記（例：'ALA CYS GLY'）"
+
+#: ../../../<autoprogram>:1
+msgid "Force field for tleap"
+msgstr "tleap用force field"
+
+#: ../../../<autoprogram>:1
+msgid "Add ACE/NME capping groups to N/C termini"
+msgstr "N/C末端へACE/NMEキャップを追加する"
+
+#: ../../reference/build.rst:117
+msgid "gen_modres_am1bcc"
+msgstr "gen_modres_am1bcc"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_modres_am1bcc"
+msgstr "mdtbx gen_modres_am1bcc"
+
+#: ../../../<autoprogram>:1
+msgid "Atom name of Head"
+msgstr "Headの原子名"
+
+#: ../../../<autoprogram>:1
+msgid "Atom name of Tail"
+msgstr "Tailの原子名"
+
+#: ../../../<autoprogram>:1
+msgid "Atom name of Mainchain"
+msgstr "Mainchainの原子名"
+
+#: ../../../<autoprogram>:1
+msgid "Atom name of Omit"
+msgstr "Omitの原子名"
+
+#: ../../../<autoprogram>:1
+msgid "Atom name of Prehead"
+msgstr "Preheadの原子名"
+
+#: ../../../<autoprogram>:1
+msgid "Atom name of Posttail"
+msgstr "Posttailの原子名"
+
+#: ../../reference/build.rst:125
+msgid "gen_modres_resp"
+msgstr "gen_modres_resp"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_modres_resp"
+msgstr "mdtbx gen_modres_resp"
+
+#: ../../../<autoprogram>:1
+msgid "Compound(Structure) file (.mol or .mol2)."
+msgstr "化合物構造ファイル（.molまたは.mol2）"
+
+#: ../../../<autoprogram>:1
+msgid "Bond1"
+msgstr "Bond1"
+
+#: ../../../<autoprogram>:1
+msgid "Bond2"
+msgstr "Bond2"
+
+#: ../../../<autoprogram>:1
+msgid "Fixed atom charge"
+msgstr "固定原子の電荷"
+
+#: ../../../<autoprogram>:1
+msgid "Memory(GB) for Gaussian"
+msgstr "Gaussian用memory［GB］"
+
+#: ../../../<autoprogram>:1
+msgid "Number of threads for Gaussian"
+msgstr "Gaussianのthread数"
+
+#: ../../reference/build.rst:133
+msgid "gen_posres"
+msgstr "gen_posres"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_posres"
+msgstr "mdtbx gen_posres"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Selection for positional restraints. (Custom atom selection language like MDtraj)"
+msgstr "position restraint用selection（MDTraj形式の独自原子選択言語）"
+
+#: ../../reference/build.rst:141
+msgid "gen_resp"
+msgstr "gen_resp"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_resp"
+msgstr "mdtbx gen_resp"
+
+#: ../../../<autoprogram>:1
+msgid "Do not optimize structure"
+msgstr "構造最適化を実行しない"
+
+#: ../../reference/build.rst:149
+msgid "gen_temperatures"
+msgstr "gen_temperatures"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx gen_temperatures"
+msgstr "mdtbx gen_temperatures"
+
+#: ../../../<autoprogram>:1
+msgid "Exchange probability"
+msgstr "交換確率"
+
+#: ../../../<autoprogram>:1
+msgid "Lower temperature limit"
+msgstr "温度下限"
+
+#: ../../../<autoprogram>:1
+msgid "Upper temperature limit"
+msgstr "温度上限"
+
+#: ../../../<autoprogram>:1
+msgid "Number of water molecules"
+msgstr "水分子数"
+
+#: ../../../<autoprogram>:1
+msgid "Number of protein atoms"
+msgstr "タンパク質原子数"
+
+#: ../../../<autoprogram>:1
+msgid "Tolerance"
+msgstr "許容値"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Constraints in the protein: 0=Fully Flexible, 1=Bonds to hydrogens only, 2=All bonds"
+msgstr "タンパク質のconstraint：0=完全flexible、1=水素との結合のみ、2=全結合"
+
+#: ../../../<autoprogram>:1
+msgid "Constraints in water: 0=Fully Flexible, 2=Flexible angle, 3=Rigid"
+msgstr "水のconstraint：0=完全flexible、2=angleのみflexible、3=rigid"
+
+#: ../../../<autoprogram>:1
+msgid "Hydrogens in protein: 0=All H, 1=Polar H"
+msgstr "タンパク質の水素：0=全H、1=極性H"
+
+#: ../../../<autoprogram>:1
+msgid "Virtual sites in protein: 0=None, 1=Virtual Hydrogen"
+msgstr "タンパク質のvirtual site：0=なし、1=virtual hydrogen"
+
+#: ../../../<autoprogram>:1
+msgid "Simulation type: 0=NPT, 1=NVT (Note: only NPT is fully supported)"
+msgstr "simulation type：0=NPT、1=NVT（NPTのみ完全対応）"
+
+#: ../../reference/build.rst:157
+msgid "modeling_cf"
+msgstr "modeling_cf"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx modeling_cf"
+msgstr "mdtbx modeling_cf"
+
+#: ../../../<autoprogram>:1
+msgid "input PDB file used as template"
+msgstr "templateとして使用する入力PDB"
+
+#: ../../../<autoprogram>:1
+msgid "amino acid sequence"
+msgstr "アミノ酸配列"
+
+#: ../../reference/build.rst:165
+msgid "mutate"
+msgstr "mutate"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx mutate"
+msgstr "mdtbx mutate"
+
+#: ../../../<autoprogram>:1
+msgid "PyMOL atom selection for the target residue"
+msgstr "対象残基のPyMOL原子selection"
+
+#: ../../../<autoprogram>:1
+msgid "Target residue name (e.g. VAL, HIE, HIP)"
+msgstr "変異先残基名（例：VAL、HIE、HIP）"
+
+#: ../../../<autoprogram>:1
+msgid "Output structure file"
+msgstr "出力構造ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Deprecated alias for output prefix. Writes <prefix>.pdb"
+msgstr "非推奨の出力prefix alias。<prefix>.pdbへ書き込む"
+
+#: ../../../<autoprogram>:1
+msgid "Rotamer index (1-based) shown by the mutagenesis wizard"
+msgstr "mutagenesis wizardに表示されるrotamer index（1-based）"
+
+#: ../../../<autoprogram>:1
+msgid "Hydrogen handling mode in the mutagenesis wizard"
+msgstr "mutagenesis wizardの水素処理mode"
+
+#: ../../reference/build.rst:173
+msgid "mv_crds_mol2"
+msgstr "mv_crds_mol2"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx mv_crds_mol2"
+msgstr "mdtbx mv_crds_mol2"
+
+#: ../../../<autoprogram>:1
+msgid "Reference mol2 file"
+msgstr "参照MOL2ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Coordinates mol2 file"
+msgstr "座標MOL2ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Output mol2 file"
+msgstr "出力MOL2ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Atom field used to match the coordinate and reference files"
+msgstr "座標ファイルと参照ファイルの対応付けに使用する原子field"
+
+#: ../../reference/build.rst:181
+msgid "place"
+msgstr "place"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx place"
+msgstr "mdtbx place"
+
+#: ../../../<autoprogram>:1
+msgid "First PDB file (single chain, kept fixed at origin)"
+msgstr "1つ目のPDBファイル（単鎖、原点に固定）"
+
+#: ../../../<autoprogram>:1
+msgid "Second PDB file (single chain, randomly rotated then translated)"
+msgstr "2つ目のPDBファイル（単鎖、ランダム回転後に移動）"
+
+#: ../../../<autoprogram>:1
+msgid "Distance between centers of mass of the two chains (Angstrom)"
+msgstr "2つのchainの重心間距離［Angstrom］"
+
+#: ../../../<autoprogram>:1
+msgid "Random seed for rotation of the second chain"
+msgstr "2つ目のchain回転用乱数seed"
+
+#: ../../../<autoprogram>:1
+msgid "Output PDB file (combined)"
+msgstr "結合済み出力PDBファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Min allowed inter-chain atom distance (Angstrom)"
+msgstr "chain間原子距離の許容最小値［Angstrom］"
+
+#: ../../../<autoprogram>:1
+msgid "Warn instead of aborting when a serious clash is detected"
+msgstr "深刻な衝突を検出しても中断せずwarningを表示する"
+
+#: ../../../<autoprogram>:1
+msgid "Maximum deterministic rotation/direction attempts used to avoid clashes"
+msgstr "衝突回避に使用する決定的な回転・方向試行の最大回数"
+
+#: ../../reference/build.rst:189
+msgid "place_solvent"
+msgstr "place_solvent"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx place_solvent"
+msgstr "mdtbx place_solvent"
+
+#: ../../../<autoprogram>:1
+msgid "AMBER topology file (.parm7)"
+msgstr "AMBERトポロジーファイル（.parm7）"
+
+#: ../../../<autoprogram>:1
+msgid "AMBER coordinate file (.rst7)"
+msgstr "AMBER座標ファイル（.rst7）"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Pre-computed solvent susceptibility file (.xvv). If not provided, rism1d is run to "
+"generate one."
+msgstr "計算済み溶媒感受率ファイル（.xvv）。未指定ならrism1dで生成する"
+
+#: ../../../<autoprogram>:1
+msgid "Solvent type"
+msgstr "溶媒type"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Solvent model for 1D-RISM. Accepts a .mdl path or a model name under "
+"$AMBERHOME/dat/rism1d/mdl/"
+msgstr "1D-RISMの溶媒model。.mdl pathまたは$AMBERHOME/dat/rism1d/mdl/以下のmodel名"
+
+#: ../../../<autoprogram>:1
+msgid "Bulk solvent density [mol/L] for 1D-RISM"
+msgstr "1D-RISMのbulk溶媒密度［mol/L］"
+
+#: ../../../<autoprogram>:1
+msgid "Bulk solvent dielectric constant for 1D-RISM"
+msgstr "1D-RISMのbulk溶媒誘電率"
+
+#: ../../../<autoprogram>:1
+msgid "Copy the prepared xvv file to this reusable output path"
+msgstr "準備したxvvファイルを再利用可能な出力パスへcopyする"
+
+#: ../../../<autoprogram>:1
+msgid "Temperature [K]"
+msgstr "温度［K］"
+
+#: ../../../<autoprogram>:1
+msgid "Closure approximation"
+msgstr "closure近似"
+
+#: ../../../<autoprogram>:1
+msgid "Grid spacing [Å]"
+msgstr "grid間隔［Å］"
+
+#: ../../../<autoprogram>:1
+msgid "Convergence tolerance for 3D-RISM"
+msgstr "3D-RISMの収束許容値"
+
+#: ../../../<autoprogram>:1
+msgid "Buffer distance around solute [Å]"
+msgstr "溶質周囲のbuffer距離［Å］"
+
+#: ../../../<autoprogram>:1
+msgid "Solvent cutoff distance [Å]"
+msgstr "溶媒cutoff距離［Å］"
+
+#: ../../../<autoprogram>:1
+msgid "Density threshold for peak extraction (g(r) value)"
+msgstr "peak抽出の密度threshold（g(r)値）"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Minimum distance between placed solvent sites [Å]. Approximate diameter of a water "
+"molecule."
+msgstr "配置する溶媒site間の最小距離［Å］。おおよその水分子直径"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Maximum number of solvent sites to place. If not set, all sites above threshold are "
+"placed."
+msgstr "配置する溶媒siteの最大数。未指定ならthresholdを超える全siteを配置する"
+
+#: ../../../<autoprogram>:1
+msgid "Use sander interface instead of rism3d.snglpnt"
+msgstr "rism3d.snglpntの代わりにsander interfaceを使用する"
+
+#: ../../reference/build.rst:197
+msgid "setup_abfe"
+msgstr "setup_abfe"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx setup_abfe"
+msgstr "mdtbx setup_abfe"
+
+#: ../../../<autoprogram>:1
+msgid "Base production MDP"
+msgstr "base production MDP"
+
+#: ../../../<autoprogram>:1
+msgid "Complex-specific base MDP"
+msgstr "複合体用base MDP"
+
+#: ../../../<autoprogram>:1
+msgid "Solvent-specific base MDP"
+msgstr "溶媒用base MDP"
+
+#: ../../../<autoprogram>:1
+msgid "Complex GROMACS topology"
+msgstr "複合体のGROMACSトポロジー"
+
+#: ../../../<autoprogram>:1
+msgid "Equilibrated complex structure"
+msgstr "平衡化済み複合体構造"
+
+#: ../../../<autoprogram>:1
+msgid "Solvated ligand GROMACS topology"
+msgstr "溶媒和リガンドのGROMACSトポロジー"
+
+#: ../../../<autoprogram>:1
+msgid "Equilibrated solvated-ligand structure"
+msgstr "平衡化済み溶媒和リガンド構造"
+
+#: ../../../<autoprogram>:1
+msgid "Ligand molecule type"
+msgstr "リガンドのmolecule type"
+
+#: ../../../<autoprogram>:1
+msgid "One-based Boresch anchor atom indices"
+msgstr "1-basedのBoresch anchor atom index"
+
+#: ../../../<autoprogram>:1
+msgid "MDTraj receptor selection for automatic anchors"
+msgstr "anchor自動選択用のMDTraj receptor selection"
+
+#: ../../../<autoprogram>:1
+msgid "MDTraj ligand selection for automatic anchors"
+msgstr "anchor自動選択用のMDTraj ligand selection"
+
+#: ../../../<autoprogram>:1
+msgid "Maximum receptor-ligand anchor distance [nm]"
+msgstr "受容体・リガンドanchor間の最大距離［nm］"
+
+#: ../../../<autoprogram>:1
+msgid "Distance restraint spring [kJ/mol/nm^2]"
+msgstr "距離restraintのばね定数［kJ/mol/nm^2］"
+
+#: ../../../<autoprogram>:1
+msgid "Angle restraint spring [kJ/mol/rad^2]"
+msgstr "角度restraintのばね定数［kJ/mol/rad^2］"
+
+#: ../../../<autoprogram>:1
+msgid "Dihedral restraint spring [kJ/mol/rad^2]"
+msgstr "二面角restraintのばね定数［kJ/mol/rad^2］"
+
+#: ../../../<autoprogram>:1
+msgid "LJ-PME combination rule"
+msgstr "LJ-PME combination rule"
+
+#: ../../../<autoprogram>:1
+msgid "Generate MDP files without final TPR files"
+msgstr "最終TPRを作成せずMDPを生成する"
+
+#: ../../reference/build.rst:205
+msgid "setup_fep"
+msgstr "setup_fep"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx setup_fep"
+msgstr "mdtbx setup_fep"
+
+#: ../../../<autoprogram>:1
+msgid "Base production MDP file"
+msgstr "base production MDPファイル"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS topology file"
+msgstr "GROMACSトポロジーファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Starting structure file"
+msgstr "開始構造ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Alchemical transformation mode"
+msgstr "alchemical変換mode"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS molecule type to decouple"
+msgstr "decoupleするGROMACS molecule type"
+
+#: ../../../<autoprogram>:1
+msgid "Window count for charge, vdw, or transform mode"
+msgstr "charge、vdw、transform modeのwindow数"
+
+#: ../../../<autoprogram>:1
+msgid "Electrostatic window count for decouple mode"
+msgstr "decouple modeの静電window数"
+
+#: ../../../<autoprogram>:1
+msgid "Van der Waals window count for decouple mode"
+msgstr "decouple modeのvan der Waals window数"
+
+#: ../../../<autoprogram>:1
+msgid "Custom dual-state lambda schedule"
+msgstr "独自dual-state lambda schedule"
+
+#: ../../../<autoprogram>:1
+msgid "Custom electrostatic lambda schedule"
+msgstr "独自静電lambda schedule"
+
+#: ../../../<autoprogram>:1
+msgid "Custom Van der Waals lambda schedule"
+msgstr "独自van der Waals lambda schedule"
+
+#: ../../../<autoprogram>:1
+msgid "Number of neighboring states evaluated for Delta H"
+msgstr "Delta Hを評価する隣接state数"
+
+#: ../../../<autoprogram>:1
+msgid "Delta H output interval"
+msgstr "Delta Hの出力間隔"
+
+#: ../../../<autoprogram>:1
+msgid "Checkpoint or trajectory supplied to grompp"
+msgstr "gromppへ渡すcheckpointまたはtrajectory"
+
+#: ../../../<autoprogram>:1
+msgid "Position-restraint reference structure"
+msgstr "position restraint参照構造"
+
+#: ../../../<autoprogram>:1
+msgid "State-B restraint reference structure"
+msgstr "State-B restraint参照構造"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS index file"
+msgstr "GROMACS indexファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Run file basename"
+msgstr "実行ファイルのbasename"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS executable"
+msgstr "GROMACS実行ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Maximum grompp warnings"
+msgstr "grompp warningの最大許容数"
+
+#: ../../../<autoprogram>:1
+msgid "Generate MDP files without creating TPR files"
+msgstr "TPRを作成せずMDPだけを生成する"
+
+#: ../../reference/build.rst:213
+msgid "setup_fep_rest"
+msgstr "setup_fep_rest"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx setup_fep_rest"
+msgstr "mdtbx setup_fep_rest"
+
+#: ../../../<autoprogram>:1
+msgid "Dual-state topology"
+msgstr "dual-state topology"
+
+#: ../../../<autoprogram>:1
+msgid "Starting structure"
+msgstr "開始構造"
+
+#: ../../../<autoprogram>:1
+msgid "Replica count"
+msgstr "replica数"
+
+#: ../../../<autoprogram>:1
+msgid "Physical simulation temperature [K]"
+msgstr "物理simulation温度［K］"
+
+#: ../../../<autoprogram>:1
+msgid "Maximum effective REST temperature [K]"
+msgstr "RESTの最大実効温度［K］"
+
+#: ../../../<autoprogram>:1
+msgid "Explicit mdtbx atom selection for the REST hot region"
+msgstr "REST hot regionを指定するmdtbx原子selection"
+
+#: ../../../<autoprogram>:1
+msgid "Automatic hot-region distance from perturbed atoms [nm]"
+msgstr "perturbed atomから自動選択するhot regionの距離［nm］"
+
+#: ../../../<autoprogram>:1
+msgid "MDTraj selection searched by automatic hot-region detection"
+msgstr "hot region自動検出で探索するMDTraj selection"
+
+#: ../../../<autoprogram>:1
+msgid "Delta H and full-precision trajectory interval"
+msgstr "Delta Hとfull-precision trajectoryの出力間隔"
+
+#: ../../../<autoprogram>:1
+msgid "Checkpoint or trajectory for grompp"
+msgstr "gromppへ渡すcheckpointまたはtrajectory"
+
+#: ../../../<autoprogram>:1
+msgid "PLUMED-patched GROMACS executable"
+msgstr "PLUMEDパッチ済みGROMACS実行ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "PLUMED executable"
+msgstr "PLUMED実行ファイル"
+
+#: ../../../<autoprogram>:1
+msgid "Generate topologies and MDP files without final TPR files"
+msgstr "最終TPRを作成せずtopologyとMDPを生成する"

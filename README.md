@@ -2,6 +2,9 @@
 
 Toolbox for MD simulation
 
+[English documentation](https://th2ch-g.github.io/mdtbx/) |
+[日本語ドキュメント](https://th2ch-g.github.io/mdtbx/ja/)
+
 - Build system quickly
 - Run conventional/enhanced MD simulation
 - Analyze trajectory

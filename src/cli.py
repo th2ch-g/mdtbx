@@ -33,8 +33,8 @@ def _register_subcommands(subparsers) -> None:
                 add_subcmd(subparsers)
 
 
-def cli() -> None:
-    # make parser
+def create_parser() -> argparse.ArgumentParser:
+    """Create the top-level argument parser with every registered subcommand."""
     parser = argparse.ArgumentParser(description=("ToolBox for MD simulation"))
 
     parser.add_argument(
@@ -49,6 +49,11 @@ def cli() -> None:
     subparsers = parser.add_subparsers()
     _register_subcommands(subparsers)
 
+    return parser
+
+
+def cli() -> None:
+    parser = create_parser()
     args = parser.parse_args()
 
     if not hasattr(args, "func"):

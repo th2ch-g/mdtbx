@@ -1,0 +1,133 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../workflows/free_energy.rst:2
+msgid "Free-energy workflows"
+msgstr "自由エネルギーワークフロー"
+
+#: ../../workflows/free_energy.rst:5
+msgid "Standard FEP"
+msgstr "標準FEP"
+
+#: ../../workflows/free_energy.rst:7
+msgid "The standard GROMACS alchemical workflow has three stages:"
+msgstr "標準GROMACS alchemicalワークフローは3段階です。"
+
+#: ../../workflows/free_energy.rst:9
+msgid "``setup_fep`` creates lambda directories, MDP files, TPR files, and a manifest."
+msgstr "``setup_fep`` がlambdaディレクトリ、MDP、TPR、manifestを作成します。"
+
+#: ../../workflows/free_energy.rst:11
+msgid "``run_fep`` runs all or selected lambda windows."
+msgstr "``run_fep`` が全lambda windowまたは選択したwindowを実行します。"
+
+#: ../../workflows/free_energy.rst:12
+msgid "``analyze_fep`` combines the generated derivative files with ``gmx bar``."
+msgstr "``analyze_fep`` が生成されたderivativeファイルを ``gmx bar`` で統合します。"
+
+#: ../../workflows/free_energy.rst:14
+msgid ""
+"The input structure must already be equilibrated. The base MDP defines the simulation "
+"protocol."
+msgstr "入力構造は事前に平衡化してください。base MDPがシミュレーションプロトコルを定義します。"
+
+#: ../../workflows/free_energy.rst:28
+msgid ""
+"The default decoupling schedule removes electrostatics and then van der Waals "
+"interactions. Use transformation mode only with a topology that already contains valid"
+" A-state and B-state parameters."
+msgstr ""
+"デフォルトのdecoupling scheduleでは静電相互作用、van der Waals相互作用の順に除去します。transformation modeは有効なA-"
+"state、B-stateパラメータを含むトポロジーでのみ使用してください。"
+
+#: ../../workflows/free_energy.rst:33
+msgid "FEP/REST"
+msgstr "FEP/REST"
+
+#: ../../workflows/free_energy.rst:35
+msgid ""
+"``setup_fep_rest`` prepares a PLUMED FEP/REST Hamiltonian replica-exchange "
+"calculation. It requires PLUMED ``partial_tempering``, a PLUMED-patched ``gmx_mpi``, "
+"MPI, and a compatible dual-state topology."
+msgstr ""
+"``setup_fep_rest`` はPLUMED FEP/REST Hamiltonian replica-exchange計算を準備します。PLUMEDの "
+"``partial_tempering`` 、PLUMEDパッチ済み ``gmx_mpi`` 、MPI、互換性のあるdual-state topologyが必要です。"
+
+#: ../../workflows/free_energy.rst:57
+msgid ""
+"The topology restrictions and installation steps are documented in "
+"``example/fep/README.md``. Review the generated manifest and hot-region selection "
+"before production."
+msgstr ""
+"トポロジーの制約とインストール手順は ``example/fep/README.md`` "
+"に記載されています。production実行前に生成されたmanifestとhot-region selectionを確認してください。"
+
+#: ../../workflows/free_energy.rst:62
+msgid "Absolute binding free energy"
+msgstr "絶対結合自由エネルギー"
+
+#: ../../workflows/free_energy.rst:64
+msgid ""
+"``setup_abfe`` creates a Boresch-restraint double-decoupling cycle from an "
+"equilibrated receptor-ligand complex and an equilibrated solvated ligand. Explicit "
+"one-based anchor atoms are recommended:"
+msgstr ""
+"``setup_abfe`` は平衡化済みの受容体・リガンド複合体と溶媒和リガンドからBoresch restraint double-decoupling "
+"cycleを作成します。1-basedのanchor atomを明示することを推奨します。"
+
+#: ../../workflows/free_energy.rst:82
+msgid ""
+"Inspect ``abfe_manifest.json`` before running production. Charged-ligand finite-size "
+"corrections are not calculated automatically; supply externally calculated corrections"
+" to ``analyze_abfe``. See ``example/abfe/README.md`` for the complete cycle, result "
+"files, symmetry numbers, and corrections."
+msgstr ""
+"production実行前に ``abfe_manifest.json`` を確認してください。荷電リガンドのfinite-size "
+"correctionは自動計算されないため、外部で計算した補正を ``analyze_abfe`` へ渡します。cycle全体、結果ファイル、対称数、補正については "
+"``example/abfe/README.md`` を参照してください。"
+
+#: ../../workflows/free_energy.rst:88
+msgid "Reproducibility"
+msgstr "再現性"
+
+#: ../../workflows/free_energy.rst:90
+msgid "Keep the following with each calculation:"
+msgstr "各計算とともに次の情報を保存します。"
+
+#: ../../workflows/free_energy.rst:92
+msgid "the exact MDP and topology inputs;"
+msgstr "使用したMDPとトポロジー入力。"
+
+#: ../../workflows/free_energy.rst:93
+msgid "the generated JSON manifest;"
+msgstr "生成されたJSON manifest。"
+
+#: ../../workflows/free_energy.rst:94
+msgid "the ``mdtbx`` version and ``pixi.lock`` revision;"
+msgstr "``mdtbx`` のversionと ``pixi.lock`` のrevision。"
+
+#: ../../workflows/free_energy.rst:95
+msgid "scheduler, MPI, and thread settings;"
+msgstr "スケジューラ、MPI、thread設定。"
+
+#: ../../workflows/free_energy.rst:96
+msgid "analysis begin time and any correction terms."
+msgstr "解析開始時刻と補正項。"

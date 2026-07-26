@@ -1,0 +1,135 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../getting_started.rst:2
+msgid "Getting started"
+msgstr "はじめに"
+
+#: ../../getting_started.rst:5
+msgid "Requirements"
+msgstr "要件"
+
+#: ../../getting_started.rst:7
+msgid ""
+"``mdtbx`` supports Linux x86-64, macOS on Apple silicon, and macOS on Intel. Python is"
+" fixed to version 3.10 in the project environment. Pixi installs most Python packages "
+"and simulation tools from the lock file."
+msgstr ""
+"``mdtbx`` はLinux x86-64、Apple "
+"silicon搭載macOS、Intel搭載macOSをサポートします。プロジェクト環境のPythonは3.10に固定されています。Pixiはロックファイルに基づいて大部分のPythonパッケージとシミュレーションツールをインストールします。"
+
+#: ../../getting_started.rst:11
+msgid "Some commands require software that is not supplied by the default environment:"
+msgstr "一部のコマンドにはデフォルト環境に含まれないソフトウェアが必要です。"
+
+#: ../../getting_started.rst:14
+msgid "Gaussian 16 for Gaussian-based RESP workflows."
+msgstr "Gaussianを用いたRESPワークフローにはGaussian 16が必要です。"
+
+#: ../../getting_started.rst:15
+msgid "PLUMED and a PLUMED-patched GROMACS MPI build for FEP/REST."
+msgstr "FEP/RESTにはPLUMEDとPLUMEDパッチ済みGROMACS MPIビルドが必要です。"
+
+#: ../../getting_started.rst:16
+msgid "ColabFold for ``modeling_cf``."
+msgstr "``modeling_cf`` にはColabFoldが必要です。"
+
+#: ../../getting_started.rst:17
+msgid "Scheduler commands such as ``srun`` when running on a cluster."
+msgstr "クラスタで実行する場合は ``srun`` などのスケジューラコマンドが必要です。"
+
+#: ../../getting_started.rst:19
+msgid ""
+"The relevant command reference and workflow page states when an external tool is "
+"required."
+msgstr "外部ツールが必要な場合は、該当するコマンドリファレンスとワークフローページに記載されています。"
+
+#: ../../getting_started.rst:23
+msgid "Install with Pixi"
+msgstr "Pixiでのインストール"
+
+#: ../../getting_started.rst:25
+msgid ""
+"Clone the repository, install the locked environment, and configure the PyMOL plugin "
+"path:"
+msgstr "リポジトリをcloneし、ロック済み環境をインストールして、PyMOLプラグインのパスを設定します。"
+
+#: ../../getting_started.rst:35
+msgid "Run commands through Pixi:"
+msgstr "Pixi経由でコマンドを実行します。"
+
+#: ../../getting_started.rst:43
+msgid ""
+"Set ``PIXI_FROZEN=false`` only when intentionally updating the environment. Normal "
+"reproducible installation should use the committed ``pixi.lock``."
+msgstr ""
+"環境を意図的に更新する場合だけ ``PIXI_FROZEN=false`` を設定してください。通常の再現可能なインストールではコミット済みの ``pixi.lock`` "
+"を使用します。"
+
+#: ../../getting_started.rst:47
+msgid "Use Docker"
+msgstr "Dockerの利用"
+
+#: ../../getting_started.rst:49
+msgid "Build the local image:"
+msgstr "ローカルイメージをビルドします。"
+
+#: ../../getting_started.rst:55
+msgid "Run ``mdtbx`` or an installed tool in the container:"
+msgstr "コンテナ内で ``mdtbx`` またはインストール済みツールを実行します。"
+
+#: ../../getting_started.rst:62
+msgid ""
+"Mount the working directory explicitly so that input and output files persist after "
+"the container exits."
+msgstr "コンテナ終了後も入出力ファイルを保持するため、作業ディレクトリを明示的にマウントします。"
+
+#: ../../getting_started.rst:66
+msgid "Understand the CLI"
+msgstr "CLIの基本"
+
+#: ../../getting_started.rst:68
+msgid ""
+"Commands are grouped by purpose in the :doc:`reference/index`. Use ``--help`` at both "
+"levels:"
+msgstr ""
+"コマンドは :doc:`reference/index` で用途別に分類されています。トップレベルとサブコマンドの両方で ``--help`` を使用できます。"
+
+#: ../../getting_started.rst:76
+msgid ""
+"Most structure and trajectory commands accept explicit input and output paths. Run "
+"commands from a dedicated calculation directory so generated files do not mix with "
+"source files or other studies."
+msgstr "大部分の構造・トラジェクトリコマンドは入出力パスを明示できます。生成ファイルがソースや別の計算と混在しないよう、計算専用ディレクトリで実行してください。"
+
+#: ../../getting_started.rst:81
+msgid "Minimal analysis example"
+msgstr "最小構成の解析例"
+
+#: ../../getting_started.rst:83
+msgid "Fit a trajectory and calculate a contact map:"
+msgstr "トラジェクトリをfitし、コンタクトマップを計算します。"
+
+#: ../../getting_started.rst:97
+msgid ""
+"Confirm the exact options with ``--help`` because required selections and accepted "
+"topology formats vary by command."
+msgstr "必須の選択式と対応トポロジー形式はコマンドごとに異なるため、 ``--help`` で正確なオプションを確認してください。"

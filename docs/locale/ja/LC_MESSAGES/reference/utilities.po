@@ -1,0 +1,235 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../reference/utilities.rst:2
+msgid "Utility commands"
+msgstr "ユーティリティコマンド"
+
+#: ../../reference/utilities.rst:5
+msgid "cmd"
+msgstr "cmd"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx cmd"
+msgstr "mdtbx cmd"
+
+#: ../../../<autoprogram>:1
+msgid "positional arguments"
+msgstr "位置引数"
+
+#: ../../../<autoprogram>:1
+msgid "The command and its arguments to execute."
+msgstr "実行するコマンドと引数。"
+
+#: ../../../<autoprogram>:1
+msgid "options"
+msgstr "オプション"
+
+#: ../../../<autoprogram>:1
+msgid "show this help message and exit"
+msgstr "このヘルプを表示して終了する"
+
+#: ../../reference/utilities.rst:13
+msgid "convert"
+msgstr "convert"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx convert"
+msgstr "mdtbx convert"
+
+#: ../../../<autoprogram>:1
+msgid "Structure file (can be parsed in PyMOL or MDtraj)"
+msgstr "構造ファイル（PyMOLまたはMDTrajでparse可能）"
+
+#: ../../../<autoprogram>:1
+msgid "Output file path"
+msgstr "出力ファイルのパス"
+
+#: ../../../<autoprogram>:1
+msgid "Type of conversion"
+msgstr "変換形式"
+
+#: ../../reference/utilities.rst:21
+msgid "mod_mdp"
+msgstr "mod_mdp"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx mod_mdp"
+msgstr "mdtbx mod_mdp"
+
+#: ../../../<autoprogram>:1
+msgid "Path to the directory"
+msgstr "ディレクトリのパス"
+
+#: ../../../<autoprogram>:1
+msgid "Target variable. If variable is not found, it will be added."
+msgstr "対象変数。見つからない場合は追加する"
+
+#: ../../../<autoprogram>:1
+msgid "New value"
+msgstr "新しい値"
+
+#: ../../../<autoprogram>:1
+msgid "Exclude name of files"
+msgstr "除外するファイル名"
+
+#: ../../../<autoprogram>:1
+msgid "Ljust for new variable line"
+msgstr "新しい変数行の左寄せ幅"
+
+#: ../../reference/utilities.rst:29
+msgid "partial_tempering"
+msgstr "partial_tempering"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx partial_tempering"
+msgstr "mdtbx partial_tempering"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS topology file (.top)"
+msgstr "GROMACSトポロジーファイル（.top）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection (Custom atom selection language)"
+msgstr "選択式（mdtbx独自原子選択言語）"
+
+#: ../../../<autoprogram>:1
+msgid "Output topology file (.top)"
+msgstr "出力トポロジーファイル（.top）"
+
+#: ../../reference/utilities.rst:37
+msgid "rmfile"
+msgstr "rmfile"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx rmfile"
+msgstr "mdtbx rmfile"
+
+#: ../../reference/utilities.rst:45
+msgid "run_abfe"
+msgstr "run_abfe"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx run_abfe"
+msgstr "mdtbx run_abfe"
+
+#: ../../../<autoprogram>:1
+msgid "ABFE setup directory"
+msgstr "ABFE setupディレクトリ"
+
+#: ../../../<autoprogram>:1
+msgid "Selected legs; all legs are run by default"
+msgstr "実行するleg。デフォルトは全leg"
+
+#: ../../../<autoprogram>:1
+msgid "MPI rank count for the launcher or thread-MPI mdrun"
+msgstr "launcherまたはthread-MPI mdrunのMPI rank数"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS executable; defaults to the setup executable"
+msgstr "GROMACS実行ファイル。デフォルトでsetup時の実行ファイルを使用する"
+
+#: ../../../<autoprogram>:1
+#, python-brace-format
+msgid ""
+"External MPI launcher template, for example 'mpirun -np {ntmpi}' or 'srun --ntasks "
+"{ntmpi}'"
+msgstr "外部MPI launcher template。例：'mpirun -np {ntmpi}'または'srun --ntasks {ntmpi}'"
+
+#: ../../reference/utilities.rst:53
+msgid "run_fep"
+msgstr "run_fep"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx run_fep"
+msgstr "mdtbx run_fep"
+
+#: ../../../<autoprogram>:1
+msgid "FEP setup directory or manifest"
+msgstr "FEP setupディレクトリまたはmanifest"
+
+#: ../../../<autoprogram>:1
+msgid "First window index"
+msgstr "最初のウィンドウ番号"
+
+#: ../../../<autoprogram>:1
+msgid "Last window index, inclusive"
+msgstr "最後のウィンドウ番号（この番号を含む）"
+
+#: ../../../<autoprogram>:1
+msgid "Run selected windows in one GROMACS multidir invocation"
+msgstr "選択したwindowを1回のGROMACS multidirで実行する"
+
+#: ../../../<autoprogram>:1
+msgid "Replica-exchange interval for multidir runs"
+msgstr "multidir実行のreplica-exchange間隔"
+
+#: ../../../<autoprogram>:1
+msgid "OpenMP thread count per rank"
+msgstr "rankごとのOpenMP thread数"
+
+#: ../../../<autoprogram>:1
+msgid "Maximum run time [hours]"
+msgstr "最大実行時間［hours］"
+
+#: ../../../<autoprogram>:1
+msgid "Override the number of integration steps"
+msgstr "積分step数を上書きする"
+
+#: ../../../<autoprogram>:1
+msgid "Do not continue from existing checkpoints"
+msgstr "既存checkpointから継続しない"
+
+#: ../../../<autoprogram>:1
+msgid "GROMACS executable; FEP/REST defaults to the setup executable"
+msgstr "GROMACS実行ファイル。FEP/RESTではデフォルトでsetup時の実行ファイルを使用する"
+
+#: ../../reference/utilities.rst:61
+msgid "shell_hook"
+msgstr "shell_hook"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx shell_hook"
+msgstr "mdtbx shell_hook"
+
+#: ../../reference/utilities.rst:69
+msgid "show_mdtraj"
+msgstr "show_mdtraj"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx show_mdtraj"
+msgstr "mdtbx show_mdtraj"
+
+#: ../../../<autoprogram>:1
+msgid "Topology file (.gro, .pdb)"
+msgstr "トポロジーファイル（.gro、.pdb）"
+
+#: ../../reference/utilities.rst:77
+msgid "show_npy"
+msgstr "show_npy"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx show_npy"
+msgstr "mdtbx show_npy"
+
+#: ../../../<autoprogram>:1
+msgid "npy file"
+msgstr "npyファイル"

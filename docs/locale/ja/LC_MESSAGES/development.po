@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../development.rst:2
+msgid "Development guide"
+msgstr "開発ガイド"
+
+#: ../../development.rst:5
+msgid "Repository structure"
+msgstr "リポジトリ構成"
+
+#: ../../development.rst:7
+msgid "The Python package is organized by command category:"
+msgstr "Python packageはコマンドカテゴリ別に構成されています。"
+
+#: ../../development.rst:22
+msgid ""
+"``src.cli`` scans the five category packages at startup. A module becomes a subcommand"
+" when it exposes ``add_subcmd``. Helper modules without that function are skipped."
+msgstr ""
+"``src.cli`` は起動時に5つのカテゴリpackageを走査します。 ``add_subcmd`` "
+"を公開するmoduleがサブコマンドとして登録され、この関数を持たないhelper moduleはスキップされます。"
+
+#: ../../development.rst:27
+msgid "Add a command"
+msgstr "コマンドの追加"
+
+#: ../../development.rst:29
+msgid "Place the module in the appropriate category and implement two functions:"
+msgstr "moduleを適切なカテゴリへ配置し、2つの関数を実装します。"
+
+#: ../../development.rst:45
+msgid ""
+"Keep the command focused on one operation. Reuse parsers and process helpers from "
+"``src.utils``. Avoid changing ``src.cli`` because registration is automatic."
+msgstr ""
+"コマンドは1つの処理に限定します。 ``src.utils`` のparserとprocess helperを再利用してください。登録は自動なので ``src.cli`` "
+"を変更する必要はありません。"
+
+#: ../../development.rst:49
+msgid ""
+"Add tests for parsing, normal behavior, failure behavior, and external command "
+"construction. External tools should be mocked where practical."
+msgstr "parse、正常動作、失敗時動作、外部コマンド構築のtestを追加します。可能な場合は外部ツールをmockしてください。"
+
+#: ../../development.rst:53
+msgid "Development commands"
+msgstr "開発用コマンド"
+
+#: ../../development.rst:63
+msgid ""
+"The full test suite can require packages from the locked environment but should not "
+"require an actual production simulation."
+msgstr "全test suiteではロック済み環境のpackageを使用できますが、実際のproduction simulationは必要としないでください。"
+
+#: ../../development.rst:67
+msgid "Compatibility"
+msgstr "互換性"
+
+#: ../../development.rst:69
+msgid ""
+"The project currently fixes Python to version 3.10 and supports Linux x86-64, macOS "
+"Apple silicon, and macOS Intel. Preserve command-line compatibility when changing "
+"option names or defaults. Update the workflow guides, command tests, and example "
+"scripts together when behavior changes."
+msgstr ""
+"現在のPythonは3.10に固定され、Linux x86-64、Apple "
+"silicon搭載macOS、Intel搭載macOSをサポートします。オプション名やデフォルトを変更する場合はCLI互換性を維持してください。挙動を変更するときは、ワークフローガイド、コマンドtest、example"
+" scriptも同時に更新します。"
+
+#: ../../development.rst:75
+msgid "Documentation coverage"
+msgstr "ドキュメントの網羅性"
+
+#: ../../development.rst:77
+msgid ""
+"The command-reference test compares registered parser commands with "
+"``:start_command:`` entries under ``docs/reference``. A new command is not complete "
+"until it appears in the appropriate reference page and its user-facing workflow "
+"documentation is updated when applicable."
+msgstr ""
+"コマンドリファレンスtestは登録済みparser commandと ``docs/reference`` 以下の ``:start_command:`` "
+"項目を比較します。新しいコマンドは、適切なリファレンスページへ掲載し、必要に応じて利用者向けワークフロードキュメントを更新するまで完成ではありません。"

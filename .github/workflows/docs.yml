@@ -1,0 +1,83 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/docs.yml"
+      - "docs/**"
+      - "src/**"
+      - "tests/test_cli.py"
+      - "tests/test_docs.py"
+      - "pyproject.toml"
+      - "pixi.lock"
+  pull_request:
+    paths:
+      - ".github/workflows/docs.yml"
+      - "docs/**"
+      - "src/**"
+      - "tests/test_cli.py"
+      - "tests/test_docs.py"
+      - "pyproject.toml"
+      - "pixi.lock"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      pages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Pixi
+        uses: prefix-dev/setup-pixi@v0.10.0
+        with:
+          pixi-version: v0.70.1
+          environments: docs
+          frozen: true
+          cache: true
+
+      - name: Test CLI documentation coverage
+        run: pixi run -e docs pytest tests/test_cli.py tests/test_docs.py
+
+      - name: Build English and Japanese documentation
+        run: pixi run -e docs docs
+
+      - name: Check documentation links
+        run: pixi run -e docs docs-linkcheck
+
+      - name: Configure GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/_build/html
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

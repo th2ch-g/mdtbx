@@ -1,0 +1,214 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the mdtbx package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mdtbx 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-27 01:38+0900\n"
+"PO-Revision-Date: 2026-07-27 00:00+0900\n"
+"Last-Translator: mdtbx contributors\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../reference/cv.rst:2
+msgid "Collective-variable commands"
+msgstr "集団変数コマンド"
+
+#: ../../reference/cv.rst:5
+msgid "comdist"
+msgstr "comdist"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx comdist"
+msgstr "mdtbx comdist"
+
+#: ../../../<autoprogram>:1
+msgid "options"
+msgstr "オプション"
+
+#: ../../../<autoprogram>:1
+msgid "show this help message and exit"
+msgstr "このヘルプを表示して終了する"
+
+#: ../../../<autoprogram>:1
+msgid "Topology file (.gro, .pdb)"
+msgstr "トポロジーファイル（.gro、.pdb）"
+
+#: ../../../<autoprogram>:1
+msgid "Trajectory file (.xtc, .trr)"
+msgstr "トラジェクトリファイル（.xtc、.trr）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection 1 (MDtraj Atom selection language)"
+msgstr "selection 1（MDTraj原子選択言語）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection 2 (MDtraj Atom selection language)"
+msgstr "selection 2（MDTraj原子選択言語）"
+
+#: ../../../<autoprogram>:1
+msgid "Output file (.npy)"
+msgstr "出力ファイル（.npy）"
+
+#: ../../../<autoprogram>:1
+msgid "Use Gromacs instead of MDtraj"
+msgstr "MDTrajの代わりにGROMACSを使用する"
+
+#: ../../../<autoprogram>:1
+msgid "Index file (.ndx)"
+msgstr "indexファイル（.ndx）"
+
+#: ../../reference/cv.rst:13
+msgid "comvec"
+msgstr "comvec"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx comvec"
+msgstr "mdtbx comvec"
+
+#: ../../../<autoprogram>:1
+msgid "Use gmx instead of MDtraj"
+msgstr "MDTrajの代わりにgmxを使用する"
+
+#: ../../reference/cv.rst:21
+msgid "contactmap"
+msgstr "contactmap"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx contactmap"
+msgstr "mdtbx contactmap"
+
+#: ../../../<autoprogram>:1
+msgid "Trajectory file (.xtc, .trr). If omitted, coordinates are read from topology"
+msgstr "trajectoryファイル（.xtc、.trr）。省略時はtopologyから座標を読み込む"
+
+#: ../../../<autoprogram>:1
+msgid "MDtraj selection for representative atoms (typically one atom per residue)"
+msgstr "代表原子のMDTraj selection（通常は残基ごとに1原子）"
+
+#: ../../../<autoprogram>:1
+msgid "Contact cutoff in angstrom"
+msgstr "contact cutoff［angstrom］"
+
+#: ../../reference/cv.rst:29
+msgid "densmap"
+msgstr "densmap"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx densmap"
+msgstr "mdtbx densmap"
+
+#: ../../../<autoprogram>:1
+msgid ""
+"Selection. MDtraj Atom selection language for the MDtraj path; with --gmx this must be"
+" a Gromacs index group name or number"
+msgstr "selection。MDTraj pathではMDTraj原子選択言語、--gmxではGROMACS index group名または番号"
+
+#: ../../../<autoprogram>:1
+msgid "Number of bins along each axis"
+msgstr "各軸のbin数"
+
+#: ../../../<autoprogram>:1
+msgid "Projection plane (MDtraj path only)"
+msgstr "投影平面（MDTraj pathのみ）"
+
+#: ../../reference/cv.rst:37
+msgid "distmap"
+msgstr "distmap"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx distmap"
+msgstr "mdtbx distmap"
+
+#: ../../reference/cv.rst:45
+msgid "mindist"
+msgstr "mindist"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx mindist"
+msgstr "mdtbx mindist"
+
+#: ../../reference/cv.rst:53
+msgid "pca"
+msgstr "pca"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx pca"
+msgstr "mdtbx pca"
+
+#: ../../../<autoprogram>:1
+msgid "Reference structure file (.gro, .pdb)"
+msgstr "参照構造ファイル（.gro、.pdb）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection for trajectory (MDtraj Atom selection language)"
+msgstr "trajectory用selection（MDTraj原子選択言語）"
+
+#: ../../../<autoprogram>:1
+msgid "Selection for reference (MDtraj Atom selection language)"
+msgstr "参照構造用selection（MDTraj原子選択言語）"
+
+#: ../../../<autoprogram>:1
+msgid "Use gmx"
+msgstr "gmxを使用する"
+
+#: ../../../<autoprogram>:1
+msgid "Number of components"
+msgstr "component数"
+
+#: ../../../<autoprogram>:1
+msgid "Output PCA metadata file (.npz)"
+msgstr "PCA metadata出力ファイル（.npz）"
+
+#: ../../../<autoprogram>:1
+msgid "Output average structure file (.pdb, .gro)"
+msgstr "平均構造出力ファイル（.pdb、.gro）"
+
+#: ../../reference/cv.rst:61
+msgid "rmsd"
+msgstr "rmsd"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx rmsd"
+msgstr "mdtbx rmsd"
+
+#: ../../reference/cv.rst:69
+msgid "rmsf"
+msgstr "rmsf"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx rmsf"
+msgstr "mdtbx rmsf"
+
+#: ../../../<autoprogram>:1
+msgid "Selection"
+msgstr "selection"
+
+#: ../../../<autoprogram>:1
+msgid "Resolution for RMSF"
+msgstr "RMSFのresolution"
+
+#: ../../../<autoprogram>:1
+msgid "Use gmx rmsf"
+msgstr "gmx rmsfを使用する"
+
+#: ../../reference/cv.rst:77
+msgid "xyz"
+msgstr "xyz"
+
+#: ../../../<autoprogram>:1
+msgid "mdtbx xyz"
+msgstr "mdtbx xyz"
+
+#: ../../../<autoprogram>:1
+msgid "Selection (MDtraj Atom selection language)"
+msgstr "selection（MDTraj原子選択言語）"
