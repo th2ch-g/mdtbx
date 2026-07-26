@@ -70,6 +70,7 @@ def test_all_subcommands_registered():
         "cmd",
         "build_solution",
         "build_vacuum",
+        "relax_water",
         "place_solvent",
         "contactmap",
         "comdist",
