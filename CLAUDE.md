@@ -5,14 +5,17 @@ when working with code in this repository.
 
 ## Overview
 
-`mdtbx` はMDシミュレーション用のツールボックス。系の構築・シミュレーション実行・軌跡解析・自由エネルギー計算をサポートするCLIツール。
+`mdtbx` is a CLI toolbox for molecular dynamics simulations. It supports
+system preparation, simulation execution, trajectory analysis, and free-energy
+calculations.
 
-依存ツール: AMBER, PyMOL, OpenBabel, Gromacs, Gaussian16
-力場: ff14SB, TIP3P, GAFF2, Lipid21, GLYCAM06-j
+External tools: AMBER, PyMOL, Open Babel, GROMACS, Gaussian 16
+Force fields: ff14SB, TIP3P, GAFF2, Lipid21, GLYCAM06-j
 
-## 設計哲学
+## Design principles
 
-各サブコマンドは**1つの機能のみ**を担当し、なるべく小さく保つ。複雑なタスクは複数サブコマンドを連携させて実現する。
+Keep every subcommand small and focused on **one function**. Build complex
+workflows by combining multiple subcommands.
 
 ```bash
 # Good: combine small subcommands to build a pipeline
@@ -23,116 +26,126 @@ pixi run mdtbx fit --trajectory md.xtc --output fitted.xtc
 pixi run mdtbx rmsd --trajectory fitted.xtc --output rmsd.npy
 ```
 
-新しいサブコマンドを追加する際は「既存コマンドの組み合わせで実現できないか」を先に検討すること。
+Before adding a subcommand, first consider whether the feature can be built by
+combining existing commands.
 
-## 開発コマンド
+## Development commands
 
 ```bash
-# 環境構築
+# Set up the environment
 pixi install
 
-# CLIの実行
+# Run the CLI
 pixi run mdtbx <subcommand>
-pixi run gmx ...           # gromacs gmx バイナリを直接実行(pixi環境のgromacsを使用)
+pixi run gmx ...           # Run the GROMACS binary from the pixi environment
 
-# テスト
-pixi run test              # 全テスト実行
-pixi run test-fast         # 最初の失敗で停止 (-x)
+# Test
+pixi run test              # Run the full test suite
+pixi run test-fast         # Stop after the first failure (-x)
 
-# コードフォーマット・Lint
-pixi run r                 # ruff format + ruff check を一括実行
-pixi run ruff-format       # フォーマットのみ
-pixi run ruff-lint         # Lintのみ
-pre-commit run --all-files # 全pre-commitフックを実行
+# Format and lint
+pixi run r                 # Run ruff format and ruff check
+pixi run ruff-format       # Format only
+pixi run ruff-lint         # Lint only
+pre-commit run --all-files # Run all pre-commit hooks
 
-# 更新
-pixi run update            # git pull && pixi install
+# Update
+pixi run update            # Run git pull and pixi install
 
-# PyMOL設定
-pixi run pymolrc           # ~/.pymolrcを生成
+# Configure PyMOL
+pixi run pymolrc           # Generate ~/.pymolrc
 
-# JupyterLab (リモート)
+# JupyterLab on a remote host
 pixi run jupyter_remote
 ```
 
-## アーキテクチャ
+## Architecture
 
 ```text
 src/
-  __main__.py    # エントリポイント: main() -> cli()
-  cli.py         # サブコマンドの自動登録(pkgutil走査)・ディスパッチ
-  config.py      # グローバル定数(水密度、Gaussian設定、MAXWARN等)
-  logger.py      # ロガー生成ユーティリティ
-  utils/         # 汎用ユーティリティ(mod_mdp, convert, rmfile, cmd, shell_hook, show_mdtraj, show_npy, partial_tempering)
-               # ※ サブコマンドでない共有ライブラリ/ヘルパ(add_subcmd なし=自動登録の対象外):
+  __main__.py    # Entry point: main() -> cli()
+  cli.py         # Automatic subcommand discovery and dispatch via pkgutil
+  config.py      # Global constants such as water density, Gaussian settings, and MAXWARN
+  logger.py      # Logger factory
+  utils/         # General utilities and commands (mod_mdp, convert, rmfile, cmd, shell_hook,
+                 # show_mdtraj, show_npy, partial_tempering, run_fep, run_abfe)
+                 # Shared libraries without add_subcmd are not registered as commands:
                #   atom_selection_parser, parse_top, proc(run_cmd), tleap(run_tleap),
-               #   gmx(gmx_index_flag/to_gmx_index/gmx_tempfile), pymol_session, common_args
-  build/         # 系構築サブコマンド(addace, addh, addnme, add_ndx, mv_crds_mol2, calc_ion_conc, centering_gro,
-               #   find_bond, gen_am1bcc, gen_resp, gen_modres_am1bcc, gen_modres_resp, gen_posres,
-               #   gen_distres, modeling_cf, amb2gro, build_solution, build_vacuum, place_solvent,
-               #   gen_temperatures, mutate)
-  trajectory/    # 軌跡処理サブコマンド(fit, trjcat, pacs_trjcat, print_perf, opt_perf)
-  analysis/      # 解析サブコマンド(extract_str, extract_ave_str)
-  cv/            # Collective Variable計算(comdist, comvec, densmap, mindist, rmsd, rmsf, xyz, pca,
-               #   contactmap, distmap)
+                 #   gmx(gmx_index_flag/to_gmx_index/gmx_tempfile), pymol_session,
+                 #   common_args, fep, fep_rest, abfe
+  build/         # System-building commands (addace, addh, addnme, add_ndx, mv_crds_mol2,
+                 # calc_ion_conc, centering_gro, find_bond, gen_am1bcc, gen_resp,
+                 # gen_modres_am1bcc, gen_modres_resp, gen_posres, gen_distres,
+                 # modeling_cf, amb2gro, build_solution, build_vacuum, place_solvent,
+                 # gen_temperatures, mutate, setup_fep, setup_fep_rest, setup_abfe)
+  trajectory/    # Trajectory commands (fit, trjcat, pacs_trjcat, print_perf, opt_perf)
+  analysis/      # Analysis commands (extract_str, extract_ave_str, analyze_fep,
+                 # analyze_fep_rest, analyze_abfe)
+  cv/            # Collective-variable commands (comdist, comvec, densmap, mindist, rmsd,
+                 # rmsf, xyz, pca, contactmap, distmap)
 
 tests/
-  conftest.py    # 共有fixture・PyMOLモック設定
-  fixtures/      # テストデータ(sample.mdp, sample.top, sample.pdb)
-  test_utils/    # src/utils/ のテスト
-  test_build/    # src/build/ のテスト
-  test_trajectory/ # src/trajectory/ のテスト
-  test_analysis/ # src/analysis/ のテスト
-  test_cv/       # src/cv/ のテスト
-  test_cli.py    # 全サブコマンドのCLI登録確認
+  conftest.py      # Shared fixtures and PyMOL mocks
+  fixtures/        # Test data such as sample.mdp, sample.top, and sample.pdb
+  test_utils/      # Tests for src/utils/
+  test_build/      # Tests for src/build/
+  test_trajectory/ # Tests for src/trajectory/
+  test_analysis/   # Tests for src/analysis/
+  test_cv/         # Tests for src/cv/
+  test_cli.py      # CLI registration tests for all subcommands
 
 pymol-plugins/
-  pymol_plugins/ # PyMOLプラグイン(builder, visualizer, selector等)
+  pymol_plugins/ # PyMOL plugins such as builders, visualizers, and selectors
 
-example/         # 用途別のサンプルノートブック・スクリプト
-install_scripts/ # Gromacs/PLUMED等の手動インストールスクリプト
+example/         # Example notebooks and scripts organized by use case
+install_scripts/ # Manual installation scripts for GROMACS, PLUMED, and related tools
 ```
 
-### サブコマンドの追加パターン
+### Subcommand pattern
 
-各モジュール(`src/build/*.py`, `src/trajectory/*.py`, `src/analysis/*.py`,
-`src/cv/*.py`, `src/utils/*.py`)は以下の2関数を実装する:
+Each command module under `src/build/`, `src/trajectory/`, `src/analysis/`,
+`src/cv/`, or `src/utils/` implements these two functions:
 
 ```python
 def add_subcmd(subparsers):
-    # argparse サブコマンドの引数定義
+    # Define the argparse subcommand and its arguments
 
 def run(args):
-    # 実装本体
+    # Implement the command
 ```
 
-`cli.py` は起動時に各カテゴリパッケージ(`build`/`trajectory`/`analysis`/`cv`/`utils`)を
-走査し、`add_subcmd` を持つモジュールを**自動登録**する。新サブコマンドは正しいディレクトリに
-モジュールを置くだけで登録され、`cli.py` の編集は不要(`add_subcmd` を持たないライブラリ/
-ヘルパは自動的にスキップされる)。
+At startup, `cli.py` scans the category packages
+(`build`/`trajectory`/`analysis`/`cv`/`utils`) and **automatically registers**
+modules that expose `add_subcmd`. Adding a command only requires placing its
+module in the correct directory; `cli.py` does not need to change. Libraries
+and helpers without `add_subcmd` are skipped.
 
-モジュール内で共有ヘルパ・パーサーを使う場合は `..utils.` で参照する:
+Import shared helpers and parsers through `..utils`:
 
 ```python
 from ..utils.atom_selection_parser import AtomSelector
 from ..utils.parse_top import GromacsTopologyParser
-from ..utils.proc import run_cmd                 # subprocess 実行 + 成功ログ
-from ..utils.tleap import run_tleap              # tleap.in 書込→実行→後片付け
+from ..utils.proc import run_cmd                 # Run subprocesses and log success
+from ..utils.tleap import run_tleap              # Write tleap.in, run tleap, and clean up
 from ..utils.gmx import gmx_index_flag, to_gmx_index, gmx_tempfile
-from ..utils.pymol_session import pymol_session  # cmd を渡して reinitialize+load
+from ..utils.pymol_session import pymol_session  # Reinitialize PyMOL and load a structure
 from ..utils.common_args import add_topology_arg, add_trajectory_arg, add_output_arg
 ```
 
-### 設定 (`src/config.py`)
+### Configuration (`src/config.py`)
 
-- `MAXWARN`: grompp の最大警告数
-- `GAUSSIAN_CMD`, `STRUCTURE_OPTIMIZATION`, `SINGLE_POINT_CALCULATION`: Gaussian設定
-- 各水モデル(TIP3P/TIP4P/TIP5P/OPC)の密度・体積定数
-- ※ PATH への `.pixi/envs/default/bin` 追加と `pymol_plugins` 読込の副作用は `src/__init__.py` に集約済み(config.py は定数のみ)
+- `MAXWARN`: maximum number of warnings accepted by `grompp`
+- `GAUSSIAN_CMD`, `STRUCTURE_OPTIMIZATION`, and
+  `SINGLE_POINT_CALCULATION`: Gaussian settings
+- Density and molecular-volume constants for TIP3P, TIP4P, TIP5P, and OPC water
+  models
+- Side effects that add `.pixi/envs/default/bin` to `PATH` and load
+  `pymol_plugins` are isolated in `src/__init__.py`; `config.py` contains
+  constants only.
 
-## 環境管理
+## Environment management
 
-- パッケージ管理: `pixi`(conda + pip の混在)
-- Python: 3.10固定
-- `pixi.lock` で再現性を保証
-- Docker対応: `Dockerfile` でコンテナビルドも可能
+- Package management: `pixi` with both conda and pip dependencies
+- Python version: fixed at 3.10
+- Reproducibility: maintained through `pixi.lock`
+- Container support: build with `Dockerfile`

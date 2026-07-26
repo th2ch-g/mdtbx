@@ -21,8 +21,8 @@ Toolbox for MD simulation
   - [x] REST
   - [x] REUS
   - [x] US
-  - [ ] FEP
-  - [ ] FEP/REST
+  - [x] FEP
+  - [x] FEP/REST
   - [x] AWH
   - [ ] WT-Metadynamics
   - [ ] OPES
@@ -37,7 +37,8 @@ Toolbox for MD simulation
   - [ ] MMPBSA
   - [x] MBAR
   - [x] WHAM
-  - [ ] BAR
+  - [x] BAR
+  - [x] ABFE
   - [ ] Zwanzig(FEP)
   - [ ] TI
   - [ ] Jarzynski Equality
@@ -148,4 +149,19 @@ pixi run mdtbx trjcat -n 10 --prefix prd -o fitted.xtc \
 pixi run mdtbx place_solvent -p leap.parm7 -x leap.rst7 \
   --solvent-model cSPCE --xvv-output cSPCE_300.xvv \
   -o placed_water.pdb
+
+# Prepare, run, and analyze a standard GROMACS decoupling calculation.
+pixi run mdtbx setup_fep -f example/mdp/solution/prd.mdp \
+  -p gmx.top -c equilibrated.gro --moltype LIG -o fep
+pixi run mdtbx run_fep --path fep
+pixi run mdtbx analyze_fep --path fep -b 2000
+
+# Prepare and run PLUMED FEP/REST with the installer-provided gmx_mpi.
+pixi run mdtbx setup_fep_rest -f run.mdp -p hybrid.top \
+  -c equilibrated.gro --replicas 32 -o fep_rest
+pixi run mdtbx run_fep --path fep_rest --multidir --replex 1000
+pixi run mdtbx analyze_fep_rest --path fep_rest -b 2000
 ```
+
+See [`example/fep/README.md`](example/fep/README.md) for standard FEP and
+FEP/REST, and [`example/abfe/README.md`](example/abfe/README.md) for ABFE.
