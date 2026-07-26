@@ -1,6 +1,8 @@
 import argparse
+import math
 import re
 from pathlib import Path
+
 import polars as pl
 
 from ..logger import generate_logger
@@ -36,8 +38,14 @@ def add_subcmd(subparsers):
     parser.set_defaults(func=run)
 
 
-def parse_log_file(log_path):
-    data = {
+def _value_after_colon(line: str) -> str | None:
+    _, separator, value = line.partition(":")
+    value = value.strip()
+    return value if separator and value else None
+
+
+def parse_log_file(log_path: str | Path) -> dict[str, str | float | None] | None:
+    data: dict[str, str | float | None] = {
         "cmd": "N/A",
         "version": "N/A",
         "executable": "N/A",
@@ -49,46 +57,76 @@ def parse_log_file(log_path):
     }
 
     try:
-        with open(log_path, "r") as f:
+        with Path(log_path).open(errors="replace") as f:
             lines = f.readlines()
-
-        for i, line in enumerate(lines):
-            if "Command line" in line:
-                if i + 1 < len(lines):
-                    cmd_full = lines[i + 1].strip()
-                    # Remove -deffnm option and its argument, which often vary between runs
-                    cmd_normalized = re.sub(r"-deffnm\s+\S+", "", cmd_full).strip()
-                    # Replace multiple spaces with a single space
-                    cmd_normalized = re.sub(r"\s\s+", " ", cmd_normalized)
-                    data["cmd"] = cmd_normalized
-            elif "GROMACS version:" in line:
-                data["version"] = line.split()[2]
-            elif "Executable:" in line:
-                data["executable"] = line.split()[1]
-            elif "Hardware detected on host" in line:
-                data["hostname"] = line.split()[4].split(":")[0]
-            elif "GPU info:" in line:
-                if i + 2 < len(lines):
-                    n_gpu_line = lines[i + 1].strip()
-                    gpu_info_line = lines[i + 2].strip()
-                    data["n_GPU"] = n_gpu_line.split()[4]
-                    data["GPU_info"] = gpu_info_line
-            elif "CPU info:" in line:
-                if i + 2 < len(lines):
-                    cpu_info_line = lines[i + 2].strip()
-                    data["CPU_info"] = " ".join(cpu_info_line.split()[1:])
-            elif "Performance:" in line:
-                data["performance"] = float(line.split()[1])
-
-    except (OSError, IndexError, ValueError) as e:
-        LOGGER.error(f"Error parsing {log_path}: {e}")
+    except OSError as exc:
+        LOGGER.error("Error reading %s: %s", log_path, exc)
         return None
+
+    for i, line in enumerate(lines):
+        if "Command line" in line and i + 1 < len(lines):
+            cmd_full = lines[i + 1].strip()
+            cmd_normalized = re.sub(r"(?:^|\s)-deffnm(?:\s+\S+|=\S+)", " ", cmd_full)
+            data["cmd"] = " ".join(cmd_normalized.split()) or "N/A"
+        elif "GROMACS version:" in line:
+            data["version"] = _value_after_colon(line) or "N/A"
+        elif "Executable:" in line:
+            data["executable"] = _value_after_colon(line) or "N/A"
+        elif "Hardware detected on host" in line:
+            match = re.search(r"Hardware detected on host\s+([^:\s]+)", line)
+            if match:
+                data["hostname"] = match.group(1)
+        elif "GPU info:" in line:
+            gpu_block = lines[i + 1 : i + 12]
+            gpu_descriptions = []
+            for gpu_line in gpu_block:
+                if "CPU info:" in gpu_line:
+                    break
+                count_match = re.search(r"Number of GPUs detected:\s*(\d+)", gpu_line)
+                if count_match:
+                    data["n_GPU"] = count_match.group(1)
+                if re.match(r"\s*GPU\s+\d+\s*:", gpu_line):
+                    gpu_descriptions.append(gpu_line.strip())
+            if gpu_descriptions:
+                data["GPU_info"] = "; ".join(gpu_descriptions)
+        elif "CPU info:" in line:
+            cpu_block = lines[i + 1 : i + 20]
+            for cpu_line in cpu_block:
+                if "Command line" in cpu_line:
+                    break
+                if "Model name:" in cpu_line:
+                    data["CPU_info"] = _value_after_colon(cpu_line) or "N/A"
+                    break
+        elif "Performance:" in line:
+            match = re.search(r"Performance:\s+(\S+)", line)
+            if not match:
+                continue
+            try:
+                performance = float(match.group(1))
+            except ValueError:
+                LOGGER.warning(
+                    "Ignoring malformed performance value in %s: %s",
+                    log_path,
+                    match.group(1),
+                )
+                continue
+            if math.isfinite(performance) and performance >= 0:
+                data["performance"] = performance
+            else:
+                LOGGER.warning(
+                    "Ignoring non-finite or negative performance in %s: %s",
+                    log_path,
+                    match.group(1),
+                )
 
     return data
 
 
 def run(args):
-    log_files = list(Path(args.path).glob(f"{args.prefix}*.log"))
+    log_dir = Path(args.path)
+    log_files = sorted(
+        path for path in log_dir.glob("*.log") if path.name.startswith(args.prefix)
+    )
     if not log_files:
         LOGGER.warning(f"No log files with prefix '{args.prefix}' found in {args.path}")
         return
@@ -110,7 +148,7 @@ def run(args):
         .agg(
             pl.mean("performance").alias("mean_perf"),
             pl.std("performance").alias("std_perf"),
-            pl.count("performance").alias("count"),
+            pl.len().alias("count"),
             pl.first("version"),
             pl.first("hostname"),
             pl.first("n_GPU"),
@@ -137,7 +175,11 @@ def run(args):
 
     if args.output:
         try:
-            agg_df.write_csv(args.output)
-            LOGGER.info(f"Performance data successfully saved to {args.output}")
-        except IOError as e:
-            LOGGER.error(f"Error writing to file {args.output}: {e}")
+            output_path = Path(args.output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            agg_df.write_csv(output_path)
+            LOGGER.info("Performance data successfully saved to %s", output_path)
+        except OSError as exc:
+            raise RuntimeError(
+                f"Failed to write performance data to {args.output}: {exc}"
+            ) from exc

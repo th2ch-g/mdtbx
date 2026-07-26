@@ -3,7 +3,8 @@ import csv
 import json
 import math
 import os
-import sys
+import string
+import subprocess
 from pathlib import Path
 
 import optuna
@@ -13,6 +14,16 @@ from ..utils.proc import run_cmd
 from .print_perf import parse_log_file
 
 LOGGER = generate_logger(__name__)
+
+COMMAND_FIELDS = {
+    "trial_dir",
+    "log_path",
+    "n_gpu",
+    "n_core",
+    "ntomp",
+    "ntmpi",
+    "gpu_ids",
+}
 
 
 def add_subcmd(subparsers):
@@ -97,7 +108,7 @@ def add_subcmd(subparsers):
         nargs="+",
         type=int,
         default=[1],
-        help="Candidate numbers of GPUs",
+        help="Candidate numbers of GPUs (use 0 for CPU-only trials)",
     )
     parser.add_argument(
         "--n-core",
@@ -149,11 +160,14 @@ def add_subcmd(subparsers):
     parser.set_defaults(func=run)
 
 
-def _validate_candidates(name: str, values: list[int]) -> list[int]:
+def _validate_candidates(
+    name: str, values: list[int], *, minimum: int = 1
+) -> list[int]:
     if not values:
         raise ValueError(f"{name} candidates must not be empty")
-    if any(v < 1 for v in values):
-        raise ValueError(f"{name} candidates must be positive integers")
+    if any(v < minimum for v in values):
+        requirement = "non-negative" if minimum == 0 else "positive"
+        raise ValueError(f"{name} candidates must be {requirement} integers")
     return sorted(set(values))
 
 
@@ -184,11 +198,13 @@ def _make_sampler(args):
 
 
 def _resolve_n_trials(args) -> int:
-    if args.n_trials is not None:
-        return args.n_trials
-    if args.sampler == "grid":
-        return _grid_size(args)
-    return 20
+    if args.n_trials is None:
+        n_trials = _grid_size(args) if args.sampler == "grid" else 20
+    else:
+        n_trials = args.n_trials
+    if n_trials < 1:
+        raise ValueError("--n-trials must be positive")
+    return n_trials
 
 
 def _resolve_mpi_mode(args) -> str:
@@ -216,6 +232,36 @@ def _build_command_template(args) -> str:
     return command
 
 
+def _validate_command_template(command: str) -> None:
+    """Reject empty templates and unknown format fields before optimization."""
+    if not command.strip():
+        raise ValueError("Command template must not be empty")
+    try:
+        fields = {
+            field_name
+            for _, field_name, _, _ in string.Formatter().parse(command)
+            if field_name is not None
+        }
+    except ValueError as exc:
+        raise ValueError(f"Invalid command template: {exc}") from exc
+    unknown = fields - COMMAND_FIELDS
+    if unknown:
+        names = ", ".join(sorted(unknown))
+        raise ValueError(f"Unknown command template field(s): {names}")
+
+
+def _validate_log_name(log_name: str) -> None:
+    """Require a plain filename so every log remains inside its trial directory."""
+    path = Path(log_name)
+    if (
+        not log_name
+        or path.is_absolute()
+        or len(path.parts) != 1
+        or log_name in {".", ".."}
+    ):
+        raise ValueError("--log-name must be a filename without directory components")
+
+
 def _gpu_id_list(n_gpu: int) -> list[int]:
     return list(range(n_gpu))
 
@@ -225,9 +271,14 @@ def _gpu_ids(n_gpu: int) -> str:
 
 
 def _format_command(
-    args, params: dict[str, int], trial_dir: Path, log_path: Path
+    args,
+    params: dict[str, int],
+    trial_dir: Path,
+    log_path: Path,
+    command_template: str | None = None,
 ) -> str:
-    return _build_command_template(args).format(
+    template = command_template or _build_command_template(args)
+    return template.format(
         trial_dir=trial_dir,
         log_path=log_path,
         n_gpu=params["n_gpu"],
@@ -261,6 +312,7 @@ def _completed_trial_records(study: optuna.Study) -> list[dict[str, object]]:
 def _write_history(path: Path, records: list[dict[str, object]]) -> None:
     if not records:
         return
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as fh:
         writer = csv.DictWriter(
             fh,
@@ -280,16 +332,25 @@ def _write_history(path: Path, records: list[dict[str, object]]) -> None:
 
 
 def run(args):
-    args.n_gpu = _validate_candidates("n_gpu", args.n_gpu)
+    args.n_gpu = _validate_candidates("n_gpu", args.n_gpu, minimum=0)
     args.n_core = _validate_candidates("n_core", args.n_core)
     args.ntomp = _validate_candidates("ntomp", args.ntomp)
     args.ntmpi = _validate_candidates("ntmpi", args.ntmpi)
+
+    n_trials = _resolve_n_trials(args)
+    command_template = _build_command_template(args)
+    _validate_command_template(command_template)
+    _validate_log_name(args.log_name)
+
+    output_path = Path(args.output).expanduser().resolve()
+    history_path = Path(args.history_output).expanduser().resolve()
+    if output_path == history_path:
+        raise ValueError("--output and --history-output must be different files")
 
     workdir = Path(args.workdir).expanduser().resolve()
     workdir.mkdir(parents=True, exist_ok=True)
 
     sampler = _make_sampler(args)
-    n_trials = _resolve_n_trials(args)
     study = optuna.create_study(direction="maximize", sampler=sampler)
 
     def objective(trial: optuna.Trial) -> float:
@@ -303,7 +364,13 @@ def run(args):
         trial_dir = workdir / f"trial_{trial.number:04d}"
         trial_dir.mkdir(parents=True, exist_ok=True)
         log_path = trial_dir / args.log_name
-        command = _format_command(args, params, trial_dir, log_path)
+        command = _format_command(
+            args,
+            params,
+            trial_dir,
+            log_path,
+            command_template=command_template,
+        )
 
         env = os.environ.copy()
         env["OMP_NUM_THREADS"] = str(params["ntomp"])
@@ -329,20 +396,31 @@ def run(args):
             params["ntmpi"],
         )
 
-        run_cmd(command, cwd=trial_dir, env=env)
+        try:
+            run_cmd(command, cwd=trial_dir, env=env)
+        except subprocess.CalledProcessError as exc:
+            message = f"Command exited with status {exc.returncode}"
+            trial.set_user_attr("error", message)
+            raise optuna.TrialPruned(message) from exc
 
         parsed = parse_log_file(log_path)
         if parsed is None or parsed["performance"] is None:
-            raise ValueError(f"Failed to read performance from {log_path}")
-        return float(parsed["performance"])
+            message = f"Failed to read performance from {log_path}"
+            trial.set_user_attr("error", message)
+            raise optuna.TrialPruned(message)
+        performance = float(parsed["performance"])
+        if not math.isfinite(performance):
+            message = f"Performance is not finite in {log_path}"
+            trial.set_user_attr("error", message)
+            raise optuna.TrialPruned(message)
+        return performance
 
     study.optimize(objective, n_trials=n_trials)
 
     if all(t.state != optuna.trial.TrialState.COMPLETE for t in study.trials):
-        LOGGER.error("No trial completed successfully; nothing to report")
-        sys.exit(1)
+        raise RuntimeError("No trial completed successfully; nothing to report")
     best_trial = study.best_trial
-    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
         json.dumps(
             {
@@ -357,7 +435,6 @@ def run(args):
         + "\n"
     )
 
-    history_path = Path(args.history_output)
     records = _completed_trial_records(study)
     _write_history(history_path, records)
 

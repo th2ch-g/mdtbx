@@ -93,3 +93,51 @@ class TestGromacsTopologyParser:
 
         assert parsed.get_all_moleculetypes() == ["Protein"]
         assert parsed.get_atoms_in("Protein")[0]["name"] == "CA"
+
+    def test_empty_topology_is_supported(self, tmp_path):
+        topology = tmp_path / "empty.top"
+        topology.write_text("")
+
+        parsed = GromacsTopologyParser(str(topology))
+
+        assert parsed.get_all_moleculetypes() == []
+
+    def test_section_names_are_case_insensitive(self, tmp_path):
+        topology = tmp_path / "uppercase.top"
+        topology.write_text(
+            "[ MOLECULETYPE ]\nProtein 3\n[ ATOMS ]\n1 CT 1 ALA CA 1 0.0 12.0\n"
+        )
+
+        parsed = GromacsTopologyParser(str(topology))
+
+        assert parsed.get_atoms_in("Protein")[0]["name"] == "CA"
+
+    def test_duplicate_moleculetype_raises(self, tmp_path):
+        topology = tmp_path / "duplicate.top"
+        topology.write_text(
+            "[ moleculetype ]\nProtein 3\n[ moleculetype ]\nProtein 3\n"
+        )
+
+        with pytest.raises(ValueError, match="Duplicate moleculetype"):
+            GromacsTopologyParser(str(topology))
+
+    def test_malformed_atom_record_reports_line(self, tmp_path):
+        topology = tmp_path / "malformed.top"
+        topology.write_text("[ moleculetype ]\nProtein 3\n[ atoms ]\n1 CT\n")
+
+        with pytest.raises(ValueError, match=r"malformed\.top:4"):
+            GromacsTopologyParser(str(topology))
+
+    def test_atoms_without_moleculetype_raises(self, tmp_path):
+        topology = tmp_path / "orphan-atoms.top"
+        topology.write_text("[ atoms ]\n1 CT 1 ALA CA\n")
+
+        with pytest.raises(ValueError, match="no preceding moleculetype"):
+            GromacsTopologyParser(str(topology))
+
+    def test_moleculetype_without_declaration_raises(self, tmp_path):
+        topology = tmp_path / "missing-name.top"
+        topology.write_text("[ moleculetype ]\n")
+
+        with pytest.raises(ValueError, match="declaration is missing"):
+            GromacsTopologyParser(str(topology))

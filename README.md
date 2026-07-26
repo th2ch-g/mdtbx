@@ -139,4 +139,9 @@ pixi run mdtbx mv_crds_mol2 -r reference.mol2 -c coordinates.mol2 \
 # Choose the final trajectory path and retain the pre-PBC concatenation.
 pixi run mdtbx trjcat -n 10 --prefix prd -o fitted.xtc \
   --keep-concatenated
+
+# Generate and retain a reusable solvent susceptibility file.
+pixi run mdtbx place_solvent -p leap.parm7 -x leap.rst7 \
+  --solvent-model cSPCE --xvv-output cSPCE_300.xvv \
+  -o placed_water.pdb
 ```

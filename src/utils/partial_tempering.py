@@ -1,9 +1,10 @@
 import argparse
 import re
+from pathlib import Path
 
+from ..logger import generate_logger
 from .atom_selection_parser import AtomSelector
 from .parse_top import GromacsTopologyParser
-from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
 
@@ -42,33 +43,37 @@ def run(args):
     selector = AtomSelector(args.selection)
     parser = GromacsTopologyParser(args.topology)
 
-    LOGGER.info(parser.all_moleculetypes)
-    LOGGER.info(selector.parsed_selection)
-
     all_moleculetypes = parser.get_all_moleculetypes()
-    LOGGER.info(f"all_moleculetypes: {all_moleculetypes}")
-
-    selected_atoms = []
+    selected_atoms: list[dict[str, str | int]] = []
 
     for moleculetype in all_moleculetypes:
-        LOGGER.info(f"moleculetype: {moleculetype}")
         atoms = parser.get_atoms_in(moleculetype)
         for atom in atoms:
-            # print(atom)
             if selector.eval(atom):
-                LOGGER.info(f"atom: {atom}")
-                # rename to ATOM_ from ATOM
                 selected_atoms.append(atom)
 
-    with open(args.topology) as f:
+    topology_path = Path(args.topology)
+    output_path = Path(args.output)
+    with topology_path.open() as f:
         lines = f.readlines()
 
+    updated_count = 0
     for atom in selected_atoms:
         atom_type = atom["atom_type"]
+        if not isinstance(atom_type, str) or atom_type.endswith("_"):
+            continue
         pattern = rf"^(\s*(?:\S+\s+){{1}}){re.escape(atom_type)}(?=\s|$)"
         replacement = rf"\g<1>{atom_type}_"
         atom_linenumber = atom["linenumber"]
-        lines[atom_linenumber] = re.sub(pattern, replacement, lines[atom_linenumber])
+        if not isinstance(atom_linenumber, int):
+            raise TypeError("Atom line number must be an integer")
+        lines[atom_linenumber], replacements = re.subn(
+            pattern, replacement, lines[atom_linenumber], count=1
+        )
+        updated_count += replacements
 
-    with open(args.output, "w") as f:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w") as f:
         f.writelines(lines)
+
+    LOGGER.info("Updated %d selected atoms in %s", updated_count, output_path)

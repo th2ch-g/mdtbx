@@ -1,9 +1,10 @@
 import argparse
 import shutil
+import tempfile
 from pathlib import Path
 
-from ..utils.proc import run_cmd
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
@@ -26,32 +27,51 @@ def add_subcmd(subparsers):
         "-s", "--sequence", required=True, type=str, help="amino acid sequence"
     )
 
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="results_modeled_cf",
+        type=str,
+        help="Output directory",
+    )
+
     parser.set_defaults(func=run)
 
 
 def run(args):
-    # colabfold command check
     if not shutil.which("colabfold_batch"):
-        LOGGER.error("colabfold_batch is not installed.")
-        exit(1)
+        raise RuntimeError("colabfold_batch is not installed")
 
-    # make input.fasta
-    with open("input.fasta", "w") as f:
-        f.write(">input\n")
-        f.write(args.sequence)
+    sequence = args.sequence.strip()
+    if not sequence:
+        raise ValueError("--sequence must not be empty")
 
-    # run colabfold with template
-    if args.input is None:
-        cmd = "colabfold_batch --num-models 1 input.fasta results_modeled_cf --amber"
-    else:
-        # make tmp directory for template input
-        Path("tmp_template").mkdir(parents=True, exist_ok=True)
-        shutil.copy(args.input, "tmp_template/temp.pdb")
-        LOGGER.info("tmp_template/temp.pdb copied")
-        cmd = "colabfold_batch --custom-template-path tmp_template/ --num-models 1 --templates input.fasta results_modeled_cf --amber"
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    run_cmd(cmd, log="results_modeled_cf/ generated")
+    with tempfile.TemporaryDirectory(prefix=".mdtbx_colabfold_", dir=".") as tmp:
+        temp_path = Path(tmp)
+        fasta_path = temp_path / "input.fasta"
+        fasta_path.write_text(f">input\n{sequence}\n")
 
-    Path("input.fasta").unlink(missing_ok=True)
-    shutil.rmtree("tmp_template", ignore_errors=True)
-    LOGGER.info("input.fasta and tmp_template/ removed")
+        command = [
+            "colabfold_batch",
+            "--num-models",
+            "1",
+        ]
+        if args.input is not None:
+            input_path = Path(args.input)
+            if not input_path.is_file():
+                raise FileNotFoundError(f"Template PDB not found: {input_path}")
+            template_dir = temp_path / "templates"
+            template_dir.mkdir()
+            shutil.copy2(input_path, template_dir / "template.pdb")
+            command.extend(
+                [
+                    "--custom-template-path",
+                    str(template_dir),
+                    "--templates",
+                ]
+            )
+        command.extend([str(fasta_path), str(output_path), "--amber"])
+        run_cmd(command, log=f"{output_path}/ generated")

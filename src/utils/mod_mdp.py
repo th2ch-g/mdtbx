@@ -38,41 +38,58 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    for mdp in Path(args.path).glob("*.mdp"):
-        key_skip = False
-        if args.exclude is not None:
-            for exclude in args.exclude:
-                if exclude in mdp.name:
-                    LOGGER.info(f"{mdp} excluded")
-                    key_skip = True
-                    break
-        if key_skip:
+    excluded_names = args.exclude or []
+    for mdp in sorted(Path(args.path).glob("*.mdp")):
+        if any(exclude in mdp.name for exclude in excluded_names):
+            LOGGER.info("%s excluded", mdp)
             continue
         mod_mdp(args.target_variable, args.new_value, mdp, args.ljust)
 
 
-def mod_mdp(target_variable, new_value, mdp, ljust):
-    new_lines = []
+def mod_mdp(
+    target_variable: str,
+    new_value: str,
+    mdp: str | Path,
+    ljust: int,
+) -> None:
+    if (
+        not target_variable
+        or target_variable != target_variable.strip()
+        or any(char in target_variable for char in "=\r\n;")
+    ):
+        raise ValueError("Target variable must be a non-empty MDP key")
+    if "\n" in new_value or "\r" in new_value:
+        raise ValueError("New value must be a single line")
+    if ljust < 0:
+        raise ValueError("ljust must be non-negative")
+
+    mdp_path = Path(mdp)
+    new_lines: list[str] = []
     added_key = False
-    with open(mdp) as f:
+    with mdp_path.open() as f:
         for line in f:
-            line_ = line.strip()
-            if line_.startswith(";"):
+            setting, comment_separator, comment = line.partition(";")
+            stripped_setting = setting.strip()
+            if not stripped_setting:
                 new_lines.append(line)
                 continue
-            key, sep, _rest = line_.partition("=")
+            key, sep, _rest = setting.partition("=")
             if sep and key.strip() == target_variable:
                 new_line = f"{key.rstrip()} = {new_value}\n"
+                if comment_separator:
+                    new_line = f"{key.rstrip()} = {new_value} ;{comment.rstrip()}\n"
                 new_lines.append(new_line)
                 added_key = True
             else:
                 new_lines.append(line)
 
     if not added_key:
+        if new_lines and not new_lines[-1].endswith("\n"):
+            new_lines[-1] += "\n"
         new_lines.append(f"{target_variable.ljust(ljust)} = {new_value}\n")
-        LOGGER.info(f"new variable {target_variable} added to {mdp}")
+        LOGGER.info("New variable %s added to %s", target_variable, mdp_path)
     else:
-        LOGGER.info(f"{mdp} modified")
+        LOGGER.info("%s modified", mdp_path)
 
-    with open(mdp, "w") as f:
+    with mdp_path.open("w") as f:
         f.writelines(new_lines)

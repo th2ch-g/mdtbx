@@ -56,6 +56,21 @@ class TestParseLogFile:
         data = parse_log_file(log)
         assert data["hostname"] == "myhost01"
 
+    def test_collects_all_gpu_descriptions(self, tmp_path):
+        log = tmp_path / "multi-gpu.log"
+        log.write_text(
+            "GPU info:\n"
+            "    Number of GPUs detected: 2\n"
+            "    GPU 0: NVIDIA A100\n"
+            "    GPU 1: NVIDIA A100\n"
+            "CPU info:\n"
+        )
+
+        data = parse_log_file(log)
+
+        assert data["n_GPU"] == "2"
+        assert data["GPU_info"] == "GPU 0: NVIDIA A100; GPU 1: NVIDIA A100"
+
     def test_cmd_strips_deffnm(self, tmp_path):
         """`-deffnm` オプションが除去されたコマンド文字列を返すこと"""
         log = tmp_path / "prd.log"
@@ -85,8 +100,23 @@ class TestParseLogFile:
         assert data["version"] == "N/A"
         assert data["hostname"] == "N/A"
 
-    def test_malformed_performance_returns_none(self, tmp_path):
+    def test_malformed_performance_preserves_other_log_data(self, tmp_path):
         log = tmp_path / "malformed.log"
-        log.write_text("Performance: not-a-number\n")
+        log.write_text("GROMACS version: 2024.1\nPerformance: not-a-number\n")
 
-        assert parse_log_file(log) is None
+        data = parse_log_file(log)
+        assert data["version"] == "2024.1"
+        assert data["performance"] is None
+
+    @pytest.mark.parametrize("value", ["nan", "inf", "-1.0"])
+    def test_invalid_performance_is_ignored(self, tmp_path, value):
+        log = tmp_path / "invalid.log"
+        log.write_text(f"Performance: {value}\n")
+
+        assert parse_log_file(log)["performance"] is None
+
+    def test_deffnm_equals_syntax_is_removed(self, tmp_path):
+        log = tmp_path / "command.log"
+        log.write_text("Command line:\n  gmx mdrun -deffnm=prd -nt 8\n")
+
+        assert parse_log_file(log)["cmd"] == "gmx mdrun -nt 8"

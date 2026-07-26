@@ -80,3 +80,22 @@ class TestPartialTemperingRun:
         output = out.read_text()
         # CT_ は含まれないはず
         assert "CT_" not in output
+
+    def test_second_application_is_idempotent(self, sample_top_path, tmp_path):
+        from src.utils.partial_tempering import run
+
+        first = tmp_path / "first.top"
+        second = tmp_path / "second.top"
+        run(self._make_args(sample_top_path, first, selection="resname ALA"))
+        run(self._make_args(first, second, selection="resname ALA"))
+
+        assert second.read_text() == first.read_text()
+        assert "CT__" not in second.read_text()
+
+    def test_nested_output_directory_is_created(self, sample_top_path, tmp_path):
+        from src.utils.partial_tempering import run
+
+        out = tmp_path / "nested" / "output.top"
+        run(self._make_args(sample_top_path, out, selection="resname ALA"))
+
+        assert out.exists()

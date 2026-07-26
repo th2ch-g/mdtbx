@@ -205,7 +205,13 @@ class TestSelectionParser:
     def test_resid_range(self):
         result = SelectionParser("resid 1 to 5").parse()
         assert isinstance(result, ResId)
-        assert result.ids == [1, 2, 3, 4, 5]
+        assert list(result.ids) == [1, 2, 3, 4, 5]
+
+    def test_large_resid_range_is_stored_compactly(self):
+        result = SelectionParser("resid 1 to 1000000000").parse()
+        assert isinstance(result, ResId)
+        assert isinstance(result.ids, range)
+        assert result.eval({"resid": 999999999})
 
     def test_and_expression(self):
         result = SelectionParser("protein and backbone").parse()
@@ -231,10 +237,15 @@ class TestSelectionParser:
         result = SelectionParser("name C*").parse()
         assert isinstance(result, Name)
 
+    @pytest.mark.parametrize("atom_name", ["O5'", "NA+", "CL-", "C_1"])
+    def test_name_allows_common_atom_name_characters(self, atom_name):
+        selector = AtomSelector(f"name {atom_name}")
+        assert selector.eval({"name": atom_name})
+
     def test_index_range(self):
         result = SelectionParser("index 1 to 3").parse()
         assert isinstance(result, Index)
-        assert result.indices == [1, 2, 3]
+        assert list(result.indices) == [1, 2, 3]
 
 
 # ---------------------------------------------------------------------------
@@ -303,3 +314,7 @@ class TestParseErrors:
     def test_parse_selection_returns_error_string_on_failure(self):
         result = parse_selection("resid 10 to")
         assert isinstance(result, str)
+
+    def test_reverse_range_reports_the_range_error(self):
+        result = parse_selection("resid 10 to 1")
+        assert result == "Range end 1 is less than start 10"

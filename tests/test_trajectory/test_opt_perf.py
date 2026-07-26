@@ -1,11 +1,9 @@
-"""
-trajectory/opt_perf のユニットテスト
-
-小さなダミーコマンドを grid sampler で最適化し、ベスト条件を検証する。
-"""
+"""Tests for trajectory/opt_perf using small grid-sampled shell commands."""
 
 import json
 import types
+
+import pytest
 
 
 class TestOptPerfRun:
@@ -94,6 +92,13 @@ class TestOptPerfRun:
         assert "{log_path}" in command
         assert "{ntomp}" in command
 
+    def test_zero_gpu_candidate_is_supported(self):
+        from src.trajectory.opt_perf import _validate_candidates
+
+        assert _validate_candidates("n_gpu", [1, 0, 0], minimum=0) == [0, 1]
+        with pytest.raises(ValueError, match="non-negative"):
+            _validate_candidates("n_gpu", [-1], minimum=0)
+
     def test_relative_workdir_uses_absolute_log_path(self, tmp_path, monkeypatch):
         from src.trajectory.opt_perf import run
 
@@ -118,3 +123,98 @@ class TestOptPerfRun:
         expected_log = tmp_path / "trials" / "trial_0000" / "md.log"
         assert best["log_path"] == str(expected_log)
         assert expected_log.exists()
+
+    def test_failed_trial_does_not_abort_remaining_trials(self, tmp_path):
+        from src.trajectory.opt_perf import run
+
+        script = tmp_path / "sometimes_fails.sh"
+        script.write_text(
+            "#!/bin/sh\n"
+            'log_path="$1"\n'
+            'n_gpu="$2"\n'
+            'if [ "$n_gpu" -eq 1 ]; then exit 2; fi\n'
+            'printf "Performance: 42.0 0.0\\n" > "$log_path"\n'
+        )
+        script.chmod(0o755)
+        args = self._make_args(script, tmp_path)
+        args.mdrun_command = f"sh {script} {{log_path}} {{n_gpu}}"
+        args.n_gpu = [1, 2]
+        args.n_core = [1]
+        args.ntomp = [1]
+        args.ntmpi = [1]
+
+        run(args)
+
+        best = json.loads((tmp_path / "best.json").read_text())
+        assert best["value"] == 42.0
+        assert best["params"]["n_gpu"] == 2
+        history = (tmp_path / "history.csv").read_text()
+        assert "\n1,42.0,2,1,1,1," in history or "\n0,42.0,2,1,1,1," in history
+
+    def test_all_failed_trials_raise_clear_error(self, tmp_path):
+        from src.trajectory.opt_perf import run
+
+        script = tmp_path / "always_fails.sh"
+        script.write_text("#!/bin/sh\nexit 3\n")
+        script.chmod(0o755)
+        args = self._make_args(script, tmp_path)
+        args.mdrun_command = f"sh {script}"
+        args.n_gpu = [1]
+        args.n_core = [1]
+        args.ntomp = [1]
+        args.ntmpi = [1]
+
+        with pytest.raises(RuntimeError, match="No trial completed"):
+            run(args)
+
+    def test_invalid_n_trials_is_rejected_before_workdir_creation(self, tmp_path):
+        from src.trajectory.opt_perf import run
+
+        args = self._make_args(tmp_path / "unused.sh", tmp_path)
+        args.n_trials = 0
+
+        with pytest.raises(ValueError, match="--n-trials"):
+            run(args)
+
+        assert not (tmp_path / "trials").exists()
+
+    @pytest.mark.parametrize("log_name", ["", "../md.log", "/tmp/md.log", "."])
+    def test_log_name_must_stay_inside_trial_directory(self, tmp_path, log_name):
+        from src.trajectory.opt_perf import run
+
+        args = self._make_args(tmp_path / "unused.sh", tmp_path)
+        args.log_name = log_name
+
+        with pytest.raises(ValueError, match="--log-name"):
+            run(args)
+
+    def test_unknown_command_field_is_rejected(self, tmp_path):
+        from src.trajectory.opt_perf import run
+
+        args = self._make_args(tmp_path / "unused.sh", tmp_path)
+        args.command_template = "gmx mdrun -g {unknown}"
+        args.mdrun_command = None
+
+        with pytest.raises(ValueError, match="unknown"):
+            run(args)
+
+    def test_output_parent_directories_are_created(self, tmp_path):
+        from src.trajectory.opt_perf import run
+
+        script = tmp_path / "fake_mdrun.sh"
+        script.write_text(
+            '#!/bin/sh\nlog_path="$1"\nprintf "Performance: 1.0 0.0\\n" > "$log_path"\n'
+        )
+        script.chmod(0o755)
+        args = self._make_args(script, tmp_path)
+        args.n_gpu = [1]
+        args.n_core = [1]
+        args.ntomp = [1]
+        args.ntmpi = [1]
+        args.output = str(tmp_path / "reports" / "best.json")
+        args.history_output = str(tmp_path / "reports" / "history.csv")
+
+        run(args)
+
+        assert (tmp_path / "reports" / "best.json").is_file()
+        assert (tmp_path / "reports" / "history.csv").is_file()

@@ -68,6 +68,40 @@ class TestModMdp:
         assert "5000" in content
         assert "0.001" in content
 
+    def test_add_key_after_line_without_newline(self, tmp_path):
+        mdp = tmp_path / "md.mdp"
+        mdp.write_text("nsteps = 1000")
+
+        mod_mdp("dt", "0.002", mdp, ljust=7)
+
+        assert mdp.read_text() == "nsteps = 1000\ndt      = 0.002\n"
+
+    def test_preserves_inline_comment(self, tmp_path):
+        mdp = tmp_path / "md.mdp"
+        mdp.write_text("nsteps = 1000 ; production length\n")
+
+        mod_mdp("nsteps", "2000", mdp, ljust=23)
+
+        assert mdp.read_text() == "nsteps = 2000 ; production length\n"
+
+    def test_rejects_invalid_key(self, tmp_path):
+        import pytest
+
+        mdp = tmp_path / "md.mdp"
+        mdp.write_text("")
+
+        with pytest.raises(ValueError, match="MDP key"):
+            mod_mdp("bad=key", "1", mdp, ljust=23)
+
+    def test_rejects_multiline_value(self, tmp_path):
+        import pytest
+
+        mdp = tmp_path / "md.mdp"
+        mdp.write_text("")
+
+        with pytest.raises(ValueError, match="single line"):
+            mod_mdp("nsteps", "1\nintegrator = md", mdp, ljust=23)
+
 
 class TestModMdpRun:
     def test_run_modifies_all_mdp_files(self, tmp_path):

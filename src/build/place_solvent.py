@@ -5,19 +5,25 @@
 #   https://ambermd.org/tutorials/advanced/tutorial40/index.php
 
 import argparse
+import math
 import os
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 
 import numpy as np
 
-from ..utils.proc import run_cmd
 from ..logger import generate_logger
+from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
-# sander 用 3D-RISM 入力テンプレート
+DEFAULT_SOLVENT_MODEL = "cSPCE"
+DEFAULT_SOLVENT_DENSITY = 55.5
+DEFAULT_DIELECTRIC = 78.44
+
+# 3D-RISM input template for sander.
 SANDER_RISM_INPUT_TEMPLATE = """\
 &cntrl
   ntx=1, nstlim=0, irism=1,
@@ -91,9 +97,32 @@ def add_subcmd(subparsers):
 
     parser.add_argument(
         "--solvent-model",
-        default="SPC",
+        default=DEFAULT_SOLVENT_MODEL,
         type=str,
-        help="Solvent model for 1D-RISM (.mdl file stem in $AMBERHOME/dat/rism1d/mdl/)",
+        help=(
+            "Solvent model for 1D-RISM. Accepts a .mdl path or a model name "
+            "under $AMBERHOME/dat/rism1d/mdl/"
+        ),
+    )
+
+    parser.add_argument(
+        "--solvent-density",
+        default=DEFAULT_SOLVENT_DENSITY,
+        type=float,
+        help="Bulk solvent density [mol/L] for 1D-RISM",
+    )
+
+    parser.add_argument(
+        "--dielectric",
+        default=DEFAULT_DIELECTRIC,
+        type=float,
+        help="Bulk solvent dielectric constant for 1D-RISM",
+    )
+
+    parser.add_argument(
+        "--xvv-output",
+        type=str,
+        help="Copy the prepared xvv file to this reusable output path",
     )
 
     parser.add_argument(
@@ -177,65 +206,102 @@ def add_subcmd(subparsers):
 
 
 # ---------------------------------------------------------------------------
-#  1D-RISM: xvv ファイル生成
+#  1D-RISM: xvv generation
 # ---------------------------------------------------------------------------
 
 
-def _run_rism1d(solvent_model, temperature, workdir):
-    """1D-RISM を実行して xvv ファイルを生成する。
+def _resolve_solvent_model_path(solvent_model):
+    """Resolve a solvent model name or .mdl path to an existing file."""
+    supplied_path = Path(solvent_model).expanduser()
+    if supplied_path.suffix == ".mdl" or supplied_path.is_absolute():
+        model_path = supplied_path.resolve()
+    else:
+        amberhome = os.environ.get("AMBERHOME")
+        if not amberhome:
+            raise EnvironmentError(
+                "$AMBERHOME is not set; provide --solvent-model as a .mdl path"
+            )
+        model_path = (
+            Path(amberhome) / "dat" / "rism1d" / "mdl" / f"{solvent_model}.mdl"
+        ).resolve()
 
-    $AMBERHOME/dat/rism1d/mdl/<solvent_model>.mdl が必要。
-    Returns:
-        xvv_path: 生成された xvv ファイルのパス
-    """
-    amberhome = os.environ.get("AMBERHOME", "")
-    mdl_path = os.path.join(amberhome, "dat", "rism1d", "mdl", f"{solvent_model}.mdl")
-    if not os.path.exists(mdl_path):
+    if not model_path.is_file():
         raise FileNotFoundError(
-            f"Solvent model file not found: {mdl_path}. "
-            f"Check $AMBERHOME and --solvent-model."
+            f"Solvent model file not found: {model_path}. "
+            "Check $AMBERHOME and --solvent-model."
+        )
+    return model_path
+
+
+def _fortran_quote(value):
+    """Quote a string for a Fortran namelist."""
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def _run_rism1d(
+    solvent_model,
+    temperature,
+    workdir,
+    solvent_density=DEFAULT_SOLVENT_DENSITY,
+    dielectric=DEFAULT_DIELECTRIC,
+):
+    """Run 1D-RISM and return the generated xvv path.
+
+    The model is loaded from $AMBERHOME/dat/rism1d/mdl/ unless an explicit
+    .mdl path is supplied.
+
+    Returns:
+        Path to the generated xvv file.
+    """
+    model_path = _resolve_solvent_model_path(solvent_model)
+    xvv_stem = f"{model_path.stem}_{temperature:.2f}"
+    workpath = Path(workdir)
+    workpath.mkdir(parents=True, exist_ok=True)
+    xvv_path = workpath / f"{xvv_stem}.xvv"
+
+    inp_content = (
+        "&PARAMETERS\n"
+        "  THEORY='DRISM', CLOSURE='KH',\n"
+        "  NR=16384, DR=0.025,\n"
+        "  OUTLIST='x',\n"
+        "  MDIIS_NVEC=20, MDIIS_DEL=0.3, TOLERANCE=1.0e-12,\n"
+        "  KSAVE=-1, MAXSTEP=10000,\n"
+        "  SMEAR=1, ADBCOR=0.5,\n"
+        f"  TEMPERATURE={temperature}, DIEPS={dielectric}, NSP=1,\n"
+        "/\n"
+        "&SPECIES\n"
+        f"  DENSITY={solvent_density}, UNITS='M',\n"
+        f"  MODEL={_fortran_quote(model_path)},\n"
+        "/\n"
+    )
+    inp_path = workpath / f"{xvv_stem}.inp"
+    inp_path.write_text(inp_content)
+
+    LOGGER.info(f"Running 1D-RISM to generate xvv file ({solvent_model}) ...")
+    with (workpath / f"{xvv_stem}.out").open("w") as output:
+        run_cmd(
+            ["rism1d", xvv_stem],
+            cwd=workdir,
+            stdout=output,
+            stderr=subprocess.STDOUT,
         )
 
-    xvv_stem = f"{solvent_model}_{temperature:.2f}"
-    xvv_path = os.path.join(workdir, f"{xvv_stem}.xvv")
-
-    # rism1d 入力ファイル
-    inp_content = (
-        f"&PARAMETERS\n"
-        f"  THEORY='DRISM', CLOSURE='KH',\n"
-        f"  NR=16384, DR=0.025,\n"
-        f"  OUTLST='xvv',\n"
-        f"  NIS=20, DESSION=0.5, MDIIS_NVEC=20, MDIIS_DEL=0.3,\n"
-        f"  TOLERANCE=1.0e-12,\n"
-        f"  SMEAR=1, APTS=0.2,\n"
-        f"  TEMPER={temperature},\n"
-        f"/\n"
-        f"  {solvent_model}\n"
-    )
-    inp_path = os.path.join(workdir, f"{xvv_stem}.inp")
-    with open(inp_path, "w") as f:
-        f.write(inp_content)
-
-    rism1d_cmd = f"rism1d {xvv_stem} > {xvv_stem}.out 2>&1"
-    LOGGER.info(f"Running 1D-RISM to generate xvv file ({solvent_model}) ...")
-    run_cmd(rism1d_cmd, cwd=workdir)
-
-    if not os.path.exists(xvv_path):
+    if not xvv_path.is_file():
         raise RuntimeError(
             f"1D-RISM did not produce {xvv_path}. Check the output for errors."
         )
 
     LOGGER.info(f"Generated xvv file: {xvv_path}")
-    return xvv_path
+    return str(xvv_path)
 
 
 # ---------------------------------------------------------------------------
-#  3D-RISM 実行
+#  3D-RISM execution
 # ---------------------------------------------------------------------------
 
 
 def _run_rism3d_snglpnt(prmtop, coord, xvv_path, args, workdir):
-    """rism3d.snglpnt コマンドラインインターフェースで 3D-RISM を実行する。"""
+    """Run 3D-RISM through the rism3d.snglpnt interface."""
 
     prmtop_abs = os.path.abspath(prmtop)
     coord_abs = os.path.abspath(coord)
@@ -243,9 +309,17 @@ def _run_rism3d_snglpnt(prmtop, coord, xvv_path, args, workdir):
     prmtop_stem = Path(prmtop).stem
 
     guv_prefix = os.path.join(workdir, prmtop_stem)
+    pdb_path = os.path.join(workdir, f"{prmtop_stem}.pdb")
+    with open(pdb_path, "w") as pdb_output:
+        run_cmd(
+            ["ambpdb", "-p", prmtop_abs, "-c", coord_abs],
+            stdout=pdb_output,
+        )
 
     rism_cmd = [
         "rism3d.snglpnt",
+        "--pdb",
+        pdb_path,
         "--prmtop",
         prmtop_abs,
         "--rst",
@@ -264,8 +338,8 @@ def _run_rism3d_snglpnt(prmtop, coord, xvv_path, args, workdir):
         str(args.tolerance),
         "--verbose",
         "2",
-        "--ntwrism",
-        "1",
+        "--volfmt",
+        "dx",
         "--guv",
         guv_prefix,
     ]
@@ -275,11 +349,13 @@ def _run_rism3d_snglpnt(prmtop, coord, xvv_path, args, workdir):
     run_cmd(rism_cmd, cwd=workdir)
 
 
-def _run_sander_rism(prmtop, coord, args, workdir):
-    """sander インターフェースで 3D-RISM を実行する。"""
+def _run_sander_rism(prmtop, coord, xvv_path, args, workdir):
+    """Run 3D-RISM through the sander interface."""
 
     prmtop_abs = os.path.abspath(prmtop)
     coord_abs = os.path.abspath(coord)
+    xvv_abs = os.path.abspath(xvv_path)
+    guv_prefix = os.path.join(workdir, f"{Path(prmtop).stem}.{args.closure}")
 
     mdin_content = SANDER_RISM_INPUT_TEMPLATE.format(
         closure=args.closure,
@@ -303,6 +379,10 @@ def _run_sander_rism(prmtop, coord, args, workdir):
         prmtop_abs,
         "-c",
         coord_abs,
+        "-xvv",
+        xvv_abs,
+        "-guv",
+        guv_prefix,
     ]
 
     LOGGER.info("Running sander with 3D-RISM ...")
@@ -310,17 +390,17 @@ def _run_sander_rism(prmtop, coord, args, workdir):
 
 
 # ---------------------------------------------------------------------------
-#  DX ファイル読み込み
+#  DX parsing
 # ---------------------------------------------------------------------------
 
 
 def _parse_dx(dx_path):
-    """OpenDX 形式の密度グリッドを ndarray として読み込む。
+    """Read an OpenDX density grid.
 
     Returns:
-        data: (nx, ny, nz) ndarray — g(r) 分布関数値
-        origin: (3,) ndarray — グリッド原点座標 [Å]
-        delta: (3, 3) ndarray — 各軸のグリッド刻み幅ベクトル (行ごと)
+        data: ``(nx, ny, nz)`` array of g(r) values.
+        origin: ``(3,)`` grid origin in angstroms.
+        delta: ``(3, 3)`` grid-axis vectors in angstroms.
     """
     origin = None
     delta = []
@@ -348,7 +428,7 @@ def _parse_dx(dx_path):
             ):
                 continue
             else:
-                # データ行
+                # Grid data line.
                 data_values.extend(float(v) for v in line.split())
 
     if counts is None:
@@ -357,45 +437,72 @@ def _parse_dx(dx_path):
         raise ValueError(f"Could not parse origin from {dx_path}")
     if len(delta) != 3:
         raise ValueError(f"Expected 3 delta vectors, got {len(delta)}")
+    if any(count < 1 for count in counts):
+        raise ValueError(f"Grid dimensions must be positive: {counts}")
+
+    expected_values = math.prod(counts)
+    if len(data_values) != expected_values:
+        raise ValueError(
+            f"Expected {expected_values} grid values in {dx_path}, "
+            f"got {len(data_values)}"
+        )
 
     data = np.array(data_values).reshape(counts)
     delta = np.array(delta)
+    if not np.all(np.isfinite(data)):
+        raise ValueError(f"Grid data contains non-finite values: {dx_path}")
+    if not np.all(np.isfinite(origin)) or not np.all(np.isfinite(delta)):
+        raise ValueError(f"Grid geometry contains non-finite values: {dx_path}")
 
     return data, origin, delta
 
 
 def _grid_to_cartesian(indices, origin, delta):
-    """グリッドインデックス (N, 3) を直交座標 (N, 3) に変換する。
+    """Convert ``(N, 3)`` grid indices to Cartesian coordinates.
 
-    OpenDX の delta 行列は行ごとに各軸方向の刻み幅ベクトルを持つ。
-    座標 = origin + i * delta[0] + j * delta[1] + k * delta[2]
-         = origin + indices @ delta
+    OpenDX stores one grid-axis vector per row of ``delta``:
+    ``coordinates = origin + indices @ delta``.
     """
     return origin + indices @ delta
 
 
 # ---------------------------------------------------------------------------
-#  Placevent 風グリーディピーク抽出
+#  Greedy Placevent-style peak extraction
 # ---------------------------------------------------------------------------
 
 
 def _extract_peaks_greedy(
     data, origin, delta, threshold, exclusion_radius, max_sites=None
 ):
-    """Placevent アルゴリズムに基づくグリーディな溶媒サイト抽出。
+    """Extract solvent sites with a greedy Placevent-style algorithm.
 
-    1. g(r) > threshold のグリッド点をすべて候補とする
-    2. g(r) 値の降順にソートする
-    3. 最も高い g(r) の点を溶媒サイトとして採用し、
-       exclusion_radius 以内の他の候補をすべて除外する
-    4. 残りの候補で最も高い g(r) の点を次のサイトとする
-    5. max_sites に達するか候補がなくなるまで繰り返す
+    Candidates above ``threshold`` are considered in descending density order.
+    After a site is selected, candidates within ``exclusion_radius`` are
+    removed. Selection stops at ``max_sites`` when specified.
 
     Returns:
-        coords: (M, 3) ndarray — 溶媒サイト座標 [Å]
-        gvalues: (M,) ndarray — 各サイトの g(r) 値
+        coords: ``(M, 3)`` solvent-site coordinates in angstroms.
+        gvalues: ``(M,)`` g(r) values at the selected sites.
     """
-    # 閾値を超えるグリッド点のインデックスと値を取得
+    data = np.asarray(data)
+    origin = np.asarray(origin)
+    delta = np.asarray(delta)
+    if data.ndim != 3:
+        raise ValueError("Density data must be a three-dimensional array")
+    if origin.shape != (3,) or delta.shape != (3, 3):
+        raise ValueError("Grid origin and delta must have shapes (3,) and (3, 3)")
+    if not np.all(np.isfinite(data)):
+        raise ValueError("Density data must contain only finite values")
+    if not np.all(np.isfinite(origin)) or not np.all(np.isfinite(delta)):
+        raise ValueError("Grid origin and delta must contain only finite values")
+    if not math.isfinite(threshold):
+        raise ValueError("threshold must be finite")
+    if not math.isfinite(exclusion_radius) or exclusion_radius <= 0:
+        raise ValueError("exclusion_radius must be positive and finite")
+    if max_sites is not None and max_sites < 1:
+        raise ValueError("max_sites must be positive")
+
+    # Collect grid points above the density threshold.
     indices = np.argwhere(data > threshold)
     if len(indices) == 0:
         LOGGER.warning(
@@ -406,15 +513,15 @@ def _extract_peaks_greedy(
 
     values = data[indices[:, 0], indices[:, 1], indices[:, 2]]
 
-    # g(r) 降順でソート
+    # Sort candidates by descending g(r).
     order = np.argsort(-values)
     indices = indices[order]
     values = values[order]
 
-    # 座標に変換
+    # Convert grid indices to Cartesian coordinates.
     all_coords = _grid_to_cartesian(indices.astype(float), origin, delta)
 
-    # グリーディ選択
+    # Select peaks greedily.
     placed_coords = []
     placed_gvalues = []
     used = np.zeros(len(all_coords), dtype=bool)
@@ -431,13 +538,13 @@ def _extract_peaks_greedy(
         if max_sites is not None and len(placed_coords) >= max_sites:
             break
 
-        # この点から exclusion_radius 以内の候補を除外
+        # Exclude candidates within the selected site's radius.
         remaining = np.where(~used)[0]
         remaining = remaining[remaining > i]
         if len(remaining) > 0:
             diff = all_coords[remaining] - coord_i
             dist_sq = np.sum(diff**2, axis=1)
-            too_close = remaining[dist_sq < excl_sq]
+            too_close = remaining[dist_sq <= excl_sq]
             used[too_close] = True
 
     coords = np.array(placed_coords)
@@ -451,16 +558,15 @@ def _extract_peaks_greedy(
 
 
 # ---------------------------------------------------------------------------
-#  PDB 出力
+#  PDB output
 # ---------------------------------------------------------------------------
 
 
 def _write_pdb(coords, gvalues, solvent, output_path):
-    """溶媒サイト座標を PDB 形式で書き出す。
+    """Write solvent-site coordinates as PDB.
 
-    occupancy には定数 1.00 を、B-factor に各サイトの g(r) 値を記録する。
-    原子番号・残基番号が PDB フォーマットの上限を超える場合は
-    モジュロで 1 始まりの範囲に折り返す。
+    Occupancy is fixed at 1.00 and each g(r) value is stored as the B-factor.
+    Atom and residue identifiers wrap to their one-based PDB field ranges.
     """
     atom_name = "O" if solvent == "water" else "X"
     resname = "WAT" if solvent == "water" else "SOL"
@@ -472,8 +578,8 @@ def _write_pdb(coords, gvalues, solvent, output_path):
         )
         for i, (coord, gval) in enumerate(zip(coords, gvalues, strict=True), start=1):
             x, y, z = coord
-            serial = (i - 1) % 99999 + 1  # ATOM serial は 5 桁まで (1..99999)
-            resseq = (i - 1) % 9999 + 1  # 残基番号は 4 桁まで (1..9999)
+            serial = (i - 1) % 99999 + 1  # PDB atom serial range: 1..99999.
+            resseq = (i - 1) % 9999 + 1  # PDB residue sequence range: 1..9999.
             f.write(
                 f"HETATM{serial:5d}  {atom_name:<3s} {resname} A"
                 f"{resseq:4d}    "
@@ -486,87 +592,117 @@ def _write_pdb(coords, gvalues, solvent, output_path):
 
 
 # ---------------------------------------------------------------------------
-#  DX ファイル検索
+#  DX discovery
 # ---------------------------------------------------------------------------
 
 
 def _find_oxygen_dx(workdir, prmtop_stem, closure):
-    """3D-RISM が出力した酸素密度の .dx ファイルを見つける。
+    """Find the oxygen pair-distribution DX output.
 
-    rism3d.snglpnt --guv prefix の場合:
-        prefix.O.1.dx (guv 出力)
-    sander の場合:
-        <stem>.<closure>.O.0.dx (guv 出力, 0-indexed)
-
-    いずれも酸素サイト "O" を含むファイルを探す。
+    Typical names are ``prefix.O.1.dx`` for rism3d.snglpnt and
+    ``<stem>.<closure>.O.0.dx`` for sander.
     """
     workpath = Path(workdir)
-
-    # Typical guv output pattern from rism3d.snglpnt.
-    # A common filename is prefix.O.1.dx.
-    candidates = sorted(workpath.glob(f"{prmtop_stem}*O*.dx"))
-
-    if not candidates:
-        # sander 出力パターン
-        candidates = sorted(workpath.glob(f"*{closure}*O*.dx"))
-
-    if not candidates:
-        # フォールバック: 任意の酸素を含む dx
-        candidates = sorted(workpath.glob("*O*.dx"))
-
-    if not candidates:
-        # 最終手段: 全 dx ファイル
-        candidates = sorted(workpath.glob("*.dx"))
-
+    excluded_kinds = ("cuv", "huv", "uuv")
+    candidates = [
+        path
+        for path in workpath.glob("*.dx")
+        if ".o." in path.name.lower()
+        and not any(kind in path.name.lower().split(".") for kind in excluded_kinds)
+    ]
     if not candidates:
         raise FileNotFoundError(
-            f"No .dx output files found in {workdir}. "
-            "3D-RISM calculation may have failed."
+            f"No oxygen pair-distribution .dx file found in {workdir}. "
+            "Check the 3D-RISM output and solvent-site names."
         )
 
-    # 水の酸素に最も適合するファイルを選択
-    # "guv" や "g" を含むもの (分布関数) を優先し、
-    # "cuv" (直接相関) や "huv" (間接相関) を避ける
-    for cand in candidates:
-        name = cand.name.lower()
-        if "cuv" in name or "huv" in name or "uuv" in name:
-            continue
-        return cand
-
-    # すべて除外された場合は最初のものを使う
-    return candidates[0]
+    prefix = prmtop_stem.lower()
+    closure_token = f".{closure.lower()}."
+    return min(
+        candidates,
+        key=lambda path: (
+            not path.name.lower().startswith(prefix),
+            closure_token not in path.name.lower(),
+            path.name,
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------
-#  メイン
+#  Main workflow
 # ---------------------------------------------------------------------------
+
+
+def _validate_args(args):
+    """Validate files and numeric options before starting external tools."""
+    for option in ("prmtop", "coord"):
+        path = Path(getattr(args, option)).expanduser()
+        if not path.is_file():
+            raise FileNotFoundError(f"{option} file not found: {path}")
+    if args.xvv is not None and not Path(args.xvv).expanduser().is_file():
+        raise FileNotFoundError(f"xvv file not found: {args.xvv}")
+
+    positive_finite = {
+        "temperature": args.temperature,
+        "solvent_density": args.solvent_density,
+        "dielectric": args.dielectric,
+        "grdspc": args.grdspc,
+        "tolerance": args.tolerance,
+        "buffer": args.buffer,
+        "solvcut": args.solvcut,
+        "exclusion_radius": args.exclusion_radius,
+    }
+    for name, value in positive_finite.items():
+        if not math.isfinite(value) or value <= 0:
+            raise ValueError(f"--{name.replace('_', '-')} must be positive and finite")
+    if not math.isfinite(args.threshold):
+        raise ValueError("--threshold must be finite")
+    if args.max_sites is not None and args.max_sites < 1:
+        raise ValueError("--max-sites must be positive")
+
+
+def _copy_xvv(xvv_path, output):
+    """Copy an xvv file to a user-visible reusable location."""
+    destination = Path(output).expanduser().resolve()
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    source = Path(xvv_path).resolve()
+    if source != destination:
+        shutil.copy2(source, destination)
+    LOGGER.info(f"xvv file saved to {destination}")
 
 
 def run(args):
+    _validate_args(args)
     prmtop_stem = Path(args.prmtop).stem
 
-    # 作業ディレクトリ
+    # Create an isolated working directory for intermediate RISM files.
     workdir = tempfile.mkdtemp(prefix="rism3d_")
     LOGGER.info(f"Working directory: {workdir}")
 
     try:
-        # ---- 1. xvv ファイル準備 ----
+        # ---- 1. Prepare the xvv file. ----
         if args.xvv is not None:
             xvv_path = os.path.abspath(args.xvv)
-            if not os.path.exists(xvv_path):
-                LOGGER.error(f"xvv file not found: {xvv_path}")
-                return
             LOGGER.info(f"Using provided xvv file: {xvv_path}")
         else:
-            xvv_path = _run_rism1d(args.solvent_model, args.temperature, workdir)
+            xvv_path = _run_rism1d(
+                args.solvent_model,
+                args.temperature,
+                workdir,
+                solvent_density=args.solvent_density,
+                dielectric=args.dielectric,
+            )
 
-        # ---- 2. 3D-RISM 実行 ----
+        if args.xvv_output is not None:
+            _copy_xvv(xvv_path, args.xvv_output)
+
+        # ---- 2. Run 3D-RISM. ----
         if args.use_sander:
-            _run_sander_rism(args.prmtop, args.coord, args, workdir)
+            _run_sander_rism(args.prmtop, args.coord, xvv_path, args, workdir)
         else:
             _run_rism3d_snglpnt(args.prmtop, args.coord, xvv_path, args, workdir)
 
-        # ---- 3. 酸素密度 DX ファイル読み込み ----
+        # ---- 3. Read the oxygen-density DX file. ----
         dx_path = _find_oxygen_dx(workdir, prmtop_stem, args.closure)
         LOGGER.info(f"Reading density from {dx_path}")
 
@@ -577,7 +713,7 @@ def run(args):
             f"spacing: {np.diag(delta)}"
         )
 
-        # ---- 4. ピーク抽出 (Placevent 風グリーディ) ----
+        # ---- 4. Extract peaks with greedy spatial exclusion. ----
         coords, gvalues = _extract_peaks_greedy(
             data,
             origin,
@@ -588,12 +724,12 @@ def run(args):
         )
 
         if len(coords) == 0:
-            LOGGER.error("No solvent sites found.")
-            return
+            raise RuntimeError("No solvent sites found; try lowering --threshold")
 
-        # ---- 5. PDB 出力 ----
-        output_path = os.path.abspath(args.output)
-        _write_pdb(coords, gvalues, args.solvent, output_path)
+        # ---- 5. Write PDB output. ----
+        output_path = Path(args.output).expanduser().resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        _write_pdb(coords, gvalues, args.solvent, str(output_path))
 
     finally:
         if not args.keepfiles:
