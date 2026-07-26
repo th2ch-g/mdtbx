@@ -128,10 +128,9 @@ docker run -it --rm mdtbx gmx ... # equal to docker run -it --rm mdtbx mdtbx cmd
 ### Enhanced workflows
 
 ```bash
-# Break up tleap's repeated solvent-box pattern with restrained short MD.
-# Run the normal full-system equilibration after this preparation step.
-pixi run mdtbx relax_water -p leap.parm7 -x leap.rst7 \
-  -o relaxed.rst7 --pdb-output relaxed.pdb
+# Build a solution with Packmol-randomized water coordinates.
+pixi run mdtbx build_solution -i protein.pdb -o solution \
+  --boxsize 100 100 100 --water-seed 42
 
 # Retry deterministic placements until a non-clashing orientation is found.
 pixi run mdtbx place -1 chain_a.pdb -2 chain_b.pdb -d 30 \

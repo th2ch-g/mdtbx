@@ -5,6 +5,7 @@ from ..config import SYSTEM_NAME
 from ..logger import generate_logger
 from ..utils.tleap import run_tleap
 from .calc_ion_conc import calc_ion_conc_from_volume
+from .packmol_water import repack_water
 
 LOGGER = generate_logger(__name__)
 
@@ -83,10 +84,27 @@ def add_subcmd(subparsers):
         "--keepfiles", action="store_true", help="Keep intermediate files"
     )
 
+    parser.add_argument(
+        "--water-seed",
+        default=2026,
+        type=int,
+        help="Packmol random seed for water placement",
+    )
+
+    parser.add_argument(
+        "--packmol-tolerance",
+        default=2.0,
+        type=float,
+        help="Packmol intermolecular distance tolerance [angstrom]",
+    )
+
     parser.set_defaults(func=run)
 
 
 def run(args):
+    if args.packmol_tolerance <= 0:
+        raise ValueError("--packmol-tolerance must be positive")
+
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -159,6 +177,14 @@ addionsrand {SYSTEM_NAME} {args.anion} 0
 
     cmd_tleap = "\n".join(lines)
     run_tleap(cmd_tleap, keepfiles=args.keepfiles)
+
+    repack_water(
+        outdir / "leap.parm7",
+        outdir / "leap.rst7",
+        outdir / "leap.pdb",
+        seed=args.water_seed,
+        tolerance=args.packmol_tolerance,
+    )
 
     LOGGER.info(
         f"{args.outdir}/leap.parm7 {args.outdir}/leap.rst7 {args.outdir}/leap.pdb generated"
