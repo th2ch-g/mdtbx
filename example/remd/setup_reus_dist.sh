@@ -1,64 +1,95 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-TEMPLATE_MDP="$TOOLS/mdtbx/example/mdp/solution/us_dist.mdp"
-SUBMIT_SCRIPT="$TOOLS/mdtbx/example/mdrun/remd_slurm.sh"
-TOPOLOGY="gmx.top"
-INDEX="index.ndx"
-ITP="*.itp"
-MAXWARN=10
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-source /home/apps/Modules/init/bash
-module purge
-module load $TOOLS/plumed-2.10.0/build/lib/plumed/modulefile
-module load gcc/13.3.0 cuda/12.9 cmake/3.31.6 openmpi/5.0.7
-export PATH=$TOOLS/gromacs/2022.5-mpi-plumed/gromacs-2022.5/bin:$PATH
+TEMPLATE_MDP="${TEMPLATE_MDP:-${REPO_DIR}/example/mdp/solution/re.mdp}"
+TEMPLATE_PLUMED="${TEMPLATE_PLUMED:-${REPO_DIR}/example/plumed/reus_dist.dat}"
+SUBMIT_SCRIPT="${SUBMIT_SCRIPT:-${REPO_DIR}/example/mdrun/remd_plumed_slurm.sh}"
+TARGETS_FILE="${TARGETS_FILE:-${SCRIPT_DIR}/reus_distances.txt}"
+TOPOLOGY="${TOPOLOGY:-gmx.top}"
+INDEX="${INDEX:-index.ndx}"
+ITP_GLOB="${ITP_GLOB:-*.itp}"
+GMX_CMD="${GMX_CMD:-gmx_mpi}"
+DEFFNM="${DEFFNM:-reus}"
+MAXWARN="${MAXWARN:-10}"
+REPLEX="${REPLEX:-1000}"
 
-touch plumed.dat
-
-cat << EOF > target_structures_distances.txt
-init1.gro     15
-init2.gro     18
-init3.gro     21
-init4.gro     24
-init5.gro     27
-init6.gro     30
-init7.gro     33
-init8.gro     36
-init9.gro     39
-init10.gro    42
-init11.gro    45
-init12.gro    48
-init13.gro    51
-init14.gro    54
-init15.gro    57
-init16.gro    60
-EOF
-
-N_REPLICA=$(wc -l target_structures_distances.txt | awk '{print $1}')
-echo "Number of replicas: ${N_REPLICA}"
-
-for rep in $(seq 1 $N_REPLICA); do
-    STRUCTURE=$(head -n $rep target_structures_distances.txt | tail -n 1 | awk '{print $1}')
-    TARGET_DISTANCE=$(head -n $rep target_structures_distances.txt | tail -n 1 | awk '{print $2}')
-    mkdir rep${rep}
-    cp $STRUCTURE rep${rep}/gmx.gro
-    cp $TOPOLOGY rep${rep}/gmx.top
-    cp $INDEX rep${rep}/index.ndx
-    cp $ITP rep${rep}/
-    cp $TEMPLATE_MDP rep${rep}/reus.mdp
-    touch rep${rep}/plumed.dat
-    sed -i -e "s/TARGET_DISTANCE/${TARGET_DISTANCE}/g" rep${rep}/reus.mdp
-    cp $SUBMIT_SCRIPT rep${rep}/
-    gmx_mpi grompp \
-        -f rep${rep}/reus.mdp \
-        -c rep${rep}/gmx.gro \
-        -n rep${rep}/index.ndx \
-        -p rep${rep}/gmx.top \
-        -maxwarn ${MAXWARN} \
-        -o rep${rep}/reus.tpr
+for required_file in \
+    "${TEMPLATE_MDP}" \
+    "${TEMPLATE_PLUMED}" \
+    "${TARGETS_FILE}" \
+    "${TOPOLOGY}" \
+    "${INDEX}"; do
+    if [ ! -f "${required_file}" ]; then
+        echo "Required file not found: ${required_file}" >&2
+        exit 1
+    fi
 done
 
-rm -f target_structures_distances.txt
+N_REPLICA="$(
+    awk 'NF >= 2 && $1 !~ /^#/ { count++ } END { print count + 0 }' "${TARGETS_FILE}"
+)"
+if [ "${N_REPLICA}" -eq 0 ]; then
+    echo "No replica definitions found in ${TARGETS_FILE}" >&2
+    exit 1
+fi
 
-echo "done"
+echo "Preparing ${N_REPLICA} REUS replicas"
+
+shopt -s nullglob
+# shellcheck disable=SC2206
+itp_files=(${ITP_GLOB})
+shopt -u nullglob
+
+rep=0
+while read -r structure target_distance; do
+    rep=$((rep + 1))
+    repdir="rep${rep}"
+
+    if [ ! -f "${structure}" ]; then
+        echo "Structure file not found: ${structure}" >&2
+        exit 1
+    fi
+    if ! [[ "${target_distance}" =~ ^[+]?[0-9]+([.][0-9]+)?$ ]]; then
+        echo "Invalid target distance: ${target_distance}" >&2
+        exit 1
+    fi
+
+    mkdir -p "${repdir}"
+    cp "${structure}" "${repdir}/gmx.gro"
+    cp "${TOPOLOGY}" "${repdir}/gmx.top"
+    cp "${INDEX}" "${repdir}/index.ndx"
+    cp "${TEMPLATE_MDP}" "${repdir}/${DEFFNM}.mdp"
+    sed "s/TARGET_DISTANCE/${target_distance}/g" \
+        "${TEMPLATE_PLUMED}" > "${repdir}/plumed.dat"
+
+    if [ ${#itp_files[@]} -gt 0 ]; then
+        cp "${itp_files[@]}" "${repdir}/"
+    fi
+
+    "${GMX_CMD}" grompp \
+        -f "${repdir}/${DEFFNM}.mdp" \
+        -c "${repdir}/gmx.gro" \
+        -n "${repdir}/index.ndx" \
+        -p "${repdir}/gmx.top" \
+        -maxwarn "${MAXWARN}" \
+        -o "${repdir}/${DEFFNM}.tpr"
+done < <(awk 'NF >= 2 && $1 !~ /^#/ { print $1, $2 }' "${TARGETS_FILE}")
+
+if [ -f "${SUBMIT_SCRIPT}" ]; then
+    submit_copy="${SUBMIT_OUTPUT:-$(basename "${SUBMIT_SCRIPT}")}"
+    submit_tmp="$(mktemp "${submit_copy}.tmp.XXXXXX")"
+    awk -v n_replica="${N_REPLICA}" -v deffnm="${DEFFNM}" -v replex="${REPLEX}" '
+        /^REPLEX=/ { print "REPLEX=" replex; next }
+        /^N_REPLICA=/ { print "N_REPLICA=" n_replica; next }
+        /^DEFFNM=/ { print "DEFFNM=\"" deffnm "\" # or rest2, reus"; next }
+        { print }
+    ' "${SUBMIT_SCRIPT}" > "${submit_tmp}"
+    chmod +x "${submit_tmp}"
+    mv "${submit_tmp}" "${submit_copy}"
+    echo "Wrote submit script: ${submit_copy}"
+fi
+
+echo "Done"

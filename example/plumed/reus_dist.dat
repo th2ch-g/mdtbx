@@ -1,0 +1,10 @@
+# TARGET1 and TARGET2 must be defined in index.ndx.
+target1_atoms: GROUP NDX_FILE=index.ndx NDX_GROUP=TARGET1
+target2_atoms: GROUP NDX_FILE=index.ndx NDX_GROUP=TARGET2
+
+target1: COM ATOMS=target1_atoms
+target2: COM ATOMS=target2_atoms
+distance: DISTANCE ATOMS=target1,target2
+
+restraint: RESTRAINT ARG=distance AT=TARGET_DISTANCE KAPPA=1000
+PRINT ARG=distance,restraint.bias STRIDE=1000 FILE=COLVAR

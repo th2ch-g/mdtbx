@@ -1,0 +1,17 @@
+# Structure      Target distance [nm]
+init1.gro         15
+init2.gro         18
+init3.gro         21
+init4.gro         24
+init5.gro         27
+init6.gro         30
+init7.gro         33
+init8.gro         36
+init9.gro         39
+init10.gro        42
+init11.gro        45
+init12.gro        48
+init13.gro        51
+init14.gro        54
+init15.gro        57
+init16.gro        60
