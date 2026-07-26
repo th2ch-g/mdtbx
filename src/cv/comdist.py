@@ -10,6 +10,8 @@ from ..utils.common_args import (
     add_trajectory_arg,
 )
 from ..utils.gmx import gmx_index_args, gmx_tempfile
+from ..utils.mdtraj import select_atom_indices
+from ..utils.numpy_io import save_npy
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -81,13 +83,15 @@ def run(args):
             comdist = np.linalg.norm(inter_com_xyz[:, [1, 2, 3]], axis=1)
     else:
         trj = md.load(args.trajectory, top=args.topology)
-        com1 = md.compute_center_of_mass(
-            trj.atom_slice(trj.topology.select(args.selection1))
+        selection1 = select_atom_indices(
+            trj.topology, args.selection1, label="selection1"
         )
-        com2 = md.compute_center_of_mass(
-            trj.atom_slice(trj.topology.select(args.selection2))
+        selection2 = select_atom_indices(
+            trj.topology, args.selection2, label="selection2"
         )
+        com1 = md.compute_center_of_mass(trj.atom_slice(selection1))
+        com2 = md.compute_center_of_mass(trj.atom_slice(selection2))
         comdist = np.linalg.norm(com1 - com2, axis=1)
     LOGGER.info(f"COM distance: {np.mean(comdist):.3f} +/- {np.std(comdist):.3f}")
-    np.save(args.output, comdist)
-    LOGGER.info(f"Saved to {args.output}")
+    output_path = save_npy(args.output, comdist)
+    LOGGER.info(f"Saved to {output_path}")

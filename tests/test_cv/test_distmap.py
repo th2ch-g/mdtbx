@@ -7,6 +7,7 @@ MDtraj ベースの residue distance matrix を検証する。
 import types
 
 import numpy as np
+import pytest
 
 
 class TestDistmapRun:
@@ -51,3 +52,19 @@ class TestDistmapRun:
 
         distmap = np.load(out)
         assert distmap.shape == (2, 2)
+
+
+@pytest.mark.parametrize(
+    "coordinates",
+    [
+        np.empty((0, 2, 3)),
+        np.empty((1, 0, 3)),
+        np.empty((1, 2, 2)),
+        np.array([[[np.nan, 0.0, 0.0]]]),
+    ],
+)
+def test_pairwise_distances_rejects_invalid_coordinates(coordinates):
+    from src.cv.distmap import pairwise_distances
+
+    with pytest.raises(ValueError, match="coordinates"):
+        pairwise_distances(coordinates)

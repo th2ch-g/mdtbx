@@ -3,6 +3,8 @@ import mdtraj as md
 
 from ..logger import generate_logger
 from ..utils.gmx import gmx_index_args, gmx_tempfile
+from ..utils.mdtraj import select_atom_indices
+from ..utils.paths import ensure_output_parent
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -57,6 +59,8 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    output_path = ensure_output_parent(args.output)
+
     if args.gmx:
         with gmx_tempfile(".xtc") as centered_path:
             cmd = [
@@ -82,7 +86,7 @@ def run(args):
                 "-s",
                 args.topology,
                 "-o",
-                args.output,
+                str(output_path),
                 "-fit",
                 "rot+trans",
                 *gmx_index_args(args.index),
@@ -90,11 +94,22 @@ def run(args):
             run_cmd(cmd, input=f"{args.selection}\nSystem\n")
     else:
         trj = md.load(args.file, top=args.topology)
-        ref = md.load(args.topology)
+        ref = md.load(args.topology)[0]
+        fit_trj_indices = select_atom_indices(
+            trj.topology, args.selection, label="trajectory fit selection"
+        )
+        fit_ref_indices = select_atom_indices(
+            ref.topology, args.selection, label="reference fit selection"
+        )
+        if len(fit_trj_indices) != len(fit_ref_indices):
+            raise ValueError(
+                "Fit selections contain different atom counts: "
+                f"trajectory={len(fit_trj_indices)}, reference={len(fit_ref_indices)}"
+            )
         fit_trj = trj.superpose(
             ref,
-            atom_indices=trj.top.select(args.selection),
-            ref_atom_indices=ref.top.select(args.selection),
+            atom_indices=fit_trj_indices,
+            ref_atom_indices=fit_ref_indices,
         )
-        fit_trj.save(args.output)
-    LOGGER.info(f"{args.output} generated")
+        fit_trj.save(str(output_path))
+    LOGGER.info(f"{output_path} generated")

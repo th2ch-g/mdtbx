@@ -7,6 +7,7 @@ MDtraj ベースの residue contact matrix を検証する。
 import types
 
 import numpy as np
+import pytest
 
 
 class TestContactmapRun:
@@ -52,3 +53,11 @@ class TestContactmapRun:
 
         contactmap = np.load(out)
         assert contactmap.shape == (2, 2)
+
+
+@pytest.mark.parametrize("cutoff", [0.0, -1.0, np.nan, np.inf])
+def test_calculate_contact_map_rejects_invalid_cutoff(cutoff):
+    from src.cv.contactmap import calculate_contact_map
+
+    with pytest.raises(ValueError, match="cutoff"):
+        calculate_contact_map(np.zeros((1, 2, 2)), cutoff)

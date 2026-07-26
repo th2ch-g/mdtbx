@@ -7,6 +7,7 @@ MDtraj を使った XYZ 座標抽出をテストする（gmx=False パス）。
 import types
 
 import numpy as np
+import pytest
 
 
 class TestXyzRun:
@@ -58,3 +59,20 @@ class TestXyzRun:
         run(self._make_args(trajectory_files, out))
         xyz = np.load(str(out))
         assert np.all(np.isfinite(xyz))
+
+    def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
+        from src.cv.xyz import run
+
+        out = tmp_path / "nested" / "xyz.npy"
+        run(self._make_args(trajectory_files, out))
+
+        assert out.exists()
+
+    def test_empty_selection_raises(self, trajectory_files, tmp_path):
+        from src.cv.xyz import run
+
+        args = self._make_args(
+            trajectory_files, tmp_path / "xyz.npy", selection="name XXXX"
+        )
+        with pytest.raises(ValueError, match="No atoms selected"):
+            run(args)

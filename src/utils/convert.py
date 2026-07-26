@@ -1,8 +1,11 @@
 import argparse
+
 import mdtraj as md
 from pymol import cmd
 
 from ..logger import generate_logger
+from .paths import ensure_output_parent
+from .pymol_session import pymol_session
 
 LOGGER = generate_logger(__name__)
 
@@ -41,10 +44,15 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    if args.type not in {"pymol", "mdtraj"}:
+        raise ValueError(f"Unsupported conversion type: {args.type}")
+
+    output_path = ensure_output_parent(args.output)
+
     if args.type == "pymol":
-        cmd.load(args.structure)
-        cmd.save(args.output)
+        with pymol_session(cmd, args.structure):
+            cmd.save(str(output_path), "target")
     elif args.type == "mdtraj":
         traj = md.load(args.structure)
-        traj.save(args.output)
-    LOGGER.info(f"{args.output} generated")
+        traj.save(str(output_path))
+    LOGGER.info(f"{output_path} generated")

@@ -8,6 +8,8 @@ from ..utils.common_args import (
     add_trajectory_arg,
 )
 from ..utils.gmx import gmx_index_args, gmx_tempfile
+from ..utils.mdtraj import select_atom_indices
+from ..utils.paths import ensure_output_parent
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -43,6 +45,8 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    output_path = ensure_output_parent(args.output)
+
     if args.gmx:
         with (
             gmx_tempfile(".xvg") as eigenvalue_path,
@@ -60,7 +64,7 @@ def run(args):
                 "-v",
                 eigenvector_path,
                 "-av",
-                args.output,
+                str(output_path),
                 *gmx_index_args(args.index),
             ]
             run_cmd(cmd, input=f"{args.selection}\n{args.selection}\n")
@@ -69,9 +73,9 @@ def run(args):
         import mdtraj as md
 
         trj = md.load(args.trajectory, top=args.topology)
-        atom_indices = trj.top.select(args.selection)
+        atom_indices = select_atom_indices(trj.topology, args.selection)
         sel_trj = trj.atom_slice(atom_indices)
         ave_xyz = sel_trj.xyz.mean(axis=0, keepdims=True)  # (1, n_sel_atoms, 3)
         avg_trj = md.Trajectory(ave_xyz, sel_trj.topology)
-        avg_trj.save_pdb(args.output)
+        avg_trj.save_pdb(str(output_path))
     LOGGER.info("Done")

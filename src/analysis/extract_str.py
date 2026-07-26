@@ -9,6 +9,8 @@ from ..utils.common_args import (
     add_trajectory_arg,
 )
 from ..utils.gmx import gmx_index_args
+from ..utils.mdtraj import select_atom_indices
+from ..utils.paths import ensure_output_parent
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -50,6 +52,8 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    output_path = ensure_output_parent(args.output)
+
     if args.gmx:
         cmd = [
             "gmx",
@@ -59,7 +63,7 @@ def run(args):
             "-f",
             args.trajectory,
             "-o",
-            args.output,
+            str(output_path),
             "-b",
             str(args.time),
             "-e",
@@ -76,7 +80,7 @@ def run(args):
             LOGGER.error(f"--time {args.time} is out of range (1 to {trj.n_frames})")
             sys.exit(1)
         trj = trj[args.time - 1]
-        atom_indices = trj.top.select(args.selection)
+        atom_indices = select_atom_indices(trj.topology, args.selection)
         final_trj = trj.atom_slice(atom_indices)
-        final_trj.save_pdb(args.output)
+        final_trj.save_pdb(str(output_path))
     LOGGER.info("Done")

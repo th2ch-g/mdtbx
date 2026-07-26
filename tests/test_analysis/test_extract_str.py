@@ -6,6 +6,8 @@ MDtraj を使った特定フレームの構造抽出をテストする（gmx=Fal
 
 import types
 
+import pytest
+
 
 class TestExtractStrRun:
     def _make_args(self, traj_files, output, time=1, selection="all"):
@@ -68,6 +70,25 @@ class TestExtractStrRun:
         import numpy as np
 
         assert not np.allclose(t1.xyz, t2.xyz)
+
+    def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
+        from src.analysis.extract_str import run
+
+        out = tmp_path / "nested" / "frame.pdb"
+        run(self._make_args(trajectory_files, out))
+
+        assert out.exists()
+
+    def test_empty_selection_raises(self, trajectory_files, tmp_path):
+        from src.analysis.extract_str import run
+
+        args = self._make_args(
+            trajectory_files,
+            tmp_path / "frame.pdb",
+            selection="name XXXX",
+        )
+        with pytest.raises(ValueError, match="No atoms selected"):
+            run(args)
 
     def test_gmx_uses_argv_and_text_input(self, tmp_path, monkeypatch):
         from src.analysis import extract_str

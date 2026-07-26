@@ -146,6 +146,27 @@ class TestPcaRun:
 
         assert out_average.exists()
 
+    def test_nested_output_directories_are_created(self, trajectory_files, tmp_path):
+        from src.cv.pca import run
+
+        output_dir = tmp_path / "nested"
+        out = output_dir / "pca"
+        out_npz = output_dir / "metadata"
+        out_average = output_dir / "average.pdb"
+
+        run(
+            self._make_args(
+                trajectory_files,
+                out,
+                output_npz=out_npz,
+                output_average=out_average,
+            )
+        )
+
+        assert (output_dir / "pca.npy").exists()
+        assert (output_dir / "metadata.npz").exists()
+        assert out_average.exists()
+
     def test_output_npz_with_gmx(self, trajectory_files, tmp_path, monkeypatch):
         """gmx パスでも PyMOL 可視化用の .npz が生成されること"""
         import mdtraj as md
@@ -288,6 +309,19 @@ class TestPcaRun:
         args = self._make_args(trajectory_files, tmp_path / "pca.npy", n_components=0)
 
         with pytest.raises(ValueError, match="n_components"):
+            run(args)
+
+    def test_rejects_too_many_components(self, trajectory_files, tmp_path):
+        from src.cv.pca import run
+
+        n_frames = trajectory_files["traj"].n_frames
+        args = self._make_args(
+            trajectory_files,
+            tmp_path / "pca.npy",
+            n_components=n_frames + 1,
+        )
+
+        with pytest.raises(ValueError, match="must not exceed"):
             run(args)
 
 

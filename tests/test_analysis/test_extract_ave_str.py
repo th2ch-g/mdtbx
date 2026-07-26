@@ -7,6 +7,7 @@ MDtraj を使った平均構造抽出をテストする（gmx=False パス）。
 import types
 
 import numpy as np
+import pytest
 
 
 class TestExtractAveStrRun:
@@ -80,6 +81,25 @@ class TestExtractAveStrRun:
 
         assert np.all(ave.xyz >= traj.xyz.min(axis=0) - 1e-6)
         assert np.all(ave.xyz <= traj.xyz.max(axis=0) + 1e-6)
+
+    def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
+        from src.analysis.extract_ave_str import run
+
+        out = tmp_path / "nested" / "average.pdb"
+        run(self._make_args(trajectory_files, out))
+
+        assert out.exists()
+
+    def test_empty_selection_raises(self, trajectory_files, tmp_path):
+        from src.analysis.extract_ave_str import run
+
+        args = self._make_args(
+            trajectory_files,
+            tmp_path / "average.pdb",
+            selection="name XXXX",
+        )
+        with pytest.raises(ValueError, match="No atoms selected"):
+            run(args)
 
     def test_gmx_supplies_both_selection_prompts(self, tmp_path, monkeypatch):
         from src.analysis import extract_ave_str

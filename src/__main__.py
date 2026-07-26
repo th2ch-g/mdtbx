@@ -1,8 +1,4 @@
-import warnings
-
-warnings.simplefilter("ignore")
-
-from .cli import cli  # noqa: E402
+from .cli import cli
 
 
 def main():

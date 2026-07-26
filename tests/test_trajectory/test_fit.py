@@ -7,6 +7,8 @@ MDtraj を使った軌跡フィッティングをテストする（gmx=False パ
 import types
 from pathlib import Path
 
+import pytest
+
 
 class TestFitRun:
     def _make_args(self, traj_files, output, selection="all"):
@@ -54,6 +56,24 @@ class TestFitRun:
         fitted = md.load(str(out), top=trajectory_files["pdb"])
         original_n_atoms = trajectory_files["traj"].n_atoms
         assert fitted.n_atoms == original_n_atoms
+
+    def test_empty_selection_raises(self, trajectory_files, tmp_path):
+        from src.trajectory.fit import run
+
+        args = self._make_args(
+            trajectory_files, tmp_path / "fitted.xtc", selection="name XXXX"
+        )
+
+        with pytest.raises(ValueError, match="No atoms selected"):
+            run(args)
+
+    def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
+        from src.trajectory.fit import run
+
+        out = tmp_path / "nested" / "fitted.xtc"
+        run(self._make_args(trajectory_files, out))
+
+        assert out.exists()
 
     def test_gmx_uses_unique_temporary_path(self, tmp_path, monkeypatch):
         from src.trajectory import fit

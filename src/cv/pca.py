@@ -11,16 +11,12 @@ from ..utils.common_args import (
     add_trajectory_arg,
 )
 from ..utils.gmx import gmx_index_args
+from ..utils.mdtraj import select_atom_indices
+from ..utils.numpy_io import save_npy, save_npz
+from ..utils.paths import ensure_output_parent
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
-
-
-def _select_atoms(topology, selection, label):
-    atom_indices = topology.select(selection)
-    if atom_indices.size == 0:
-        raise ValueError(f"No atoms found for {label}: {selection}")
-    return atom_indices
 
 
 def _per_atom_metadata(topology, atom_indices):
@@ -51,7 +47,7 @@ def _save_pca_npz(
     atom_names, residue_ids, residue_names, chain_ids = _per_atom_metadata(
         topology, atom_indices
     )
-    np.savez(
+    output_path = save_npz(
         output_npz,
         scores=pc,
         components=components,
@@ -73,7 +69,7 @@ def _save_pca_npz(
         selection_fit_trj=args.selection_fit_trj,
         selection_fit_ref=args.selection_fit_ref,
     )
-    LOGGER.info(f"Saved PCA metadata to {output_npz}")
+    LOGGER.info(f"Saved PCA metadata to {output_path}")
 
 
 def _save_pca_metadata(output_npz, pc, pca_model, trj, atom_indices_cal, args):
@@ -254,7 +250,7 @@ def run(args):
             projection_path = temp_path / "proj.xvg"
 
             if args.output_average is not None:
-                average_structure_path = Path(args.output_average)
+                average_structure_path = ensure_output_parent(args.output_average)
             elif args.output_npz is not None:
                 average_structure_path = temp_path / "average.pdb"
             else:
@@ -328,12 +324,12 @@ def run(args):
         from sklearn.decomposition import PCA
 
         trj = md.load(args.trajectory, top=args.topology)
-        ref = md.load(args.reference)
-        atom_indices_fit_trj = _select_atoms(
-            trj.top, args.selection_fit_trj, "selection_fit_trj"
+        ref = md.load(args.reference)[0]
+        atom_indices_fit_trj = select_atom_indices(
+            trj.topology, args.selection_fit_trj, label="selection_fit_trj"
         )
-        atom_indices_fit_ref = _select_atoms(
-            ref.top, args.selection_fit_ref, "selection_fit_ref"
+        atom_indices_fit_ref = select_atom_indices(
+            ref.topology, args.selection_fit_ref, label="selection_fit_ref"
         )
         if atom_indices_fit_trj.size != atom_indices_fit_ref.size:
             raise ValueError(
@@ -345,9 +341,14 @@ def run(args):
             atom_indices=atom_indices_fit_trj,
             ref_atom_indices=atom_indices_fit_ref,
         )
-        atom_indices_cal = _select_atoms(
-            trj.top, args.selection_cal_trj, "selection_cal_trj"
+        atom_indices_cal = select_atom_indices(
+            trj.topology, args.selection_cal_trj, label="selection_cal_trj"
         )
+        max_components = min(trj.n_frames, atom_indices_cal.size * 3)
+        if args.n_components > max_components:
+            raise ValueError(
+                f"--n_components must not exceed {max_components} for this trajectory"
+            )
         pca_model = PCA(n_components=args.n_components)
         pc = pca_model.fit_transform(
             trj.xyz[:, atom_indices_cal, :].reshape(trj.n_frames, -1)
@@ -358,7 +359,8 @@ def run(args):
             )
         if args.output_average is not None:
             ave_xyz = trj.xyz.mean(axis=0, keepdims=True)
-            md.Trajectory(ave_xyz, trj.topology).save(args.output_average)
-            LOGGER.info(f"Saved average structure to {args.output_average}")
-    np.save(args.output, pc)
-    LOGGER.info(f"Saved to {args.output}")
+            average_path = ensure_output_parent(args.output_average)
+            md.Trajectory(ave_xyz, trj.topology).save(average_path)
+            LOGGER.info(f"Saved average structure to {average_path}")
+    output_path = save_npy(args.output, pc)
+    LOGGER.info(f"Saved to {output_path}")

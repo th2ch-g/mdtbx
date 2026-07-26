@@ -1,9 +1,11 @@
 import argparse
+import math
 
 import numpy as np
 
 from ..logger import generate_logger
 from ..utils.common_args import add_output_arg, add_topology_arg
+from ..utils.numpy_io import save_npy
 from .distmap import load_representative_coordinates, pairwise_distances
 
 LOGGER = generate_logger(__name__)
@@ -45,6 +47,16 @@ def add_subcmd(subparsers):
 
 
 def calculate_contact_map(distance_matrices: np.ndarray, cutoff: float) -> np.ndarray:
+    if not math.isfinite(cutoff) or cutoff <= 0:
+        raise ValueError("cutoff must be positive and finite")
+    if distance_matrices.ndim != 3 or distance_matrices.shape[0] == 0:
+        raise ValueError(
+            "distance_matrices must have shape (n_frames, n_atoms, n_atoms)"
+        )
+    if distance_matrices.shape[1] != distance_matrices.shape[2]:
+        raise ValueError("distance matrices must be square")
+    if not np.all(np.isfinite(distance_matrices)):
+        raise ValueError("distance matrices must contain only finite values")
     contact_map = (distance_matrices < cutoff).astype(float).mean(axis=0)
     np.fill_diagonal(contact_map, 0.0)
     return contact_map
@@ -63,5 +75,5 @@ def run(args):
     contact_map = calculate_contact_map(distance_matrices, args.cutoff)
 
     LOGGER.info(f"Contact map shape: {contact_map.shape}")
-    np.save(args.output, contact_map)
-    LOGGER.info(f"Saved to {args.output}")
+    output_path = save_npy(args.output, contact_map)
+    LOGGER.info(f"Saved to {output_path}")

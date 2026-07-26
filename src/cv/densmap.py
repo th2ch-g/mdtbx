@@ -9,6 +9,8 @@ from ..utils.common_args import (
     add_trajectory_arg,
 )
 from ..utils.gmx import gmx_index_args, gmx_tempfile
+from ..utils.mdtraj import select_atom_indices
+from ..utils.numpy_io import save_npy
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -60,6 +62,9 @@ def add_subcmd(subparsers):
 
 
 def run(args):
+    if args.bins <= 0:
+        raise ValueError("--bins must be positive")
+
     if args.gmx:
         with gmx_tempfile(".dat") as density_path:
             cmd = [
@@ -85,10 +90,7 @@ def run(args):
         import mdtraj as md
 
         trj = md.load(args.trajectory, top=args.topology)
-        atom_indices = trj.topology.select(args.selection)
-        if len(atom_indices) == 0:
-            LOGGER.error(f"No atoms selected by: {args.selection}")
-            return
+        atom_indices = select_atom_indices(trj.topology, args.selection)
 
         xyz = trj.xyz[:, atom_indices, :]  # (n_frames, n_atoms, 3) [nm]
         ax0, ax1 = _AXIS_MAP[args.axis]
@@ -104,5 +106,5 @@ def run(args):
         densmap[2] = edges1
         LOGGER.info(f"Density map shape: {counts.shape}, axis: {args.axis}")
 
-    np.save(args.output, densmap)
-    LOGGER.info(f"Saved to {args.output}")
+    output_path = save_npy(args.output, densmap)
+    LOGGER.info(f"Saved to {output_path}")

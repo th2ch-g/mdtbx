@@ -11,6 +11,7 @@ Examples:
 
 from __future__ import annotations
 
+import ast
 import base64
 import json
 import re
@@ -29,18 +30,54 @@ AI_MAX_ATTEMPTS = 5
 AI_JOB_COUNTER = count(1)
 AI_JOBS: dict[int, dict[str, object]] = {}
 AI_JOBS_LOCK = threading.Lock()
-PYMOL_SPECIAL_COMMAND_PREFIXES = (
-    "@",
-    "/",
-)
-PYMOL_SPECIAL_COMMANDS = {
+FORBIDDEN_PYMOL_COMMAND_PREFIXES = ("@", "/")
+FORBIDDEN_PYMOL_COMMANDS = {
+    "do",
+    "embed",
     "python",
     "python end",
-    "embed",
+    "quit",
+    "run",
     "skip",
-    "util.cbag",
-    "util.cbaw",
-    "util.cbao",
+    "spawn",
+    "system",
+}
+FORBIDDEN_PYTHON_NODES = (
+    ast.AsyncFunctionDef,
+    ast.AsyncWith,
+    ast.ClassDef,
+    ast.Delete,
+    ast.FunctionDef,
+    ast.Global,
+    ast.Import,
+    ast.ImportFrom,
+    ast.Lambda,
+    ast.Nonlocal,
+    ast.Raise,
+    ast.Try,
+    ast.With,
+)
+FORBIDDEN_CMD_METHODS = FORBIDDEN_PYMOL_COMMANDS | {"extend"}
+SAFE_BUILTINS = {
+    "abs": abs,
+    "bool": bool,
+    "dict": dict,
+    "enumerate": enumerate,
+    "float": float,
+    "int": int,
+    "len": len,
+    "list": list,
+    "max": max,
+    "min": min,
+    "print": print,
+    "range": range,
+    "round": round,
+    "set": set,
+    "sorted": sorted,
+    "str": str,
+    "sum": sum,
+    "tuple": tuple,
+    "zip": zip,
 }
 
 
@@ -121,7 +158,7 @@ Rules:
 - If you return Python, use a single ```python fenced block and call `cmd.*`.
 - If you return PyMOL commands, use a single ```pymol fenced block.
 - Keep the output minimal and directly executable in the current session.
-- Do not use shell commands.
+- Do not import modules or use shell, script-loading, or Python-evaluation commands.
 """
 
 
@@ -480,7 +517,9 @@ def _execute_blocks(blocks: list[tuple[str, str]]) -> None:
 
         print(f" [ai] Executing ({lang}):\n{code}\n")
         if lang == "python":
-            exec(code, {"cmd": cmd, "__builtins__": __builtins__})
+            _validate_python_code(code)
+            namespace = {"cmd": cmd, "__builtins__": SAFE_BUILTINS}
+            exec(compile(code, "<pymol-ai>", "exec"), namespace, namespace)
             continue
 
         for line in code.splitlines():
@@ -490,21 +529,62 @@ def _execute_blocks(blocks: list[tuple[str, str]]) -> None:
                 cmd.do(line)
 
 
+def _root_name(node: ast.AST) -> str | None:
+    while isinstance(node, ast.Attribute):
+        node = node.value
+    return node.id if isinstance(node, ast.Name) else None
+
+
+def _validate_python_code(code: str) -> None:
+    """Reject Python constructs that can escape the PyMOL command boundary."""
+    tree = ast.parse(code, filename="<pymol-ai>", mode="exec")
+    for node in ast.walk(tree):
+        if isinstance(node, FORBIDDEN_PYTHON_NODES):
+            raise RuntimeError(
+                f"Unsupported Python syntax in AI response: {type(node).__name__}"
+            )
+        if isinstance(node, ast.Name) and node.id.startswith("_"):
+            raise RuntimeError(f"Private Python name is not allowed: {node.id}")
+        if isinstance(node, ast.Attribute) and node.attr.startswith("_"):
+            raise RuntimeError(f"Private Python attribute is not allowed: {node.attr}")
+        if not isinstance(node, ast.Call):
+            continue
+
+        if isinstance(node.func, ast.Name):
+            if node.func.id not in SAFE_BUILTINS:
+                raise RuntimeError(
+                    f"Python call is not allowed in AI response: {node.func.id}"
+                )
+            continue
+
+        if isinstance(node.func, ast.Attribute):
+            root_name = _root_name(node.func)
+            method_name = node.func.attr.lower()
+            if root_name != "cmd" or method_name in FORBIDDEN_CMD_METHODS:
+                raise RuntimeError(
+                    f"Python method call is not allowed in AI response: "
+                    f"{root_name or '<expression>'}.{node.func.attr}"
+                )
+            continue
+
+        raise RuntimeError("Indirect Python calls are not allowed in AI responses")
+
+
 def _validate_pymol_command(line: str) -> None:
     stripped = line.strip()
     if not stripped or stripped.startswith("#"):
         return
 
-    if stripped.startswith(PYMOL_SPECIAL_COMMAND_PREFIXES):
-        return
+    if ";" in stripped:
+        raise RuntimeError("Multiple PyMOL commands on one line are not allowed")
 
     normalized = stripped.lower()
-    if normalized in PYMOL_SPECIAL_COMMANDS:
-        return
+    if stripped.startswith(FORBIDDEN_PYMOL_COMMAND_PREFIXES):
+        raise RuntimeError(f"Unsupported PyMOL command prefix in line: {line}")
 
     command = stripped.split(maxsplit=1)[0].rstrip(",").lower()
-    if command in PYMOL_SPECIAL_COMMANDS:
-        return
+    if normalized in FORBIDDEN_PYMOL_COMMANDS or command in FORBIDDEN_PYMOL_COMMANDS:
+        raise RuntimeError(f"Unsafe PyMOL command is not allowed: {command}")
     if command in cmd.keyword:
         return
 

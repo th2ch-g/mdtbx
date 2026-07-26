@@ -81,3 +81,12 @@ class TestRmsdRun:
         rmsd = np.load(str(out))
         # frame 0 以外のどこかが 0 より大きいことを確認
         assert np.any(rmsd[1:] > 0)
+
+    def test_empty_fit_selection_raises(self, trajectory_files, tmp_path):
+        from src.cv.rmsd import run
+
+        args = self._make_args(
+            trajectory_files, tmp_path / "rmsd.npy", selection="name XXXX"
+        )
+        with pytest.raises(ValueError, match="No atoms selected"):
+            run(args)

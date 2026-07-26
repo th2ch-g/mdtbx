@@ -1,6 +1,5 @@
 import argparse
 import mdtraj as md
-import numpy as np
 
 from ..logger import generate_logger
 from ..utils.common_args import (
@@ -9,6 +8,8 @@ from ..utils.common_args import (
     add_topology_arg,
     add_trajectory_arg,
 )
+from ..utils.mdtraj import select_atom_indices
+from ..utils.numpy_io import save_npy
 
 LOGGER = generate_logger(__name__)
 
@@ -33,6 +34,7 @@ def add_subcmd(subparsers):
 
 def run(args):
     trj = md.load(args.trajectory, top=args.topology)
-    xyz = trj.atom_slice(trj.topology.select(args.selection)).xyz
-    np.save(args.output, xyz)
-    LOGGER.info(f"Saved to {args.output}")
+    atom_indices = select_atom_indices(trj.topology, args.selection)
+    xyz = trj.atom_slice(atom_indices).xyz
+    output_path = save_npy(args.output, xyz)
+    LOGGER.info(f"Saved to {output_path}")

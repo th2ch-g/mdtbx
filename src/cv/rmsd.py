@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 import mdtraj as md
 import numpy as np
@@ -10,6 +9,8 @@ from ..utils.common_args import (
     add_topology_arg,
     add_trajectory_arg,
 )
+from ..utils.mdtraj import select_atom_indices
+from ..utils.numpy_io import save_npy
 
 LOGGER = generate_logger(__name__)
 
@@ -68,23 +69,31 @@ def add_subcmd(subparsers):
 
 def run(args):
     trj = md.load(args.trajectory, top=args.topology)
-    ref = md.load(args.reference)
+    ref = md.load(args.reference)[0]
 
-    fit_trj = trj.top.select(args.selection_fit_trj)
-    fit_ref = ref.top.select(args.selection_fit_ref)
+    fit_trj = select_atom_indices(
+        trj.topology, args.selection_fit_trj, label="trajectory fit selection"
+    )
+    fit_ref = select_atom_indices(
+        ref.topology, args.selection_fit_ref, label="reference fit selection"
+    )
     if len(fit_trj) != len(fit_ref):
-        LOGGER.error(
-            f"Number of atoms in fit selection for trajectory ({len(fit_trj)}) and reference ({len(fit_ref)}) are different"
+        raise ValueError(
+            "Fit selections contain different atom counts: "
+            f"trajectory={len(fit_trj)}, reference={len(fit_ref)}"
         )
-        sys.exit(1)
 
-    cal_trj = trj.top.select(args.selection_cal_trj)
-    cal_ref = ref.top.select(args.selection_cal_ref)
+    cal_trj = select_atom_indices(
+        trj.topology, args.selection_cal_trj, label="trajectory calculation selection"
+    )
+    cal_ref = select_atom_indices(
+        ref.topology, args.selection_cal_ref, label="reference calculation selection"
+    )
     if len(cal_trj) != len(cal_ref):
-        LOGGER.error(
-            f"Number of atoms in cal selection for trajectory ({len(cal_trj)}) and reference ({len(cal_ref)}) are different"
+        raise ValueError(
+            "Calculation selections contain different atom counts: "
+            f"trajectory={len(cal_trj)}, reference={len(cal_ref)}"
         )
-        sys.exit(1)
 
     trj.superpose(
         ref,
@@ -96,9 +105,9 @@ def run(args):
     rmsd = np.sqrt(
         3
         * np.mean(
-            np.square(trj.xyz[:, cal_trj] - ref.xyz[:, cal_ref]),
+            np.square(trj.xyz[:, cal_trj] - ref.xyz[0, cal_ref]),
             axis=(1, 2),
         )
     )
-    np.save(args.output, rmsd)
-    LOGGER.info(f"Saved to {args.output}")
+    output_path = save_npy(args.output, rmsd)
+    LOGGER.info(f"Saved to {output_path}")

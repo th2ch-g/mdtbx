@@ -5,6 +5,8 @@ import numpy as np
 
 from ..logger import generate_logger
 from ..utils.common_args import add_output_arg, add_topology_arg
+from ..utils.mdtraj import select_atom_indices
+from ..utils.numpy_io import save_npy
 
 LOGGER = generate_logger(__name__)
 
@@ -42,16 +44,13 @@ def load_representative_coordinates(
     topology_path: str,
     trajectory_path: str | None,
     selection: str,
-) -> np.ndarray | None:
+) -> np.ndarray:
     if trajectory_path is not None:
         traj = md.load(trajectory_path, top=topology_path)
     else:
         traj = md.load(topology_path)
 
-    atom_indices = traj.topology.select(selection)
-    if len(atom_indices) == 0:
-        LOGGER.error(f"No atoms selected by: {selection}")
-        return None
+    atom_indices = select_atom_indices(traj.topology, selection)
 
     coordinates = traj.xyz[:, atom_indices, :] * 10.0
     LOGGER.info(
@@ -63,6 +62,13 @@ def load_representative_coordinates(
 
 
 def pairwise_distances(coordinates: np.ndarray) -> np.ndarray:
+    coordinates = np.asarray(coordinates, dtype=float)
+    if coordinates.ndim != 3 or coordinates.shape[0] == 0 or coordinates.shape[1] == 0:
+        raise ValueError("coordinates must have shape (n_frames, n_atoms, 3)")
+    if coordinates.shape[2] != 3:
+        raise ValueError("coordinates must have shape (n_frames, n_atoms, 3)")
+    if not np.all(np.isfinite(coordinates)):
+        raise ValueError("coordinates must contain only finite values")
     diff = coordinates[:, :, None, :] - coordinates[:, None, :, :]
     return np.linalg.norm(diff, axis=-1)
 
@@ -77,10 +83,7 @@ def run(args):
         args.trajectory,
         args.selection,
     )
-    if coordinates is None:
-        return
-
     distance_map = calculate_distance_map(coordinates)
     LOGGER.info(f"Distance map shape: {distance_map.shape}")
-    np.save(args.output, distance_map)
-    LOGGER.info(f"Saved to {args.output}")
+    output_path = save_npy(args.output, distance_map)
+    LOGGER.info(f"Saved to {output_path}")

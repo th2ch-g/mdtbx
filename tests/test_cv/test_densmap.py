@@ -49,13 +49,20 @@ class TestDensmapRun:
         run(self._make_args(trajectory_files, out, axis=axis))
         assert out.exists()
 
-    def test_empty_selection_does_not_create_file(self, trajectory_files, tmp_path):
-        """原子が選択されない場合はファイルを生成しないこと"""
+    def test_empty_selection_raises(self, trajectory_files, tmp_path):
         from src.cv.densmap import run
 
         out = tmp_path / "densmap_empty.npy"
-        run(self._make_args(trajectory_files, out, selection="name XXXX"))
+        with pytest.raises(ValueError, match="No atoms selected"):
+            run(self._make_args(trajectory_files, out, selection="name XXXX"))
         assert not out.exists()
+
+    @pytest.mark.parametrize("bins", [0, -1])
+    def test_non_positive_bins_raise(self, trajectory_files, tmp_path, bins):
+        from src.cv.densmap import run
+
+        with pytest.raises(ValueError, match="bins"):
+            run(self._make_args(trajectory_files, tmp_path / "out.npy", bins=bins))
 
     def test_histogram_shape(self, trajectory_files, tmp_path):
         """np.histogram2d の結果と整合すること（ゴールデンパス検証）"""

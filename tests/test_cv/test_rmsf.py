@@ -96,6 +96,46 @@ class TestRmsfRun:
         rmsf = np.load(str(out))
         assert np.allclose(rmsf, 0.0, atol=1e-6)
 
+    def test_residue_resolution_returns_one_value_per_selected_residue(
+        self, trajectory_files, tmp_path
+    ):
+        from src.cv.rmsf import run
+
+        out = tmp_path / "rmsf_residue.npy"
+        args = self._make_args(trajectory_files, out)
+        args.resolution = "residue"
+
+        run(args)
+
+        rmsf = np.load(out)
+        selected_residues = {
+            atom.residue.index for atom in trajectory_files["traj"].topology.atoms
+        }
+        assert rmsf.shape == (len(selected_residues),)
+
+    def test_gromacs_style_protein_selection_works_with_mdtraj(
+        self, trajectory_files, tmp_path
+    ):
+        from src.cv.rmsf import run
+
+        out = tmp_path / "rmsf_protein.npy"
+        args = self._make_args(trajectory_files, out, selection="Protein")
+
+        run(args)
+
+        assert out.exists()
+
+    def test_empty_selection_raises(self, trajectory_files, tmp_path):
+        import pytest
+
+        from src.cv.rmsf import run
+
+        args = self._make_args(
+            trajectory_files, tmp_path / "rmsf_empty.npy", selection="name XXXX"
+        )
+        with pytest.raises(ValueError, match="No atoms selected"):
+            run(args)
+
     def test_gmx_single_value_output(self, tmp_path, monkeypatch):
         from src.cv import rmsf
 
