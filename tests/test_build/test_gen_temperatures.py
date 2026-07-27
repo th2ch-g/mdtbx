@@ -1,7 +1,7 @@
 """
-gen_temperatures のユニットテスト
+gen_temperatures unit tests
 
-純粋計算関数（calc_mu）とバリデーションロジック（run）をテストする。
+Tests the pure computation helper (calc_mu) and the validation logic (run).
 """
 
 import types
@@ -13,18 +13,18 @@ from src.build.gen_temperatures import A0, A1, B0, B1, calc_mu, run
 
 class TestCalcMu:
     def test_known_value(self):
-        """calc_mu の数値が手計算と一致すること"""
+        """calc_mu matches a hand calculation"""
         nw, np_val, temp, fener = 100, 50, 300.0, 0.0
         expected = (A0 + A1 * temp) * nw + (B0 + B1 * temp) * np_val - temp * fener
         assert calc_mu(nw, np_val, temp, fener) == pytest.approx(expected)
 
     def test_zero_system(self):
-        """nw=0, np=0 のとき 0 になること"""
+        """Returns 0 for nw=0 and np=0"""
         result = calc_mu(0, 0, 300.0, 0.0)
         assert result == 0.0
 
     def test_temperature_effect(self):
-        """温度が高いほど calc_mu の値が変化すること（単調ではないが変わること）"""
+        """calc_mu changes with temperature (not monotonically, but it changes)"""
         mu1 = calc_mu(1000, 500, 300.0, 0.0)
         mu2 = calc_mu(1000, 500, 400.0, 0.0)
         assert mu1 != mu2
@@ -49,7 +49,7 @@ class TestGenTemperaturesRun:
         return types.SimpleNamespace(**defaults)
 
     def test_generates_temperature_ladder(self, capsys):
-        """正常な入力で温度ラダーが出力されること"""
+        """Valid input produces a temperature ladder"""
         args = self._base_args()
         run(args)
         captured = capsys.readouterr()
@@ -57,14 +57,14 @@ class TestGenTemperaturesRun:
         assert "300.00" in captured.out
 
     def test_first_temp_equals_tlow(self, capsys):
-        """最初の温度が tlow であること"""
+        """The first temperature equals tlow"""
         args = self._base_args(tlow=310.0, thigh=360.0)
         run(args)
         captured = capsys.readouterr()
         assert "310.00" in captured.out
 
     def test_invalid_pdes_raises(self):
-        """0〜1 の範囲外の pdes は ValueError を送出すること"""
+        """A pdes outside 0-1 raises ValueError"""
         args = self._base_args(pdes=1.5)
         with pytest.raises(ValueError, match="Pdes"):
             run(args)
@@ -75,19 +75,19 @@ class TestGenTemperaturesRun:
             run(self._base_args(pdes=pdes))
 
     def test_thigh_must_be_greater_than_tlow(self):
-        """thigh <= tlow のとき ValueError を送出すること"""
+        """thigh <= tlow raises ValueError"""
         args = self._base_args(tlow=350.0, thigh=300.0)
         with pytest.raises(ValueError):
             run(args)
 
     def test_tlow_must_be_positive(self):
-        """tlow が 0 以下のとき ValueError を送出すること"""
+        """tlow <= 0 raises ValueError"""
         args = self._base_args(tlow=0.0)
         with pytest.raises(ValueError):
             run(args)
 
     def test_zero_protein_atoms_raises(self):
-        """np=0 のとき ValueError を送出すること"""
+        """np=0 raises ValueError"""
         args = self._base_args(np=0)
         with pytest.raises(ValueError, match="protein atoms"):
             run(args)
@@ -101,7 +101,7 @@ class TestGenTemperaturesRun:
             run(self._base_args(tol=0.0))
 
     def test_nvt_not_supported(self):
-        """alg=1（NVT）は未対応なので ValueError を送出すること"""
+        """alg=1 (NVT) is unsupported and raises ValueError"""
         args = self._base_args(alg=1)
         with pytest.raises(ValueError, match="constant volume"):
             run(args)

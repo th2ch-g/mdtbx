@@ -1,7 +1,7 @@
 """
-trajectory/fit のユニットテスト
+trajectory/fit unit tests
 
-MDtraj を使った軌跡フィッティングをテストする（gmx=False パス）。
+Tests trajectory fitting with MDtraj (the gmx=False path).
 """
 
 import types
@@ -23,7 +23,7 @@ class TestFitRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """run() がフィット済み軌跡ファイルを生成すること"""
+        """run() generates a fitted trajectory file"""
 
         from src.trajectory.fit import run
 
@@ -32,7 +32,7 @@ class TestFitRun:
         assert out.exists()
 
     def test_output_has_same_frames(self, trajectory_files, tmp_path):
-        """フィット後の軌跡のフレーム数が元と同じであること"""
+        """The fitted trajectory keeps the original frame count"""
         import mdtraj as md
 
         from src.trajectory.fit import run
@@ -45,7 +45,7 @@ class TestFitRun:
         assert fitted.n_frames == original_n_frames
 
     def test_output_has_same_atoms(self, trajectory_files, tmp_path):
-        """フィット後の軌跡の原子数が元と同じであること"""
+        """The fitted trajectory keeps the original atom count"""
         import mdtraj as md
 
         from src.trajectory.fit import run

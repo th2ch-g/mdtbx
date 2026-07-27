@@ -1,7 +1,7 @@
 """
-cv/densmap のユニットテスト
+cv/densmap unit tests
 
-MDtraj を使った 2D 密度マップ計算をテストする（gmx=False パス）。
+Tests the 2D density map computation with MDtraj (the gmx=False path).
 """
 
 import types
@@ -25,7 +25,7 @@ class TestDensmapRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """.npy ファイルが生成されること"""
+        """.npy file is generated"""
         from src.cv.densmap import run
 
         out = tmp_path / "densmap.npy"
@@ -33,7 +33,7 @@ class TestDensmapRun:
         assert out.exists()
 
     def test_output_is_nonempty(self, trajectory_files, tmp_path):
-        """出力ファイルが空でないこと"""
+        """The output file is not empty"""
         from src.cv.densmap import run
 
         out = tmp_path / "densmap_size.npy"
@@ -42,7 +42,7 @@ class TestDensmapRun:
 
     @pytest.mark.parametrize("axis", ["xy", "xz", "yz"])
     def test_different_axes(self, trajectory_files, tmp_path, axis):
-        """xy / xz / yz の各投影面でファイルが生成されること"""
+        """A file is generated for each of the xy / xz / yz projections"""
         from src.cv.densmap import run
 
         out = tmp_path / f"densmap_{axis}.npy"
@@ -65,7 +65,7 @@ class TestDensmapRun:
             run(self._make_args(trajectory_files, tmp_path / "out.npy", bins=bins))
 
     def test_histogram_shape(self, trajectory_files, tmp_path):
-        """np.histogram2d の結果と整合すること（ゴールデンパス検証）"""
+        """The result agrees with np.histogram2d (golden-path check)"""
         import mdtraj as md
         from src.cv.densmap import _AXIS_MAP, run
 
@@ -74,7 +74,7 @@ class TestDensmapRun:
         out = tmp_path / "densmap_golden.npy"
         run(self._make_args(trajectory_files, out, bins=bins, axis=axis))
 
-        # 内部と同じ計算で counts を再現し、合計を比較する
+        # Reproduce counts with the same computation and compare the totals
         traj = md.load(trajectory_files["xtc"], top=trajectory_files["pdb"])
         atom_indices = traj.topology.select("all")
         xyz = traj.xyz[:, atom_indices, :]
@@ -83,7 +83,7 @@ class TestDensmapRun:
         pos1 = xyz[:, :, ax1].ravel()
         counts_ref, _, _ = np.histogram2d(pos0, pos1, bins=bins)
 
-        # ファイルが存在し、総カウントが一致すること
+        # The file exists and the total count matches
         assert out.exists()
         total_ref = int(counts_ref.sum())
         expected = traj.n_frames * traj.n_atoms

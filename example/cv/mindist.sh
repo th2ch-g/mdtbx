@@ -1,13 +1,14 @@
 #!/bin/bash
 # mindist.sh
-# 2つの原子グループ間の全ペアから最小距離を計算する
+# Compute the minimum distance over all pairs between two atom groups
 #
-# comdist (重心距離) と異なり、2グループの接触の有無を反映しやすい
-# 結合部位での接触距離や、タンパク質-タンパク質界面の解析に使用する
+# Unlike comdist (a centre-of-mass distance), this reflects whether the two
+# groups are in contact; used for contact distances at a binding site or for
+# protein-protein interfaces
 #
-# 出力: .npy (shape: [n_frames], 単位: nm)
+# Output: .npy (shape: [n_frames], unit: nm)
 #
-# 使用例:
+# Example:
 #   bash mindist.sh
 
 set -e
@@ -18,7 +19,7 @@ TRAJECTORY="prd.xtc"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# 基本ケース: 活性部位残基とリガンド間の最小距離
+# Basic case: minimum distance between active-site residues and the ligand
 # -----------------------------------------------------------------------
 mdtbx mindist \
     -p ${TOPOLOGY} \
@@ -30,7 +31,7 @@ mdtbx mindist \
 echo "mindist done -> cvs/mindist.npy"
 
 # -----------------------------------------------------------------------
-# タンパク質-タンパク質界面の最小距離
+# Minimum distance across a protein-protein interface
 # -----------------------------------------------------------------------
 # mdtbx mindist \
 #     -p ${TOPOLOGY} \

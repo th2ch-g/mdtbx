@@ -1,13 +1,13 @@
 #!/bin/bash
 # xyz.sh
-# 特定の原子群の XYZ 座標時系列を抽出する
+# Extract the XYZ coordinate time series of a set of atoms
 #
-# スカラー CV では失われる空間情報が必要な場合や、
-# カスタム CV のための前処理として使用する
+# Use when the spatial information a scalar CV discards is needed, or as
+# preprocessing for a custom CV
 #
-# 出力: .npy (shape: [n_frames, n_atoms, 3], 単位: nm)
+# Output: .npy (shape: [n_frames, n_atoms, 3], unit: nm)
 #
-# 使用例:
+# Example:
 #   bash xyz.sh
 
 set -e
@@ -18,7 +18,7 @@ TRAJECTORY="prd.xtc"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# リガンドの全原子座標
+# All ligand atom coordinates
 # -----------------------------------------------------------------------
 mdtbx xyz \
     -p ${TOPOLOGY} \
@@ -29,7 +29,7 @@ mdtbx xyz \
 echo "xyz done -> cvs/lig_xyz.npy"
 
 # -----------------------------------------------------------------------
-# 活性部位 Cα 座標 (特定残基)
+# Active-site CA coordinates (selected residues)
 # -----------------------------------------------------------------------
 mdtbx xyz \
     -p ${TOPOLOGY} \

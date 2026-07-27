@@ -12,7 +12,7 @@ mdtbx addnme -s ace.pdb -o ace_nme
 
 mdtbx find_bond -s ace_nme.pdb -o bonds.txt -op cym.pdb
 
-# SS-bond有無で入力PDBとpostcmdを切り替え
+# Switch the input PDB and the postcmd depending on whether SS-bonds exist
 if [ -s bonds.txt ]; then
     input_pdb="cym.pdb"
     mdtbx build_solution \

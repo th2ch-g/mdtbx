@@ -1,7 +1,7 @@
 """
-calc_ion_conc のユニットテスト
+calc_ion_conc unit tests
 
-純粋計算関数と PDB パーサーをテストする。
+Tests the pure computation helpers and the PDB parser.
 """
 
 import types
@@ -14,14 +14,14 @@ from src.build.calc_ion_conc import (
     get_water_number_from_pdb,
 )
 
-# AVOGADRO_CONST = 6.022 (config.py より)
+# AVOGADRO_CONST = 6.022 (from config.py)
 AVOGADRO = 6.022
 
 
 class TestCalcIonConcFromVolume:
     def test_known_value(self):
         """
-        volume=1e6 A^3, concentration=0.15 M のとき
+        For volume=1e6 A^3 and concentration=0.15 M,
         ionnum = 1e6 * 0.15 * 6.022 // 10000 = 90
         """
         result = calc_ion_conc_from_volume(1e6, 0.15)
@@ -36,13 +36,13 @@ class TestCalcIonConcFromVolume:
         assert isinstance(result, int)
 
     def test_proportional_to_volume(self):
-        """体積が 2 倍になるとイオン数もほぼ 2 倍になること"""
+        """Doubling the volume roughly doubles the ion count"""
         n1 = calc_ion_conc_from_volume(1e6, 0.15)
         n2 = calc_ion_conc_from_volume(2e6, 0.15)
-        assert abs(n2 - 2 * n1) <= 1  # 整数切り捨てによる誤差を許容
+        assert abs(n2 - 2 * n1) <= 1  # Allow for integer truncation
 
     def test_proportional_to_concentration(self):
-        """濃度が 2 倍になるとイオン数もほぼ 2 倍になること"""
+        """Doubling the concentration roughly doubles the ion count"""
         n1 = calc_ion_conc_from_volume(1e6, 0.10)
         n2 = calc_ion_conc_from_volume(1e6, 0.20)
         assert abs(n2 - 2 * n1) <= 1
@@ -58,7 +58,7 @@ class TestCalcIonConcFromVolume:
 
 class TestGetBoxsizeFromPdb:
     def test_reads_cryst_line(self, sample_pdb_path):
-        """CRYST1 行からボックスサイズが読み取れること"""
+        """The box size is read from the CRYST1 record"""
         args = types.SimpleNamespace(pdb=str(sample_pdb_path))
         x, y, z = get_boxsize_from_pdb(args)
         assert x == pytest.approx(50.0)
@@ -66,7 +66,7 @@ class TestGetBoxsizeFromPdb:
         assert z == pytest.approx(50.0)
 
     def test_raises_if_no_cryst(self, tmp_path):
-        """CRYST1 行がない PDB は例外を送出すること"""
+        """A PDB without a CRYST1 record raises"""
         pdb = tmp_path / "no_cryst.pdb"
         pdb.write_text("ATOM      1  CA  ALA A   1       0.000   0.000   0.000\n")
         args = types.SimpleNamespace(pdb=str(pdb))
@@ -84,15 +84,15 @@ class TestGetBoxsizeFromPdb:
 
 class TestGetWaterNumberFromPdb:
     def test_counts_wat_oxygens(self, sample_pdb_path):
-        """WAT の酸素原子数が正しくカウントされること（fixture は 2 分子）"""
+        """WAT oxygen atoms are counted correctly (the fixture holds 2 molecules)"""
         args = types.SimpleNamespace(pdb=str(sample_pdb_path), water_name="WAT")
         count = get_water_number_from_pdb(args)
         assert count == 2
 
     def test_counts_with_custom_water_name(self, tmp_path):
-        """water_name を変えたときに正しくカウントされること"""
+        """Counting is still correct after changing water_name"""
         pdb = tmp_path / "wat.pdb"
-        # "WAT" は "O" を含まないため、O 原子行のみマッチする
+        # "WAT" does not contain "O", so only the O atom lines match
         pdb.write_text(
             "HETATM    1  O   WAT A   1       0.000   0.000   0.000\n"
             "HETATM    2  H1  WAT A   1       0.800   0.600   0.000\n"
@@ -103,7 +103,7 @@ class TestGetWaterNumberFromPdb:
         assert count == 1
 
     def test_no_water_returns_zero(self, tmp_path):
-        """水分子がない場合は 0 を返すこと"""
+        """Returns 0 when there is no water"""
         pdb = tmp_path / "protein_only.pdb"
         pdb.write_text("ATOM      1  CA  ALA A   1       0.000   0.000   0.000\n")
         args = types.SimpleNamespace(pdb=str(pdb), water_name="WAT")

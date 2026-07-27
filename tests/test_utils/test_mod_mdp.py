@@ -1,8 +1,8 @@
 """
-mod_mdp のユニットテスト
+mod_mdp unit tests
 
-mod_mdp() 関数（ファイル I/O）と run()（ディレクトリ走査）をテストする。
-tmp_path fixture により、テスト後に一時ファイルは自動削除される。
+Tests the mod_mdp() function (file I/O) and run() (directory traversal).
+The tmp_path fixture removes the temporary files after each test.
 """
 
 from src.utils.mod_mdp import mod_mdp, run
@@ -10,7 +10,7 @@ from src.utils.mod_mdp import mod_mdp, run
 
 class TestModMdp:
     def test_replace_existing_value(self, tmp_path):
-        """既存キーの値が書き換わること"""
+        """The value of an existing key is rewritten"""
         mdp = tmp_path / "md.mdp"
         mdp.write_text("nsteps                  = 1000\n")
 
@@ -22,7 +22,7 @@ class TestModMdp:
         assert "1000" not in content
 
     def test_add_new_key(self, tmp_path):
-        """存在しないキーが末尾に追加されること"""
+        """A key that does not exist is appended at the end"""
         mdp = tmp_path / "md.mdp"
         mdp.write_text("nsteps                  = 1000\n")
 
@@ -31,11 +31,11 @@ class TestModMdp:
         content = mdp.read_text()
         assert "dt" in content
         assert "0.002" in content
-        # 元の内容は保持される
+        # The original content is preserved
         assert "nsteps" in content
 
     def test_comment_lines_preserved(self, tmp_path):
-        """コメント行（; で始まる）は変更されないこと"""
+        """Comment lines (starting with ;) are left unchanged"""
         mdp = tmp_path / "md.mdp"
         original = "; this is a comment\nnsteps = 1000\n"
         mdp.write_text(original)
@@ -46,18 +46,18 @@ class TestModMdp:
         assert "; this is a comment" in content
 
     def test_ljust_controls_padding(self, tmp_path):
-        """ljust パラメータが新規キーの整形幅を制御すること"""
+        """The ljust parameter controls the padding width of a new key"""
         mdp = tmp_path / "md.mdp"
         mdp.write_text("")
 
         mod_mdp("dt", "0.002", mdp, ljust=30)
 
         content = mdp.read_text()
-        # フォーマット: f"{key.ljust(30)} = {value}" → "dt" + 28空白 + " = 0.002"
+        # Format: f"{key.ljust(30)} = {value}" -> "dt" + 28 spaces + " = 0.002"
         assert "dt" + " " * 28 + " = 0.002" in content
 
     def test_multiple_keys(self, tmp_path):
-        """複数のキーを順番に書き換えられること"""
+        """Several keys can be rewritten in sequence"""
         mdp = tmp_path / "md.mdp"
         mdp.write_text("nsteps = 1000\ndt     = 0.002\n")
 
@@ -105,7 +105,7 @@ class TestModMdp:
 
 class TestModMdpRun:
     def test_run_modifies_all_mdp_files(self, tmp_path):
-        """run() がディレクトリ内の全 .mdp ファイルを更新すること"""
+        """run() updates every .mdp file in the directory"""
         for name in ["em.mdp", "nvt.mdp", "npt.mdp"]:
             (tmp_path / name).write_text("nsteps = 100\n")
 
@@ -125,7 +125,7 @@ class TestModMdpRun:
             assert "50000" in content
 
     def test_run_respects_exclude(self, tmp_path):
-        """exclude オプションで指定したファイルは変更されないこと"""
+        """Files named by the exclude option are left unchanged"""
         (tmp_path / "nvt.mdp").write_text("nsteps = 100\n")
         (tmp_path / "npt.mdp").write_text("nsteps = 100\n")
 
@@ -141,10 +141,10 @@ class TestModMdpRun:
         run(args)
 
         assert "50000" in (tmp_path / "nvt.mdp").read_text()
-        assert "100" in (tmp_path / "npt.mdp").read_text()  # 変更されていない
+        assert "100" in (tmp_path / "npt.mdp").read_text()  # unchanged
 
     def test_run_nonexistent_dir(self, tmp_path):
-        """存在しないディレクトリを指定した場合でもエラーにならないこと（.mdp ファイルが 0 件）"""
+        """A directory that does not exist is not an error (it holds 0 .mdp files)"""
         import types
 
         args = types.SimpleNamespace(
@@ -154,5 +154,5 @@ class TestModMdpRun:
             exclude=None,
             ljust=23,
         )
-        # glob が空を返すだけでエラーにならない
+        # glob just returns empty rather than raising
         run(args)

@@ -1,16 +1,17 @@
 #!/bin/bash
 # pca.sh
-# 主成分分析 (PCA) で集団運動モードを抽出する
+# Extract collective motion modes by principal component analysis (PCA)
 #
-# 自由エネルギー地形の可視化や、PACs MD の多次元 CV として使用する
-# フィット選択 (-sft/-sfr) と PCA 計算選択 (-sct/-scr) を分けられる
+# Used to visualise free-energy landscapes, or as a multi-dimensional CV for
+# PaCS-MD. The fitting selection (-sft/-sfr) and the PCA selection
+# (-sct/-scr) can be given separately
 #
-# 出力:
+# Output:
 #   - .npy: scores (shape: [n_frames, n_components])
 #   - .npz: PCA metadata for PyMOL visualization
 #   - .pdb: average structure after fitting
 #
-# 使用例:
+# Example:
 #   bash pca.sh
 
 set -e
@@ -22,8 +23,8 @@ REFERENCE="ref.gro"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# 基本ケース: MDtraj + scikit-learn による PCA
-# backbone で重ね合わせ後、backbone の主成分を抽出
+# Basic case: PCA with MDtraj + scikit-learn
+# Fit on the backbone, then extract the principal components of the backbone
 # -----------------------------------------------------------------------
 mdtbx pca \
     -p ${TOPOLOGY} \
@@ -43,8 +44,8 @@ echo "metadata done -> cvs/pca_backbone.npz"
 echo "average structure done -> cvs/pca_average.pdb"
 
 # -----------------------------------------------------------------------
-# Gromacs gmx covar/anaeig を使う場合 (--gmx)
-# 大規模系や gmx との一貫性が必要な場合に使用する
+# Using Gromacs gmx covar/anaeig instead (--gmx)
+# Use this for large systems, or when consistency with gmx is required
 # -----------------------------------------------------------------------
 # mdtbx pca \
 #     -p gmx.tpr \

@@ -1,8 +1,8 @@
 """
-rmfile のユニットテスト
+rmfile unit tests
 
-対象パターン（#*#, *cpt, mdout.mdp）のファイルが削除され、
-それ以外のファイルは残ることを確認する。
+Confirms that files matching the target patterns (#*#, *cpt, mdout.mdp) are
+removed and every other file is kept.
 """
 
 import types
@@ -47,7 +47,7 @@ class TestRmfile:
         assert tpr.exists()
 
     def test_removes_cpt_recursively(self, tmp_path):
-        """サブディレクトリ内の .cpt も再帰的に削除されること"""
+        """.cpt files in subdirectories are removed recursively"""
         subdir = tmp_path / "run1"
         subdir.mkdir()
         cpt = subdir / "state.cpt"
@@ -58,7 +58,7 @@ class TestRmfile:
         assert not cpt.exists()
 
     def test_mixed_files(self, tmp_path):
-        """削除対象と保持対象が混在していても正しく処理されること"""
+        """A mix of targets and non-targets is handled correctly"""
         targets = [
             tmp_path / "state.cpt",
             tmp_path / "mdout.mdp",

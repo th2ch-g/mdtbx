@@ -1,15 +1,15 @@
 """
-CLI のサブコマンド登録テスト
+CLI subcommand registration tests
 
-全サブコマンドが argparse に正常に登録されることを確認する。
-外部ツール(PyMOL, Gromacs 等)の呼び出しは発生しない。
+Confirms that every subcommand registers with argparse. No external tool
+(PyMOL, Gromacs, ...) is invoked.
 """
 
 import pytest
 
 
 def test_cli_importable():
-    """cli モジュールが import エラーなくロードできること"""
+    """The cli module imports without error"""
     from src.cli import cli, create_parser
 
     assert callable(cli)
@@ -18,13 +18,13 @@ def test_cli_importable():
 
 def test_all_subcommands_registered():
     """
-    全サブコマンドが argparse に登録されており、
-    --help が正常に動作すること（SystemExit(0) で終了）
+    Every subcommand is registered with argparse and its --help works
+    (exiting with SystemExit(0))
     """
     from src.cli import cli
 
     with pytest.raises(SystemExit) as exc_info:
-        # --help は SystemExit(0) を発生させる
+        # --help raises SystemExit(0)
         import sys
 
         sys.argv = ["mdtbx", "--help"]
@@ -93,7 +93,7 @@ def test_all_subcommands_registered():
     ],
 )
 def test_subcommand_help(subcmd):
-    """各サブコマンドの --help が正常終了すること"""
+    """--help of each subcommand exits successfully"""
     import sys
 
     from src.cli import cli

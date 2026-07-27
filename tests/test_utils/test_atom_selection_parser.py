@@ -1,8 +1,8 @@
 """
-atom_selection_parser のユニットテスト
+atom_selection_parser unit tests
 
-SelectionParser / AtomSelector の純粋なパースロジックをテストする。
-外部ツール・ファイル I/O に依存しない。
+Tests the pure parsing logic of SelectionParser / AtomSelector. It depends
+on no external tool and on no file I/O.
 """
 
 import pytest
@@ -29,7 +29,7 @@ from src.utils.atom_selection_parser import (
 )
 
 # ---------------------------------------------------------------------------
-# ヘルパー: テスト用の原子辞書
+# Helpers: atom dictionaries for the tests
 # ---------------------------------------------------------------------------
 
 ALA_CA = {"resname": "ALA", "name": "CA", "resid": 1, "index": 1}
@@ -53,7 +53,7 @@ SOL_OW = {
 }
 
 # ---------------------------------------------------------------------------
-# SelectionNode の基本評価
+# Basic SelectionNode evaluation
 # ---------------------------------------------------------------------------
 
 
@@ -206,7 +206,7 @@ class TestOr:
 
 
 # ---------------------------------------------------------------------------
-# SelectionParser パース結果の検証
+# SelectionParser parse results
 # ---------------------------------------------------------------------------
 
 
@@ -291,7 +291,7 @@ class TestSelectionParser:
 
 
 # ---------------------------------------------------------------------------
-# AtomSelector の end-to-end テスト
+# AtomSelector end-to-end tests
 # ---------------------------------------------------------------------------
 
 
@@ -341,7 +341,7 @@ class TestAtomSelector:
 
 
 # ---------------------------------------------------------------------------
-# エラー処理
+# Error handling
 # ---------------------------------------------------------------------------
 
 

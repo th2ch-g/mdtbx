@@ -1,7 +1,8 @@
 """
-build/add_ndx のユニットテスト
+build/add_ndx unit tests
 
-gmx make_ndx に依存しない純粋な count_index_group() ヘルパーをテストする。
+Tests the pure count_index_group() helper, which does not depend on
+gmx make_ndx.
 """
 
 import types
@@ -13,7 +14,7 @@ class TestCountIndexGroup:
         return types.SimpleNamespace(index=str(index_path))
 
     def _write_ndx(self, path: Path, n_groups: int) -> Path:
-        """n_groups 個のインデックスグループを持つ .ndx ファイルを作成する"""
+        """Write an .ndx file holding n_groups index groups"""
         lines = []
         for i in range(n_groups):
             lines.append(f"[ Group{i} ]\n")
@@ -22,21 +23,21 @@ class TestCountIndexGroup:
         return path
 
     def test_counts_single_group(self, tmp_path):
-        """グループが 1 つの .ndx を正しくカウントすること"""
+        """An .ndx with a single group is counted correctly"""
         from src.build.add_ndx import count_index_group
 
         ndx = self._write_ndx(tmp_path / "single.ndx", n_groups=1)
         assert count_index_group(self._make_args(ndx)) == 1
 
     def test_counts_multiple_groups(self, tmp_path):
-        """複数グループの .ndx を正しくカウントすること"""
+        """An .ndx with several groups is counted correctly"""
         from src.build.add_ndx import count_index_group
 
         ndx = self._write_ndx(tmp_path / "multi.ndx", n_groups=5)
         assert count_index_group(self._make_args(ndx)) == 5
 
     def test_ignores_non_bracket_lines(self, tmp_path):
-        """[ で始まらない行はカウントしないこと"""
+        """Lines that do not start with [ are not counted"""
         from src.build.add_ndx import count_index_group
 
         ndx = tmp_path / "mixed.ndx"
@@ -52,7 +53,7 @@ class TestCountIndexGroup:
         assert count_index_group(self._make_args(ndx)) == 3
 
     def test_empty_file_returns_zero(self, tmp_path):
-        """空ファイルは 0 を返すこと"""
+        """An empty file returns 0"""
         from src.build.add_ndx import count_index_group
 
         ndx = tmp_path / "empty.ndx"
@@ -60,7 +61,7 @@ class TestCountIndexGroup:
         assert count_index_group(self._make_args(ndx)) == 0
 
     def test_real_gromacs_style_ndx(self, tmp_path):
-        """GROMACS 形式の .ndx を正しくカウントすること"""
+        """A GROMACS-format .ndx is counted correctly"""
         from src.build.add_ndx import count_index_group
 
         ndx = tmp_path / "gromacs.ndx"

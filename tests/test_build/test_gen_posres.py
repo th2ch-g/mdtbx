@@ -1,7 +1,8 @@
 """
-build/gen_posres のユニットテスト
+build/gen_posres unit tests
 
-sample.top を使って位置拘束 (.itp) の生成と topology への挿入をテストする。
+Uses sample.top to test position restraint (.itp) generation and its
+insertion into the topology.
 """
 
 import shutil
@@ -17,10 +18,10 @@ class TestGenPosresRun:
         )
 
     def test_itp_file_created_for_protein(self, sample_top_path, tmp_path):
-        """Protein モジュールの posres .itp ファイルが生成されること"""
+        """A posres .itp file is generated for the Protein moleculetype"""
         from src.build.gen_posres import run
 
-        # topology をコピー（in-place で書き換えられるため）
+        # Copy the topology (it is rewritten in place)
         top_copy = tmp_path / "test.top"
         shutil.copy(str(sample_top_path), str(top_copy))
 
@@ -31,7 +32,7 @@ class TestGenPosresRun:
         assert itp.exists()
 
     def test_itp_contains_ifdef_block(self, sample_top_path, tmp_path):
-        """生成された .itp が #ifdef / #endif ブロックを持つこと"""
+        """The generated .itp has #ifdef / #endif blocks"""
         from src.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"
@@ -42,14 +43,14 @@ class TestGenPosresRun:
 
         itp = tmp_path / "posres_Protein.itp"
         content = itp.read_text()
-        # output_prefix がフルパスになるため #ifdef の名前はパス依存
-        # 形式的な #ifdef / #endif の存在を確認する
+        # output_prefix becomes a full path, so the #ifdef name is path dependent;
+        # only check that #ifdef / #endif are present at all
         assert "#ifdef" in content
         assert "#endif" in content
         assert "[ position_restraints ]" in content
 
     def test_itp_contains_selected_atoms(self, sample_top_path, tmp_path):
-        """CA 原子のインデックスが .itp に含まれること（Protein に CA は 2 個）"""
+        """CA atom indices appear in the .itp (Protein has 2 CA atoms)"""
         from src.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"
@@ -61,7 +62,7 @@ class TestGenPosresRun:
         itp = tmp_path / "posres_Protein.itp"
         content = itp.read_text()
 
-        # ALA-CA (index 2) と GLY-CA (index 7) が含まれること
+        # ALA-CA (index 2) and GLY-CA (index 7) must be present
         lines = [
             line
             for line in content.splitlines()
@@ -73,7 +74,7 @@ class TestGenPosresRun:
         assert len(lines) == 2
 
     def test_topology_updated_with_include(self, sample_top_path, tmp_path):
-        """実行後の topology ファイルに #include 行が追加されること"""
+        """An #include line is appended to the topology file after the run"""
         from src.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"
@@ -87,7 +88,7 @@ class TestGenPosresRun:
         assert "posres_Protein.itp" in updated
 
     def test_no_sol_itp_when_sol_not_selected(self, sample_top_path, tmp_path):
-        """SOL に CA 原子がないため posres_SOL.itp は生成されないこと"""
+        """SOL has no CA atom, so posres_SOL.itp is not generated"""
         from src.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"

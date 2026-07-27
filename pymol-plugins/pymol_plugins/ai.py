@@ -5,8 +5,8 @@ Usage:
     codex <natural language instruction>
 
 Examples:
-    claude resid 10を赤色にして
-    codex タンパク質を透明度0.5で表示して
+    claude colour resid 10 red
+    codex show the protein at transparency 0.5
 """
 
 from __future__ import annotations

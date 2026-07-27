@@ -1,7 +1,7 @@
 """
-build/mutate のユニットテスト
+build/mutate unit tests
 
-PyMOL Mutagenesis Wizard の呼び出しをモックして検証する。
+Verifies the calls into the PyMOL Mutagenesis Wizard with mocks.
 """
 
 import types

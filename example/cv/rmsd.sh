@@ -1,13 +1,14 @@
 #!/bin/bash
 # rmsd.sh
-# reference 構造に対する RMSD を計算する
+# Compute the RMSD against a reference structure
 #
-# フィット選択 (-sft/-sfr) と RMSD 計算選択 (-sct/-scr) を分けられる
-# 例: backbone で重ね合わせたうえで活性部位ループの RMSD を算出
+# The fitting selection (-sft/-sfr) and the RMSD selection (-sct/-scr) can be
+# given separately, for example fit on the backbone and report the RMSD of an
+# active-site loop
 #
-# 出力: .npy (shape: [n_frames], 単位: nm)
+# Output: .npy (shape: [n_frames], unit: nm)
 #
-# 使用例:
+# Example:
 #   bash rmsd.sh
 
 set -e
@@ -19,7 +20,7 @@ REFERENCE="ref.gro"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# backbone 全体の RMSD
+# RMSD of the whole backbone
 # -----------------------------------------------------------------------
 mdtbx rmsd \
     -p ${TOPOLOGY} \
@@ -34,9 +35,9 @@ mdtbx rmsd \
 echo "rmsd backbone done -> cvs/rmsd_backbone.npy"
 
 # -----------------------------------------------------------------------
-# 活性部位ループの RMSD (backbone で重ね合わせ後にループ領域を計算)
-# -sft/-sfr: 重ね合わせに使う選択 (グローバルフィット)
-# -sct/-scr: RMSD を計算する選択 (局所的な変化を検出)
+# RMSD of an active-site loop (fit on the backbone, measure the loop)
+# -sft/-sfr: selection used for fitting (a global fit)
+# -sct/-scr: selection the RMSD is computed on (detects local changes)
 # -----------------------------------------------------------------------
 mdtbx rmsd \
     -p ${TOPOLOGY} \

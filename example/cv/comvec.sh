@@ -1,13 +1,13 @@
 #!/bin/bash
 # comvec.sh
-# 2つの原子グループ間の重心ベクトル (COM vector) を計算する
+# Compute the centre-of-mass vector (COM vector) between two atom groups
 #
-# comdist がスカラー(距離)を返すのに対し、comvec は3次元ベクトルを返す
-# チャネル透過や膜挿入のような方向性のある運動の解析に適している
+# comdist returns a scalar (a distance); comvec returns a 3D vector, which
+# suits directional motion such as channel permeation or membrane insertion
 #
-# 出力: .npy (shape: [n_frames, 3], 単位: nm)
+# Output: .npy (shape: [n_frames, 3], unit: nm)
 #
-# 使用例:
+# Example:
 #   bash comvec.sh
 
 set -e
@@ -18,7 +18,7 @@ TRAJECTORY="prd.xtc"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# 基本ケース: MDtraj による計算
+# Basic case: computed with MDtraj
 # -----------------------------------------------------------------------
 mdtbx comvec \
     -p ${TOPOLOGY} \
@@ -30,7 +30,7 @@ mdtbx comvec \
 echo "comvec done -> cvs/comvec.npy"
 
 # -----------------------------------------------------------------------
-# Gromacs インターフェース (--gmx)
+# Gromacs interface (--gmx)
 # -----------------------------------------------------------------------
 # mdtbx comvec \
 #     -p gmx.tpr \

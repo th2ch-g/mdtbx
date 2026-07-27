@@ -1,8 +1,9 @@
 #!/bin/bash
 # pca_pymol.sh
-# Backbone PCA を計算し、PyMOL で主成分ベクトルを矢印表示する
+# Compute a backbone PCA and draw the principal component vectors as arrows
+# in PyMOL
 #
-# 使用例:
+# Example:
 #   bash pca_pymol.sh
 
 set -e

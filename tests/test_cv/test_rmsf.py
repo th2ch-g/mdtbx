@@ -1,7 +1,7 @@
 """
-cv/rmsf のユニットテスト
+cv/rmsf unit tests
 
-MDtraj を使った RMSF 計算をテストする（gmx=False パス）。
+Tests the RMSF computation with MDtraj (the gmx=False path).
 """
 
 import types
@@ -22,7 +22,7 @@ class TestRmsfRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """.npy ファイルが生成されること"""
+        """.npy file is generated"""
         from src.cv.rmsf import run
 
         out = tmp_path / "rmsf.npy"
@@ -30,7 +30,7 @@ class TestRmsfRun:
         assert out.exists()
 
     def test_output_shape_all_atoms(self, trajectory_files, tmp_path):
-        """全原子選択時の出力長が原子数と一致すること"""
+        """Selecting all atoms gives an output length equal to the atom count"""
         from src.cv.rmsf import run
 
         out = tmp_path / "rmsf_all.npy"
@@ -41,7 +41,7 @@ class TestRmsfRun:
         assert rmsf.shape == (n_atoms,)
 
     def test_output_shape_subset(self, trajectory_files, tmp_path):
-        """部分選択時の出力長が選択原子数と一致すること"""
+        """A partial selection gives an output length equal to the selected count"""
         from src.cv.rmsf import run
 
         out = tmp_path / "rmsf_subset.npy"
@@ -52,7 +52,7 @@ class TestRmsfRun:
         assert rmsf.shape == (n_selected,)
 
     def test_output_nonnegative(self, trajectory_files, tmp_path):
-        """RMSF は常に非負であること"""
+        """RMSF is always non-negative"""
         from src.cv.rmsf import run
 
         out = tmp_path / "rmsf_nn.npy"
@@ -61,14 +61,14 @@ class TestRmsfRun:
         assert np.all(rmsf >= 0)
 
     def test_static_trajectory_gives_zero_rmsf(self, tmp_path_factory):
-        """全フレームが同一座標の軌跡では RMSF が 0 になること"""
+        """RMSF is 0 for a trajectory whose frames share identical coordinates"""
         import mdtraj as md
 
         from src.cv.rmsf import run
 
         tmp = tmp_path_factory.mktemp("static")
 
-        # 静止軌跡を作成
+        # Build a static trajectory
         top = md.Topology()
         chain = top.add_chain()
         res = top.add_residue("ALA", chain)

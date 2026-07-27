@@ -1,16 +1,17 @@
 #!/bin/bash
 # densmap.sh
-# 特定の原子群の 2D 密度マップ (ヒストグラム) を計算する
+# Compute a 2D density map (histogram) for a set of atoms
 #
-# 膜系でのリガンド分布や、特定平面への投影密度の可視化に使用する
-# --axis: 投影する平面 (xy / xz / yz)
-# --bins: 各軸のビン数
+# Used to visualise ligand distribution in membrane systems, or density
+# projected onto a particular plane
+# --axis: the plane to project onto (xy / xz / yz)
+# --bins: number of bins per axis
 #
-# 出力: .npy (object array [counts, edges0, edges1])
-#   counts  : shape [bins, bins]  - 各セルの頻度
-#   edges0/1: shape [bins+1]      - ビンの境界
+# Output: .npy (object array [counts, edges0, edges1])
+#   counts  : shape [bins, bins]  - frequency per cell
+#   edges0/1: shape [bins+1]      - bin edges
 #
-# 使用例:
+# Example:
 #   bash densmap.sh
 
 set -e
@@ -21,7 +22,7 @@ TRAJECTORY="prd.xtc"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# xy 平面への投影 (膜面内の分布)
+# Projection onto the xy plane (in-plane distribution of the membrane)
 # -----------------------------------------------------------------------
 mdtbx densmap \
     -p ${TOPOLOGY} \
@@ -34,7 +35,7 @@ mdtbx densmap \
 echo "densmap xy done -> cvs/densmap_xy.npy"
 
 # -----------------------------------------------------------------------
-# xz 平面への投影 (膜の厚さ方向を含む断面)
+# Projection onto the xz plane (a cross-section along the membrane normal)
 # -----------------------------------------------------------------------
 mdtbx densmap \
     -p ${TOPOLOGY} \
@@ -47,7 +48,7 @@ mdtbx densmap \
 echo "densmap xz done -> cvs/densmap_xz.npy"
 
 # -----------------------------------------------------------------------
-# Gromacs gmx densmap を使う場合 (--gmx)
+# Using Gromacs gmx densmap instead (--gmx)
 # -----------------------------------------------------------------------
 # mdtbx densmap \
 #     -p gmx.tpr \

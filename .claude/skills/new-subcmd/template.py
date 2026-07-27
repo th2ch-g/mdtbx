@@ -11,9 +11,9 @@ def add_subcmd(subparsers):
         help="HELP_TEXT",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    # 必須引数
+    # Required arguments
     parser.add_argument("input", type=str, help="Input file")
-    # オプション引数
+    # Optional arguments
     parser.add_argument("--output", type=str, default="output.dat", help="Output file")
 
     parser.set_defaults(func=run)
@@ -21,4 +21,4 @@ def add_subcmd(subparsers):
 
 def run(args):
     LOGGER.info(f"input: {args.input}")
-    # TODO: 実装
+    # TODO: implement

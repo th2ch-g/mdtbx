@@ -1,8 +1,8 @@
 """
-build/fill_chainname のユニットテスト
+build/fill_chainname unit tests
 
-PyMOL の load/iterate/alter/save をモックして、
-ブロック分割と chain ID 割当ロジックを検証する。
+Mocks PyMOL load/iterate/alter/save to verify the block splitting and the
+chain ID assignment logic.
 """
 
 import types

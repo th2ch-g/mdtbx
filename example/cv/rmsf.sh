@@ -1,14 +1,14 @@
 #!/bin/bash
 # rmsf.sh
-# 残基ごと・原子ごとの揺らぎ (RMSF) を計算する
+# Compute per-residue or per-atom fluctuations (RMSF)
 #
-# B-factor に対応する指標; 柔軟な領域や剛直な領域の同定に使用する
-# --resolution residue: 残基ごとに集約 (デフォルト)
-# --resolution atom   : 原子ごとに出力
+# The counterpart of the B-factor; used to identify flexible and rigid regions
+# --resolution residue: aggregate per residue (default)
+# --resolution atom   : report per atom
 #
-# 出力: .npy (shape: [n_residues] or [n_atoms], 単位: nm)
+# Output: .npy (shape: [n_residues] or [n_atoms], unit: nm)
 #
-# 使用例:
+# Example:
 #   bash rmsf.sh
 
 set -e
@@ -19,7 +19,7 @@ TRAJECTORY="prd.xtc"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# 残基単位の RMSF (B-factor 相当)
+# Per-residue RMSF (the B-factor counterpart)
 # -----------------------------------------------------------------------
 mdtbx rmsf \
     -p ${TOPOLOGY} \
@@ -31,7 +31,7 @@ mdtbx rmsf \
 echo "rmsf residue done -> cvs/rmsf_residue.npy"
 
 # -----------------------------------------------------------------------
-# 原子単位の RMSF (backbone のみ)
+# Per-atom RMSF (backbone only)
 # -----------------------------------------------------------------------
 mdtbx rmsf \
     -p ${TOPOLOGY} \
@@ -43,7 +43,7 @@ mdtbx rmsf \
 echo "rmsf atom done -> cvs/rmsf_atom.npy"
 
 # -----------------------------------------------------------------------
-# Gromacs gmx rmsf を使う場合 (--gmx)
+# Using Gromacs gmx rmsf instead (--gmx)
 # -----------------------------------------------------------------------
 # mdtbx rmsf \
 #     -p gmx.tpr \

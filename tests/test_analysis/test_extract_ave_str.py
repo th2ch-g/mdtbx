@@ -1,7 +1,7 @@
 """
-analysis/extract_ave_str のユニットテスト
+analysis/extract_ave_str unit tests
 
-MDtraj を使った平均構造抽出をテストする（gmx=False パス）。
+Tests average structure extraction with MDtraj (the gmx=False path).
 """
 
 import types
@@ -22,7 +22,7 @@ class TestExtractAveStrRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """run() が PDB ファイルを生成すること"""
+        """run() writes a PDB file"""
         from src.analysis.extract_ave_str import run
 
         out = tmp_path / "ave.pdb"
@@ -30,7 +30,7 @@ class TestExtractAveStrRun:
         assert out.exists()
 
     def test_output_has_single_frame(self, trajectory_files, tmp_path):
-        """平均構造は 1 フレームのみであること"""
+        """The average structure has exactly one frame"""
         import mdtraj as md
 
         from src.analysis.extract_ave_str import run
@@ -42,7 +42,7 @@ class TestExtractAveStrRun:
         assert loaded.n_frames == 1
 
     def test_output_has_correct_atom_count_all(self, trajectory_files, tmp_path):
-        """全原子選択時の原子数が元の軌跡と一致すること"""
+        """Selecting all atoms keeps the atom count of the source trajectory"""
         import mdtraj as md
 
         from src.analysis.extract_ave_str import run
@@ -54,7 +54,7 @@ class TestExtractAveStrRun:
         assert loaded.n_atoms == trajectory_files["traj"].n_atoms
 
     def test_output_has_correct_atom_count_subset(self, trajectory_files, tmp_path):
-        """部分選択時の原子数が選択した原子数と一致すること"""
+        """A partial selection yields exactly the selected atom count"""
         import mdtraj as md
 
         from src.analysis.extract_ave_str import run
@@ -68,7 +68,7 @@ class TestExtractAveStrRun:
         assert loaded.n_atoms == n_selected
 
     def test_average_xyz_is_within_trajectory_range(self, trajectory_files, tmp_path):
-        """平均座標が元の軌跡の各軸の min/max の範囲内であること"""
+        """Average coordinates stay within the per-axis min/max of the source"""
         import mdtraj as md
 
         from src.analysis.extract_ave_str import run

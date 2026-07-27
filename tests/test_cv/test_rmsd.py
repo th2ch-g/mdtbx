@@ -1,7 +1,7 @@
 """
-cv/rmsd のユニットテスト
+cv/rmsd unit tests
 
-合成軌跡データを使って RMSD 計算の正確性を検証する。
+Verifies the accuracy of the RMSD computation on synthetic trajectory data.
 """
 
 import types
@@ -24,7 +24,7 @@ class TestRmsdRun:
         )
 
     def test_rmsd_output_file_created(self, trajectory_files, tmp_path):
-        """run() が .npy ファイルを生成すること"""
+        """run() generates a .npy file"""
         from src.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
@@ -33,7 +33,7 @@ class TestRmsdRun:
         assert out.exists()
 
     def test_rmsd_shape(self, trajectory_files, tmp_path):
-        """RMSD 配列の長さが軌跡のフレーム数と一致すること"""
+        """The RMSD array length matches the trajectory frame count"""
         from src.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
@@ -45,7 +45,7 @@ class TestRmsdRun:
         assert rmsd.shape == (n_frames,)
 
     def test_rmsd_nonnegative(self, trajectory_files, tmp_path):
-        """RMSD は常に非負であること"""
+        """RMSD is always non-negative"""
         from src.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
@@ -57,8 +57,8 @@ class TestRmsdRun:
 
     def test_rmsd_first_frame_near_zero(self, trajectory_files, tmp_path):
         """
-        reference は frame 0 の PDB であるため、
-        frame 0 の RMSD は fitting 後にほぼ 0 になること。
+        The reference is the PDB of frame 0, so the RMSD of frame 0 is
+        close to 0 after fitting.
         """
         from src.cv.rmsd import run
 
@@ -67,11 +67,11 @@ class TestRmsdRun:
         run(args)
 
         rmsd = np.load(str(out))
-        # XTC は float32 のため PDB (float64) との往復で精度損失がある
+        # XTC is float32, so a round trip through PDB (float64) loses precision
         assert rmsd[0] == pytest.approx(0.0, abs=1e-3)
 
     def test_rmsd_other_frames_nonzero(self, trajectory_files, tmp_path):
-        """ランダムな座標を持つ他のフレームの RMSD は 0 より大きいこと"""
+        """Other frames hold random coordinates, so their RMSD exceeds 0"""
         from src.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
@@ -79,7 +79,7 @@ class TestRmsdRun:
         run(args)
 
         rmsd = np.load(str(out))
-        # frame 0 以外のどこかが 0 より大きいことを確認
+        # Check that some frame other than frame 0 exceeds 0
         assert np.any(rmsd[1:] > 0)
 
     def test_empty_fit_selection_raises(self, trajectory_files, tmp_path):

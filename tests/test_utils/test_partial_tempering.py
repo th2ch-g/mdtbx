@@ -1,7 +1,7 @@
 """
-utils/partial_tempering のユニットテスト
+utils/partial_tempering unit tests
 
-sample.top を使って atom_type へのアンダースコア付与をテストする。
+Uses sample.top to test appending an underscore to atom_type.
 """
 
 import types
@@ -16,7 +16,7 @@ class TestPartialTemperingRun:
         )
 
     def test_output_file_created(self, sample_top_path, tmp_path):
-        """出力ファイルが生成されること"""
+        """The output file is generated"""
         from src.utils.partial_tempering import run
 
         out = tmp_path / "output.top"
@@ -24,26 +24,26 @@ class TestPartialTemperingRun:
         assert out.exists()
 
     def test_selected_atoms_get_underscore(self, sample_top_path, tmp_path):
-        """選択された ALA 原子の atom_type に _ が付加されること"""
+        """The atom_type of a selected ALA atom gains a trailing _"""
         from src.utils.partial_tempering import run
 
         out = tmp_path / "output.top"
         run(self._make_args(sample_top_path, out, selection="resname ALA"))
 
         content = out.read_text()
-        # ALA の atom_type CT が CT_ に変更されているはず
+        # The ALA atom_type CT must have become CT_
         assert "CT_" in content
 
     def test_unselected_atoms_unchanged(self, sample_top_path, tmp_path):
-        """選択されていない GLY 原子の atom_type は変更されないこと"""
+        """The atom_type of an unselected GLY atom is unchanged"""
         from src.utils.partial_tempering import run
 
         out = tmp_path / "output.top"
-        # ALA のみを選択
+        # Select ALA only
         run(self._make_args(sample_top_path, out, selection="resname ALA"))
 
         content = out.read_text()
-        # GLY の行（residue 2）は CT のまま残る
+        # The GLY lines (residue 2) stay as CT
         lines = content.splitlines()
         gly_lines = [
             line
@@ -59,7 +59,7 @@ class TestPartialTemperingRun:
                 )
 
     def test_original_file_not_modified(self, sample_top_path, tmp_path):
-        """入力ファイルが変更されないこと"""
+        """The input file is left unchanged"""
         from src.utils.partial_tempering import run
 
         original_content = sample_top_path.read_text()
@@ -71,14 +71,14 @@ class TestPartialTemperingRun:
     def test_no_match_selection_produces_unchanged_output(
         self, sample_top_path, tmp_path
     ):
-        """マッチしない選択ではアンダースコアが付かないこと"""
+        """A selection that matches nothing appends no underscore"""
         from src.utils.partial_tempering import run
 
         out = tmp_path / "output_nomatch.top"
         run(self._make_args(sample_top_path, out, selection="resname LIG"))
 
         output = out.read_text()
-        # CT_ は含まれないはず
+        # CT_ must not appear
         assert "CT_" not in output
 
     def test_second_application_is_idempotent(self, sample_top_path, tmp_path):

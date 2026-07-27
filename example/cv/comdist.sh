@@ -1,10 +1,10 @@
 #!/bin/bash
 # comdist.sh
-# 2つの原子グループ間の重心距離 (COM distance) を計算する
+# Compute the centre-of-mass distance (COM distance) between two atom groups
 #
-# 出力: .npy (shape: [n_frames], 単位: nm)
+# Output: .npy (shape: [n_frames], unit: nm)
 #
-# 使用例:
+# Example:
 #   bash comdist.sh
 
 set -e
@@ -15,8 +15,8 @@ TRAJECTORY="prd.xtc"
 mkdir -p cvs
 
 # -----------------------------------------------------------------------
-# 基本ケース: MDtraj による計算
-# protein と リガンド間の重心距離
+# Basic case: computed with MDtraj
+# Centre-of-mass distance between the protein and the ligand
 # -----------------------------------------------------------------------
 mdtbx comdist \
     -p ${TOPOLOGY} \
@@ -28,8 +28,8 @@ mdtbx comdist \
 echo "comdist done -> cvs/comdist.npy"
 
 # -----------------------------------------------------------------------
-# Gromacs インターフェース (--gmx): 大規模系で高速
-# -s1/-s2 に ndx グループ名を指定する
+# Gromacs interface (--gmx): faster for large systems
+# Give ndx group names to -s1/-s2
 # -----------------------------------------------------------------------
 # mdtbx comdist \
 #     -p gmx.tpr \

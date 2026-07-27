@@ -1,7 +1,7 @@
 """
-cv/contactmap のユニットテスト
+cv/contactmap unit tests
 
-MDtraj ベースの residue contact matrix を検証する。
+Verifies the MDtraj-based residue contact matrix.
 """
 
 import types

@@ -1,7 +1,7 @@
 """
-analysis/extract_str のユニットテスト
+analysis/extract_str unit tests
 
-MDtraj を使った特定フレームの構造抽出をテストする（gmx=False パス）。
+Tests single-frame structure extraction with MDtraj (the gmx=False path).
 """
 
 import types
@@ -22,7 +22,7 @@ class TestExtractStrRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """run() が PDB ファイルを生成すること"""
+        """run() writes a PDB file"""
         from src.analysis.extract_str import run
 
         out = tmp_path / "frame1.pdb"
@@ -30,7 +30,7 @@ class TestExtractStrRun:
         assert out.exists()
 
     def test_output_is_valid_pdb(self, trajectory_files, tmp_path):
-        """生成された PDB が MDtraj で読み込めること"""
+        """The generated PDB can be read back by MDtraj"""
         import mdtraj as md
 
         from src.analysis.extract_str import run
@@ -42,7 +42,7 @@ class TestExtractStrRun:
         assert loaded.n_frames == 1
 
     def test_output_atom_count(self, trajectory_files, tmp_path):
-        """抽出した構造の原子数が元の軌跡と一致すること"""
+        """The extracted structure keeps the atom count of the source trajectory"""
         import mdtraj as md
 
         from src.analysis.extract_str import run
@@ -54,7 +54,7 @@ class TestExtractStrRun:
         assert loaded.n_atoms == trajectory_files["traj"].n_atoms
 
     def test_extract_different_frames(self, trajectory_files, tmp_path):
-        """異なるフレームで異なる座標が得られること"""
+        """Different frames give different coordinates"""
         import mdtraj as md
 
         from src.analysis.extract_str import run
@@ -66,7 +66,7 @@ class TestExtractStrRun:
 
         t1 = md.load_pdb(str(out1))
         t2 = md.load_pdb(str(out2))
-        # ランダム座標なので 2 フレームの座標は異なるはず
+        # The coordinates are random, so the two frames must differ
         import numpy as np
 
         assert not np.allclose(t1.xyz, t2.xyz)

@@ -1,7 +1,7 @@
 """
-cv/pca のユニットテスト
+cv/pca unit tests
 
-MDtraj + scikit-learn を使った PCA をテストする（gmx=False パス）。
+Tests PCA with MDtraj + scikit-learn (the gmx=False path).
 """
 
 import types
@@ -54,7 +54,7 @@ class TestPcaRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """.npy ファイルが生成されること"""
+        """.npy file is generated"""
         from src.cv.pca import run
 
         out = tmp_path / "pca.npy"
@@ -62,7 +62,7 @@ class TestPcaRun:
         assert out.exists()
 
     def test_output_shape(self, trajectory_files, tmp_path):
-        """出力形状が (n_frames, n_components) であること"""
+        """The output shape is (n_frames, n_components)"""
         from src.cv.pca import run
 
         n_components = 3
@@ -74,7 +74,7 @@ class TestPcaRun:
         assert pc.shape == (n_frames, n_components)
 
     def test_first_pc_has_max_variance(self, trajectory_files, tmp_path):
-        """PC1 の分散が PC2 以上であること（PCA の定義）"""
+        """The variance of PC1 is at least that of PC2 (by definition of PCA)"""
         from src.cv.pca import run
 
         out = tmp_path / "pca_var.npy"
@@ -86,7 +86,7 @@ class TestPcaRun:
         assert var1 >= var2
 
     def test_subset_selection(self, trajectory_files, tmp_path):
-        """部分選択でも正常に計算できること"""
+        """A partial selection still computes"""
         from src.cv.pca import run
 
         out = tmp_path / "pca_subset.npy"
@@ -104,7 +104,7 @@ class TestPcaRun:
         assert pc.shape[0] == trajectory_files["traj"].n_frames
 
     def test_output_npz_contains_metadata(self, trajectory_files, tmp_path):
-        """PyMOL 可視化用の .npz が生成されること"""
+        """The .npz for PyMOL visualisation is generated"""
         from src.cv.pca import run
 
         out = tmp_path / "pca.npy"
@@ -131,7 +131,7 @@ class TestPcaRun:
         assert data["unit_scale_to_angstrom"].item() == 10.0
 
     def test_output_average_is_created(self, trajectory_files, tmp_path):
-        """平均構造ファイルが生成されること"""
+        """The average structure file is generated"""
         from src.cv.pca import run
 
         out = tmp_path / "pca.npy"
@@ -168,7 +168,7 @@ class TestPcaRun:
         assert out_average.exists()
 
     def test_output_npz_with_gmx(self, trajectory_files, tmp_path, monkeypatch):
-        """gmx パスでも PyMOL 可視化用の .npz が生成されること"""
+        """The gmx path also generates the .npz for PyMOL visualisation"""
         import mdtraj as md
 
         from src.cv.pca import run
@@ -241,7 +241,7 @@ class TestPcaRun:
     def test_output_npz_with_gmx_single_component(
         self, trajectory_files, tmp_path, monkeypatch
     ):
-        """gmx パスで n_components=1 のときも固有値列を正しく読むこと"""
+        """The gmx path reads the eigenvalue column correctly for n_components=1"""
         import mdtraj as md
 
         from src.cv.pca import run

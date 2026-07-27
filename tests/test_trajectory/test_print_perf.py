@@ -1,15 +1,15 @@
 """
-trajectory/print_perf のユニットテスト
+trajectory/print_perf unit tests
 
-parse_log_file() の純粋なログパースロジックをテストする。
-外部ツール・gmx に依存しない。
+Tests the pure log parsing logic of parse_log_file(). It depends on no
+external tool and not on gmx.
 """
 
 import pytest
 
 from src.trajectory.print_perf import parse_log_file
 
-# GROMACS ログの最小限サンプル
+# A minimal sample of a GROMACS log
 _SAMPLE_LOG = """\
                       GROMACS version:    2023.3
                          Executable:   /usr/local/bin/gmx
@@ -29,28 +29,28 @@ Command line:
 
 class TestParseLogFile:
     def test_parses_performance(self, tmp_path):
-        """`Performance:` 行から ns/day 値を正しく取得すること"""
+        """The ns/day value is read from the `Performance:` line"""
         log = tmp_path / "prd.log"
         log.write_text(_SAMPLE_LOG)
         data = parse_log_file(log)
         assert data["performance"] == pytest.approx(123.45)
 
     def test_parses_version(self, tmp_path):
-        """`GROMACS version:` から版数文字列を取得すること"""
+        """The version string is read from `GROMACS version:`"""
         log = tmp_path / "prd.log"
         log.write_text(_SAMPLE_LOG)
         data = parse_log_file(log)
         assert data["version"] == "2023.3"
 
     def test_parses_executable(self, tmp_path):
-        """`Executable:` からパスを取得すること"""
+        """The path is read from `Executable:`"""
         log = tmp_path / "prd.log"
         log.write_text(_SAMPLE_LOG)
         data = parse_log_file(log)
         assert data["executable"] == "/usr/local/bin/gmx"
 
     def test_parses_hostname(self, tmp_path):
-        """`Hardware detected on host` からホスト名を取得すること"""
+        """The host name is read from `Hardware detected on host`"""
         log = tmp_path / "prd.log"
         log.write_text(_SAMPLE_LOG)
         data = parse_log_file(log)
@@ -72,7 +72,7 @@ class TestParseLogFile:
         assert data["GPU_info"] == "GPU 0: NVIDIA A100; GPU 1: NVIDIA A100"
 
     def test_cmd_strips_deffnm(self, tmp_path):
-        """`-deffnm` オプションが除去されたコマンド文字列を返すこと"""
+        """The returned command string has the `-deffnm` option stripped"""
         log = tmp_path / "prd.log"
         log.write_text(_SAMPLE_LOG)
         data = parse_log_file(log)
@@ -80,12 +80,12 @@ class TestParseLogFile:
         assert "gmx mdrun" in data["cmd"]
 
     def test_nonexistent_file_returns_none(self, tmp_path):
-        """存在しないファイルは None を返すこと"""
+        """A missing file returns None"""
         data = parse_log_file(tmp_path / "nonexistent.log")
         assert data is None
 
     def test_empty_log_has_no_performance(self, tmp_path):
-        """Performance 行がないログでは performance が None になること"""
+        """performance is None for a log without a Performance line"""
         log = tmp_path / "empty.log"
         log.write_text("Some GROMACS output without performance line\n")
         data = parse_log_file(log)
@@ -93,7 +93,7 @@ class TestParseLogFile:
         assert data["performance"] is None
 
     def test_default_values_for_missing_fields(self, tmp_path):
-        """フィールドが見つからない場合は 'N/A' がデフォルトであること"""
+        """Fields that are not found default to 'N/A'"""
         log = tmp_path / "minimal.log"
         log.write_text("               Performance:       50.0   0.5\n")
         data = parse_log_file(log)

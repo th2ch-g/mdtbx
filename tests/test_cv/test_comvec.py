@@ -1,7 +1,7 @@
 """
-cv/comvec のユニットテスト
+cv/comvec unit tests
 
-重心ベクトル（COM vector）の計算を合成軌跡で検証する。
+Verifies the centre-of-mass vector (COM vector) on a synthetic trajectory.
 """
 
 import types
@@ -23,7 +23,7 @@ class TestComvecRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """.npy ファイルが生成されること"""
+        """.npy file is generated"""
         from src.cv.comvec import run
 
         out = tmp_path / "comvec.npy"
@@ -31,7 +31,7 @@ class TestComvecRun:
         assert out.exists()
 
     def test_output_shape(self, trajectory_files, tmp_path):
-        """出力配列の形状が (n_frames, 3) であること"""
+        """The output shape is (n_frames, 3)"""
         from src.cv.comvec import run
 
         out = tmp_path / "comvec_shape.npy"
@@ -42,7 +42,7 @@ class TestComvecRun:
         assert vec.shape == (n_frames, 3)
 
     def test_same_selection_gives_zero_vector(self, trajectory_files, tmp_path):
-        """同じ原子群のベクトルは零ベクトルになること"""
+        """The vector between identical atom groups is the zero vector"""
         from src.cv.comvec import run
 
         out = tmp_path / "comvec_zero.npy"
@@ -52,7 +52,7 @@ class TestComvecRun:
         assert np.allclose(vec, 0.0, atol=1e-6)
 
     def test_antisymmetry(self, trajectory_files, tmp_path):
-        """sel1/sel2 を入れ替えると符号が反転すること"""
+        """Swapping sel1 and sel2 flips the sign"""
         from src.cv.comvec import run
 
         out1 = tmp_path / "comvec_ab.npy"

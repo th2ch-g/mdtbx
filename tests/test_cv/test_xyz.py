@@ -1,7 +1,7 @@
 """
-cv/xyz のユニットテスト
+cv/xyz unit tests
 
-MDtraj を使った XYZ 座標抽出をテストする（gmx=False パス）。
+Tests XYZ coordinate extraction with MDtraj (the gmx=False path).
 """
 
 import types
@@ -20,7 +20,7 @@ class TestXyzRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """.npy ファイルが生成されること"""
+        """.npy file is generated"""
         from src.cv.xyz import run
 
         out = tmp_path / "xyz.npy"
@@ -28,7 +28,7 @@ class TestXyzRun:
         assert out.exists()
 
     def test_output_shape_all_atoms(self, trajectory_files, tmp_path):
-        """全原子選択時の形状が (n_frames, n_atoms, 3) であること"""
+        """Selecting all atoms gives shape (n_frames, n_atoms, 3)"""
         from src.cv.xyz import run
 
         out = tmp_path / "xyz_all.npy"
@@ -40,7 +40,7 @@ class TestXyzRun:
         assert xyz.shape == (n_frames, n_atoms, 3)
 
     def test_output_shape_subset(self, trajectory_files, tmp_path):
-        """部分選択時の形状が (n_frames, n_selected, 3) であること"""
+        """A partial selection gives shape (n_frames, n_selected, 3)"""
         from src.cv.xyz import run
 
         out = tmp_path / "xyz_subset.npy"
@@ -52,7 +52,7 @@ class TestXyzRun:
         assert xyz.shape == (n_frames, n_selected, 3)
 
     def test_coordinates_are_finite(self, trajectory_files, tmp_path):
-        """出力座標に NaN / Inf が含まれないこと"""
+        """The output coordinates contain no NaN or Inf"""
         from src.cv.xyz import run
 
         out = tmp_path / "xyz_finite.npy"

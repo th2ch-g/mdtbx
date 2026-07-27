@@ -1,7 +1,7 @@
 """
-cv/distmap のユニットテスト
+cv/distmap unit tests
 
-MDtraj ベースの residue distance matrix を検証する。
+Verifies the MDtraj-based residue distance matrix.
 """
 
 import types

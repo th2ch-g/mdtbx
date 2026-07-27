@@ -1,7 +1,7 @@
 """
-utils/show_npy のユニットテスト
+utils/show_npy unit tests
 
-run() が .npy ファイルの内容と shape を標準出力に表示することをテストする。
+Tests that run() prints the contents and the shape of a .npy file to stdout.
 """
 
 import types
@@ -14,7 +14,7 @@ class TestShowNpyRun:
         return types.SimpleNamespace(npy=str(npy_path))
 
     def test_prints_array_content(self, tmp_path, capsys):
-        """配列の内容が標準出力に表示されること"""
+        """The array contents are printed to stdout"""
         from src.utils.show_npy import run
 
         arr = np.array([1.0, 2.0, 3.0])
@@ -26,7 +26,7 @@ class TestShowNpyRun:
         assert "1." in captured.out or "1.0" in captured.out
 
     def test_prints_shape(self, tmp_path, capsys):
-        """配列の shape が標準出力に表示されること"""
+        """The array shape is printed to stdout"""
         from src.utils.show_npy import run
 
         arr = np.zeros((3, 4))
@@ -38,7 +38,7 @@ class TestShowNpyRun:
         assert "(3, 4)" in captured.out
 
     def test_2d_array(self, tmp_path, capsys):
-        """2D 配列でも正常に動作すること"""
+        """A 2D array works as well"""
         from src.utils.show_npy import run
 
         arr = np.arange(6).reshape(2, 3)
@@ -50,7 +50,7 @@ class TestShowNpyRun:
         assert "(2, 3)" in captured.out
 
     def test_scalar_array(self, tmp_path, capsys):
-        """スカラー配列でも正常に動作すること"""
+        """A scalar array works as well"""
         from src.utils.show_npy import run
 
         arr = np.float64(42.0)

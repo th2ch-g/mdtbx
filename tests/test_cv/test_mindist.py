@@ -1,7 +1,7 @@
 """
-cv/mindist のユニットテスト
+cv/mindist unit tests
 
-原子間最短距離の計算を合成軌跡で検証する。
+Verifies the minimum interatomic distance on a synthetic trajectory.
 """
 
 import types
@@ -20,7 +20,7 @@ class TestMindistRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """.npy ファイルが生成されること"""
+        """.npy file is generated"""
         from src.cv.mindist import run
 
         out = tmp_path / "mindist.npy"
@@ -28,7 +28,7 @@ class TestMindistRun:
         assert out.exists()
 
     def test_output_shape(self, trajectory_files, tmp_path):
-        """出力配列の長さがフレーム数と一致すること"""
+        """The output length matches the frame count"""
         from src.cv.mindist import run
 
         out = tmp_path / "mindist_shape.npy"
@@ -39,7 +39,7 @@ class TestMindistRun:
         assert dist.shape == (n_frames,)
 
     def test_output_nonnegative(self, trajectory_files, tmp_path):
-        """距離は常に非負であること"""
+        """Distances are always non-negative"""
         from src.cv.mindist import run
 
         out = tmp_path / "mindist_nn.npy"
@@ -48,7 +48,7 @@ class TestMindistRun:
         assert np.all(dist >= 0)
 
     def test_mindist_consistent_across_runs(self, trajectory_files, tmp_path):
-        """同じ入力で 2 回実行しても同一の結果が得られること（決定論的）"""
+        """Running twice on the same input gives the same result (deterministic)"""
         from src.cv.mindist import run
 
         out1 = tmp_path / "mindist_run1.npy"

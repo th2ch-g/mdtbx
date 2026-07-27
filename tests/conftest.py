@@ -1,16 +1,16 @@
 """
-pytest 共有 fixture と PyMOL モック設定
+Shared pytest fixtures and PyMOL mock setup
 
-NOTE: sys.modules へのモック注入は他のどの src インポートよりも前に
-      実行される必要があるため、このファイルの先頭で行う。
+NOTE: the mock injection into sys.modules has to happen before any other src
+      import, so it is done at the top of this file.
 """
 
 import sys
 from unittest.mock import MagicMock
 
-# src/__init__.py が `import pymol_plugins` を実行し、
-# find_bond.py / convert.py が `from pymol import cmd` を実行するため、
-# テスト環境では PyMOL GUI なしで動作できるようモックする。
+# src/__init__.py runs `import pymol_plugins`, and find_bond.py / convert.py
+# run `from pymol import cmd`, so they are mocked to let the test environment
+# work without a PyMOL GUI.
 sys.modules["pymol_plugins"] = MagicMock()
 sys.modules["pymol"] = MagicMock()
 sys.modules["pymol.cmd"] = MagicMock()
@@ -46,9 +46,9 @@ def sample_pdb_path() -> pathlib.Path:
 @pytest.fixture(scope="session")
 def trajectory_files(tmp_path_factory):
     """
-    mdtraj で合成した軌跡を一時ファイルとして用意する。
-    ALA + GLY の 2 残基 9 原子、10 フレームの最小系。
-    scope="session" で全テストセッション中に 1 回だけ生成する。
+    Prepare a trajectory synthesised with mdtraj as temporary files.
+    A minimal system: ALA + GLY, 2 residues, 9 atoms, 10 frames.
+    scope="session" builds it once for the whole test session.
     """
     import mdtraj as md
 
@@ -74,7 +74,7 @@ def trajectory_files(tmp_path_factory):
     n_atoms = top.n_atoms  # 9
 
     np.random.seed(42)
-    # 0〜2 nm の範囲でランダムな座標（各フレームで異なる位置）
+    # Random coordinates in the 0-2 nm range (a different position per frame)
     xyz = np.random.rand(n_frames, n_atoms, 3) * 2.0
 
     traj = md.Trajectory(xyz, top)

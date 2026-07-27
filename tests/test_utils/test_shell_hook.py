@@ -1,7 +1,7 @@
 """
-utils/shell_hook のユニットテスト
+utils/shell_hook unit tests
 
-run() が適切なシェルスクリプトのテンプレートを標準出力に出力することをテストする。
+Tests that run() prints a suitable shell script template to stdout.
 """
 
 import types
@@ -12,7 +12,7 @@ class TestShellHookRun:
         return types.SimpleNamespace()
 
     def test_output_contains_mdtbx_alias(self, capsys):
-        """mdtbx の alias / function 定義が含まれること"""
+        """The mdtbx alias / function definitions are present"""
         from src.utils.shell_hook import run
 
         run(self._make_args())
@@ -20,7 +20,7 @@ class TestShellHookRun:
         assert "mdtbx" in captured.out
 
     def test_output_contains_pymol(self, capsys):
-        """pymol の設定が含まれること"""
+        """The pymol settings are present"""
         from src.utils.shell_hook import run
 
         run(self._make_args())
@@ -28,7 +28,7 @@ class TestShellHookRun:
         assert "pymol" in captured.out
 
     def test_output_contains_begin_end_markers(self, capsys):
-        """BEGIN / END マーカーが含まれること"""
+        """The BEGIN / END markers are present"""
         from src.utils.shell_hook import run
 
         run(self._make_args())
@@ -37,7 +37,7 @@ class TestShellHookRun:
         assert "END OF MDTBX SHELL HOOK" in captured.out
 
     def test_output_contains_path_export(self, capsys):
-        """PATH 設定が含まれること"""
+        """The PATH export is present"""
         from src.utils.shell_hook import run
 
         run(self._make_args())
@@ -45,7 +45,7 @@ class TestShellHookRun:
         assert "PATH" in captured.out
 
     def test_output_is_nonempty(self, capsys):
-        """出力が空でないこと"""
+        """The output is not empty"""
         from src.utils.shell_hook import run
 
         run(self._make_args())

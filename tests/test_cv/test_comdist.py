@@ -1,7 +1,7 @@
 """
-cv/comdist のユニットテスト
+cv/comdist unit tests
 
-合成軌跡を使って重心間距離（COM distance）の計算を検証する。
+Verifies the centre-of-mass distance (COM distance) on a synthetic trajectory.
 """
 
 import types
@@ -23,7 +23,7 @@ class TestComdistRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        """.npy ファイルが生成されること"""
+        """.npy file is generated"""
         from src.cv.comdist import run
 
         out = tmp_path / "comdist.npy"
@@ -31,7 +31,7 @@ class TestComdistRun:
         assert out.exists()
 
     def test_output_shape(self, trajectory_files, tmp_path):
-        """出力配列の長さがフレーム数と一致すること"""
+        """The output length matches the frame count"""
         from src.cv.comdist import run
 
         out = tmp_path / "comdist.npy"
@@ -42,7 +42,7 @@ class TestComdistRun:
         assert dist.shape == (n_frames,)
 
     def test_output_nonnegative(self, trajectory_files, tmp_path):
-        """距離は常に非負であること"""
+        """Distances are always non-negative"""
         from src.cv.comdist import run
 
         out = tmp_path / "comdist.npy"
@@ -52,7 +52,7 @@ class TestComdistRun:
         assert np.all(dist >= 0)
 
     def test_same_selection_gives_zero(self, trajectory_files, tmp_path):
-        """同じ原子群の重心間距離は 0 になること"""
+        """The COM distance between identical atom groups is 0"""
         from src.cv.comdist import run
 
         out = tmp_path / "comdist_zero.npy"

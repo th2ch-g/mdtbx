@@ -1,30 +1,34 @@
 #!/bin/bash
 # gen_temperatures.sh
-# REMD シミュレーション用の温度リストを生成する
+# Generate the temperature ladder for a REMD simulation
 #
-# アルゴリズム: de Pablo らの方法 (virtualchemistry.org/remd-temperature-generator)
-# 系の自由度・拘束条件・溶媒モデルから交換確率が目標値になる温度を逐次計算する
+# Algorithm: the method of de Pablo et al.
+# (virtualchemistry.org/remd-temperature-generator)
+# Temperatures reaching the target exchange probability are computed
+# iteratively from the degrees of freedom, the constraints and the solvent
+# model of the system
 #
-# 前提: gmx.gro / gmx.top から原子数・水分子数を確認しておく
-#   水分子数:  grep -c "SOL" gmx.gro (3原子/分子なので /3 する)
-#   タンパク原子数: grep -c "Protein" gmx.ndx 等で確認
+# Prerequisite: read the atom and water counts off gmx.gro / gmx.top
+#   water molecules: grep -c "SOL" gmx.gro (3 atoms per molecule, so divide by 3)
+#   protein atoms:   grep -c "Protein" gmx.ndx or similar
 #
-# 使用例:
+# Example:
 #   bash gen_temperatures.sh
 
 set -e
 
 # -----------------------------------------------------------------------
-# 水溶液系タンパク質 (ff14SB + TIP3P/SPC 相当) の標準設定
-# --pc 1 : タンパク質中の水素結合のみ拘束 (typical LINCS/SHAKE 設定)
-# --wc 3 : 水は剛体モデル (TIP3P/SPC/SPC-E)
-# --hff 0 : 全水素原子を含む力場 (ff14SB)
+# Standard settings for a protein in aqueous solution (ff14SB + TIP3P/SPC)
+# --pc 1 : constrain only the hydrogen bonds in the protein (typical
+#          LINCS/SHAKE setting)
+# --wc 3 : water is a rigid model (TIP3P/SPC/SPC-E)
+# --hff 0 : an all-hydrogen force field (ff14SB)
 # -----------------------------------------------------------------------
-NW=10000    # 水分子数
-NP=3000     # タンパク質原子数
-TLOW=300.0  # 最低温度 [K]
-THIGH=400.0 # 最高温度 [K]
-PDES=0.25   # 目標交換確率 (0.2-0.3 が一般的)
+NW=10000    # water molecules
+NP=3000     # protein atoms
+TLOW=300.0  # lowest temperature [K]
+THIGH=400.0 # highest temperature [K]
+PDES=0.25   # target exchange probability (0.2-0.3 is typical)
 
 echo "=== Standard protein-water REMD ==="
 mdtbx gen_temperatures \
@@ -38,8 +42,9 @@ mdtbx gen_temperatures \
     --hff 0
 
 # -----------------------------------------------------------------------
-# 小分子・ペプチド系: 原子数が少なく交換確率が高くなりやすい
-# レプリカ数が少なくなるので温度範囲を絞るか pdes を下げて調整する
+# Small molecules and peptides: few atoms, so the exchange probability tends
+# to be high. That yields few replicas, so narrow the temperature range or
+# lower pdes to compensate
 # -----------------------------------------------------------------------
 echo ""
 echo "=== Small peptide REMD ==="
@@ -54,10 +59,10 @@ mdtbx gen_temperatures \
     --hff 0
 
 # -----------------------------------------------------------------------
-# 全原子フレキシブル (拘束なし) 設定
-# --pc 0 : タンパク質拘束なし
-# --wc 0 : 水も完全フレキシブル (SPC/Ef 等)
-# 自由度が増えるためレプリカ数が増える傾向にある
+# Fully flexible (unconstrained) settings
+# --pc 0 : no constraints on the protein
+# --wc 0 : fully flexible water as well (SPC/Fw and similar)
+# The extra degrees of freedom tend to increase the replica count
 # -----------------------------------------------------------------------
 echo ""
 echo "=== Fully flexible (no constraints) ==="

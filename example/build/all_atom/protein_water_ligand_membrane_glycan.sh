@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# グリカンがタンパク質と同一PDBに含まれている前提
+# Assumes the glycan is contained in the same PDB as the protein
 input_structure="prot_lig.pdb"
 out_dir="${PWD}/gmx"
 lig_frcmod="./LIG.frcmod"
@@ -15,14 +15,14 @@ mdtbx addnme -s ace.pdb -o ace_nme
 
 mdtbx find_bond -s ace_nme.pdb -o bonds.txt -op cym.pdb
 
-# SS-bond有無で入力PDBを切り替え
+# Switch the input PDB depending on whether SS-bonds exist
 if [ -s bonds.txt ]; then
     input_pdb="cym.pdb"
 else
     input_pdb="ace_nme.pdb"
 fi
 
-# --keepligs でグリカン座標を保持、--gaff2 は使わずGLYCAM06-jをtleapでロード
+# --keepligs preserves the glycan coordinates; GLYCAM06-j is loaded in tleap instead of --gaff2
 mdtbx cmd packmol-memgen \
     --pdb ${input_pdb} \
     --lipids POPC:CHL1 \
