@@ -19,7 +19,7 @@ class TestGenPosresRun:
 
     def test_itp_file_created_for_protein(self, sample_top_path, tmp_path):
         """A posres .itp file is generated for the Protein moleculetype"""
-        from src.build.gen_posres import run
+        from mdtbx.build.gen_posres import run
 
         # Copy the topology (it is rewritten in place)
         top_copy = tmp_path / "test.top"
@@ -33,7 +33,7 @@ class TestGenPosresRun:
 
     def test_itp_contains_ifdef_block(self, sample_top_path, tmp_path):
         """The generated .itp has #ifdef / #endif blocks"""
-        from src.build.gen_posres import run
+        from mdtbx.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"
         shutil.copy(str(sample_top_path), str(top_copy))
@@ -51,7 +51,7 @@ class TestGenPosresRun:
 
     def test_itp_contains_selected_atoms(self, sample_top_path, tmp_path):
         """CA atom indices appear in the .itp (Protein has 2 CA atoms)"""
-        from src.build.gen_posres import run
+        from mdtbx.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"
         shutil.copy(str(sample_top_path), str(top_copy))
@@ -75,7 +75,7 @@ class TestGenPosresRun:
 
     def test_topology_updated_with_include(self, sample_top_path, tmp_path):
         """An #include line is appended to the topology file after the run"""
-        from src.build.gen_posres import run
+        from mdtbx.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"
         shutil.copy(str(sample_top_path), str(top_copy))
@@ -89,7 +89,7 @@ class TestGenPosresRun:
 
     def test_no_sol_itp_when_sol_not_selected(self, sample_top_path, tmp_path):
         """SOL has no CA atom, so posres_SOL.itp is not generated"""
-        from src.build.gen_posres import run
+        from mdtbx.build.gen_posres import run
 
         top_copy = tmp_path / "test.top"
         shutil.copy(str(sample_top_path), str(top_copy))

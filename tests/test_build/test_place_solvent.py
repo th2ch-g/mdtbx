@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from src.build import place_solvent
+from mdtbx.build import place_solvent
 
 
 def _rism_args(**overrides):

@@ -24,7 +24,7 @@ class TestComvecRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """.npy file is generated"""
-        from src.cv.comvec import run
+        from mdtbx.cv.comvec import run
 
         out = tmp_path / "comvec.npy"
         run(self._make_args(trajectory_files, out))
@@ -32,7 +32,7 @@ class TestComvecRun:
 
     def test_output_shape(self, trajectory_files, tmp_path):
         """The output shape is (n_frames, 3)"""
-        from src.cv.comvec import run
+        from mdtbx.cv.comvec import run
 
         out = tmp_path / "comvec_shape.npy"
         run(self._make_args(trajectory_files, out))
@@ -43,7 +43,7 @@ class TestComvecRun:
 
     def test_same_selection_gives_zero_vector(self, trajectory_files, tmp_path):
         """The vector between identical atom groups is the zero vector"""
-        from src.cv.comvec import run
+        from mdtbx.cv.comvec import run
 
         out = tmp_path / "comvec_zero.npy"
         args = self._make_args(trajectory_files, out, sel1="resid 0", sel2="resid 0")
@@ -53,7 +53,7 @@ class TestComvecRun:
 
     def test_antisymmetry(self, trajectory_files, tmp_path):
         """Swapping sel1 and sel2 flips the sign"""
-        from src.cv.comvec import run
+        from mdtbx.cv.comvec import run
 
         out1 = tmp_path / "comvec_ab.npy"
         out2 = tmp_path / "comvec_ba.npy"
@@ -65,7 +65,7 @@ class TestComvecRun:
         assert np.allclose(vec_ab, -vec_ba, atol=1e-6)
 
     def test_gmx_single_frame_output(self, tmp_path, monkeypatch):
-        from src.cv import comvec
+        from mdtbx.cv import comvec
 
         monkeypatch.chdir(tmp_path)
 

@@ -31,7 +31,7 @@ class TestOptPerfRun:
         )
 
     def test_run_finds_best_trial(self, tmp_path):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         script = tmp_path / "fake_mdrun.sh"
         script.write_text(
@@ -62,7 +62,7 @@ class TestOptPerfRun:
         assert (tmp_path / "history.csv").exists()
 
     def test_build_command_template_appends_missing_mdrun_args(self):
-        from src.trajectory.opt_perf import _build_command_template
+        from mdtbx.trajectory.opt_perf import _build_command_template
 
         args = types.SimpleNamespace(
             command_template=None,
@@ -77,7 +77,7 @@ class TestOptPerfRun:
         assert "{ntmpi}" in command
 
     def test_build_command_template_supports_external_mpi_launcher(self):
-        from src.trajectory.opt_perf import _build_command_template
+        from mdtbx.trajectory.opt_perf import _build_command_template
 
         args = types.SimpleNamespace(
             command_template=None,
@@ -93,14 +93,14 @@ class TestOptPerfRun:
         assert "{ntomp}" in command
 
     def test_zero_gpu_candidate_is_supported(self):
-        from src.trajectory.opt_perf import _validate_candidates
+        from mdtbx.trajectory.opt_perf import _validate_candidates
 
         assert _validate_candidates("n_gpu", [1, 0, 0], minimum=0) == [0, 1]
         with pytest.raises(ValueError, match="non-negative"):
             _validate_candidates("n_gpu", [-1], minimum=0)
 
     def test_relative_workdir_uses_absolute_log_path(self, tmp_path, monkeypatch):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         script = tmp_path / "fake_mdrun.sh"
         script.write_text(
@@ -125,7 +125,7 @@ class TestOptPerfRun:
         assert expected_log.exists()
 
     def test_failed_trial_does_not_abort_remaining_trials(self, tmp_path):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         script = tmp_path / "sometimes_fails.sh"
         script.write_text(
@@ -152,7 +152,7 @@ class TestOptPerfRun:
         assert "\n1,42.0,2,1,1,1," in history or "\n0,42.0,2,1,1,1," in history
 
     def test_all_failed_trials_raise_clear_error(self, tmp_path):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         script = tmp_path / "always_fails.sh"
         script.write_text("#!/bin/sh\nexit 3\n")
@@ -168,7 +168,7 @@ class TestOptPerfRun:
             run(args)
 
     def test_invalid_n_trials_is_rejected_before_workdir_creation(self, tmp_path):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         args = self._make_args(tmp_path / "unused.sh", tmp_path)
         args.n_trials = 0
@@ -180,7 +180,7 @@ class TestOptPerfRun:
 
     @pytest.mark.parametrize("log_name", ["", "../md.log", "/tmp/md.log", "."])
     def test_log_name_must_stay_inside_trial_directory(self, tmp_path, log_name):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         args = self._make_args(tmp_path / "unused.sh", tmp_path)
         args.log_name = log_name
@@ -189,7 +189,7 @@ class TestOptPerfRun:
             run(args)
 
     def test_unknown_command_field_is_rejected(self, tmp_path):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         args = self._make_args(tmp_path / "unused.sh", tmp_path)
         args.command_template = "gmx mdrun -g {unknown}"
@@ -199,7 +199,7 @@ class TestOptPerfRun:
             run(args)
 
     def test_output_parent_directories_are_created(self, tmp_path):
-        from src.trajectory.opt_perf import run
+        from mdtbx.trajectory.opt_perf import run
 
         script = tmp_path / "fake_mdrun.sh"
         script.write_text(

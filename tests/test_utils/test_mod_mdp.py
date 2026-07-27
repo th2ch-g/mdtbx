@@ -5,7 +5,7 @@ Tests the mod_mdp() function (file I/O) and run() (directory traversal).
 The tmp_path fixture removes the temporary files after each test.
 """
 
-from src.utils.mod_mdp import mod_mdp, run
+from mdtbx.utils.mod_mdp import mod_mdp, run
 
 
 class TestModMdp:

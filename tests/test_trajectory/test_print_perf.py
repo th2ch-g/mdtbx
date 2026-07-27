@@ -7,7 +7,7 @@ external tool and not on gmx.
 
 import pytest
 
-from src.trajectory.print_perf import parse_log_file
+from mdtbx.trajectory.print_perf import parse_log_file
 
 # A minimal sample of a GROMACS log
 _SAMPLE_LOG = """\

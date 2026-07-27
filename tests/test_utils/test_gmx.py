@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.utils.gmx import gmx_index_args, gmx_tempfile, remove_gmx_backups
+from mdtbx.utils.gmx import gmx_index_args, gmx_tempfile, remove_gmx_backups
 
 
 def test_gmx_index_args():

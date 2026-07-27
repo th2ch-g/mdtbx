@@ -3,7 +3,7 @@ import math
 
 import pytest
 
-from src.utils.abfe import (
+from mdtbx.utils.abfe import (
     ABFE_MANIFEST,
     boresch_pull_settings,
     boresch_standard_state_correction,

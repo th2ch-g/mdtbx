@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def test_make_default_index_uses_argv_and_stdin(monkeypatch):
-    from src.build import add_ndx
+    from mdtbx.build import add_ndx
 
     captured = {}
 
@@ -31,7 +31,7 @@ def test_make_default_index_uses_argv_and_stdin(monkeypatch):
 
 
 def test_centering_gro_uses_unique_topology_and_argv(tmp_path, monkeypatch):
-    from src.build import centering_gro
+    from mdtbx.build import centering_gro
 
     calls = []
 
@@ -63,7 +63,7 @@ def test_centering_gro_uses_unique_topology_and_argv(tmp_path, monkeypatch):
 
 
 def test_amb2gro_parmed_preserves_paths_as_single_arguments(monkeypatch):
-    from src.build import amb2gro
+    from mdtbx.build import amb2gro
 
     calls = []
     monkeypatch.setattr(
@@ -85,7 +85,7 @@ def test_amb2gro_parmed_preserves_paths_as_single_arguments(monkeypatch):
 
 
 def test_gen_am1bcc_reuses_tleap_helper(monkeypatch):
-    from src.build import gen_am1bcc
+    from mdtbx.build import gen_am1bcc
 
     commands = []
     tleap_inputs = []

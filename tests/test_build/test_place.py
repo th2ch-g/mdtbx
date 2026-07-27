@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from src.build import place
+from mdtbx.build import place
 
 
 def _parse_args(add_subcmd, argv):

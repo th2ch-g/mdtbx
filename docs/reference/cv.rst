@@ -4,7 +4,7 @@ Collective-variable commands
 comdist
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: comdist
    :groups:
@@ -12,7 +12,7 @@ comdist
 comvec
 ------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: comvec
    :groups:
@@ -20,7 +20,7 @@ comvec
 contactmap
 ----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: contactmap
    :groups:
@@ -28,7 +28,7 @@ contactmap
 densmap
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: densmap
    :groups:
@@ -36,7 +36,7 @@ densmap
 distmap
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: distmap
    :groups:
@@ -44,7 +44,7 @@ distmap
 mindist
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: mindist
    :groups:
@@ -52,7 +52,7 @@ mindist
 pca
 ---
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: pca
    :groups:
@@ -60,7 +60,7 @@ pca
 rmsd
 ----
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: rmsd
    :groups:
@@ -68,7 +68,7 @@ rmsd
 rmsf
 ----
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: rmsf
    :groups:
@@ -76,7 +76,7 @@ rmsf
 xyz
 ---
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: xyz
    :groups:

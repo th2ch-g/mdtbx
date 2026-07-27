@@ -2,7 +2,7 @@ import types
 
 import pytest
 
-from src.build import modeling_cf
+from mdtbx.build import modeling_cf
 
 
 def _args(tmp_path, **overrides):

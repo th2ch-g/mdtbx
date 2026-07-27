@@ -24,21 +24,21 @@ class TestCountIndexGroup:
 
     def test_counts_single_group(self, tmp_path):
         """An .ndx with a single group is counted correctly"""
-        from src.build.add_ndx import count_index_group
+        from mdtbx.build.add_ndx import count_index_group
 
         ndx = self._write_ndx(tmp_path / "single.ndx", n_groups=1)
         assert count_index_group(self._make_args(ndx)) == 1
 
     def test_counts_multiple_groups(self, tmp_path):
         """An .ndx with several groups is counted correctly"""
-        from src.build.add_ndx import count_index_group
+        from mdtbx.build.add_ndx import count_index_group
 
         ndx = self._write_ndx(tmp_path / "multi.ndx", n_groups=5)
         assert count_index_group(self._make_args(ndx)) == 5
 
     def test_ignores_non_bracket_lines(self, tmp_path):
         """Lines that do not start with [ are not counted"""
-        from src.build.add_ndx import count_index_group
+        from mdtbx.build.add_ndx import count_index_group
 
         ndx = tmp_path / "mixed.ndx"
         ndx.write_text(
@@ -54,7 +54,7 @@ class TestCountIndexGroup:
 
     def test_empty_file_returns_zero(self, tmp_path):
         """An empty file returns 0"""
-        from src.build.add_ndx import count_index_group
+        from mdtbx.build.add_ndx import count_index_group
 
         ndx = tmp_path / "empty.ndx"
         ndx.write_text("")
@@ -62,7 +62,7 @@ class TestCountIndexGroup:
 
     def test_real_gromacs_style_ndx(self, tmp_path):
         """A GROMACS-format .ndx is counted correctly"""
-        from src.build.add_ndx import count_index_group
+        from mdtbx.build.add_ndx import count_index_group
 
         ndx = tmp_path / "gromacs.ndx"
         ndx.write_text(

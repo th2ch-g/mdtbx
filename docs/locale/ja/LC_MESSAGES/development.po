@@ -33,10 +33,10 @@ msgstr "Python packageはコマンドカテゴリ別に構成されています�
 
 #: ../../development.rst:22
 msgid ""
-"``src.cli`` scans the five category packages at startup. A module becomes a subcommand"
+"``mdtbx.cli`` scans the five category packages at startup. A module becomes a subcommand"
 " when it exposes ``add_subcmd``. Helper modules without that function are skipped."
 msgstr ""
-"``src.cli`` は起動時に5つのカテゴリpackageを走査します。 ``add_subcmd`` "
+"``mdtbx.cli`` は起動時に5つのカテゴリpackageを走査します。 ``add_subcmd`` "
 "を公開するmoduleがサブコマンドとして登録され、この関数を持たないhelper moduleはスキップされます。"
 
 #: ../../development.rst:27
@@ -50,9 +50,9 @@ msgstr "moduleを適切なカテゴリへ配置し、2つの関数を実装し�
 #: ../../development.rst:45
 msgid ""
 "Keep the command focused on one operation. Reuse parsers and process helpers from "
-"``src.utils``. Avoid changing ``src.cli`` because registration is automatic."
+"``mdtbx.utils``. Avoid changing ``mdtbx.cli`` because registration is automatic."
 msgstr ""
-"コマンドは1つの処理に限定します。 ``src.utils`` のparserとprocess helperを再利用してください。登録は自動なので ``src.cli`` "
+"コマンドは1つの処理に限定します。 ``mdtbx.utils`` のparserとprocess helperを再利用してください。登録は自動なので ``mdtbx.cli`` "
 "を変更する必要はありません。"
 
 #: ../../development.rst:49

@@ -6,7 +6,7 @@ Tests the topology parser against tests/fixtures/sample.top.
 
 import pytest
 
-from src.utils.parse_top import GromacsTopologyParser
+from mdtbx.utils.parse_top import GromacsTopologyParser
 
 
 @pytest.fixture(scope="module")

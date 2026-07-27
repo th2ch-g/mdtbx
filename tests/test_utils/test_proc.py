@@ -1,4 +1,4 @@
-from src.utils import proc
+from mdtbx.utils import proc
 
 
 def test_run_cmd_enables_text_mode_for_string_input(monkeypatch):

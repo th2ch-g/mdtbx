@@ -17,7 +17,7 @@ class TestPartialTemperingRun:
 
     def test_output_file_created(self, sample_top_path, tmp_path):
         """The output file is generated"""
-        from src.utils.partial_tempering import run
+        from mdtbx.utils.partial_tempering import run
 
         out = tmp_path / "output.top"
         run(self._make_args(sample_top_path, out, selection="resname ALA"))
@@ -25,7 +25,7 @@ class TestPartialTemperingRun:
 
     def test_selected_atoms_get_underscore(self, sample_top_path, tmp_path):
         """The atom_type of a selected ALA atom gains a trailing _"""
-        from src.utils.partial_tempering import run
+        from mdtbx.utils.partial_tempering import run
 
         out = tmp_path / "output.top"
         run(self._make_args(sample_top_path, out, selection="resname ALA"))
@@ -36,7 +36,7 @@ class TestPartialTemperingRun:
 
     def test_unselected_atoms_unchanged(self, sample_top_path, tmp_path):
         """The atom_type of an unselected GLY atom is unchanged"""
-        from src.utils.partial_tempering import run
+        from mdtbx.utils.partial_tempering import run
 
         out = tmp_path / "output.top"
         # Select ALA only
@@ -60,7 +60,7 @@ class TestPartialTemperingRun:
 
     def test_original_file_not_modified(self, sample_top_path, tmp_path):
         """The input file is left unchanged"""
-        from src.utils.partial_tempering import run
+        from mdtbx.utils.partial_tempering import run
 
         original_content = sample_top_path.read_text()
         out = tmp_path / "output.top"
@@ -72,7 +72,7 @@ class TestPartialTemperingRun:
         self, sample_top_path, tmp_path
     ):
         """A selection that matches nothing appends no underscore"""
-        from src.utils.partial_tempering import run
+        from mdtbx.utils.partial_tempering import run
 
         out = tmp_path / "output_nomatch.top"
         run(self._make_args(sample_top_path, out, selection="resname LIG"))
@@ -82,7 +82,7 @@ class TestPartialTemperingRun:
         assert "CT_" not in output
 
     def test_second_application_is_idempotent(self, sample_top_path, tmp_path):
-        from src.utils.partial_tempering import run
+        from mdtbx.utils.partial_tempering import run
 
         first = tmp_path / "first.top"
         second = tmp_path / "second.top"
@@ -93,7 +93,7 @@ class TestPartialTemperingRun:
         assert "CT__" not in second.read_text()
 
     def test_nested_output_directory_is_created(self, sample_top_path, tmp_path):
-        from src.utils.partial_tempering import run
+        from mdtbx.utils.partial_tempering import run
 
         out = tmp_path / "nested" / "output.top"
         run(self._make_args(sample_top_path, out, selection="resname ALA"))

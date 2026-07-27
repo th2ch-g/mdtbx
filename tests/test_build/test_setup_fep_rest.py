@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
-from src.build import setup_fep_rest
+from mdtbx.build import setup_fep_rest
 
 
 DUAL_TOPOLOGY = """\

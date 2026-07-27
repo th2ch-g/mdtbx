@@ -43,6 +43,7 @@ pipeline instead of expecting one command to perform an entire study:
    workflows/trajectory_analysis
    workflows/free_energy
    agent_workflows
+   pymol_ai
    troubleshooting
    reference/index
    development

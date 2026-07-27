@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.utils import run_fep
+from mdtbx.utils import run_fep
 
 
 def _fep_setup(tmp_path, count=3):

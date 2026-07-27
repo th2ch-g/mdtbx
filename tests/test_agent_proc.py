@@ -1,7 +1,7 @@
 import sys
 
-from src.agent.context import JSON_MODE
-from src.utils import proc
+from mdtbx.agent.context import JSON_MODE
+from mdtbx.utils import proc
 
 
 def test_json_mode_redirects_uncaptured_subprocess(monkeypatch):

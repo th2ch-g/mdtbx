@@ -5,9 +5,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.agent.profile import validate_profile
-from src.agent.schedulers import AgeScheduler, PjmScheduler, SlurmScheduler
-from src.cli import _run_agent_mode
+from mdtbx.agent.profile import validate_profile
+from mdtbx.agent.schedulers import AgeScheduler, PjmScheduler, SlurmScheduler
+from mdtbx.cli import _run_agent_mode
 
 
 def _completed(stdout):
@@ -33,7 +33,7 @@ def test_json_mode_wraps_system_exit(capsys):
 @pytest.mark.parametrize("key", ["cpus_per_node", "memory_mb_per_node"])
 def test_profile_requires_positive_capacity(key):
     profile = {
-        "schema_version": 1,
+        "schema_version": 2,
         "name": "invalid",
         "scheduler": "slurm",
         "resources": [
@@ -60,7 +60,7 @@ def test_slurm_submit_uses_afterok(monkeypatch, tmp_path):
         calls.append((argv, check))
         return _completed("123;cluster\n")
 
-    monkeypatch.setattr("src.agent.schedulers._run", fake_run)
+    monkeypatch.setattr("mdtbx.agent.schedulers._run", fake_run)
     job_id = SlurmScheduler().submit(
         tmp_path / "job.sh",
         dependencies=["100", "101"],
@@ -77,7 +77,7 @@ def test_age_submit_uses_hold_jid(monkeypatch, tmp_path):
         calls.append((argv, check))
         return _completed("456.cluster\n")
 
-    monkeypatch.setattr("src.agent.schedulers._run", fake_run)
+    monkeypatch.setattr("mdtbx.agent.schedulers._run", fake_run)
     job_id = AgeScheduler().submit(
         tmp_path / "job.sh",
         dependencies=["200", "201"],
@@ -103,7 +103,7 @@ def test_pjm_submit_parses_job_id(monkeypatch, tmp_path):
         calls.append((argv, check))
         return _completed("[INFO] PJM 0000 pjsub Job 789 submitted.\n")
 
-    monkeypatch.setattr("src.agent.schedulers._run", fake_run)
+    monkeypatch.setattr("mdtbx.agent.schedulers._run", fake_run)
     job_id = PjmScheduler().submit(
         tmp_path / "job.sh",
         dependencies=["300"],

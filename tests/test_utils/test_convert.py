@@ -18,7 +18,7 @@ class FakeCmd:
 def test_pymol_conversion_uses_isolated_target_and_creates_parent(
     tmp_path, monkeypatch
 ):
-    from src.utils import convert
+    from mdtbx.utils import convert
 
     fake_cmd = FakeCmd()
     monkeypatch.setattr(convert, "cmd", fake_cmd)
@@ -42,7 +42,7 @@ def test_pymol_conversion_uses_isolated_target_and_creates_parent(
 def test_mdtraj_conversion_creates_parent(trajectory_files, tmp_path):
     import mdtraj as md
 
-    from src.utils.convert import run
+    from mdtbx.utils.convert import run
 
     output = tmp_path / "nested" / "output.pdb"
     args = types.SimpleNamespace(
@@ -59,7 +59,7 @@ def test_mdtraj_conversion_creates_parent(trajectory_files, tmp_path):
 def test_conversion_rejects_unknown_backend(tmp_path):
     import pytest
 
-    from src.utils.convert import run
+    from mdtbx.utils.convert import run
 
     args = types.SimpleNamespace(
         structure="input.pdb",

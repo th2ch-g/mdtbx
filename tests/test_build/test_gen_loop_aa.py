@@ -2,7 +2,7 @@ import argparse
 
 import pytest
 
-from src.build import gen_loop_aa
+from mdtbx.build import gen_loop_aa
 
 
 def _parse_args(add_subcmd, argv):

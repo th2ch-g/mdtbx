@@ -2,7 +2,7 @@ import re
 from argparse import _SubParsersAction
 from pathlib import Path
 
-from src.cli import create_parser
+from mdtbx.cli import create_parser
 
 
 def _registered_commands() -> set[str]:

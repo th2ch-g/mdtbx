@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.build import setup_fep
+from mdtbx.build import setup_fep
 
 
 def _args(tmp_path, **overrides):

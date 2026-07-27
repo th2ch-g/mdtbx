@@ -10,7 +10,7 @@ import pytest
 
 def test_cli_importable():
     """The cli module imports without error"""
-    from src.cli import cli, create_parser
+    from mdtbx.cli import cli, create_parser
 
     assert callable(cli)
     assert callable(create_parser)
@@ -21,7 +21,7 @@ def test_all_subcommands_registered():
     Every subcommand is registered with argparse and its --help works
     (exiting with SystemExit(0))
     """
-    from src.cli import cli
+    from mdtbx.cli import cli
 
     with pytest.raises(SystemExit) as exc_info:
         # --help raises SystemExit(0)
@@ -90,13 +90,16 @@ def test_all_subcommands_registered():
         "pca",
         "densmap",
         "distmap",
+        "tica",
+        "cluster",
+        "msm",
     ],
 )
 def test_subcommand_help(subcmd):
     """--help of each subcommand exits successfully"""
     import sys
 
-    from src.cli import cli
+    from mdtbx.cli import cli
 
     sys.argv = ["mdtbx", subcmd, "--help"]
     with pytest.raises(SystemExit) as exc_info:

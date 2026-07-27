@@ -21,14 +21,14 @@ class TestContactmapRun:
         )
 
     def test_output_file_created(self, trajectory_files, tmp_path):
-        from src.cv.contactmap import run
+        from mdtbx.cv.contactmap import run
 
         out = tmp_path / "contactmap.npy"
         run(self._make_args(trajectory_files, out))
         assert out.exists()
 
     def test_output_shape(self, trajectory_files, tmp_path):
-        from src.cv.contactmap import run
+        from mdtbx.cv.contactmap import run
 
         out = tmp_path / "contactmap_shape.npy"
         run(self._make_args(trajectory_files, out))
@@ -37,7 +37,7 @@ class TestContactmapRun:
         assert contactmap.shape == (2, 2)
 
     def test_diagonal_is_zero(self, trajectory_files, tmp_path):
-        from src.cv.contactmap import run
+        from mdtbx.cv.contactmap import run
 
         out = tmp_path / "contactmap_diag.npy"
         run(self._make_args(trajectory_files, out))
@@ -46,7 +46,7 @@ class TestContactmapRun:
         assert np.allclose(np.diag(contactmap), 0.0)
 
     def test_single_structure_path_supported(self, trajectory_files, tmp_path):
-        from src.cv.contactmap import run
+        from mdtbx.cv.contactmap import run
 
         out = tmp_path / "contactmap_pdb.npy"
         run(self._make_args(trajectory_files, out, trajectory=False))
@@ -57,7 +57,7 @@ class TestContactmapRun:
 
 @pytest.mark.parametrize("cutoff", [0.0, -1.0, np.nan, np.inf])
 def test_calculate_contact_map_rejects_invalid_cutoff(cutoff):
-    from src.cv.contactmap import calculate_contact_map
+    from mdtbx.cv.contactmap import calculate_contact_map
 
     with pytest.raises(ValueError, match="cutoff"):
         calculate_contact_map(np.zeros((1, 2, 2)), cutoff)

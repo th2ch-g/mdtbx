@@ -1,16 +1,15 @@
 """
 Shared pytest fixtures and PyMOL mock setup
 
-NOTE: the mock injection into sys.modules has to happen before any other src
-      import, so it is done at the top of this file.
+NOTE: the mock injection into sys.modules has to happen before modules that
+      import PyMOL, so it is done at the top of this file.
 """
 
 import sys
 from unittest.mock import MagicMock
 
-# src/__init__.py runs `import pymol_plugins`, and find_bond.py / convert.py
-# run `from pymol import cmd`, so they are mocked to let the test environment
-# work without a PyMOL GUI.
+# Some commands import PyMOL at module load time, so it is mocked to let the
+# test environment work without a PyMOL GUI.
 sys.modules["pymol_plugins"] = MagicMock()
 sys.modules["pymol"] = MagicMock()
 sys.modules["pymol.cmd"] = MagicMock()

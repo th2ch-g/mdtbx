@@ -2,7 +2,7 @@ import argparse
 
 import pytest
 
-from src.build import build_solution, build_vacuum
+from mdtbx.build import build_solution, build_vacuum
 
 
 def _parse_args(add_subcmd, argv):
@@ -35,7 +35,7 @@ def test_build_solution_default_template_exists_and_outdir_is_created(
 
     args = _parse_args(build_solution.add_subcmd, ["build_solution", "-o", str(outdir)])
 
-    assert args.template_tleap.endswith("src/utils/template_tleap.in")
+    assert args.template_tleap.endswith("src/mdtbx/utils/template_tleap.in")
 
     build_solution.run(args)
 

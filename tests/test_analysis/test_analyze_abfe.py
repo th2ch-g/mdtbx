@@ -2,7 +2,7 @@ import json
 import math
 from types import SimpleNamespace
 
-from src.analysis import analyze_abfe
+from mdtbx.analysis import analyze_abfe
 
 
 def _manifest(tmp_path):

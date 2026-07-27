@@ -1,7 +1,7 @@
 import json
 from types import SimpleNamespace
 
-from src.utils import run_abfe
+from mdtbx.utils import run_abfe
 
 
 def _setup(tmp_path):

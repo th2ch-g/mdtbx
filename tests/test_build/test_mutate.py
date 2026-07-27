@@ -23,7 +23,7 @@ class TestMutateRun:
         )
 
     def test_run_invokes_mutagenesis_wizard(self, tmp_path, monkeypatch):
-        from src.build import mutate
+        from mdtbx.build import mutate
 
         structure = tmp_path / "input.pdb"
         structure.write_text("MODEL\nENDMDL\n")
@@ -43,7 +43,7 @@ class TestMutateRun:
         pymol_cmd.save.assert_called_once()
 
     def test_run_rejects_multi_residue_selection(self, tmp_path, monkeypatch):
-        from src.build import mutate
+        from mdtbx.build import mutate
 
         structure = tmp_path / "input.pdb"
         structure.write_text("MODEL\nENDMDL\n")
@@ -56,7 +56,7 @@ class TestMutateRun:
             mutate.run(self._make_args(structure, tmp_path / "mutated"))
 
     def test_output_prefix_alias_is_supported(self, tmp_path, monkeypatch):
-        from src.build import mutate
+        from mdtbx.build import mutate
 
         structure = tmp_path / "input.pdb"
         structure.write_text("MODEL\nENDMDL\n")

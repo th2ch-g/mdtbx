@@ -13,7 +13,7 @@ import pytest
 
 class TestSplitIntoBlocks:
     def test_single_continuous_block(self):
-        from src.build.fill_chainname import _split_into_blocks
+        from mdtbx.build.fill_chainname import _split_into_blocks
 
         atoms = [(1, 1, ""), (2, 1, ""), (3, 2, ""), (4, 2, "")]
         blocks = _split_into_blocks(atoms, max_resi_gap=1, use_segi=True)
@@ -22,7 +22,7 @@ class TestSplitIntoBlocks:
         assert blocks[0] == [1, 2, 3, 4]
 
     def test_split_on_residue_gap(self):
-        from src.build.fill_chainname import _split_into_blocks
+        from mdtbx.build.fill_chainname import _split_into_blocks
 
         # resv jumps 2 -> 100, gap of 98 should start a new block
         atoms = [(1, 1, ""), (2, 2, ""), (3, 100, ""), (4, 101, "")]
@@ -33,7 +33,7 @@ class TestSplitIntoBlocks:
         assert blocks[1] == [3, 4]
 
     def test_split_on_segi_change(self):
-        from src.build.fill_chainname import _split_into_blocks
+        from mdtbx.build.fill_chainname import _split_into_blocks
 
         atoms = [(1, 1, "P1"), (2, 2, "P1"), (3, 3, "P2"), (4, 4, "P2")]
         blocks = _split_into_blocks(atoms, max_resi_gap=1, use_segi=True)
@@ -43,7 +43,7 @@ class TestSplitIntoBlocks:
         assert blocks[1] == [3, 4]
 
     def test_ignore_segi_when_use_segi_false(self):
-        from src.build.fill_chainname import _split_into_blocks
+        from mdtbx.build.fill_chainname import _split_into_blocks
 
         # Same resv flow but segi differs; with use_segi=False stay one block
         atoms = [(1, 1, "P1"), (2, 2, "P2"), (3, 3, "P3")]
@@ -52,27 +52,27 @@ class TestSplitIntoBlocks:
         assert len(blocks) == 1
 
     def test_empty_input(self):
-        from src.build.fill_chainname import _split_into_blocks
+        from mdtbx.build.fill_chainname import _split_into_blocks
 
         assert _split_into_blocks([], max_resi_gap=1, use_segi=True) == []
 
 
 class TestNextChainId:
     def test_returns_first_unused_uppercase(self):
-        from src.build.fill_chainname import _next_chain_id
+        from mdtbx.build.fill_chainname import _next_chain_id
 
         assert _next_chain_id(set()) == "A"
         assert _next_chain_id({"A"}) == "B"
         assert _next_chain_id({"A", "B", "C"}) == "D"
 
     def test_skips_used_then_falls_back_to_lowercase(self):
-        from src.build.fill_chainname import _next_chain_id
+        from mdtbx.build.fill_chainname import _next_chain_id
 
         used = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         assert _next_chain_id(used) == "a"
 
     def test_raises_when_pool_exhausted(self):
-        from src.build.fill_chainname import _next_chain_id, CHAIN_POOL
+        from mdtbx.build.fill_chainname import _next_chain_id, CHAIN_POOL
 
         with pytest.raises(RuntimeError, match="No single-letter chain ID"):
             _next_chain_id(set(CHAIN_POOL))
@@ -92,7 +92,7 @@ class TestRun:
         return args
 
     def test_no_blank_chain_saves_as_is(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")
@@ -109,7 +109,7 @@ class TestRun:
         pymol_cmd.save.assert_called_once_with(str(output), "target")
 
     def test_assigns_next_unused_chain_id(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")
@@ -137,7 +137,7 @@ class TestRun:
         pymol_cmd.save.assert_called_once_with(str(output), "target")
 
     def test_user_specified_chainnames_are_used(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")
@@ -159,7 +159,7 @@ class TestRun:
         assert exprs == ["chain='X'", "chain='Y'"]
 
     def test_user_chainname_count_mismatch_raises(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")
@@ -178,7 +178,7 @@ class TestRun:
             fill_chainname.run(args)
 
     def test_user_chainname_collision_with_existing_raises(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")
@@ -195,7 +195,7 @@ class TestRun:
             fill_chainname.run(args)
 
     def test_user_chainname_invalid_letter_raises(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")
@@ -212,7 +212,7 @@ class TestRun:
             fill_chainname.run(args)
 
     def test_user_chainname_duplicates_raises(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")
@@ -231,7 +231,7 @@ class TestRun:
             fill_chainname.run(args)
 
     def test_uses_index_selection(self, tmp_path, monkeypatch):
-        from src.build import fill_chainname
+        from mdtbx.build import fill_chainname
 
         structure = tmp_path / "input.pdb"
         structure.write_text("ATOM\n")

@@ -8,7 +8,7 @@ import types
 
 import pytest
 
-from src.build.calc_ion_conc import (
+from mdtbx.build.calc_ion_conc import (
     calc_ion_conc_from_volume,
     get_boxsize_from_pdb,
     get_water_number_from_pdb,

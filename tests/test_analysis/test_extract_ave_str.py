@@ -23,7 +23,7 @@ class TestExtractAveStrRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """run() writes a PDB file"""
-        from src.analysis.extract_ave_str import run
+        from mdtbx.analysis.extract_ave_str import run
 
         out = tmp_path / "ave.pdb"
         run(self._make_args(trajectory_files, out))
@@ -33,7 +33,7 @@ class TestExtractAveStrRun:
         """The average structure has exactly one frame"""
         import mdtraj as md
 
-        from src.analysis.extract_ave_str import run
+        from mdtbx.analysis.extract_ave_str import run
 
         out = tmp_path / "ave_single.pdb"
         run(self._make_args(trajectory_files, out))
@@ -45,7 +45,7 @@ class TestExtractAveStrRun:
         """Selecting all atoms keeps the atom count of the source trajectory"""
         import mdtraj as md
 
-        from src.analysis.extract_ave_str import run
+        from mdtbx.analysis.extract_ave_str import run
 
         out = tmp_path / "ave_all.pdb"
         run(self._make_args(trajectory_files, out, selection="all"))
@@ -57,7 +57,7 @@ class TestExtractAveStrRun:
         """A partial selection yields exactly the selected atom count"""
         import mdtraj as md
 
-        from src.analysis.extract_ave_str import run
+        from mdtbx.analysis.extract_ave_str import run
 
         selection = "resid 0"
         out = tmp_path / "ave_subset.pdb"
@@ -71,7 +71,7 @@ class TestExtractAveStrRun:
         """Average coordinates stay within the per-axis min/max of the source"""
         import mdtraj as md
 
-        from src.analysis.extract_ave_str import run
+        from mdtbx.analysis.extract_ave_str import run
 
         out = tmp_path / "ave_range.pdb"
         run(self._make_args(trajectory_files, out))
@@ -83,7 +83,7 @@ class TestExtractAveStrRun:
         assert np.all(ave.xyz <= traj.xyz.max(axis=0) + 1e-6)
 
     def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
-        from src.analysis.extract_ave_str import run
+        from mdtbx.analysis.extract_ave_str import run
 
         out = tmp_path / "nested" / "average.pdb"
         run(self._make_args(trajectory_files, out))
@@ -91,7 +91,7 @@ class TestExtractAveStrRun:
         assert out.exists()
 
     def test_empty_selection_raises(self, trajectory_files, tmp_path):
-        from src.analysis.extract_ave_str import run
+        from mdtbx.analysis.extract_ave_str import run
 
         args = self._make_args(
             trajectory_files,
@@ -102,7 +102,7 @@ class TestExtractAveStrRun:
             run(args)
 
     def test_gmx_supplies_both_selection_prompts(self, tmp_path, monkeypatch):
-        from src.analysis import extract_ave_str
+        from mdtbx.analysis import extract_ave_str
 
         captured = {}
 

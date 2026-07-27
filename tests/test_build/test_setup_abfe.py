@@ -1,7 +1,7 @@
 import json
 from types import SimpleNamespace
 
-from src.build import setup_abfe
+from mdtbx.build import setup_abfe
 
 
 def _anchor_pdb(path):

@@ -14,11 +14,13 @@ from __future__ import annotations
 import ast
 import base64
 import json
+import queue
 import re
 import subprocess
 import tempfile
 import threading
 import traceback
+from collections import deque
 from itertools import count
 from pathlib import Path
 
@@ -27,9 +29,16 @@ from pymol import cmd
 SUPPORTED_AI_TYPES = {"claude", "codex"}
 AI_TIMEOUT_SEC = 180
 AI_MAX_ATTEMPTS = 5
+AI_MAX_RESPONSE_CHARS = 128 * 1024
+AI_MAX_JOBS = 100
+AI_HISTORY_MAX_ENTRIES = 10
+AI_HISTORY_MAX_BYTES = 24 * 1024
 AI_JOB_COUNTER = count(1)
 AI_JOBS: dict[int, dict[str, object]] = {}
+AI_HISTORY: deque[dict[str, object]] = deque()
+AI_JOB_QUEUE: queue.Queue[int] = queue.Queue()
 AI_JOBS_LOCK = threading.Lock()
+AI_WORKER: threading.Thread | None = None
 FORBIDDEN_PYMOL_COMMAND_PREFIXES = ("@", "/")
 FORBIDDEN_PYMOL_COMMANDS = {
     "do",
@@ -137,8 +146,28 @@ def _get_scene_context() -> str:
     return "\n".join(lines)
 
 
-def _build_prompt(instruction: str, scene_context: str, image_path: Path) -> str:
+def _format_history(history: list[dict[str, object]]) -> str:
+    if not history:
+        return "(no previous AI turns in this PyMOL session)"
+    turns = []
+    for index, entry in enumerate(history, start=1):
+        turns.append(
+            f"Turn {index} [{entry.get('backend', '?')}, "
+            f"{entry.get('outcome', 'unknown')}]\n"
+            f"User: {entry.get('instruction', '')}\n"
+            f"Assistant: {entry.get('response', '')}"
+        )
+    return "\n\n".join(turns)
+
+
+def _build_prompt(
+    instruction: str,
+    scene_context: str,
+    image_path: Path,
+    history: list[dict[str, object]] | None = None,
+) -> str:
     """Build the prompt sent to the local AI CLI."""
+    session_history = _format_history(history or [])
     return f"""You are a PyMOL expert assistant.
 
 The user is controlling a live PyMOL session. A PNG screenshot of the current viewport is attached.
@@ -147,9 +176,16 @@ The screenshot file name is `{image_path.name}`.
 Current PyMOL scene metadata:
 {scene_context}
 
-User request:
+Completed AI turns from this same PyMOL session, shared across backends:
+--- history start ---
+{session_history}
+--- history end ---
+
+Current user request:
 {instruction}
 
+Use the completed turns when they clarify references such as "previous", "it", or "again".
+The live scene metadata and screenshot are authoritative if they differ from history.
 Return only executable PyMOL commands or Python code for PyMOL.
 
 Rules:
@@ -169,9 +205,10 @@ def _build_feedback_prompt(
     previous_response: str,
     error_message: str,
     attempt: int,
+    history: list[dict[str, object]] | None = None,
 ) -> str:
     """Build a retry prompt that includes execution feedback."""
-    base_prompt = _build_prompt(instruction, scene_context, image_path)
+    base_prompt = _build_prompt(instruction, scene_context, image_path, history)
     return f"""{base_prompt}
 
 The previous response did not succeed in the live PyMOL session.
@@ -228,11 +265,14 @@ def _extract_code(response: str) -> list[tuple[str, str]]:
 
 
 def _run_subprocess(
-    args: list[str], stdin: str | None = None
+    args: list[str],
+    stdin: str | None = None,
+    cwd: str | Path | None = None,
 ) -> subprocess.CompletedProcess:
     return subprocess.run(
         args,
         input=stdin,
+        cwd=cwd,
         capture_output=True,
         text=True,
         timeout=AI_TIMEOUT_SEC,
@@ -417,6 +457,11 @@ def _run_claude(prompt: str, image_path: Path) -> str:
             "claude",
             "--print",
             "--verbose",
+            "--bare",
+            "--tools",
+            "",
+            "--permission-mode",
+            "dontAsk",
             "--input-format",
             "stream-json",
             "--no-session-persistence",
@@ -434,33 +479,44 @@ def _run_claude(prompt: str, image_path: Path) -> str:
 
 
 def _run_codex(prompt: str, image_path: Path) -> str:
-    """Run Codex CLI with an attached screenshot and capture the last message."""
-    with tempfile.TemporaryDirectory() as tmpdir:
+    """Run Codex in an ephemeral read-only sandbox with an attached screenshot."""
+    with tempfile.TemporaryDirectory(prefix="pymol-codex-") as tmpdir:
         output_path = Path(tmpdir) / "codex-last-message.txt"
         result = _run_subprocess(
             [
                 "codex",
                 "exec",
+                "--ephemeral",
+                "--sandbox",
+                "read-only",
+                "--ask-for-approval",
+                "never",
                 "--skip-git-repo-check",
                 "-c",
-                "effort=high",
+                "model_reasoning_effort=high",
                 "--image",
                 str(image_path),
                 "--output-last-message",
                 str(output_path),
                 prompt,
-            ]
+            ],
+            cwd=tmpdir,
         )
         if result.returncode != 0:
             stderr = result.stderr.strip() or result.stdout.strip()
             raise RuntimeError(
                 f"codex command failed (exit {result.returncode}):\n{stderr}"
             )
-
-        if output_path.exists():
+        if output_path.is_symlink():
+            raise RuntimeError("codex output path unexpectedly became a symlink")
+        if output_path.is_file():
+            if output_path.stat().st_size > AI_MAX_RESPONSE_CHARS:
+                raise RuntimeError("codex response exceeded the size limit")
             return output_path.read_text().strip()
-
-    return result.stdout
+        stdout = result.stdout.strip()
+        if len(stdout) > AI_MAX_RESPONSE_CHARS:
+            raise RuntimeError("codex response exceeded the size limit")
+        return stdout
 
 
 def _request_ai_response(ai_type: str, prompt: str, image_path: Path) -> str:
@@ -484,29 +540,132 @@ def _cleanup_ai_context(image_path: Path) -> None:
         pass
 
 
-def _register_ai_job(job_id: int, ai_type: str, instruction: str) -> None:
+def _register_ai_job(job_id: int, ai_type: str, instruction: str) -> threading.Event:
+    event = threading.Event()
     with AI_JOBS_LOCK:
+        terminal = {"done", "error"}
+        while len(AI_JOBS) >= AI_MAX_JOBS:
+            removable = next(
+                (
+                    identifier
+                    for identifier, job in AI_JOBS.items()
+                    if job.get("status") in terminal
+                ),
+                None,
+            )
+            if removable is None:
+                break
+            AI_JOBS.pop(removable, None)
         AI_JOBS[job_id] = {
             "id": job_id,
             "type": ai_type,
             "instruction": instruction,
-            "status": "running",
+            "status": "queued",
             "attempts": 0,
             "max_attempts": AI_MAX_ATTEMPTS,
+            "_event": event,
         }
+    return event
 
 
 def _update_ai_job(job_id: int, **updates: object) -> None:
     with AI_JOBS_LOCK:
         job = AI_JOBS.get(job_id)
-        if job is None:
-            return
-        job.update(updates)
+        if job is not None:
+            job.update(updates)
 
 
 def _snapshot_ai_jobs() -> list[dict[str, object]]:
     with AI_JOBS_LOCK:
-        return [dict(job) for job in AI_JOBS.values()]
+        return [
+            {key: value for key, value in job.items() if not key.startswith("_")}
+            for job in AI_JOBS.values()
+        ]
+
+
+def _snapshot_ai_history() -> list[dict[str, object]]:
+    with AI_JOBS_LOCK:
+        return [dict(entry) for entry in AI_HISTORY]
+
+
+def _history_size() -> int:
+    return sum(
+        len(json.dumps(entry, ensure_ascii=False).encode("utf-8"))
+        for entry in AI_HISTORY
+    )
+
+
+def _record_ai_history(job: dict[str, object]) -> None:
+    raw_blocks = job.get("executable_blocks", [])
+    blocks = []
+    if isinstance(raw_blocks, list):
+        for block in raw_blocks[:4]:
+            if isinstance(block, dict):
+                blocks.append(
+                    {
+                        "language": str(block.get("language", "")),
+                        "code": str(block.get("code", ""))[:2000],
+                    }
+                )
+    entry = {
+        "job_id": job.get("id"),
+        "backend": job.get("type"),
+        "instruction": str(job.get("instruction", ""))[:4000],
+        "response": str(job.get("response", ""))[:8000],
+        "executable_blocks": blocks,
+        "outcome": job.get("status", "unknown"),
+        "attempts": job.get("attempts", 0),
+        "error": str(job.get("error", ""))[:2000] if job.get("error") else None,
+    }
+    with AI_JOBS_LOCK:
+        AI_HISTORY.append(entry)
+        while (
+            len(AI_HISTORY) > AI_HISTORY_MAX_ENTRIES
+            or _history_size() > AI_HISTORY_MAX_BYTES
+        ):
+            AI_HISTORY.popleft()
+
+
+def _ai_queue_worker() -> None:
+    while True:
+        job_id = AI_JOB_QUEUE.get()
+        try:
+            with AI_JOBS_LOCK:
+                job = AI_JOBS.get(job_id)
+                if job is None:
+                    continue
+                ai_type = str(job["type"])
+                instruction = str(job["instruction"])
+                event = job.get("_event")
+            _update_ai_job(job_id, status="running")
+            try:
+                _run_ai_job(job_id, ai_type, instruction)
+            except BaseException as exc:
+                _update_ai_job(
+                    job_id,
+                    status="error",
+                    error=f"{type(exc).__name__}: {exc}",
+                )
+            with AI_JOBS_LOCK:
+                completed = dict(AI_JOBS.get(job_id, {}))
+            _record_ai_history(completed)
+            if isinstance(event, threading.Event):
+                event.set()
+        finally:
+            AI_JOB_QUEUE.task_done()
+
+
+def _ensure_ai_worker() -> threading.Thread:
+    global AI_WORKER
+    with AI_JOBS_LOCK:
+        if AI_WORKER is None or not AI_WORKER.is_alive():
+            AI_WORKER = threading.Thread(
+                target=_ai_queue_worker,
+                daemon=True,
+                name="pymol-ai-queue",
+            )
+            AI_WORKER.start()
+        return AI_WORKER
 
 
 def _execute_blocks(blocks: list[tuple[str, str]]) -> None:
@@ -605,8 +764,9 @@ def _run_ai_job(
         image_path: Path | None = None
         try:
             image_path, scene_context = _capture_ai_context()
+            history = _snapshot_ai_history()
             prompt = (
-                _build_prompt(instruction, scene_context, image_path)
+                _build_prompt(instruction, scene_context, image_path, history)
                 if attempt == 1
                 else _build_feedback_prompt(
                     instruction=instruction,
@@ -615,6 +775,7 @@ def _run_ai_job(
                     previous_response=previous_response,
                     error_message=feedback_error,
                     attempt=attempt,
+                    history=history,
                 )
             )
             _update_ai_job(
@@ -654,6 +815,11 @@ def _run_ai_job(
                 print(f" [ai:{job_id}] Error: {exc}")
                 return
 
+            if len(response) > AI_MAX_RESPONSE_CHARS:
+                raise _AIResponseFeedbackError(
+                    "AI response exceeded the size limit.",
+                    response[:AI_MAX_RESPONSE_CHARS],
+                )
             _update_ai_job(job_id, response=response)
             print(f" [ai:{job_id}] Response received ({len(response)} chars).")
 
@@ -669,7 +835,14 @@ def _run_ai_job(
                     response,
                 )
 
-            _update_ai_job(job_id, status="executing", blocks=len(blocks))
+            _update_ai_job(
+                job_id,
+                status="executing",
+                blocks=len(blocks),
+                executable_blocks=[
+                    {"language": lang, "code": code} for lang, code in blocks
+                ],
+            )
             print(f" [ai:{job_id}] Executing {len(blocks)} block(s).")
             try:
                 _execute_blocks(blocks)
@@ -727,41 +900,28 @@ def _submit_ai_request(
     type: str = "claude",
     async_: str = "1",
 ) -> None:
-    """Send a natural-language request to Claude/Codex and run the result."""
+    """Queue a natural-language request and apply its result in submission order."""
     ai_type = type.strip().lower()
     if ai_type not in SUPPORTED_AI_TYPES:
         supported = ", ".join(sorted(SUPPORTED_AI_TYPES))
         print(f" [ai] Unknown type '{type}'. Use one of: {supported}")
         return
-
     if not instruction or not instruction.strip():
         print(" [ai] Instruction is empty.")
         return
 
     use_async = _normalize_bool_arg(async_, default=True)
     job_id = next(AI_JOB_COUNTER)
-    _register_ai_job(job_id, ai_type, instruction.strip())
-
+    event = _register_ai_job(job_id, ai_type, instruction.strip())
+    _ensure_ai_worker()
+    AI_JOB_QUEUE.put(job_id)
     print(
-        f" [ai:{job_id}] Using {ai_type}. "
-        f"{'Queued asynchronously' if use_async else 'Running synchronously'}: {instruction!r}"
+        f" [ai:{job_id}] Using {ai_type}. Queued in the shared session: {instruction!r}"
     )
-
     if use_async:
-        worker = threading.Thread(
-            target=_run_ai_job,
-            args=(job_id, ai_type, instruction.strip()),
-            daemon=True,
-            name=f"pymol-ai-{job_id}",
-        )
-        _update_ai_job(job_id, thread=worker)
-        worker.start()
-        print(
-            f" [ai:{job_id}] Background job started. Use `ai_status` to check progress."
-        )
+        print(f" [ai:{job_id}] Use `ai_status` to check progress.")
         return
-
-    _run_ai_job(job_id, ai_type, instruction.strip())
+    event.wait()
 
 
 def claude_cmd(instruction: str, async_: str = "1") -> None:
@@ -806,6 +966,43 @@ def ai_status(job_id: str = "all") -> None:
             print(f" [ai:{job['id']}] error: {job['error']}")
 
 
+def ai_history(limit: str = "all") -> None:
+    """Show completed AI turns retained for the current PyMOL session."""
+    history = _snapshot_ai_history()
+    if limit.strip().lower() != "all":
+        try:
+            count_value = int(limit)
+        except ValueError:
+            print(" [ai] limit must be a positive integer or 'all'.")
+            return
+        if count_value < 1:
+            print(" [ai] limit must be positive.")
+            return
+        history = history[-count_value:]
+    if not history:
+        print(" [ai] No conversation history.")
+        return
+    for entry in history:
+        print(
+            f" [ai:{entry.get('job_id')}] {entry.get('outcome')} "
+            f"({entry.get('backend')}) {entry.get('instruction')}"
+        )
+        if entry.get("response"):
+            print(f" [ai:{entry.get('job_id')}] response: {entry.get('response')}")
+        if entry.get("error"):
+            print(f" [ai:{entry.get('job_id')}] error: {entry.get('error')}")
+
+
+def ai_clear() -> None:
+    """Clear only the in-memory conversation history for this PyMOL session."""
+    with AI_JOBS_LOCK:
+        removed = len(AI_HISTORY)
+        AI_HISTORY.clear()
+    print(f" [ai] Cleared {removed} conversation turn(s).")
+
+
 cmd.extend("claude", claude_cmd)
 cmd.extend("codex", codex_cmd)
 cmd.extend("ai_status", ai_status)
+cmd.extend("ai_history", ai_history)
+cmd.extend("ai_clear", ai_clear)

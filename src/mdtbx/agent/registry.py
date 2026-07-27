@@ -46,6 +46,9 @@ DATA_COMMANDS = {
     "rmsd",
     "rmsf",
     "xyz",
+    "tica",
+    "cluster",
+    "msm",
 }
 READ_ONLY_COMMANDS = {"show_mdtraj", "show_npy", "print_perf", "shell_hook"}
 PILOT_COMMANDS = {"run_fep", "run_abfe", "opt_perf"}

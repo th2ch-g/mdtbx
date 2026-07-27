@@ -13,7 +13,7 @@ class TestShellHookRun:
 
     def test_output_contains_mdtbx_alias(self, capsys):
         """The mdtbx alias / function definitions are present"""
-        from src.utils.shell_hook import run
+        from mdtbx.utils.shell_hook import run
 
         run(self._make_args())
         captured = capsys.readouterr()
@@ -21,7 +21,7 @@ class TestShellHookRun:
 
     def test_output_contains_pymol(self, capsys):
         """The pymol settings are present"""
-        from src.utils.shell_hook import run
+        from mdtbx.utils.shell_hook import run
 
         run(self._make_args())
         captured = capsys.readouterr()
@@ -29,7 +29,7 @@ class TestShellHookRun:
 
     def test_output_contains_begin_end_markers(self, capsys):
         """The BEGIN / END markers are present"""
-        from src.utils.shell_hook import run
+        from mdtbx.utils.shell_hook import run
 
         run(self._make_args())
         captured = capsys.readouterr()
@@ -38,7 +38,7 @@ class TestShellHookRun:
 
     def test_output_contains_path_export(self, capsys):
         """The PATH export is present"""
-        from src.utils.shell_hook import run
+        from mdtbx.utils.shell_hook import run
 
         run(self._make_args())
         captured = capsys.readouterr()
@@ -46,7 +46,7 @@ class TestShellHookRun:
 
     def test_output_is_nonempty(self, capsys):
         """The output is not empty"""
-        from src.utils.shell_hook import run
+        from mdtbx.utils.shell_hook import run
 
         run(self._make_args())
         captured = capsys.readouterr()

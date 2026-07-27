@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68,<81"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "mdtbx"
 version = "0.1.0"
@@ -7,10 +11,15 @@ requires-python = "==3.10"
 # requires-python = ">=3.10"
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
+include = ["mdtbx*"]
+
+[tool.setuptools.package-data]
+"mdtbx.utils" = ["template_tleap.in"]
+"mdtbx.build" = ["dummy.mdp"]
 
 [project.scripts]
-mdtbx = "src.__main__:main"
+mdtbx = "mdtbx.__main__:main"
 
 [tool.pixi.workspace]
 channels = ["conda-forge", "bioconda"]

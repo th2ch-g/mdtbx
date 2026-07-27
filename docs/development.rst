@@ -9,17 +9,19 @@ The Python package is organized by command category:
 .. code-block:: text
 
    src/
-     cli.py
-     utils/
-     build/
-     trajectory/
-     analysis/
-     cv/
+     mdtbx/
+       cli.py
+       utils/
+       build/
+       trajectory/
+       analysis/
+       cv/
+       agent/
    tests/
    example/
    pymol-plugins/
 
-``src.cli`` scans the five category packages at startup. A module becomes a
+``mdtbx.cli`` scans the command category packages at startup. A module becomes a
 subcommand when it exposes ``add_subcmd``. Helper modules without that function
 are skipped.
 
@@ -43,7 +45,7 @@ Place the module in the appropriate category and implement two functions:
        ...
 
 Keep the command focused on one operation. Reuse parsers and process helpers
-from ``src.utils``. Avoid changing ``src.cli`` because registration is
+from ``mdtbx.utils``. Avoid changing ``mdtbx.cli`` because registration is
 automatic.
 
 Add tests for parsing, normal behavior, failure behavior, and external command

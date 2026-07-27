@@ -21,7 +21,7 @@ class TestMindistRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """.npy file is generated"""
-        from src.cv.mindist import run
+        from mdtbx.cv.mindist import run
 
         out = tmp_path / "mindist.npy"
         run(self._make_args(trajectory_files, out))
@@ -29,7 +29,7 @@ class TestMindistRun:
 
     def test_output_shape(self, trajectory_files, tmp_path):
         """The output length matches the frame count"""
-        from src.cv.mindist import run
+        from mdtbx.cv.mindist import run
 
         out = tmp_path / "mindist_shape.npy"
         run(self._make_args(trajectory_files, out))
@@ -40,7 +40,7 @@ class TestMindistRun:
 
     def test_output_nonnegative(self, trajectory_files, tmp_path):
         """Distances are always non-negative"""
-        from src.cv.mindist import run
+        from mdtbx.cv.mindist import run
 
         out = tmp_path / "mindist_nn.npy"
         run(self._make_args(trajectory_files, out))
@@ -49,7 +49,7 @@ class TestMindistRun:
 
     def test_mindist_consistent_across_runs(self, trajectory_files, tmp_path):
         """Running twice on the same input gives the same result (deterministic)"""
-        from src.cv.mindist import run
+        from mdtbx.cv.mindist import run
 
         out1 = tmp_path / "mindist_run1.npy"
         out2 = tmp_path / "mindist_run2.npy"

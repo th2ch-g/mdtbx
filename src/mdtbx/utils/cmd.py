@@ -30,7 +30,7 @@ def run(args):
         LOGGER.error("No command provided to run.")
         return
 
-    project_root = Path(__file__).parent.parent.parent.resolve()
+    project_root = Path(__file__).resolve().parents[3]
     pixi_cmd = ["pixi", "run", "--manifest-path", str(project_root), *args.command]
     command_str = shlex.join(args.command)
 

@@ -2,13 +2,21 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import math
+import os
+import re
 import shlex
+import stat
 import subprocess
 import sys
+import tempfile
+import uuid
 from pathlib import Path
 from typing import Any
 
+from .json_schemas import schemas as protocol_schemas
 from .model import (
     SCHEMA_VERSION,
     finalize_plan,
@@ -45,6 +53,32 @@ DEFAULT_WALLTIME_SECONDS = {
     "gpu": 14400,
     "md": 21600,
 }
+_STEP_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
+_REQUEST_KEYS = {
+    "schema_version",
+    "name",
+    "cwd",
+    "cluster_profile",
+    "execution",
+    "steps",
+}
+_STEP_KEYS = {
+    "id",
+    "command",
+    "arguments",
+    "depends_on",
+    "resources",
+    "evidence",
+    "confidence",
+}
+_RESOURCE_KEYS = {
+    "resource",
+    "nodes",
+    "cpus_per_node",
+    "gpus_per_node",
+    "memory_mb",
+    "walltime_seconds",
+}
 
 
 def _root_parser():
@@ -62,8 +96,46 @@ def schema(command: str | None = None) -> dict[str, Any]:
             raise ValueError(f"Unknown mdtbx command: {command}") from error
     return {
         "schema_version": SCHEMA_VERSION,
+        "schemas": protocol_schemas(),
         "commands": commands,
     }
+
+
+def _reject_unknown(value: dict[str, Any], allowed: set[str], label: str) -> None:
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise ValueError(f"Unknown {label} fields: {', '.join(unknown)}")
+
+
+def _positive_int(value: Any, label: str, *, zero: bool = False) -> int:
+    minimum = 0 if zero else 1
+    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
+        requirement = "non-negative" if zero else "positive"
+        raise ValueError(f"{label} must be {requirement} integer")
+    return value
+
+
+def _validate_resources(identifier: str, value: Any) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ValueError(f"{identifier}.resources must be an object")
+    _reject_unknown(value, _RESOURCE_KEYS, f"{identifier}.resources")
+    result = dict(value)
+    if "resource" in result:
+        resource = result["resource"]
+        if not isinstance(resource, str) or not resource or "\x00" in resource:
+            raise ValueError(f"{identifier}.resources.resource must be a string")
+    for key in ("nodes", "cpus_per_node", "memory_mb", "walltime_seconds"):
+        if key in result:
+            _positive_int(result[key], f"{identifier}.resources.{key}")
+    if "gpus_per_node" in result:
+        _positive_int(
+            result["gpus_per_node"],
+            f"{identifier}.resources.gpus_per_node",
+            zero=True,
+        )
+    return result
 
 
 def _validated_steps(request: dict[str, Any]) -> list[dict[str, Any]]:
@@ -73,17 +145,22 @@ def _validated_steps(request: dict[str, Any]) -> list[dict[str, Any]]:
     root = _root_parser()
     descriptors = all_descriptors(root)
     steps = []
-    identifiers = set()
+    identifiers: set[str] = set()
     for raw in raw_steps:
         if not isinstance(raw, dict):
             raise ValueError("Each request step must be an object")
+        _reject_unknown(raw, _STEP_KEYS, "step")
         identifier = raw.get("id")
         command = raw.get("command")
         arguments = raw.get("arguments", {})
-        if not isinstance(identifier, str) or not identifier:
-            raise ValueError("Each request step requires an id")
+        if not isinstance(identifier, str) or not _STEP_ID.fullmatch(identifier):
+            raise ValueError(f"Invalid step id: {identifier!r}")
+        if identifier in {".", ".."}:
+            raise ValueError(f"Invalid step id: {identifier!r}")
         if identifier in identifiers:
             raise ValueError(f"Duplicate step id: {identifier}")
+        if not isinstance(command, str) or command not in descriptors:
+            raise ValueError(f"Unknown mdtbx command: {command}")
         if command in AGENT_COMMANDS:
             raise ValueError("Agent commands cannot be nested in an agent plan")
         if not isinstance(arguments, dict):
@@ -96,8 +173,9 @@ def _validated_steps(request: dict[str, Any]) -> list[dict[str, Any]]:
         requested_confidence = raw.get("confidence")
         if requested_confidence is not None:
             if (
-                not isinstance(requested_confidence, (int, float))
-                or isinstance(requested_confidence, bool)
+                isinstance(requested_confidence, bool)
+                or not isinstance(requested_confidence, (int, float))
+                or not math.isfinite(float(requested_confidence))
                 or not 0 <= requested_confidence <= 1
             ):
                 raise ValueError(
@@ -108,10 +186,11 @@ def _validated_steps(request: dict[str, Any]) -> list[dict[str, Any]]:
         normalized = normalized_arguments(parser, argv)
         depends_on = raw.get("depends_on", [])
         if not isinstance(depends_on, list) or not all(
-            isinstance(item, str) for item in depends_on
+            isinstance(item, str) and _STEP_ID.fullmatch(item) for item in depends_on
         ):
-            raise ValueError(f"{identifier}.depends_on must be a string list")
-        descriptor = descriptors[command]
+            raise ValueError(f"{identifier}.depends_on must be a step-id list")
+        if len(depends_on) != len(set(depends_on)):
+            raise ValueError(f"{identifier}.depends_on contains duplicates")
         steps.append(
             {
                 "id": identifier,
@@ -119,9 +198,10 @@ def _validated_steps(request: dict[str, Any]) -> list[dict[str, Any]]:
                 "arguments": normalized,
                 "argv": argv,
                 "depends_on": depends_on,
-                "descriptor": descriptor,
-                "requested_resources": raw.get("resources"),
-                "requested_execution": raw.get("execution", "auto"),
+                "descriptor": descriptors[command],
+                "requested_resources": _validate_resources(
+                    identifier, raw.get("resources")
+                ),
                 "resource_evidence": resource_evidence,
                 "requested_confidence": requested_confidence,
             }
@@ -139,7 +219,7 @@ def _validated_steps(request: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _topological(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
     remaining = {step["id"]: step for step in steps}
-    completed = set()
+    completed: set[str] = set()
     ordered = []
     while remaining:
         ready = sorted(
@@ -159,7 +239,58 @@ def _topological(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return ordered
 
 
-def _input_bytes(step: dict[str, Any]) -> int:
+def _absolute_path(cwd: Path, value: str) -> Path:
+    expanded = Path(value).expanduser()
+    if not expanded.is_absolute():
+        expanded = cwd / expanded
+    return Path(os.path.abspath(expanded))
+
+
+def _snapshot(path: Path) -> dict[str, Any]:
+    result: dict[str, Any] = {"path": str(path), "exists": os.path.lexists(path)}
+    if not result["exists"]:
+        return result
+    details = path.lstat()
+    if stat.S_ISLNK(details.st_mode):
+        kind = "symlink"
+        result["symlink_target"] = os.readlink(path)
+    elif stat.S_ISREG(details.st_mode):
+        kind = "file"
+    elif stat.S_ISDIR(details.st_mode):
+        kind = "directory"
+    else:
+        kind = "other"
+    result.update(
+        {
+            "kind": kind,
+            "size": details.st_size,
+            "mtime_ns": details.st_mtime_ns,
+        }
+    )
+    return result
+
+
+def _snapshot_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: snapshot.get(key)
+        for key in ("path", "exists", "kind", "size", "mtime_ns", "symlink_target")
+        if key in snapshot
+    }
+
+
+def _verify_snapshots(plan: dict[str, Any]) -> None:
+    for step in plan["steps"]:
+        for group in ("artifact_snapshots", "destructive_snapshots"):
+            for approved in step.get(group, []):
+                current = _snapshot(Path(approved["path"]))
+                if _snapshot_identity(current) != _snapshot_identity(approved):
+                    raise ValueError(
+                        "Filesystem changed after plan approval target was captured: "
+                        f"{approved['path']}; create and approve a new plan"
+                    )
+
+
+def _input_bytes(step: dict[str, Any], cwd: Path) -> int:
     total = 0
     for name in step["descriptor"]["inputs"]:
         value = step["arguments"].get(name)
@@ -167,7 +298,7 @@ def _input_bytes(step: dict[str, Any]) -> int:
         for item in values:
             if not isinstance(item, str):
                 continue
-            path = Path(item).expanduser()
+            path = _absolute_path(cwd, item)
             if path.is_file():
                 total += path.stat().st_size
     return total
@@ -193,41 +324,35 @@ def _resource_candidates(
 
 
 def _select_resources(
-    step: dict[str, Any], profile: dict[str, Any]
+    step: dict[str, Any], profile: dict[str, Any], cwd: Path
 ) -> tuple[dict[str, Any], dict[str, Any], float, list[dict[str, Any]]]:
     requested = step.get("requested_resources")
     resource_class = step["descriptor"]["resource_class"]
-    input_bytes = _input_bytes(step)
+    input_bytes = _input_bytes(step, cwd)
     evidence = [
-        {
-            "source": "command_registry",
-            "resource_class": resource_class,
-        },
-        {
-            "source": "input_files",
-            "total_bytes": input_bytes,
-        },
+        {"source": "command_registry", "resource_class": resource_class},
+        {"source": "input_files", "total_bytes": input_bytes},
     ]
     evidence.extend(json_value(step["resource_evidence"]))
 
-    explicit = isinstance(requested, dict)
+    explicit = requested is not None
     memory_estimate = DEFAULT_MEMORY_MB[resource_class]
     if resource_class == "data":
         memory_estimate = max(memory_estimate, int(input_bytes * 3 / 1_000_000) + 1024)
     memory_factor = float(_policy(profile, "memory_safety_factor", 1.25))
     walltime_factor = float(_policy(profile, "walltime_safety_factor", 1.5))
-    memory_mb = int(memory_estimate * memory_factor)
-    walltime = int(DEFAULT_WALLTIME_SECONDS[resource_class] * walltime_factor)
+    memory_mb = max(1, int(memory_estimate * memory_factor))
+    walltime = max(1, int(DEFAULT_WALLTIME_SECONDS[resource_class] * walltime_factor))
     nodes = 1
     minimum_gpus = 1 if resource_class == "gpu" else 0
     minimum_cpus = 1
     resource_name = None
-    if explicit:
-        nodes = int(requested.get("nodes", nodes))
-        memory_mb = int(requested.get("memory_mb", memory_mb))
-        walltime = int(requested.get("walltime_seconds", walltime))
-        minimum_gpus = int(requested.get("gpus_per_node", minimum_gpus))
-        minimum_cpus = int(requested.get("cpus_per_node", minimum_cpus))
+    if requested is not None:
+        nodes = requested.get("nodes", nodes)
+        memory_mb = requested.get("memory_mb", memory_mb)
+        walltime = requested.get("walltime_seconds", walltime)
+        minimum_gpus = requested.get("gpus_per_node", minimum_gpus)
+        minimum_cpus = requested.get("cpus_per_node", minimum_cpus)
         resource_name = requested.get("resource")
         evidence.append({"source": "request", "resources": json_value(requested)})
 
@@ -236,12 +361,12 @@ def _select_resources(
     for candidate in candidates:
         if resource_name and candidate["name"] != resource_name:
             continue
-        capabilities = candidate.get("capabilities", {})
-        if capabilities.get("memory_mb_per_node", 0) < memory_mb:
+        capabilities = candidate["capabilities"]
+        if capabilities["memory_mb_per_node"] < memory_mb:
             continue
         if capabilities.get("gpus_per_node", 0) < minimum_gpus:
             continue
-        if capabilities.get("cpus_per_node", 0) < minimum_cpus:
+        if capabilities["cpus_per_node"] < minimum_cpus:
             continue
         limits = candidate.get("limits", {})
         if nodes > limits.get("max_nodes", nodes):
@@ -250,25 +375,17 @@ def _select_resources(
             continue
         score = (
             capabilities.get("gpus_per_node", 0) * 10**12
-            + capabilities.get("memory_mb_per_node", 0) * 10**4
-            + capabilities.get("cpus_per_node", 0)
+            + capabilities["memory_mb_per_node"] * 10**4
+            + capabilities["cpus_per_node"]
         )
         suitable.append((score, candidate))
     if not suitable:
         raise ValueError(f"No cluster resource can satisfy step {step['id']}")
     resource = min(suitable, key=lambda item: item[0])[1]
-    capabilities = resource.get("capabilities", {})
     allocation = {
         "resource": resource["name"],
         "nodes": nodes,
-        "cpus_per_node": min(
-            int(capabilities.get("cpus_per_node", minimum_cpus)),
-            (
-                max(minimum_cpus, int(requested.get("cpus_per_node", minimum_cpus)))
-                if explicit
-                else minimum_cpus
-            ),
-        ),
+        "cpus_per_node": minimum_cpus,
         "gpus_per_node": minimum_gpus,
         "memory_mb": memory_mb,
         "walltime_seconds": walltime,
@@ -290,43 +407,74 @@ def _select_resources(
         {
             "source": "cluster_profile",
             "selected": resource["name"],
-            "capabilities": capabilities,
-            "safety_factors": {
-                "memory": memory_factor,
-                "walltime": walltime_factor,
-            },
+            "capabilities": resource["capabilities"],
+            "safety_factors": {"memory": memory_factor, "walltime": walltime_factor},
         }
     )
     return allocation, resource, confidence, evidence
 
 
+def _execution_mode(
+    request: dict[str, Any], steps: list[dict[str, Any]], profile: dict[str, Any]
+) -> str:
+    requested = request.get("execution", "auto")
+    if requested not in {"auto", "local", "batch"}:
+        raise ValueError("execution must be auto, local, or batch")
+    batch_classes = set(_policy(profile, "batch_classes", ["md", "gpu", "quantum"]))
+    requires_batch = any(
+        step["descriptor"]["resource_class"] in batch_classes for step in steps
+    )
+    if requested == "local" and requires_batch:
+        classes = sorted(
+            {
+                step["descriptor"]["resource_class"]
+                for step in steps
+                if step["descriptor"]["resource_class"] in batch_classes
+            }
+        )
+        raise ValueError(
+            "Local execution is prohibited for configured batch classes: "
+            + ", ".join(classes)
+        )
+    selected = (
+        "batch"
+        if requested == "batch" or (requested == "auto" and requires_batch)
+        else "local"
+    )
+    if selected == "batch" and profile["scheduler"] == "local":
+        raise ValueError("Batch execution requires a non-local cluster profile")
+    return selected
+
+
 def build_plan(request: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(request, dict):
+        raise ValueError("Request must be a JSON object")
+    _reject_unknown(request, _REQUEST_KEYS, "request")
     if request.get("schema_version") != SCHEMA_VERSION:
         raise ValueError("Unsupported request schema")
-    cwd = Path(request.get("cwd", ".")).expanduser().resolve()
+    cwd_value = request.get("cwd", ".")
+    if not isinstance(cwd_value, str) or not cwd_value or "\x00" in cwd_value:
+        raise ValueError("cwd must be a non-empty path string")
+    cwd = Path(cwd_value).expanduser().resolve()
     if not cwd.is_dir():
         raise FileNotFoundError(f"Working directory not found: {cwd}")
+    name = request.get("name", "mdtbx-agent-plan")
+    if not isinstance(name, str) or not name or "\x00" in name:
+        raise ValueError("name must be a non-empty string")
     profile_value = request.get("cluster_profile")
+    if profile_value is not None and not isinstance(profile_value, str):
+        raise ValueError("cluster_profile must be a path string or null")
     profile_path, profile = load_profile(profile_value)
     steps = _validated_steps(request)
-    batch_classes = set(_policy(profile, "batch_classes", ["md", "gpu", "quantum"]))
-    any_batch = any(
-        step["requested_execution"] == "batch"
-        or (
-            step["requested_execution"] == "auto"
-            and step["descriptor"]["resource_class"] in batch_classes
-        )
-        for step in steps
-    )
-    if any_batch and profile["scheduler"] == "local":
-        raise ValueError("Batch execution requires a non-local cluster profile")
+    execution = _execution_mode(request, steps, profile)
 
     planned_steps = []
     plan_kind = "production"
     minimum_confidence = float(_policy(profile, "minimum_confidence", 0.7))
     for step in steps:
-        allocation, resource, confidence, evidence = _select_resources(step, profile)
-        execution = "batch" if any_batch else "local"
+        allocation, resource, confidence, evidence = _select_resources(
+            step, profile, cwd
+        )
         arguments = dict(step["arguments"])
         argv = list(step["argv"])
         if confidence < minimum_confidence and step["descriptor"]["pilot_capable"]:
@@ -344,26 +492,27 @@ def build_plan(request: dict[str, Any]) -> dict[str, Any]:
                 argv = arguments_to_argv(parser, arguments)
                 arguments = normalized_arguments(parser, argv)
                 evidence.append(
-                    {
-                        "source": "pilot_policy",
-                        "override": {"nsteps": 1000},
-                    }
+                    {"source": "pilot_policy", "override": {"nsteps": 1000}}
                 )
-        inputs = input_paths(arguments, step["descriptor"])
-        outputs = artifact_paths(arguments, step["descriptor"])
-        resolved_outputs = []
-        existing_artifacts = []
-        for value in outputs:
-            target = Path(value)
-            if not target.is_absolute():
-                target = cwd / target
-            target = target.resolve()
-            resolved_outputs.append(str(target))
-            if target.is_file() or target.is_symlink():
-                existing_artifacts.append(str(target))
-        destructive_targets = []
-        if step["descriptor"]["risk"] == "destructive":
-            destructive_targets = inputs
+
+        inputs = [
+            str(_absolute_path(cwd, value))
+            for value in input_paths(arguments, step["descriptor"])
+        ]
+        outputs = [
+            str(_absolute_path(cwd, value))
+            for value in artifact_paths(arguments, step["descriptor"])
+        ]
+        artifact_snapshots = [_snapshot(Path(value)) for value in outputs]
+        existing_artifacts = [
+            item["path"] for item in artifact_snapshots if item["exists"]
+        ]
+        destructive_targets = (
+            inputs if step["descriptor"]["risk"] == "destructive" else []
+        )
+        destructive_snapshots = [
+            _snapshot(Path(value)) for value in destructive_targets
+        ]
         planned_steps.append(
             {
                 "id": step["id"],
@@ -379,25 +528,26 @@ def build_plan(request: dict[str, Any]) -> dict[str, Any]:
                 "confidence": confidence,
                 "evidence": evidence,
                 "inputs": inputs,
-                "artifacts": resolved_outputs,
+                "artifacts": outputs,
+                "artifact_snapshots": artifact_snapshots,
                 "existing_artifacts": existing_artifacts,
                 "destructive_targets": destructive_targets,
+                "destructive_snapshots": destructive_snapshots,
             }
         )
 
-    profile_hash = profile_fingerprint(profile)
     result = {
         "schema_version": SCHEMA_VERSION,
         "created_at": utc_now(),
-        "name": request.get("name", "mdtbx-agent-plan"),
+        "name": name,
         "plan_kind": plan_kind,
         "cwd": str(cwd),
         "cluster_profile": str(profile_path) if profile_path else None,
-        "profile_fingerprint": profile_hash,
+        "profile_fingerprint": profile_fingerprint(profile),
         "scheduler": profile["scheduler"],
-        "execution": "batch" if any_batch else "local",
-        "runner_argv": profile.get("runner_argv", [sys.executable, "-m", "src"]),
-        "work_root": profile.get("work_root", ".mdtbx/runs"),
+        "execution": execution,
+        "runner_argv": profile["runner_argv"],
+        "work_root": profile["work_root"],
         "steps": planned_steps,
         "approval": {
             "required": True,
@@ -427,6 +577,7 @@ def direct_plan(command: str, namespace: Any) -> dict[str, Any]:
         "name": f"dry-run-{command}",
         "cwd": str(Path.cwd()),
         "cluster_profile": getattr(namespace, "_agent_cluster_profile", None),
+        "execution": "auto",
         "steps": [
             {
                 "id": command,
@@ -443,16 +594,42 @@ def _run_root(plan: dict[str, Any]) -> Path:
     root = Path(plan["work_root"]).expanduser()
     if not root.is_absolute():
         root = Path(plan["cwd"]) / root
-    run_id = (
-        f"{utc_now().replace(':', '').replace('-', '')[:15]}-{plan['plan_id'][:12]}"
-    )
+    timestamp = utc_now().replace(":", "").replace("-", "").replace(".", "")
+    run_id = f"{timestamp}-{plan['plan_id'][:10]}-{uuid.uuid4().hex[:8]}"
     return root / run_id
 
 
 def _append_event(run_dir: Path, event: dict[str, Any]) -> None:
     path = run_dir / "events.jsonl"
-    with path.open("a") as handle:
-        handle.write(json.dumps(json_value(event), ensure_ascii=False) + "\n")
+    payload = json.dumps(json_value(event), ensure_ascii=False) + "\n"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(value)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def _persist_state(run_dir: Path, state: dict[str, Any]) -> None:
+    state["updated_at"] = utc_now()
+    write_json(run_dir / "state.json", state)
 
 
 def _render_script(
@@ -466,12 +643,7 @@ def _render_script(
     step_dir.mkdir(parents=True, exist_ok=True)
     resource = step["resource_profile"]
     directives = adapter.directives(step, resource, profile)
-    command = [
-        *plan["runner_argv"],
-        step["command"],
-        *step["argv"],
-        "--json",
-    ]
+    command = [*plan["runner_argv"], step["command"], *step["argv"], "--json"]
     environment = profile.get("environment", {})
     lines = ["#!/bin/bash", *directives, "set -euo pipefail"]
     for key, value in environment.get("env", {}).items():
@@ -483,9 +655,29 @@ def _render_script(
         f"2> {shlex.quote(str(step_dir / 'stderr.log'))}"
     )
     script = step_dir / "job.sh"
-    script.write_text("\n".join(lines) + "\n")
+    _write_text(script, "\n".join(lines) + "\n")
     script.chmod(0o700)
     return script
+
+
+def _validate_executable_plan(plan: dict[str, Any]) -> str:
+    if not isinstance(plan, dict) or plan.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError("Unsupported plan schema")
+    plan_id = verify_plan(plan)
+    if plan.get("execution") not in {"local", "batch"}:
+        raise ValueError("Plan execution must be local or batch")
+    if not isinstance(plan.get("steps"), list) or not plan["steps"]:
+        raise ValueError("Plan requires steps")
+    identifiers = set()
+    for step in plan["steps"]:
+        identifier = step.get("id")
+        if not isinstance(identifier, str) or not _STEP_ID.fullmatch(identifier):
+            raise ValueError(f"Invalid planned step id: {identifier!r}")
+        if identifier in identifiers:
+            raise ValueError(f"Duplicate planned step id: {identifier}")
+        identifiers.add(identifier)
+    _topological(plan["steps"])
+    return plan_id
 
 
 def execute_plan(
@@ -496,7 +688,7 @@ def execute_plan(
     approve_destructive: bool = False,
     approve_overwrite: bool = False,
 ) -> dict[str, Any]:
-    plan_id = verify_plan(plan)
+    plan_id = _validate_executable_plan(plan)
     if approval != plan_id:
         raise ValueError("--approve must exactly match plan_id")
     if plan["approval"]["unsafe"] and not approve_unsafe:
@@ -508,9 +700,10 @@ def execute_plan(
     profile_path, profile = load_profile(plan.get("cluster_profile"))
     if profile_fingerprint(profile) != plan["profile_fingerprint"]:
         raise ValueError("Cluster profile changed after plan creation")
+    _verify_snapshots(plan)
 
     run_dir = _run_root(plan)
-    run_dir.mkdir(parents=True)
+    run_dir.mkdir(parents=True, exist_ok=False)
     write_json(run_dir / "plan.json", plan)
     state = {
         "schema_version": SCHEMA_VERSION,
@@ -521,80 +714,131 @@ def execute_plan(
         "cluster_profile": str(profile_path) if profile_path else None,
         "status": "running",
         "created_at": utc_now(),
-        "steps": {},
+        "steps": {step["id"]: {"state": "pending"} for step in plan["steps"]},
     }
-    write_json(run_dir / "state.json", state)
-    _append_event(
-        run_dir,
-        {"at": utc_now(), "event": "approved", "plan_id": plan_id},
-    )
+    _persist_state(run_dir, state)
+    _append_event(run_dir, {"at": utc_now(), "event": "approved", "plan_id": plan_id})
 
     ordered = _topological(plan["steps"])
     if plan["execution"] == "local":
         for step in ordered:
             step_dir = run_dir / "steps" / step["id"]
-            step_dir.mkdir(parents=True)
-            command = [
-                *plan["runner_argv"],
-                step["command"],
-                *step["argv"],
-                "--json",
-            ]
-            result = subprocess.run(
-                command,
-                cwd=plan["cwd"],
-                capture_output=True,
-                text=True,
-            )
-            (step_dir / "result.json").write_text(result.stdout)
-            (step_dir / "stderr.log").write_text(result.stderr)
-            status = "succeeded" if result.returncode == 0 else "failed"
+            step_dir.mkdir(parents=True, exist_ok=True)
+            command = [*plan["runner_argv"], step["command"], *step["argv"], "--json"]
             state["steps"][step["id"]] = {
-                "state": status,
-                "returncode": result.returncode,
+                "state": "running",
+                "started_at": utc_now(),
+                "argv": command,
             }
+            _persist_state(run_dir, state)
             _append_event(
                 run_dir,
-                {
-                    "at": utc_now(),
-                    "event": "step_finished",
-                    "step": step["id"],
-                    "state": status,
-                },
+                {"at": utc_now(), "event": "step_started", "step": step["id"]},
             )
-            if result.returncode:
+            try:
+                result = subprocess.run(
+                    command,
+                    cwd=plan["cwd"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                _write_text(step_dir / "result.json", result.stdout)
+                _write_text(step_dir / "stderr.log", result.stderr)
+                status = "succeeded" if result.returncode == 0 else "failed"
+                state["steps"][step["id"]].update(
+                    {
+                        "state": status,
+                        "returncode": result.returncode,
+                        "finished_at": utc_now(),
+                    }
+                )
+                _persist_state(run_dir, state)
+                _append_event(
+                    run_dir,
+                    {
+                        "at": utc_now(),
+                        "event": "step_finished",
+                        "step": step["id"],
+                        "state": status,
+                    },
+                )
+                if result.returncode:
+                    state["status"] = "failed"
+                    _persist_state(run_dir, state)
+                    break
+            except BaseException as error:
+                state["steps"][step["id"]].update(
+                    {
+                        "state": "failed",
+                        "finished_at": utc_now(),
+                        "error": {"type": type(error).__name__, "message": str(error)},
+                    }
+                )
                 state["status"] = "failed"
-                break
+                _persist_state(run_dir, state)
+                _append_event(
+                    run_dir,
+                    {"at": utc_now(), "event": "step_failed", "step": step["id"]},
+                )
+                raise
         else:
             state["status"] = "succeeded"
+            _persist_state(run_dir, state)
     else:
         adapter = scheduler(plan["scheduler"])
         submitted: dict[str, str] = {}
         for step in ordered:
-            dependencies = [submitted[item] for item in step["depends_on"]]
-            script = _render_script(plan, step, run_dir, profile)
-            job_id = adapter.submit(
-                script,
-                dependencies=dependencies,
-                resource=step["resource_profile"],
-            )
-            submitted[step["id"]] = job_id
-            state["steps"][step["id"]] = {
-                "state": "queued",
-                "job_id": job_id,
-                "script": str(script),
-            }
-            _append_event(
-                run_dir,
-                {
-                    "at": utc_now(),
-                    "event": "job_submitted",
-                    "step": step["id"],
+            try:
+                dependencies = [submitted[item] for item in step["depends_on"]]
+                script = _render_script(plan, step, run_dir, profile)
+                state["steps"][step["id"]] = {
+                    "state": "submitting",
+                    "script": str(script),
+                }
+                _persist_state(run_dir, state)
+                job_id = adapter.submit(
+                    script,
+                    dependencies=dependencies,
+                    resource=step["resource_profile"],
+                )
+                submitted[step["id"]] = job_id
+                state["steps"][step["id"]] = {
+                    "state": "queued",
                     "job_id": job_id,
-                },
-            )
+                    "script": str(script),
+                    "submitted_at": utc_now(),
+                }
+                _persist_state(run_dir, state)
+                _append_event(
+                    run_dir,
+                    {
+                        "at": utc_now(),
+                        "event": "job_submitted",
+                        "step": step["id"],
+                        "job_id": job_id,
+                    },
+                )
+            except BaseException as error:
+                state["steps"][step["id"]] = {
+                    **state["steps"].get(step["id"], {}),
+                    "state": "failed",
+                    "failed_at": utc_now(),
+                    "error": {"type": type(error).__name__, "message": str(error)},
+                }
+                state["status"] = "submission_failed"
+                _persist_state(run_dir, state)
+                _append_event(
+                    run_dir,
+                    {
+                        "at": utc_now(),
+                        "event": "submission_failed",
+                        "step": step["id"],
+                    },
+                )
+                raise
         state["status"] = "submitted"
-    write_json(run_dir / "state.json", state)
+        _persist_state(run_dir, state)
     return state
 
 
@@ -615,7 +859,22 @@ def load_run(value: str) -> tuple[Path, dict[str, Any]]:
     state_path = run_dir / "state.json"
     if not state_path.is_file():
         raise FileNotFoundError(f"Run state not found: {state_path}")
-    return run_dir, read_json(state_path)
+    state = read_json(state_path)
+    if state.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError("Unsupported run state schema")
+    return run_dir, state
+
+
+def _overall_status(states: set[str]) -> str:
+    if states and states <= {"succeeded"}:
+        return "succeeded"
+    if states & {"failed", "cancelled"}:
+        return "failed"
+    if "running" in states:
+        return "running"
+    if states & {"queued", "submitting", "pending"}:
+        return "queued"
+    return "unknown"
 
 
 def run_status(value: str) -> dict[str, Any]:
@@ -625,18 +884,19 @@ def run_status(value: str) -> dict[str, Any]:
     adapter = scheduler(state["scheduler"])
     statuses = {}
     for step, item in state["steps"].items():
-        statuses[step] = adapter.status(item["job_id"])
-    values = {item["state"] for item in statuses.values()}
-    if values and values <= {"succeeded"}:
-        overall = "succeeded"
-    elif "failed" in values or "cancelled" in values:
-        overall = "failed"
-    elif "running" in values:
-        overall = "running"
-    elif "queued" in values:
-        overall = "queued"
-    else:
-        overall = "unknown"
+        if item.get("job_id"):
+            statuses[step] = adapter.status(item["job_id"])
+        else:
+            statuses[step] = {
+                "schema_version": SCHEMA_VERSION,
+                "job_id": None,
+                "state": item.get("state", "unknown"),
+                "raw_state": "",
+                "reason": "not submitted",
+                "elapsed": "",
+                "checked_at": utc_now(),
+            }
+    overall = _overall_status({item["state"] for item in statuses.values()})
     return {
         **state,
         "run_dir": str(run_dir),
@@ -646,22 +906,50 @@ def run_status(value: str) -> dict[str, Any]:
     }
 
 
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _artifact_result(path: str) -> dict[str, Any]:
+    snapshot = _snapshot(Path(path))
+    if snapshot.get("kind") == "file":
+        snapshot["sha256"] = _sha256(Path(path))
+    return snapshot
+
+
 def collect_run(value: str) -> dict[str, Any]:
     run_dir, state = load_run(value)
     status = run_status(str(run_dir))
+    plan = read_json(run_dir / "plan.json")
+    plan_steps = {step["id"]: step for step in plan["steps"]}
     results = {}
     for step in state["steps"]:
         result_path = run_dir / "steps" / step / "result.json"
-        if not result_path.is_file() or not result_path.read_text().strip():
-            results[step] = None
-            continue
-        try:
-            results[step] = read_json(result_path)
-        except json.JSONDecodeError:
-            results[step] = {
-                "status": "invalid",
-                "path": str(result_path),
-            }
+        entry: dict[str, Any] = {
+            "result_path": str(result_path),
+            "valid": False,
+            "result": None,
+            "artifacts": [
+                _artifact_result(path) for path in plan_steps[step].get("artifacts", [])
+            ],
+        }
+        if result_path.is_file() and result_path.read_text().strip():
+            try:
+                payload = read_json(result_path)
+                entry["result"] = payload
+                entry["valid"] = (
+                    isinstance(payload, dict)
+                    and payload.get("schema_version") == 1
+                    and isinstance(payload.get("ok"), bool)
+                    and isinstance(payload.get("exit_code"), int)
+                )
+            except json.JSONDecodeError as error:
+                entry["error"] = {"type": type(error).__name__, "message": str(error)}
+        results[step] = entry
     result = {
         "schema_version": SCHEMA_VERSION,
         "run_id": state["run_id"],
@@ -674,10 +962,9 @@ def collect_run(value: str) -> dict[str, Any]:
     write_json(run_dir / "result.json", result)
     state["status"] = status["status"]
     state["collected_at"] = result["collected_at"]
-    write_json(run_dir / "state.json", state)
+    _persist_state(run_dir, state)
     _append_event(
-        run_dir,
-        {"at": utc_now(), "event": "collected", "status": result["status"]},
+        run_dir, {"at": utc_now(), "event": "collected", "status": result["status"]}
     )
     return result
 
@@ -725,10 +1012,7 @@ def draft_profile(probe: dict[str, Any]) -> dict[str, Any]:
                         capabilities.get("memory_mb_per_node", 4096)
                     ),
                 },
-                "limits": {
-                    "max_nodes": 1,
-                    "max_walltime_seconds": 86400,
-                },
+                "limits": {"max_nodes": 1, "max_walltime_seconds": 86400},
                 "scheduler_options": {},
             }
         )
@@ -741,10 +1025,7 @@ def draft_profile(probe: dict[str, Any]) -> dict[str, Any]:
                     "gpus_per_node": 0,
                     "memory_mb_per_node": 4096,
                 },
-                "limits": {
-                    "max_nodes": 1,
-                    "max_walltime_seconds": 3600,
-                },
+                "limits": {"max_nodes": 1, "max_walltime_seconds": 3600},
                 "scheduler_options": {},
                 "incomplete": True,
             }
@@ -754,6 +1035,7 @@ def draft_profile(probe: dict[str, Any]) -> dict[str, Any]:
         "name": f"{scheduler_name}-cluster",
         "scheduler": scheduler_name,
         "work_root": ".mdtbx/runs",
+        "runner_argv": [sys.executable, "-m", "mdtbx"],
         "environment": {"prologue": [], "env": {}},
         "policy": {
             "batch_classes": ["data", "quantum", "gpu", "md"],
@@ -779,7 +1061,7 @@ def save_profile(
 
     profile = validate_profile(draft)
     target = output.expanduser()
-    if target.exists() and not replace:
+    if os.path.lexists(target) and not replace:
         raise FileExistsError(f"Cluster profile already exists: {target}")
     write_json(target, profile)
     return {

@@ -55,7 +55,7 @@ class TestPcaRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """.npy file is generated"""
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         out = tmp_path / "pca.npy"
         run(self._make_args(trajectory_files, out))
@@ -63,7 +63,7 @@ class TestPcaRun:
 
     def test_output_shape(self, trajectory_files, tmp_path):
         """The output shape is (n_frames, n_components)"""
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         n_components = 3
         out = tmp_path / "pca_shape.npy"
@@ -75,7 +75,7 @@ class TestPcaRun:
 
     def test_first_pc_has_max_variance(self, trajectory_files, tmp_path):
         """The variance of PC1 is at least that of PC2 (by definition of PCA)"""
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         out = tmp_path / "pca_var.npy"
         run(self._make_args(trajectory_files, out, n_components=2))
@@ -87,7 +87,7 @@ class TestPcaRun:
 
     def test_subset_selection(self, trajectory_files, tmp_path):
         """A partial selection still computes"""
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         out = tmp_path / "pca_subset.npy"
         args = self._make_args(
@@ -105,7 +105,7 @@ class TestPcaRun:
 
     def test_output_npz_contains_metadata(self, trajectory_files, tmp_path):
         """The .npz for PyMOL visualisation is generated"""
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         out = tmp_path / "pca.npy"
         out_npz = tmp_path / "pca.npz"
@@ -132,7 +132,7 @@ class TestPcaRun:
 
     def test_output_average_is_created(self, trajectory_files, tmp_path):
         """The average structure file is generated"""
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         out = tmp_path / "pca.npy"
         out_average = tmp_path / "pca_average.pdb"
@@ -147,7 +147,7 @@ class TestPcaRun:
         assert out_average.exists()
 
     def test_nested_output_directories_are_created(self, trajectory_files, tmp_path):
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         output_dir = tmp_path / "nested"
         out = output_dir / "pca"
@@ -171,7 +171,7 @@ class TestPcaRun:
         """The gmx path also generates the .npz for PyMOL visualisation"""
         import mdtraj as md
 
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         monkeypatch.chdir(tmp_path)
 
@@ -244,7 +244,7 @@ class TestPcaRun:
         """The gmx path reads the eigenvalue column correctly for n_components=1"""
         import mdtraj as md
 
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         monkeypatch.chdir(tmp_path)
 
@@ -304,7 +304,7 @@ class TestPcaRun:
         assert data["explained_variance_ratio"].tolist() == pytest.approx([1.0])
 
     def test_rejects_non_positive_component_count(self, trajectory_files, tmp_path):
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         args = self._make_args(trajectory_files, tmp_path / "pca.npy", n_components=0)
 
@@ -312,7 +312,7 @@ class TestPcaRun:
             run(args)
 
     def test_rejects_too_many_components(self, trajectory_files, tmp_path):
-        from src.cv.pca import run
+        from mdtbx.cv.pca import run
 
         n_frames = trajectory_files["traj"].n_frames
         args = self._make_args(
@@ -326,7 +326,7 @@ class TestPcaRun:
 
 
 def test_load_gmx_projections_removes_time_column(tmp_path):
-    from src.cv.pca import _load_gmx_projections
+    from mdtbx.cv.pca import _load_gmx_projections
 
     projections = tmp_path / "proj.xvg"
     projections.write_text("0.0 1.0 2.0\n1.0 3.0 4.0\n")

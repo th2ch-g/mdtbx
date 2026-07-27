@@ -4,7 +4,7 @@ Utility commands
 cmd
 ---
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: cmd
    :groups:
@@ -12,7 +12,7 @@ cmd
 convert
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: convert
    :groups:
@@ -20,7 +20,7 @@ convert
 mod_mdp
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: mod_mdp
    :groups:
@@ -28,7 +28,7 @@ mod_mdp
 partial_tempering
 -----------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: partial_tempering
    :groups:
@@ -36,7 +36,7 @@ partial_tempering
 rmfile
 ------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: rmfile
    :groups:
@@ -44,7 +44,7 @@ rmfile
 run_abfe
 --------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: run_abfe
    :groups:
@@ -52,7 +52,7 @@ run_abfe
 run_fep
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: run_fep
    :groups:
@@ -60,7 +60,7 @@ run_fep
 shell_hook
 ----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: shell_hook
    :groups:
@@ -68,7 +68,7 @@ shell_hook
 show_mdtraj
 -----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: show_mdtraj
    :groups:
@@ -76,7 +76,7 @@ show_mdtraj
 show_npy
 --------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: show_npy
    :groups:

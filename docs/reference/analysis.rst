@@ -4,7 +4,7 @@ Analysis commands
 analyze_abfe
 ------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: analyze_abfe
    :groups:
@@ -12,7 +12,7 @@ analyze_abfe
 analyze_fep
 -----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: analyze_fep
    :groups:
@@ -20,7 +20,7 @@ analyze_fep
 analyze_fep_rest
 ----------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: analyze_fep_rest
    :groups:
@@ -28,7 +28,7 @@ analyze_fep_rest
 extract_ave_str
 ---------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: extract_ave_str
    :groups:
@@ -36,7 +36,31 @@ extract_ave_str
 extract_str
 -----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: extract_str
+   :groups:
+
+cluster
+-------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: cluster
+   :groups:
+
+msm
+---
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: msm
+   :groups:
+
+tica
+----
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: tica
    :groups:

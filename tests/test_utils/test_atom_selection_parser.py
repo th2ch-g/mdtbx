@@ -7,7 +7,7 @@ on no external tool and on no file I/O.
 
 import pytest
 
-from src.utils.atom_selection_parser import (
+from mdtbx.utils.atom_selection_parser import (
     All,
     And,
     AtomSelector,

@@ -77,35 +77,26 @@ pixi run jupyter_remote
 
 ```text
 src/
-  __main__.py    # Entry point: main() -> cli()
-  cli.py         # Automatic subcommand discovery and dispatch via pkgutil
-  config.py      # Global constants such as water density, Gaussian settings, and MAXWARN
-  logger.py      # Logger factory
-  utils/         # General utilities and commands (mod_mdp, convert, rmfile, cmd, shell_hook,
-                 # show_mdtraj, show_npy, partial_tempering, run_fep, run_abfe)
-                 # Shared libraries without add_subcmd are not registered as commands:
-               #   atom_selection_parser, parse_top, proc(run_cmd), tleap(run_tleap),
-                 #   gmx(gmx_index_flag/to_gmx_index/gmx_tempfile), pymol_session,
-                 #   common_args, fep, fep_rest, abfe
-  build/         # System-building commands (addace, addh, addnme, add_ndx, mv_crds_mol2,
-                 # calc_ion_conc, centering_gro, find_bond, gen_am1bcc, gen_resp,
-                 # gen_modres_am1bcc, gen_modres_resp, gen_posres, gen_distres,
-                 # modeling_cf, amb2gro, build_solution, build_vacuum, place_solvent,
-                 # gen_temperatures, mutate, setup_fep, setup_fep_rest, setup_abfe)
-  trajectory/    # Trajectory commands (fit, trjcat, pacs_trjcat, print_perf, opt_perf)
-  analysis/      # Analysis commands (extract_str, extract_ave_str, analyze_fep,
-                 # analyze_fep_rest, analyze_abfe)
-  cv/            # Collective-variable commands (comdist, comvec, densmap, mindist, rmsd,
-                 # rmsf, xyz, pca, contactmap, distmap)
+  mdtbx/
+    __main__.py  # Entry point and explicit runtime preparation
+    cli.py       # Automatic subcommand discovery and dispatch via pkgutil
+    config.py    # Global constants
+    logger.py    # Logger factory
+    utils/       # General utilities, shared libraries, and utility commands
+    build/       # System-building commands
+    trajectory/  # Trajectory commands
+    analysis/    # Free-energy, tICA, clustering, and MSM commands
+    cv/          # Collective-variable commands
+    agent/       # Agent protocol v2, cluster profiles, and scheduler adapters
 
 tests/
   conftest.py      # Shared fixtures and PyMOL mocks
-  fixtures/        # Test data such as sample.mdp, sample.top, and sample.pdb
-  test_utils/      # Tests for src/utils/
-  test_build/      # Tests for src/build/
-  test_trajectory/ # Tests for src/trajectory/
-  test_analysis/   # Tests for src/analysis/
-  test_cv/         # Tests for src/cv/
+  fixtures/        # Test data
+  test_utils/      # Tests for src/mdtbx/utils/
+  test_build/      # Tests for src/mdtbx/build/
+  test_trajectory/ # Tests for src/mdtbx/trajectory/
+  test_analysis/   # Tests for src/mdtbx/analysis/
+  test_cv/         # Tests for src/mdtbx/cv/
   test_cli.py      # CLI registration tests for all subcommands
 
 pymol-plugins/
@@ -117,8 +108,9 @@ install_scripts/ # Manual installation scripts for GROMACS, PLUMED, and related 
 
 ### Subcommand pattern
 
-Each command module under `src/build/`, `src/trajectory/`, `src/analysis/`,
-`src/cv/`, or `src/utils/` implements these two functions:
+Each command module under `src/mdtbx/build/`, `src/mdtbx/trajectory/`,
+`src/mdtbx/analysis/`, `src/mdtbx/cv/`, `src/mdtbx/utils/`, or
+`src/mdtbx/agent/` implements these two functions:
 
 ```python
 def add_subcmd(subparsers):
@@ -146,32 +138,31 @@ from ..utils.pymol_session import pymol_session  # Reinitialize PyMOL and load a
 from ..utils.common_args import add_topology_arg, add_trajectory_arg, add_output_arg
 ```
 
-### Configuration (`src/config.py`)
+### Configuration (`src/mdtbx/config.py`)
 
 - `MAXWARN`: maximum number of warnings accepted by `grompp`
 - `GAUSSIAN_CMD`, `STRUCTURE_OPTIMIZATION`, and
   `SINGLE_POINT_CALCULATION`: Gaussian settings
 - Density and molecular-volume constants for TIP3P, TIP4P, TIP5P, and OPC water
   models
-- Side effects that add `.pixi/envs/default/bin` to `PATH` and load
-  `pymol_plugins` are isolated in `src/__init__.py`; `config.py` contains
-  constants only.
+- Importing `mdtbx` is side-effect free. The CLI entry point explicitly calls
+  `prepare_runtime()` to expose `.pixi/envs/default/bin`; PyMOL plugin loading
+  remains isolated in the separate `pymol-plugins` distribution.
 
 ## GROMACS: two installations, two roles
 
-| installation | role |
-|---|---|
-| `pixi run gmx` (conda-forge) | preprocessing and analysis: `grompp`, `trjconv`, `editconf`, ... |
-| `$TOOLS/gromacs/*` (built by `install_scripts/gmx*.sh`) | production `mdrun`, including GPU and PLUMED runs |
+| installation      | role                                   |
+| ----------------- | -------------------------------------- |
+| `pixi run gmx`    | preprocessing and analysis             |
+| installer GROMACS | production `mdrun` with GPU and PLUMED |
 
 The conda-forge build reports `GPU support: OpenCL` and does not detect NVIDIA
 GPUs, so `pixi run gmx mdrun -nb gpu` fails with "no GPU is detected". This is
 expected: production MD is not meant to run through the pixi GROMACS.
 
-`src/__init__.py` prepends the pixi `bin` to `PATH` unconditionally, so a bare
-`gmx` inside mdtbx resolves to the pixi build even when the caller exported
-their own GROMACS first. Point the mdrun-running subcommands at the intended
-binary explicitly:
+The CLI entry point prepends the project pixi `bin` to `PATH` when running from
+a source checkout, so a bare `gmx` inside mdtbx resolves to the pixi build.
+Point subcommands that launch `mdrun` at the intended binary explicitly:
 
 ```bash
 mdtbx run_fep          --gmx $TOOLS/gromacs/2025.1/gromacs-2025.1/bin/gmx ...

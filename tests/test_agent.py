@@ -6,16 +6,16 @@ from pathlib import Path
 
 import pytest
 
-from src.agent.model import finalize_plan, fingerprint, verify_plan
-from src.agent.profile import validate_profile
-from src.agent.runtime import build_plan
-from src.agent.schedulers import AgeScheduler, PjmScheduler, SlurmScheduler
-from src.cli import create_parser
+from mdtbx.agent.model import finalize_plan, fingerprint, verify_plan
+from mdtbx.agent.profile import validate_profile
+from mdtbx.agent.runtime import build_plan
+from mdtbx.agent.schedulers import AgeScheduler, PjmScheduler, SlurmScheduler
+from mdtbx.cli import create_parser
 
 
 def _profile(scheduler="slurm"):
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "name": "test-cluster",
         "scheduler": scheduler,
         "work_root": ".mdtbx/runs",
@@ -68,7 +68,7 @@ def test_agent_commands_and_common_flags_are_registered():
 
 
 def test_plan_hash_rejects_changes():
-    plan = finalize_plan({"schema_version": 1, "steps": []})
+    plan = finalize_plan({"schema_version": 2, "steps": []})
     assert verify_plan(plan) == plan["plan_id"]
     plan["steps"].append({"id": "changed"})
     with pytest.raises(ValueError, match="does not match"):
@@ -79,7 +79,7 @@ def test_resource_plan_uses_external_profile(tmp_path):
     profile_path = tmp_path / "cluster.json"
     profile_path.write_text(json.dumps(_profile()))
     request = {
-        "schema_version": 1,
+        "schema_version": 2,
         "cwd": str(tmp_path),
         "cluster_profile": str(profile_path),
         "steps": [
@@ -156,3 +156,15 @@ def test_approval_hook_asks_and_denies():
 def test_profile_fingerprint_is_stable():
     profile = _profile()
     assert fingerprint(profile) == fingerprint(json.loads(json.dumps(profile)))
+
+
+def test_agent_schema_exposes_formal_v2_documents():
+    from mdtbx.agent.runtime import schema
+
+    document = schema("show_npy")
+    assert document["schema_version"] == 2
+    assert set(document["schemas"]) == {"request", "profile", "plan", "state", "result"}
+    assert document["schemas"]["request"]["additionalProperties"] is False
+    assert document["schemas"]["request"]["properties"]["schema_version"] == {
+        "const": 2
+    }

@@ -2,7 +2,7 @@ import argparse
 
 import pytest
 
-from src.build import gen_distres
+from mdtbx.build import gen_distres
 
 
 def _parse_args(argv):

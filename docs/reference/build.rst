@@ -4,7 +4,7 @@ System-building commands
 add_ndx
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: add_ndx
    :groups:
@@ -12,7 +12,7 @@ add_ndx
 addace
 ------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: addace
    :groups:
@@ -20,7 +20,7 @@ addace
 addh
 ----
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: addh
    :groups:
@@ -28,7 +28,7 @@ addh
 addnme
 ------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: addnme
    :groups:
@@ -36,7 +36,7 @@ addnme
 amb2gro
 -------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: amb2gro
    :groups:
@@ -44,7 +44,7 @@ amb2gro
 build_solution
 --------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: build_solution
    :groups:
@@ -52,7 +52,7 @@ build_solution
 build_vacuum
 ------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: build_vacuum
    :groups:
@@ -60,7 +60,7 @@ build_vacuum
 calc_ion_conc
 -------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: calc_ion_conc
    :groups:
@@ -68,7 +68,7 @@ calc_ion_conc
 centering_gro
 -------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: centering_gro
    :groups:
@@ -76,7 +76,7 @@ centering_gro
 fill_chainname
 --------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: fill_chainname
    :groups:
@@ -84,7 +84,7 @@ fill_chainname
 find_bond
 ---------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: find_bond
    :groups:
@@ -92,7 +92,7 @@ find_bond
 gen_am1bcc
 ----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_am1bcc
    :groups:
@@ -100,7 +100,7 @@ gen_am1bcc
 gen_distres
 -----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_distres
    :groups:
@@ -108,7 +108,7 @@ gen_distres
 gen_loop_aa
 -----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_loop_aa
    :groups:
@@ -116,7 +116,7 @@ gen_loop_aa
 gen_modres_am1bcc
 -----------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_modres_am1bcc
    :groups:
@@ -124,7 +124,7 @@ gen_modres_am1bcc
 gen_modres_resp
 ---------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_modres_resp
    :groups:
@@ -132,7 +132,7 @@ gen_modres_resp
 gen_posres
 ----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_posres
    :groups:
@@ -140,7 +140,7 @@ gen_posres
 gen_resp
 --------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_resp
    :groups:
@@ -148,7 +148,7 @@ gen_resp
 gen_temperatures
 ----------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_temperatures
    :groups:
@@ -156,7 +156,7 @@ gen_temperatures
 modeling_cf
 -----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: modeling_cf
    :groups:
@@ -164,7 +164,7 @@ modeling_cf
 mutate
 ------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: mutate
    :groups:
@@ -172,7 +172,7 @@ mutate
 mv_crds_mol2
 ------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: mv_crds_mol2
    :groups:
@@ -180,7 +180,7 @@ mv_crds_mol2
 place
 -----
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: place
    :groups:
@@ -188,7 +188,7 @@ place
 place_solvent
 -------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: place_solvent
    :groups:
@@ -196,7 +196,7 @@ place_solvent
 setup_abfe
 ----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: setup_abfe
    :groups:
@@ -204,7 +204,7 @@ setup_abfe
 setup_fep
 ---------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: setup_fep
    :groups:
@@ -212,7 +212,7 @@ setup_fep
 setup_fep_rest
 --------------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: setup_fep_rest
    :groups:

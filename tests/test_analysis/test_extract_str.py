@@ -23,7 +23,7 @@ class TestExtractStrRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """run() writes a PDB file"""
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         out = tmp_path / "frame1.pdb"
         run(self._make_args(trajectory_files, out, time=1))
@@ -33,7 +33,7 @@ class TestExtractStrRun:
         """The generated PDB can be read back by MDtraj"""
         import mdtraj as md
 
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         out = tmp_path / "frame1.pdb"
         run(self._make_args(trajectory_files, out, time=1))
@@ -45,7 +45,7 @@ class TestExtractStrRun:
         """The extracted structure keeps the atom count of the source trajectory"""
         import mdtraj as md
 
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         out = tmp_path / "frame1.pdb"
         run(self._make_args(trajectory_files, out, time=1))
@@ -57,7 +57,7 @@ class TestExtractStrRun:
         """Different frames give different coordinates"""
         import mdtraj as md
 
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         out1 = tmp_path / "frame1.pdb"
         out2 = tmp_path / "frame2.pdb"
@@ -72,7 +72,7 @@ class TestExtractStrRun:
         assert not np.allclose(t1.xyz, t2.xyz)
 
     def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         out = tmp_path / "nested" / "frame.pdb"
         run(self._make_args(trajectory_files, out))
@@ -83,7 +83,7 @@ class TestExtractStrRun:
         """--time is interpreted in ps, not as a frame index"""
         import numpy as np
 
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         traj = trajectory_files["traj"]
         # The fixture trajectory carries time = 0, 1, ..., 9 ps
@@ -102,7 +102,7 @@ class TestExtractStrRun:
         import mdtraj as md
         import numpy as np
 
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         out = tmp_path / "at_0ps.pdb"
         run(self._make_args(trajectory_files, out, time=0))
@@ -112,7 +112,7 @@ class TestExtractStrRun:
 
     def test_time_out_of_range_exits(self, trajectory_files, tmp_path):
         """A time outside the trajectory range exits"""
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         with pytest.raises(SystemExit):
             run(self._make_args(trajectory_files, tmp_path / "x.pdb", time=999))
@@ -122,7 +122,7 @@ class TestExtractStrRun:
         import mdtraj as md
         import numpy as np
 
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         out = tmp_path / "at_2p6ps.pdb"
         run(self._make_args(trajectory_files, out, time=2.6))
@@ -131,7 +131,7 @@ class TestExtractStrRun:
         assert np.allclose(loaded.xyz[0], trajectory_files["traj"].xyz[3], atol=1e-3)
 
     def test_empty_selection_raises(self, trajectory_files, tmp_path):
-        from src.analysis.extract_str import run
+        from mdtbx.analysis.extract_str import run
 
         args = self._make_args(
             trajectory_files,
@@ -142,7 +142,7 @@ class TestExtractStrRun:
             run(args)
 
     def test_gmx_uses_argv_and_text_input(self, tmp_path, monkeypatch):
-        from src.analysis import extract_str
+        from mdtbx.analysis import extract_str
 
         captured = {}
 

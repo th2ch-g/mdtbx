@@ -20,7 +20,7 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    project_root = Path(__file__).parent.parent.parent
+    project_root = Path(__file__).resolve().parents[3]
     hook = f"""
 ----- BEGIN OF MDTBX SHELL HOOK -----
 # for alias

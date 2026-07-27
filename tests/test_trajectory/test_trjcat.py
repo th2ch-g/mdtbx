@@ -21,7 +21,7 @@ def _args(**overrides):
 
 
 def test_run_uses_argv_and_stdin(monkeypatch):
-    from src.trajectory import trjcat
+    from mdtbx.trajectory import trjcat
 
     calls = []
     monkeypatch.setattr(
@@ -40,7 +40,7 @@ def test_run_uses_argv_and_stdin(monkeypatch):
 
 
 def test_cluster_supplies_three_selection_prompts(monkeypatch):
-    from src.trajectory import trjcat
+    from mdtbx.trajectory import trjcat
 
     calls = []
     monkeypatch.setattr(
@@ -56,7 +56,7 @@ def test_cluster_supplies_three_selection_prompts(monkeypatch):
 
 
 def test_custom_output_and_intermediate_retention(tmp_path, monkeypatch):
-    from src.trajectory import trjcat
+    from mdtbx.trajectory import trjcat
 
     calls = []
     monkeypatch.chdir(tmp_path)
@@ -87,7 +87,7 @@ def test_custom_output_and_intermediate_retention(tmp_path, monkeypatch):
     [{"num_of_step": 0}, {"skip": 0}],
 )
 def test_rejects_non_positive_counts(overrides):
-    from src.trajectory.trjcat import run
+    from mdtbx.trajectory.trjcat import run
 
     with pytest.raises(ValueError):
         run(_args(**overrides))

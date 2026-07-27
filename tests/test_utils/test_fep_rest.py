@@ -1,6 +1,6 @@
 import pytest
 
-from src.utils.fep_rest import (
+from mdtbx.utils.fep_rest import (
     build_fep_rest_schedule,
     hot_global_indices,
     parse_preprocessed_topology,

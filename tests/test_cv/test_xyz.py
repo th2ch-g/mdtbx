@@ -21,7 +21,7 @@ class TestXyzRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """.npy file is generated"""
-        from src.cv.xyz import run
+        from mdtbx.cv.xyz import run
 
         out = tmp_path / "xyz.npy"
         run(self._make_args(trajectory_files, out))
@@ -29,7 +29,7 @@ class TestXyzRun:
 
     def test_output_shape_all_atoms(self, trajectory_files, tmp_path):
         """Selecting all atoms gives shape (n_frames, n_atoms, 3)"""
-        from src.cv.xyz import run
+        from mdtbx.cv.xyz import run
 
         out = tmp_path / "xyz_all.npy"
         run(self._make_args(trajectory_files, out))
@@ -41,7 +41,7 @@ class TestXyzRun:
 
     def test_output_shape_subset(self, trajectory_files, tmp_path):
         """A partial selection gives shape (n_frames, n_selected, 3)"""
-        from src.cv.xyz import run
+        from mdtbx.cv.xyz import run
 
         out = tmp_path / "xyz_subset.npy"
         run(self._make_args(trajectory_files, out, selection="resid 0"))
@@ -53,7 +53,7 @@ class TestXyzRun:
 
     def test_coordinates_are_finite(self, trajectory_files, tmp_path):
         """The output coordinates contain no NaN or Inf"""
-        from src.cv.xyz import run
+        from mdtbx.cv.xyz import run
 
         out = tmp_path / "xyz_finite.npy"
         run(self._make_args(trajectory_files, out))
@@ -61,7 +61,7 @@ class TestXyzRun:
         assert np.all(np.isfinite(xyz))
 
     def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
-        from src.cv.xyz import run
+        from mdtbx.cv.xyz import run
 
         out = tmp_path / "nested" / "xyz.npy"
         run(self._make_args(trajectory_files, out))
@@ -69,7 +69,7 @@ class TestXyzRun:
         assert out.exists()
 
     def test_empty_selection_raises(self, trajectory_files, tmp_path):
-        from src.cv.xyz import run
+        from mdtbx.cv.xyz import run
 
         args = self._make_args(
             trajectory_files, tmp_path / "xyz.npy", selection="name XXXX"

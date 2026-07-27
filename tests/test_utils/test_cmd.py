@@ -3,7 +3,7 @@ from argparse import Namespace
 
 import pytest
 
-from src.utils import cmd
+from mdtbx.utils import cmd
 
 
 def test_cmd_run_uses_argv_list(monkeypatch):

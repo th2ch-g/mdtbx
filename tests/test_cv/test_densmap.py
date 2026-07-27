@@ -26,7 +26,7 @@ class TestDensmapRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """.npy file is generated"""
-        from src.cv.densmap import run
+        from mdtbx.cv.densmap import run
 
         out = tmp_path / "densmap.npy"
         run(self._make_args(trajectory_files, out))
@@ -34,7 +34,7 @@ class TestDensmapRun:
 
     def test_output_is_nonempty(self, trajectory_files, tmp_path):
         """The output file is not empty"""
-        from src.cv.densmap import run
+        from mdtbx.cv.densmap import run
 
         out = tmp_path / "densmap_size.npy"
         run(self._make_args(trajectory_files, out))
@@ -43,14 +43,14 @@ class TestDensmapRun:
     @pytest.mark.parametrize("axis", ["xy", "xz", "yz"])
     def test_different_axes(self, trajectory_files, tmp_path, axis):
         """A file is generated for each of the xy / xz / yz projections"""
-        from src.cv.densmap import run
+        from mdtbx.cv.densmap import run
 
         out = tmp_path / f"densmap_{axis}.npy"
         run(self._make_args(trajectory_files, out, axis=axis))
         assert out.exists()
 
     def test_empty_selection_raises(self, trajectory_files, tmp_path):
-        from src.cv.densmap import run
+        from mdtbx.cv.densmap import run
 
         out = tmp_path / "densmap_empty.npy"
         with pytest.raises(ValueError, match="No atoms selected"):
@@ -59,7 +59,7 @@ class TestDensmapRun:
 
     @pytest.mark.parametrize("bins", [0, -1])
     def test_non_positive_bins_raise(self, trajectory_files, tmp_path, bins):
-        from src.cv.densmap import run
+        from mdtbx.cv.densmap import run
 
         with pytest.raises(ValueError, match="bins"):
             run(self._make_args(trajectory_files, tmp_path / "out.npy", bins=bins))
@@ -67,7 +67,7 @@ class TestDensmapRun:
     def test_histogram_shape(self, trajectory_files, tmp_path):
         """The result agrees with np.histogram2d (golden-path check)"""
         import mdtraj as md
-        from src.cv.densmap import _AXIS_MAP, run
+        from mdtbx.cv.densmap import _AXIS_MAP, run
 
         bins = 8
         axis = "xy"
@@ -90,7 +90,7 @@ class TestDensmapRun:
         assert total_ref == expected
 
     def test_gmx_uses_temporary_output(self, tmp_path, monkeypatch):
-        from src.cv import densmap
+        from mdtbx.cv import densmap
 
         monkeypatch.chdir(tmp_path)
 

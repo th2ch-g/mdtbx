@@ -1,9 +1,9 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "name": "example-slurm",
   "scheduler": "slurm",
   "work_root": ".mdtbx/runs",
-  "runner_argv": ["python", "-m", "src"],
+  "runner_argv": ["python", "-m", "mdtbx"],
   "environment": {
     "prologue": [],
     "env": {}

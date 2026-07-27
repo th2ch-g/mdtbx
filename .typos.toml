@@ -9,3 +9,10 @@ parm = "parm"
 fo = "fo"
 # vector direction abbreviation (e.g. vec_ba = vector from b to a)
 ba = "ba"
+# Amino-acid, topology, electrostatics, and sampler identifiers
+AGS = "AGS"
+SER = "SER"
+THR = "THR"
+DUM = "DUM"
+coul = "coul"
+tpe = "tpe"

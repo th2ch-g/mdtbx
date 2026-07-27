@@ -2,7 +2,7 @@ from argparse import Namespace
 
 import pytest
 
-from src.trajectory import pacs_trjcat
+from mdtbx.trajectory import pacs_trjcat
 
 
 def test_check_replica_reads_first_cycle_directory(tmp_path):

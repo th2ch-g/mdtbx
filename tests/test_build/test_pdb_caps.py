@@ -1,6 +1,6 @@
 import pytest
 
-from src.build.pdb_caps import normalize_methyl_hydrogen_names
+from mdtbx.build.pdb_caps import normalize_methyl_hydrogen_names
 
 
 @pytest.mark.parametrize(

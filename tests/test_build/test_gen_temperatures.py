@@ -8,7 +8,7 @@ import types
 
 import pytest
 
-from src.build.gen_temperatures import A0, A1, B0, B1, calc_mu, run
+from mdtbx.build.gen_temperatures import A0, A1, B0, B1, calc_mu, run
 
 
 class TestCalcMu:

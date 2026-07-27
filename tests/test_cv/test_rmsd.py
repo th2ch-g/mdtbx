@@ -25,7 +25,7 @@ class TestRmsdRun:
 
     def test_rmsd_output_file_created(self, trajectory_files, tmp_path):
         """run() generates a .npy file"""
-        from src.cv.rmsd import run
+        from mdtbx.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
         args = self._make_args(trajectory_files, out)
@@ -34,7 +34,7 @@ class TestRmsdRun:
 
     def test_rmsd_shape(self, trajectory_files, tmp_path):
         """The RMSD array length matches the trajectory frame count"""
-        from src.cv.rmsd import run
+        from mdtbx.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
         args = self._make_args(trajectory_files, out)
@@ -46,7 +46,7 @@ class TestRmsdRun:
 
     def test_rmsd_nonnegative(self, trajectory_files, tmp_path):
         """RMSD is always non-negative"""
-        from src.cv.rmsd import run
+        from mdtbx.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
         args = self._make_args(trajectory_files, out)
@@ -60,7 +60,7 @@ class TestRmsdRun:
         The reference is the PDB of frame 0, so the RMSD of frame 0 is
         close to 0 after fitting.
         """
-        from src.cv.rmsd import run
+        from mdtbx.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
         args = self._make_args(trajectory_files, out)
@@ -72,7 +72,7 @@ class TestRmsdRun:
 
     def test_rmsd_other_frames_nonzero(self, trajectory_files, tmp_path):
         """Other frames hold random coordinates, so their RMSD exceeds 0"""
-        from src.cv.rmsd import run
+        from mdtbx.cv.rmsd import run
 
         out = tmp_path / "rmsd.npy"
         args = self._make_args(trajectory_files, out)
@@ -83,7 +83,7 @@ class TestRmsdRun:
         assert np.any(rmsd[1:] > 0)
 
     def test_empty_fit_selection_raises(self, trajectory_files, tmp_path):
-        from src.cv.rmsd import run
+        from mdtbx.cv.rmsd import run
 
         args = self._make_args(
             trajectory_files, tmp_path / "rmsd.npy", selection="name XXXX"

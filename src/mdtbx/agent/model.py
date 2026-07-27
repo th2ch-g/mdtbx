@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def utc_now() -> str:
@@ -41,8 +43,24 @@ def fingerprint(value: Any) -> str:
 
 
 def write_json(path: Path, value: Any) -> None:
+    """Atomically replace a JSON document in its destination directory."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(json_value(value), indent=2, ensure_ascii=False) + "\n")
+    payload = json.dumps(json_value(value), indent=2, ensure_ascii=False) + "\n"
+    descriptor, temporary = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def read_json(path: Path) -> Any:

@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-from .model import utc_now
+from .model import SCHEMA_VERSION, utc_now
 
 NORMAL_STATES = {
     "queued",
@@ -108,7 +108,7 @@ class SlurmScheduler(Scheduler):
                 }
             )
         return {
-            "schema_version": 1,
+            "schema_version": SCHEMA_VERSION,
             "scheduler": self.name,
             "probed_at": utc_now(),
             "commands": results,
@@ -197,7 +197,7 @@ class AgeScheduler(Scheduler):
                 }
             )
         return {
-            "schema_version": 1,
+            "schema_version": SCHEMA_VERSION,
             "scheduler": self.name,
             "probed_at": utc_now(),
             "commands": results,
@@ -286,7 +286,7 @@ class PjmScheduler(Scheduler):
                 }
             )
         return {
-            "schema_version": 1,
+            "schema_version": SCHEMA_VERSION,
             "scheduler": self.name,
             "probed_at": utc_now(),
             "commands": results,
@@ -359,7 +359,7 @@ def _status(job_id, state, raw_state, reason, elapsed):
     if state not in NORMAL_STATES:
         state = "unknown"
     return {
-        "schema_version": 1,
+        "schema_version": SCHEMA_VERSION,
         "job_id": str(job_id),
         "state": state,
         "raw_state": raw_state,

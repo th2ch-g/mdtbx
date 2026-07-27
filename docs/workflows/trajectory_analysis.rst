@@ -47,6 +47,29 @@ Example:
 Selection syntax and defaults differ between commands. Check the command
 reference before assuming atom, residue, or mass-weighting behavior.
 
+Kinetic analysis
+----------------
+
+Use separate two-dimensional feature arrays for independent trajectories.
+``tica`` accepts multiple arrays without introducing transitions across their
+boundaries. ``cluster`` accepts those arrays or the resulting tICA archive, and
+``msm`` accepts integer arrays or the cluster archive:
+
+.. code-block:: console
+
+   $ pixi run mdtbx tica -i feature-a.npy feature-b.npy \
+       --lagtime 10 --n-components 3 -o tica.npz
+   $ pixi run mdtbx cluster -i tica.npz --n-clusters 100 \
+       --seed 42 -o clusters.npz
+   $ pixi run mdtbx msm -i clusters.npz --lagtime 10 \
+       --count-mode effective -o msm.npz
+
+All inputs are validated for shape, type, finite values, and lag-time length.
+The NPZ archives contain named arrays only and can be loaded with
+``allow_pickle=False``. The MSM uses a reversible maximum-likelihood estimate
+and the largest connected component by default; pass ``--nonreversible`` to
+change the estimator.
+
 Extract structures
 ------------------
 

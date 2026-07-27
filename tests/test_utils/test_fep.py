@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from src.utils.fep import (
+from mdtbx.utils.fep import (
     FEP_MANIFEST,
     build_lambda_schedule,
     load_fep_manifest,

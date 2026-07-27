@@ -2,7 +2,7 @@ import types
 
 import pytest
 
-from src.build.mv_crds_mol2 import run
+from mdtbx.build.mv_crds_mol2 import run
 
 
 def _mol2(atom_lines):

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from src.utils.numpy_io import save_npy, save_npz
+from mdtbx.utils.numpy_io import save_npy, save_npz
 
 
 def test_save_npy_creates_parent_and_adds_suffix(tmp_path):

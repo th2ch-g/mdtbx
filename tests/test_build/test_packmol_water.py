@@ -1,6 +1,6 @@
 import types
 
-from src.build import packmol_water
+from mdtbx.build import packmol_water
 
 
 def test_build_packmol_input_uses_box_bounds_and_fixed_solute(tmp_path):

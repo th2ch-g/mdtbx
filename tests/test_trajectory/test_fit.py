@@ -25,7 +25,7 @@ class TestFitRun:
     def test_output_file_created(self, trajectory_files, tmp_path):
         """run() generates a fitted trajectory file"""
 
-        from src.trajectory.fit import run
+        from mdtbx.trajectory.fit import run
 
         out = tmp_path / "fitted.xtc"
         run(self._make_args(trajectory_files, out))
@@ -35,7 +35,7 @@ class TestFitRun:
         """The fitted trajectory keeps the original frame count"""
         import mdtraj as md
 
-        from src.trajectory.fit import run
+        from mdtbx.trajectory.fit import run
 
         out = tmp_path / "fitted.xtc"
         run(self._make_args(trajectory_files, out))
@@ -48,7 +48,7 @@ class TestFitRun:
         """The fitted trajectory keeps the original atom count"""
         import mdtraj as md
 
-        from src.trajectory.fit import run
+        from mdtbx.trajectory.fit import run
 
         out = tmp_path / "fitted.xtc"
         run(self._make_args(trajectory_files, out))
@@ -58,7 +58,7 @@ class TestFitRun:
         assert fitted.n_atoms == original_n_atoms
 
     def test_empty_selection_raises(self, trajectory_files, tmp_path):
-        from src.trajectory.fit import run
+        from mdtbx.trajectory.fit import run
 
         args = self._make_args(
             trajectory_files, tmp_path / "fitted.xtc", selection="name XXXX"
@@ -68,7 +68,7 @@ class TestFitRun:
             run(args)
 
     def test_nested_output_directory_is_created(self, trajectory_files, tmp_path):
-        from src.trajectory.fit import run
+        from mdtbx.trajectory.fit import run
 
         out = tmp_path / "nested" / "fitted.xtc"
         run(self._make_args(trajectory_files, out))
@@ -76,7 +76,7 @@ class TestFitRun:
         assert out.exists()
 
     def test_gmx_uses_unique_temporary_path(self, tmp_path, monkeypatch):
-        from src.trajectory import fit
+        from mdtbx.trajectory import fit
 
         calls = []
 

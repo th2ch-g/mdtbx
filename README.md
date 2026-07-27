@@ -61,7 +61,7 @@ Toolbox for MD simulation
   - [x] xyz
   - [x] PCA
   - [x] densmap
-  - [ ] tICA
+  - [x] tICA
   - [x] RISM/3D-RISM
   - [ ] Elastic Network Model
   - [ ] Normal Mode analysis
@@ -71,6 +71,7 @@ Toolbox for MD simulation
 
 - Kinetic analysis
 
+  - [x] K-means clustering
   - [x] MSM
   - [ ] TRAM
 
@@ -153,6 +154,14 @@ pixi run mdtbx place_solvent -p leap.parm7 -x leap.rst7 \
   --solvent-model cSPCE --xvv-output cSPCE_300.xvv \
   -o placed_water.pdb
 
+# Preserve independent-trajectory boundaries through tICA, clustering, and MSM.
+pixi run mdtbx tica -i replica1.npy replica2.npy \
+  --lagtime 10 --n-components 3 -o tica.npz
+pixi run mdtbx cluster -i tica.npz --n-clusters 100 \
+  --seed 42 -o clusters.npz
+pixi run mdtbx msm -i clusters.npz --lagtime 10 \
+  --count-mode effective -o msm.npz
+
 # Prepare, run, and analyze a standard GROMACS decoupling calculation.
 pixi run mdtbx setup_fep -f example/mdp/solution/prd.mdp \
   -p gmx.top -c equilibrated.gro --moltype LIG -o fep
@@ -166,5 +175,21 @@ pixi run mdtbx run_fep --path fep_rest --multidir --replex 1000
 pixi run mdtbx analyze_fep_rest --path fep_rest -b 2000
 ```
 
+### PyMOL AI commands
+
+Inside the configured PyMOL session, `claude` and `codex` automatically apply
+validated PyMOL code. Completed turns are shared between both backends and
+retained only in memory for the current PyMOL session. Requests run one at a
+time in submission order.
+
+```text
+PyMOL> claude color the ligand red
+PyMOL> codex show it as sticks
+PyMOL> ai_history
+PyMOL> ai_status
+PyMOL> ai_clear
+```
+
 See [`example/fep/README.md`](example/fep/README.md) for standard FEP and
-FEP/REST, and [`example/abfe/README.md`](example/abfe/README.md) for ABFE.
+FEP/REST, [`example/abfe/README.md`](example/abfe/README.md) for ABFE, and
+[`example/msm/README.md`](example/msm/README.md) for kinetic analysis.

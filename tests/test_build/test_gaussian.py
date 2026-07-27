@@ -2,7 +2,7 @@ import types
 
 import pytest
 
-from src.build import gaussian
+from mdtbx.build import gaussian
 
 
 def test_configure_gaussian_input_updates_resources_and_charge(tmp_path):
@@ -87,7 +87,7 @@ def test_run_gaussian_uses_file_streams(monkeypatch, tmp_path):
 
 
 def test_gen_resp_no_opt_uses_shared_helpers(monkeypatch, tmp_path):
-    from src.build import gen_resp
+    from mdtbx.build import gen_resp
 
     conversions = []
     configurations = []
@@ -140,7 +140,7 @@ def test_gen_resp_no_opt_uses_shared_helpers(monkeypatch, tmp_path):
 
 
 def test_gen_modres_resp_validates_atom_charge_format(monkeypatch, tmp_path):
-    from src.build import gen_modres_resp
+    from mdtbx.build import gen_modres_resp
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(

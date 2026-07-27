@@ -4,7 +4,7 @@ Trajectory commands
 fit
 ---
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: fit
    :groups:
@@ -12,7 +12,7 @@ fit
 opt_perf
 --------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: opt_perf
    :groups:
@@ -20,7 +20,7 @@ opt_perf
 pacs_trjcat
 -----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: pacs_trjcat
    :groups:
@@ -28,7 +28,7 @@ pacs_trjcat
 print_perf
 ----------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: print_perf
    :groups:
@@ -36,7 +36,7 @@ print_perf
 trjcat
 ------
 
-.. autoprogram:: src.cli:create_parser()
+.. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: trjcat
    :groups:

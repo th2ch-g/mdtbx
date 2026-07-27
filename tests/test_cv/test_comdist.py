@@ -24,7 +24,7 @@ class TestComdistRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """.npy file is generated"""
-        from src.cv.comdist import run
+        from mdtbx.cv.comdist import run
 
         out = tmp_path / "comdist.npy"
         run(self._make_args(trajectory_files, out))
@@ -32,7 +32,7 @@ class TestComdistRun:
 
     def test_output_shape(self, trajectory_files, tmp_path):
         """The output length matches the frame count"""
-        from src.cv.comdist import run
+        from mdtbx.cv.comdist import run
 
         out = tmp_path / "comdist.npy"
         run(self._make_args(trajectory_files, out))
@@ -43,7 +43,7 @@ class TestComdistRun:
 
     def test_output_nonnegative(self, trajectory_files, tmp_path):
         """Distances are always non-negative"""
-        from src.cv.comdist import run
+        from mdtbx.cv.comdist import run
 
         out = tmp_path / "comdist.npy"
         run(self._make_args(trajectory_files, out))
@@ -53,7 +53,7 @@ class TestComdistRun:
 
     def test_same_selection_gives_zero(self, trajectory_files, tmp_path):
         """The COM distance between identical atom groups is 0"""
-        from src.cv.comdist import run
+        from mdtbx.cv.comdist import run
 
         out = tmp_path / "comdist_zero.npy"
         args = self._make_args(trajectory_files, out, sel1="resid 0", sel2="resid 0")
@@ -63,7 +63,7 @@ class TestComdistRun:
         assert np.allclose(dist, 0.0, atol=1e-6)
 
     def test_gmx_single_frame_output(self, tmp_path, monkeypatch):
-        from src.cv import comdist
+        from mdtbx.cv import comdist
 
         monkeypatch.chdir(tmp_path)
 

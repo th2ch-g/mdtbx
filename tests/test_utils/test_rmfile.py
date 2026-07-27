@@ -8,7 +8,7 @@ removed and every other file is kept.
 import types
 
 
-from src.utils.rmfile import run
+from mdtbx.utils.rmfile import run
 
 
 class TestRmfile:

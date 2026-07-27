@@ -23,7 +23,7 @@ class TestRmsfRun:
 
     def test_output_file_created(self, trajectory_files, tmp_path):
         """.npy file is generated"""
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         out = tmp_path / "rmsf.npy"
         run(self._make_args(trajectory_files, out))
@@ -31,7 +31,7 @@ class TestRmsfRun:
 
     def test_output_shape_all_atoms(self, trajectory_files, tmp_path):
         """Selecting all atoms gives an output length equal to the atom count"""
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         out = tmp_path / "rmsf_all.npy"
         run(self._make_args(trajectory_files, out))
@@ -42,7 +42,7 @@ class TestRmsfRun:
 
     def test_output_shape_subset(self, trajectory_files, tmp_path):
         """A partial selection gives an output length equal to the selected count"""
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         out = tmp_path / "rmsf_subset.npy"
         run(self._make_args(trajectory_files, out, selection="resid 0"))
@@ -53,7 +53,7 @@ class TestRmsfRun:
 
     def test_output_nonnegative(self, trajectory_files, tmp_path):
         """RMSF is always non-negative"""
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         out = tmp_path / "rmsf_nn.npy"
         run(self._make_args(trajectory_files, out))
@@ -64,7 +64,7 @@ class TestRmsfRun:
         """RMSF is 0 for a trajectory whose frames share identical coordinates"""
         import mdtraj as md
 
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         tmp = tmp_path_factory.mktemp("static")
 
@@ -99,7 +99,7 @@ class TestRmsfRun:
     def test_residue_resolution_returns_one_value_per_selected_residue(
         self, trajectory_files, tmp_path
     ):
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         out = tmp_path / "rmsf_residue.npy"
         args = self._make_args(trajectory_files, out)
@@ -116,7 +116,7 @@ class TestRmsfRun:
     def test_gromacs_style_protein_selection_works_with_mdtraj(
         self, trajectory_files, tmp_path
     ):
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         out = tmp_path / "rmsf_protein.npy"
         args = self._make_args(trajectory_files, out, selection="Protein")
@@ -128,7 +128,7 @@ class TestRmsfRun:
     def test_empty_selection_raises(self, trajectory_files, tmp_path):
         import pytest
 
-        from src.cv.rmsf import run
+        from mdtbx.cv.rmsf import run
 
         args = self._make_args(
             trajectory_files, tmp_path / "rmsf_empty.npy", selection="name XXXX"
@@ -137,7 +137,7 @@ class TestRmsfRun:
             run(args)
 
     def test_gmx_single_value_output(self, tmp_path, monkeypatch):
-        from src.cv import rmsf
+        from mdtbx.cv import rmsf
 
         monkeypatch.chdir(tmp_path)
 
