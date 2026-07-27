@@ -43,7 +43,7 @@ class TestGromacsTopologyParser:
         assert "moleculetype" in first
 
     def test_atoms_carry_their_moleculetype(self, parser):
-        """各原子が所属する moleculetype 名を保持すること"""
+        """Every atom carries the name of the moleculetype it belongs to"""
         assert {a["moleculetype"] for a in parser.get_atoms_in("Protein")} == {
             "Protein"
         }
