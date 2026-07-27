@@ -38,6 +38,7 @@ pixi install
 # Run the CLI
 pixi run mdtbx <subcommand>
 pixi run gmx ...           # Run the GROMACS binary from the pixi environment
+                           # (preprocessing and analysis only -- see below)
 
 # Test
 pixi run test              # Run the full test suite
@@ -142,6 +143,29 @@ from ..utils.common_args import add_topology_arg, add_trajectory_arg, add_output
 - Side effects that add `.pixi/envs/default/bin` to `PATH` and load
   `pymol_plugins` are isolated in `src/__init__.py`; `config.py` contains
   constants only.
+
+## GROMACS: two installations, two roles
+
+| installation | role |
+|---|---|
+| `pixi run gmx` (conda-forge) | preprocessing and analysis: `grompp`, `trjconv`, `editconf`, ... |
+| `$TOOLS/gromacs/*` (built by `install_scripts/gmx*.sh`) | production `mdrun`, including GPU and PLUMED runs |
+
+The conda-forge build reports `GPU support: OpenCL` and does not detect NVIDIA
+GPUs, so `pixi run gmx mdrun -nb gpu` fails with "no GPU is detected". This is
+expected: production MD is not meant to run through the pixi GROMACS.
+
+`src/__init__.py` prepends the pixi `bin` to `PATH` unconditionally, so a bare
+`gmx` inside mdtbx resolves to the pixi build even when the caller exported
+their own GROMACS first. Point the mdrun-running subcommands at the intended
+binary explicitly:
+
+```bash
+mdtbx run_fep          --gmx $TOOLS/gromacs/2025.1/gromacs-2025.1/bin/gmx ...
+mdtbx run_abfe         --gmx $TOOLS/gromacs/2025.1/gromacs-2025.1/bin/gmx ...
+mdtbx analyze_fep_rest --gmx $TOOLS/gromacs/2022.5-mpi-plumed/gromacs-2022.5/bin/gmx_mpi ...
+mdtbx opt_perf --mdrun-command "$TOOLS/gromacs/2025.1/gromacs-2025.1/bin/gmx mdrun -deffnm prd"
+```
 
 ## Environment management
 

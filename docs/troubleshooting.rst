@@ -28,6 +28,26 @@ the expected executable with ``command -v`` and read the relevant workflow
 page. FEP/REST requires the PLUMED-patched ``gmx_mpi`` rather than the default
 ``gmx`` binary.
 
+GROMACS: no GPU is detected
+---------------------------
+
+.. code-block:: text
+
+   Fatal error:
+   Cannot run short-ranged nonbonded interactions on a GPU because no GPU is
+   detected.
+
+The bundled GROMACS is the conda-forge build, which reports
+``GPU support: OpenCL`` and does not detect NVIDIA GPUs. It is intended for
+preprocessing and analysis (``grompp``, ``trjconv``, ``editconf``), not for
+production ``mdrun``. Run production MD with a GROMACS built by
+``install_scripts/gmx*.sh``.
+
+Note that mdtbx prepends its own environment to ``PATH``, so a bare ``gmx``
+resolves to the bundled build even when another GROMACS was exported first.
+Pass the intended binary explicitly with ``--gmx`` (``run_fep``, ``run_abfe``,
+``analyze_fep_rest``) or spell it out in ``--mdrun-command`` (``opt_perf``).
+
 Unexpected atom selections
 --------------------------
 

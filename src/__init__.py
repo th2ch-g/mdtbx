@@ -7,6 +7,17 @@ here (they previously lived in config.py and were triggered indirectly via
 - Prepend the pixi environment's bin directory to PATH so bundled external
   tools (gmx, tleap, antechamber, ...) resolve.
 - Register the PyMOL plugins package (mocked out in tests via sys.modules).
+
+Note on GROMACS: the bundled `gmx` is the conda-forge build, which is an
+OpenCL build and does not detect NVIDIA GPUs. It is meant for preprocessing
+and analysis (grompp, trjconv, editconf, ...), not for production `mdrun`.
+Production runs use a GROMACS built by `install_scripts/gmx*.sh`.
+
+Because the prepend below is unconditional, it wins over a `gmx` the caller
+put on PATH themselves -- including `export PATH=$TOOLS/gromacs/.../bin:$PATH`
+as in `example/remd/setup_rest.sh`. Subcommands that launch `mdrun`
+(`run_fep`, `run_abfe`, `analyze_fep_rest`) therefore need `--gmx` pointed at
+the intended binary; `opt_perf` needs it spelled out in `--mdrun-command`.
 """
 
 import importlib
