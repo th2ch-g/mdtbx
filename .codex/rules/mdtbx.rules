@@ -1,0 +1,71 @@
+prefix_rule(
+    pattern = ["mdtbx", "agent_run"],
+    decision = "prompt",
+    justification = "Confirm the exact immutable mdtbx plan hash before execution.",
+)
+
+prefix_rule(
+    pattern = ["pixi", "run", "mdtbx", "agent_run"],
+    decision = "prompt",
+    justification = "Confirm the exact immutable mdtbx plan hash before execution.",
+)
+
+prefix_rule(
+    pattern = ["mdtbx", "agent_profile_save"],
+    decision = "prompt",
+    justification = "Confirm the exact external cluster profile hash before saving.",
+)
+
+prefix_rule(
+    pattern = ["uv", "run", "mdtbx", "agent_run"],
+    decision = "prompt",
+    justification = "Confirm the exact immutable mdtbx plan hash before execution.",
+)
+
+prefix_rule(
+    pattern = ["pixi", "run", "mdtbx", "agent_profile_save"],
+    decision = "prompt",
+    justification = "Confirm the exact external cluster profile hash before saving.",
+)
+
+prefix_rule(
+    pattern = ["uv", "run", "mdtbx", "agent_profile_save"],
+    decision = "prompt",
+    justification = "Confirm the exact external cluster profile hash before saving.",
+)
+
+prefix_rule(
+    pattern = ["sbatch"],
+    decision = "forbidden",
+    justification = "Submit through an approved mdtbx agent_run plan.",
+)
+
+prefix_rule(
+    pattern = ["qsub"],
+    decision = "forbidden",
+    justification = "Submit through an approved mdtbx agent_run plan.",
+)
+
+prefix_rule(
+    pattern = ["pjsub"],
+    decision = "forbidden",
+    justification = "Submit through an approved mdtbx agent_run plan.",
+)
+
+prefix_rule(
+    pattern = ["scancel"],
+    decision = "forbidden",
+    justification = "Cancellation requires a separately approved mdtbx operation.",
+)
+
+prefix_rule(
+    pattern = ["qdel"],
+    decision = "forbidden",
+    justification = "Cancellation requires a separately approved mdtbx operation.",
+)
+
+prefix_rule(
+    pattern = ["pjdel"],
+    decision = "forbidden",
+    justification = "Cancellation requires a separately approved mdtbx operation.",
+)

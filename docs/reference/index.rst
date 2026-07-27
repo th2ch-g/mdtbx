@@ -13,3 +13,4 @@ choices, and help text in the installed source.
    trajectory
    analysis
    cv
+   agent

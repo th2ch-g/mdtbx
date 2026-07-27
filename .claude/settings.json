@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --python \"$CLAUDE_PROJECT_DIR/.pixi/envs/default/bin/python\" --no-project python \"$CLAUDE_PROJECT_DIR/agent-skills/md-research/scripts/approval_hook.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

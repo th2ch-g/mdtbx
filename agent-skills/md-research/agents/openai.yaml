@@ -1,0 +1,4 @@
+interface:
+  display_name: "MD Research"
+  short_description: "Plan and run approved MD workflows safely"
+  default_prompt: "Use $md-research to inspect resources and prepare an approved mdtbx execution plan."

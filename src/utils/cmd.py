@@ -5,26 +5,23 @@ import sys
 from pathlib import Path
 
 from ..logger import generate_logger
+from .proc import run_cmd
 
 LOGGER = generate_logger(__name__)
 
 
 def add_subcmd(subparsers):
-    """
-    mdtbx cmd
-    """
+    """Register the project-environment command runner."""
     parser = subparsers.add_parser(
         "cmd",
         help="Run a command within the mdtbx project environment.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-
     parser.add_argument(
         "command",
         nargs=argparse.REMAINDER,
         help="The command and its arguments to execute.",
     )
-
     parser.set_defaults(func=run)
 
 
@@ -39,8 +36,8 @@ def run(args):
 
     LOGGER.info(f"Executing command in pixi environment: {command_str}")
     try:
-        subprocess.run(pixi_cmd, check=True)
+        run_cmd(pixi_cmd)
         LOGGER.info("Command finished successfully.")
-    except subprocess.CalledProcessError as e:
-        LOGGER.error(f"Command failed with exit code {e.returncode}.")
-        sys.exit(e.returncode)
+    except subprocess.CalledProcessError as error:
+        LOGGER.error(f"Command failed with exit code {error.returncode}.")
+        sys.exit(error.returncode)

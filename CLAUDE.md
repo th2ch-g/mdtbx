@@ -29,6 +29,19 @@ pixi run mdtbx rmsd --trajectory fitted.xtc --output rmsd.npy
 Before adding a subcommand, first consider whether the feature can be built by
 combining existing commands.
 
+## Autonomous MD research
+
+Use the shared `md-research` Skill for autonomous preparation, simulation,
+analysis, free-energy, resource discovery, or scheduler work. Discover typed
+arguments with `mdtbx agent_schema`, create immutable plans with
+`mdtbx agent_plan`, and execute only an exact user-approved `plan_id` with
+`mdtbx agent_run`.
+
+Cluster capabilities belong in approved external JSON profiles. Probe them
+read-only from a login node with `mdtbx agent_probe`. Never run heavy
+calculations on a login node, submit with raw scheduler commands, or
+automatically cancel, resubmit, expand sampling, or change a protocol.
+
 ## Development commands
 
 ```bash
