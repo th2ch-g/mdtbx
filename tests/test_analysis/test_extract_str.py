@@ -79,6 +79,57 @@ class TestExtractStrRun:
 
         assert out.exists()
 
+    def test_time_is_ps_not_frame_index(self, trajectory_files, tmp_path):
+        """--time is interpreted in ps, not as a frame index"""
+        import numpy as np
+
+        from src.analysis.extract_str import run
+
+        traj = trajectory_files["traj"]
+        # The fixture trajectory carries time = 0, 1, ..., 9 ps
+        out = tmp_path / "at_3ps.pdb"
+        run(self._make_args(trajectory_files, out, time=3))
+
+        import mdtraj as md
+
+        loaded = md.load_pdb(str(out))
+        # ps semantics selects frame 3; a frame index would have given frame 2
+        assert np.allclose(loaded.xyz[0], traj.xyz[3], atol=1e-3)
+        assert not np.allclose(loaded.xyz[0], traj.xyz[2], atol=1e-3)
+
+    def test_time_zero_is_the_first_frame(self, trajectory_files, tmp_path):
+        """--time 0 selects the first frame (the old code rejected it)"""
+        import mdtraj as md
+        import numpy as np
+
+        from src.analysis.extract_str import run
+
+        out = tmp_path / "at_0ps.pdb"
+        run(self._make_args(trajectory_files, out, time=0))
+
+        loaded = md.load_pdb(str(out))
+        assert np.allclose(loaded.xyz[0], trajectory_files["traj"].xyz[0], atol=1e-3)
+
+    def test_time_out_of_range_exits(self, trajectory_files, tmp_path):
+        """A time outside the trajectory range exits"""
+        from src.analysis.extract_str import run
+
+        with pytest.raises(SystemExit):
+            run(self._make_args(trajectory_files, tmp_path / "x.pdb", time=999))
+
+    def test_time_between_frames_uses_nearest(self, trajectory_files, tmp_path):
+        """A time between frames snaps to the nearest frame"""
+        import mdtraj as md
+        import numpy as np
+
+        from src.analysis.extract_str import run
+
+        out = tmp_path / "at_2p6ps.pdb"
+        run(self._make_args(trajectory_files, out, time=2.6))
+
+        loaded = md.load_pdb(str(out))
+        assert np.allclose(loaded.xyz[0], trajectory_files["traj"].xyz[3], atol=1e-3)
+
     def test_empty_selection_raises(self, trajectory_files, tmp_path):
         from src.analysis.extract_str import run
 

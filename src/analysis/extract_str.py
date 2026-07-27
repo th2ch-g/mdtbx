@@ -19,6 +19,9 @@ LOGGER = generate_logger(__name__)
 def add_subcmd(subparsers):
     """
     mdtbx extract_str --topology structure.pdb --trajectory trajectory.xtc --selection "resid 1 to 10" -o target.pdb --time 123
+
+    --time is a time point in ps, not a frame index, for both the mdtraj and
+    the --gmx backend.
     """
     parser = subparsers.add_parser(
         "extract_str",
@@ -31,9 +34,9 @@ def add_subcmd(subparsers):
     add_selection_arg(parser)
     parser.add_argument(
         "--time",
-        type=int,
+        type=float,
         required=True,
-        help="Time to extract structure",
+        help="Time point to extract [ps]",
     )
     add_output_arg(parser, default="target.pdb", help="Output struxture file")
     parser.add_argument(
@@ -76,10 +79,23 @@ def run(args):
         import mdtraj as md
 
         trj = md.load(args.trajectory, top=args.topology)
-        if not (1 <= args.time <= trj.n_frames):
-            LOGGER.error(f"--time {args.time} is out of range (1 to {trj.n_frames})")
+        # --time is a time point in ps for both backends: the gmx path feeds it
+        # to `trjconv -b/-e`, so the mdtraj path resolves it against trj.time
+        # instead of treating it as a frame index.
+        times = trj.time
+        if not (times.min() <= args.time <= times.max()):
+            LOGGER.error(
+                f"--time {args.time} ps is out of range "
+                f"({times.min()} to {times.max()} ps)"
+            )
             sys.exit(1)
-        trj = trj[args.time - 1]
+        frame = int(abs(times - args.time).argmin())
+        if times[frame] != args.time:
+            LOGGER.warning(
+                f"No frame at {args.time} ps; using the nearest frame "
+                f"{frame} at {times[frame]} ps"
+            )
+        trj = trj[frame]
         atom_indices = select_atom_indices(trj.topology, args.selection)
         final_trj = trj.atom_slice(atom_indices)
         final_trj.save_pdb(str(output_path))
