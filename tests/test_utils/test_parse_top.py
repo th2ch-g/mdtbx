@@ -40,6 +40,14 @@ class TestGromacsTopologyParser:
         assert "resid" in first
         assert "resname" in first
         assert "name" in first
+        assert "moleculetype" in first
+
+    def test_atoms_carry_their_moleculetype(self, parser):
+        """各原子が所属する moleculetype 名を保持すること"""
+        assert {a["moleculetype"] for a in parser.get_atoms_in("Protein")} == {
+            "Protein"
+        }
+        assert {a["moleculetype"] for a in parser.get_atoms_in("SOL")} == {"SOL"}
 
     def test_protein_residue_names(self, parser):
         """ALA と GLY の残基が含まれること（fixture の内容に対応）"""

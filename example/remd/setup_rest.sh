@@ -2,7 +2,7 @@
 set -e
 
 TEMPLATE_MDP="$TOOLS/mdtbx/example/mdp/solution/prd.mdp"
-SELECTION_TEMPERING="protein and (resid 117 to 137)"
+SELECTION_TEMPERING="protein and (resid 117 to 137)" # used in gmx.top
 N_REPLICA=16
 TMIN=310
 TMAX=500

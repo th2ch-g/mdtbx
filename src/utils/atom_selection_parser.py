@@ -96,6 +96,17 @@ class Chain(SelectionNode):
         return any(fnmatch.fnmatchcase(chain, pattern) for pattern in self.names)
 
 
+class Moleculetype(SelectionNode):
+    def __init__(self, names: list[str]):
+        self.names = names
+
+    def eval(self, mol: AtomRecord) -> bool:
+        moleculetype = mol.get("moleculetype")
+        if not isinstance(moleculetype, str):
+            return False
+        return any(fnmatch.fnmatchcase(moleculetype, pattern) for pattern in self.names)
+
+
 class ResName(SelectionNode):
     def __init__(self, names: list[str]):
         self.names = names
@@ -186,7 +197,7 @@ class ParseError(ValueError):
     pass
 
 
-FORBIDDEN_IDENTIFIERS = {"and", "or", "not", "to"}
+FORBIDDEN_IDENTIFIERS = {"and", "or", "not", "to", "moleculetype"}
 
 
 class SelectionParser:
@@ -335,6 +346,11 @@ class SelectionParser:
         self._skip_space1()
         return Chain(self._parse_list_of_identifiers())
 
+    def _parse_moleculetype(self) -> SelectionNode:
+        self._consume_tag("moleculetype")
+        self._skip_space1()
+        return Moleculetype(self._parse_list_of_identifiers())
+
     def _parse_all(self) -> SelectionNode:
         self._consume_tag("all")
         return All()
@@ -368,6 +384,7 @@ class SelectionParser:
             "backbone": self._parse_backbone,
             "sidechain": self._parse_sidechain,
             "chain": self._parse_chain,
+            "moleculetype": self._parse_moleculetype,
             "resname": self._parse_resname,
             "resid": self._parse_resid,
             "index": self._parse_index,
