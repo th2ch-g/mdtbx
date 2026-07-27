@@ -15,6 +15,7 @@ from src.utils.atom_selection_parser import (
     Bracket,
     Chain,
     Index,
+    Moleculetype,
     Name,
     Not,
     Or,
@@ -36,6 +37,20 @@ ALA_CB = {"resname": "ALA", "name": "CB", "resid": 1, "index": 2}
 GLY_N = {"resname": "GLY", "name": "N", "resid": 2, "index": 3}
 HOH_O = {"resname": "HOH", "name": "O", "resid": 3, "index": 4}
 NA_ION = {"resname": "NA", "name": "NA", "resid": 4, "index": 5}
+PROTEIN_CA = {
+    "resname": "ALA",
+    "name": "CA",
+    "resid": 1,
+    "index": 1,
+    "moleculetype": "Protein_chain_A",
+}
+SOL_OW = {
+    "resname": "SOL",
+    "name": "OW",
+    "resid": 1,
+    "index": 1,
+    "moleculetype": "SOL",
+}
 
 # ---------------------------------------------------------------------------
 # SelectionNode の基本評価
@@ -144,6 +159,23 @@ class TestIndex:
         assert not Index([99]).eval(ALA_CA)
 
 
+class TestMoleculetype:
+    def test_match(self):
+        assert Moleculetype(["SOL"]).eval(SOL_OW)
+
+    def test_no_match(self):
+        assert not Moleculetype(["SOL"]).eval(PROTEIN_CA)
+
+    def test_wildcard(self):
+        assert Moleculetype(["Protein*"]).eval(PROTEIN_CA)
+
+    def test_case_sensitive(self):
+        assert not Moleculetype(["sol"]).eval(SOL_OW)
+
+    def test_missing_key_is_false(self):
+        assert not Moleculetype(["SOL"]).eval(ALA_CA)
+
+
 class TestNot:
     def test_inverts_protein(self):
         assert Not(Protein()).eval(HOH_O)
@@ -233,6 +265,16 @@ class TestSelectionParser:
         result = SelectionParser("chain A").parse()
         assert isinstance(result, Chain)
 
+    def test_moleculetype(self):
+        result = SelectionParser("moleculetype SOL").parse()
+        assert isinstance(result, Moleculetype)
+        assert result.names == ["SOL"]
+
+    def test_moleculetype_multiple_names(self):
+        result = SelectionParser("moleculetype Protein_chain_A SOL").parse()
+        assert isinstance(result, Moleculetype)
+        assert result.names == ["Protein_chain_A", "SOL"]
+
     def test_name_wildcard(self):
         result = SelectionParser("name C*").parse()
         assert isinstance(result, Name)
@@ -284,6 +326,12 @@ class TestAtomSelector:
         selector = AtomSelector("not not protein")
         assert selector.eval(ALA_CA)
 
+    def test_moleculetype_selection(self):
+        assert AtomSelector("moleculetype SOL").eval(SOL_OW)
+        assert not AtomSelector("moleculetype SOL").eval(PROTEIN_CA)
+        assert AtomSelector("moleculetype Protein* and name CA").eval(PROTEIN_CA)
+        assert AtomSelector("not moleculetype SOL").eval(PROTEIN_CA)
+
     def test_chain_selection(self):
         mol_a = {"resname": "ALA", "name": "CA", "chain": "A"}
         mol_b = {"resname": "ALA", "name": "CA", "chain": "B"}
@@ -305,6 +353,8 @@ class TestParseErrors:
             "resname and",
             "( resid 1",
             "name ca and",
+            "moleculetype",
+            "chain A moleculetype SOL",
         ],
     )
     def test_invalid_selection_raises(self, bad_selection):

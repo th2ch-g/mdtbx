@@ -93,6 +93,7 @@ class GromacsTopologyParser:
                         "resid": resid,
                         "resname": resname,
                         "name": atom_name,
+                        "moleculetype": current_moleculetype,
                         "linenumber": idx,
                     }
 
