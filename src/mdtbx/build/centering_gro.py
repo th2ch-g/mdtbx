@@ -59,10 +59,15 @@ def add_subcmd(subparsers):
 
 def run(args):
     dummy_mdp_path = Path(__file__).parent / "dummy.mdp"
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     gmx_command = shlex.split(args.gmx)
     if not gmx_command:
         raise ValueError("--gmx must not be empty")
-    with gmx_tempfile(".tpr") as topology_path:
+    with (
+        gmx_tempfile(".tpr") as topology_path,
+        gmx_tempfile(".gro", directory=output_path.parent) as centered_path,
+    ):
         cmd = [
             *gmx_command,
             "grompp",
@@ -93,7 +98,7 @@ def run(args):
             "-n",
             args.index,
             "-o",
-            args.output,
+            centered_path,
             "-pbc",
             "mol",
             "-center",
@@ -101,21 +106,22 @@ def run(args):
         run_cmd(
             cmd,
             input=f"{args.centering_selection}\nSystem\n",
-            log=f"{args.output} generated",
+            log=f"{centered_path} generated",
         )
-
-    if not args.no_editconf:
-        cmd = [
-            *gmx_command,
-            "editconf",
-            "-f",
-            args.output,
-            "-o",
-            args.output,
-            "-resnr",
-            "1",
-        ]
-        run_cmd(
-            cmd,
-            log=f"{args.output} residue numbers reset",
-        )
+        if args.no_editconf:
+            Path(centered_path).replace(output_path)
+        else:
+            cmd = [
+                *gmx_command,
+                "editconf",
+                "-f",
+                centered_path,
+                "-o",
+                args.output,
+                "-resnr",
+                "1",
+            ]
+            run_cmd(
+                cmd,
+                log=f"{args.output} residue numbers reset",
+            )

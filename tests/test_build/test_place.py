@@ -61,6 +61,11 @@ def test_rotation_and_direction_are_independent_streams():
     assert not np.allclose(R @ v, v)
 
 
+def test_retry_seed_does_not_overlap_adjacent_base_seed():
+    assert place.placement_attempt_seed(7, 0) == 7
+    assert place.placement_attempt_seed(7, 1) != place.placement_attempt_seed(8, 0)
+
+
 def test_default_seed_is_42():
     args = _parse_args(
         place.add_subcmd,
@@ -81,6 +86,14 @@ def test_min_interchain_distance_basic():
     coords2 = np.array([[3.0, 0.0, 0.0], [11.0, 0.0, 0.0]])
     # min pair: (10,0,0) and (11,0,0) -> 1.0
     assert place.min_interchain_distance(coords1, coords2) == pytest.approx(1.0)
+
+
+def test_min_interchain_distance_chunks_pairwise_array(monkeypatch):
+    monkeypatch.setattr(place, "MAX_PAIRWISE_PAIRS", 2)
+    coords1 = np.array([[0.0, 0.0, 0.0], [5.0, 0.0, 0.0]])
+    coords2 = np.array([[2.0, 0.0, 0.0], [9.0, 0.0, 0.0]])
+
+    assert place.min_interchain_distance(coords1, coords2) == pytest.approx(2.0)
 
 
 @pytest.mark.parametrize(

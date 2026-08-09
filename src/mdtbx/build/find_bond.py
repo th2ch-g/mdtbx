@@ -9,6 +9,22 @@ from ..utils.pymol_session import pymol_session
 LOGGER = generate_logger(__name__)
 
 
+def _tleap_residue_numbers(
+    atom_records: list[tuple[int, str, str, str]],
+) -> dict[int, int]:
+    """Map PyMOL atom indices to tleap's sequential residue numbers."""
+    mapping: dict[int, int] = {}
+    previous_key: tuple[str, str, str] | None = None
+    residue_number = 0
+    for atom_index, segi, chain, resi in sorted(atom_records):
+        key = (segi, chain, resi)
+        if key != previous_key:
+            residue_number += 1
+            previous_key = key
+        mapping[atom_index] = residue_number
+    return mapping
+
+
 def add_subcmd(subparsers):
     """
     mdtbx find_bond -s structure -s1 selection -s2 selection -c cutoff -o output
@@ -70,6 +86,14 @@ def add_subcmd(subparsers):
 
 def run(args):
     with pymol_session(cmd, args.structure):
+        atom_records: list[tuple[int, str, str, str]] = []
+        cmd.iterate_state(
+            1,
+            "target",
+            "atom_records.append((index, segi, chain, resi))",
+            space={"atom_records": atom_records},
+        )
+        tleap_residue_by_atom = _tleap_residue_numbers(atom_records)
         pairs = cmd.find_pairs(args.selection1, args.selection2, cutoff=args.cutoff)
         bonds_set = set()
         # Keep the bonded SG atom indices together with their resi so the CYM rename
@@ -81,21 +105,19 @@ def run(args):
                 continue
             bonds_set.add(idx1[1])
             bonds_set.add(idx2[1])
-            tmp = []
-            cmd.iterate_state(1, f"index {idx1[1]}", "tmp.append(resi)", space=locals())
-            cmd.iterate_state(1, f"index {idx2[1]}", "tmp.append(resi)", space=locals())
             bonds.append(
                 {
                     "index1": idx1[1],
                     "index2": idx2[1],
-                    "resi1": tmp[0],
-                    "resi2": tmp[1],
+                    "residue1": tleap_residue_by_atom[idx1[1]],
+                    "residue2": tleap_residue_by_atom[idx2[1]],
                 }
             )
         bonds_str_lines = []
         for bond in bonds:
             bonds_str_lines.append(
-                f"bond {SYSTEM_NAME}.{bond['resi1']}.SG {SYSTEM_NAME}.{bond['resi2']}.SG"
+                f"bond {SYSTEM_NAME}.{bond['residue1']}.SG "
+                f"{SYSTEM_NAME}.{bond['residue2']}.SG"
             )
         bonds_str = "\n".join(bonds_str_lines)
 

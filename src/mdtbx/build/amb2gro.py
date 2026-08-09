@@ -1,7 +1,9 @@
 import argparse
 import shutil
+import tempfile
 from pathlib import Path
 
+from ..utils.gmx import gmx_tempfile
 from ..utils.proc import run_cmd
 from ..logger import generate_logger
 
@@ -62,17 +64,33 @@ def run(args):
     # acpype may create wrong gro file
     # because of overflow of residue numbers or atom numbers
     elif args.type == "acpype":
-        cmd = ["acpype", "-p", args.parm, "-x", args.rst]
-        run_cmd(cmd)
         stem = Path(args.parm).stem
-        generated_dir = Path(f"{stem}.amb2gmx")
-        shutil.copy2(generated_dir / f"{stem}_GMX.gro", "gmx.gro")
-        shutil.copy2(generated_dir / f"{stem}_GMX.top", "gmx.top")
+        with tempfile.TemporaryDirectory(prefix="mdtbx-acpype-") as tempdir:
+            cmd = [
+                "acpype",
+                "-p",
+                str(Path(args.parm).resolve()),
+                "-x",
+                str(Path(args.rst).resolve()),
+            ]
+            run_cmd(cmd, cwd=tempdir)
+            generated_dir = Path(tempdir) / f"{stem}.amb2gmx"
+            shutil.copy2(generated_dir / f"{stem}_GMX.gro", "gmx.gro")
+            shutil.copy2(generated_dir / f"{stem}_GMX.top", "gmx.top")
         LOGGER.info("gmx.gro generated")
         LOGGER.info("gmx.top generated")
-        shutil.rmtree(generated_dir)
-        LOGGER.info(f"{generated_dir}/ removed")
 
     if not args.no_editconf:
-        cmd = ["gmx", "editconf", "-f", "gmx.gro", "-o", "gmx.gro", "-resnr", "1"]
-        run_cmd(cmd, log="gmx editconf -f gmx.gro -o gmx.gro -resnr 1 run")
+        with gmx_tempfile(".gro") as edited_path:
+            cmd = [
+                "gmx",
+                "editconf",
+                "-f",
+                "gmx.gro",
+                "-o",
+                edited_path,
+                "-resnr",
+                "1",
+            ]
+            run_cmd(cmd, log="gmx editconf residue renumbering completed")
+            Path(edited_path).replace("gmx.gro")

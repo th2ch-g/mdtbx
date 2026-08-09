@@ -78,7 +78,10 @@ class _FakeStructure:
         self.coordinate_set_count += 1
 
     def __getitem__(self, indices):
-        return _FakeStructure(self._coordinates[list(indices)])
+        selection = list(indices)
+        if len(selection) == len(self.atoms):
+            selection = [index for index, keep in enumerate(selection) if keep]
+        return _FakeStructure(self._coordinates[selection])
 
     def save(self, path, **_kwargs):
         Path(path).write_text("fake structure\n")
@@ -112,7 +115,7 @@ def test_repack_water_writes_packed_coordinates_back_once(tmp_path, monkeypatch)
     monkeypatch.setattr(pmd, "load_file", fake_load_file)
     monkeypatch.setattr(packmol_water, "run_cmd", fake_run_cmd)
 
-    packmol_water.repack_water(
+    report = packmol_water.repack_water(
         tmp_path / "system.parm7",
         tmp_path / "system.rst7",
         tmp_path / "system.pdb",
@@ -121,3 +124,10 @@ def test_repack_water_writes_packed_coordinates_back_once(tmp_path, monkeypatch)
     assert original.coordinate_set_count == 1
     np.testing.assert_allclose(original._coordinates[:2], original_coordinates[:2])
     np.testing.assert_allclose(original._coordinates[2:], packed_coordinates[2:])
+    assert report["transfer_max_abs_error_A"] == 0.0
+    assert report["saved_max_abs_error_A"] == 0.0
+    assert report["vectorized_transfer"] is True
+
+
+def test_atom_selection_mask_keeps_atom_zero():
+    assert packmol_water._atom_selection_mask(3, [0, 1, 2]) == [True, True, True]

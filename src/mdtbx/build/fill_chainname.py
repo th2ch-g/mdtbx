@@ -79,7 +79,9 @@ def _split_into_blocks(
     for idx, resv, segi in atoms:
         boundary = prev_resv is None
         if not boundary and (
-            (use_segi and segi != prev_segi) or resv - prev_resv > max_resi_gap
+            (use_segi and segi != prev_segi)
+            or resv < prev_resv
+            or resv - prev_resv > max_resi_gap
         ):
             boundary = True
         if boundary:

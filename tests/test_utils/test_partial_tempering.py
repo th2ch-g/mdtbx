@@ -6,6 +6,8 @@ Uses sample.top to test appending an underscore to atom_type.
 
 import types
 
+import pytest
+
 
 class TestPartialTemperingRun:
     def _make_args(self, topology_path, output_path, selection):
@@ -99,3 +101,16 @@ class TestPartialTemperingRun:
         run(self._make_args(sample_top_path, out, selection="resname ALA"))
 
         assert out.exists()
+
+    def test_require_update_rejects_empty_selection(self, sample_top_path, tmp_path):
+        from mdtbx.utils.partial_tempering import run
+
+        args = self._make_args(
+            sample_top_path,
+            tmp_path / "output.top",
+            selection="resname LIG",
+        )
+        args.require_update = True
+
+        with pytest.raises(ValueError, match="no new atom-type updates"):
+            run(args)

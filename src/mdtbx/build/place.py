@@ -10,6 +10,8 @@ LOGGER = generate_logger(__name__)
 # Pairwise atom distance below this is treated as a serious clash.
 # Smaller than typical vdW contact (~3.0 A) but larger than covalent bonds (~1.5 A).
 DEFAULT_CLASH_CUTOFF = 2.0
+RETRY_SEED_STRIDE = 1_000_003
+MAX_PAIRWISE_PAIRS = 1_000_000
 
 
 def add_subcmd(subparsers):
@@ -127,6 +129,11 @@ def random_unit_vector(seed: int) -> np.ndarray:
     return v / np.linalg.norm(v)
 
 
+def placement_attempt_seed(seed: int, attempt: int) -> int:
+    """Keep the first seed stable while separating retry streams."""
+    return seed + attempt * RETRY_SEED_STRIDE
+
+
 def min_interchain_distance(coords1: np.ndarray, coords2: np.ndarray) -> float:
     """
     Smallest pairwise distance between two atom coordinate sets.
@@ -138,9 +145,13 @@ def min_interchain_distance(coords1: np.ndarray, coords2: np.ndarray) -> float:
         raise ValueError("coords1 must be a non-empty array with shape (n_atoms, 3)")
     if coords2.ndim != 2 or coords2.shape[1:] != (3,) or coords2.shape[0] == 0:
         raise ValueError("coords2 must be a non-empty array with shape (n_atoms, 3)")
-    diff = coords1[:, None, :] - coords2[None, :, :]
-    dists = np.linalg.norm(diff, axis=-1)
-    return float(dists.min())
+    chunk_size = max(1, MAX_PAIRWISE_PAIRS // len(coords2))
+    minimum = np.inf
+    for start in range(0, len(coords1), chunk_size):
+        diff = coords1[start : start + chunk_size, None, :] - coords2[None, :, :]
+        squared_distances = np.einsum("ijk,ijk->ij", diff, diff)
+        minimum = min(minimum, float(squared_distances.min()))
+    return float(np.sqrt(minimum))
 
 
 def run(args):
@@ -171,7 +182,7 @@ def run(args):
             LOGGER.info(f"mol2 COM (input): {com2}")
             pymol_cmd.translate(list(-com2), "mol2", camera=0)
 
-            attempt_seed = args.seed + attempt
+            attempt_seed = placement_attempt_seed(args.seed, attempt)
             rotation = random_rotation_matrix(attempt_seed)
             ttt_matrix = np.eye(4)
             ttt_matrix[:3, :3] = rotation

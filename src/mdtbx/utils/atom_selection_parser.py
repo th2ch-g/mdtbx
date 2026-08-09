@@ -26,13 +26,35 @@ PROTEIN_RESNAMES: set[str] = {
     "TRP",
     "TYR",
     "VAL",
+    # Common Amber protonation and disulfide variants.
+    "ASH",
+    "CYM",
+    "CYX",
+    "GLH",
+    "HID",
+    "HIE",
+    "HIP",
+    "LYN",
 }
 
 WATER_RESNAMES: set[str] = {"HOH", "WAT", "SOL"}
 
 BACKBONE_ATOM_NAMES: set[str] = {"N", "CA", "C", "O", "OXT"}
 
-ION_NAMES: set[str] = {"NA", "CL", "K", "MG", "ZN", "CA"}
+ION_NAMES: set[str] = {
+    "NA",
+    "NA+",
+    "CL",
+    "CL-",
+    "K",
+    "K+",
+    "MG",
+    "MG2+",
+    "ZN",
+    "ZN2+",
+    "CA",
+    "CA2+",
+}
 
 
 @runtime_checkable
@@ -155,27 +177,27 @@ class All(SelectionNode):
 class Protein(SelectionNode):
     def eval(self, mol: AtomRecord) -> bool:
         resname = mol.get("resname")
-        return isinstance(resname, str) and resname in PROTEIN_RESNAMES
+        return isinstance(resname, str) and resname.upper() in PROTEIN_RESNAMES
 
 
 class Water(SelectionNode):
     def eval(self, mol: AtomRecord) -> bool:
         resname = mol.get("resname")
-        return isinstance(resname, str) and resname in WATER_RESNAMES
+        return isinstance(resname, str) and resname.upper() in WATER_RESNAMES
 
 
 class Ion(SelectionNode):
     def eval(self, mol: AtomRecord) -> bool:
         name = mol.get("name")
         resname = mol.get("resname")
-        if isinstance(resname, str) and resname in ION_NAMES:
+        normalized_resname = resname.upper() if isinstance(resname, str) else None
+        normalized_name = name.upper() if isinstance(name, str) else None
+        if normalized_resname in ION_NAMES:
             return True
         # Fall back to the atom name only when the residue is not a known protein
         # residue, so a protein alpha-carbon (name "CA") is not misread as calcium.
         return (
-            isinstance(name, str)
-            and name in ION_NAMES
-            and not (isinstance(resname, str) and resname in PROTEIN_RESNAMES)
+            normalized_name in ION_NAMES and normalized_resname not in PROTEIN_RESNAMES
         )
 
 

@@ -60,6 +60,16 @@ def _water_atom_groups(structure, water_resnames):
     ]
 
 
+def _atom_selection_mask(atom_count, indices):
+    """Return an unambiguous ParmEd boolean atom-selection mask."""
+    mask = [False] * atom_count
+    for index in indices:
+        if index < 0 or index >= atom_count:
+            raise IndexError(f"Atom index out of range: {index}")
+        mask[index] = True
+    return mask
+
+
 def repack_water(
     parm_path,
     rst_path,
@@ -76,7 +86,13 @@ def repack_water(
     water_groups = _water_atom_groups(structure, water_resnames)
     if not water_groups:
         LOGGER.info("No water molecules to repack")
-        return
+        return {
+            "water_molecules": 0,
+            "water_atoms": 0,
+            "transfer_max_abs_error_A": 0.0,
+            "saved_max_abs_error_A": 0.0,
+            "vectorized_transfer": True,
+        }
 
     atoms_per_water = len(water_groups[0])
     if any(len(group) != atoms_per_water for group in water_groups):
@@ -101,12 +117,12 @@ def repack_water(
 
         fixed_input = None
         if fixed_indices:
-            fixed = structure[fixed_indices]
+            fixed = structure[_atom_selection_mask(len(structure.atoms), fixed_indices)]
             fixed.box = None
             fixed.save(str(fixed_path), format="pdb", overwrite=True)
             fixed_input = fixed_path
 
-        water = structure[water_groups[0]]
+        water = structure[_atom_selection_mask(len(structure.atoms), water_groups[0])]
         water.box = None
         water.save(str(water_path), format="pdb", overwrite=True)
 
@@ -152,7 +168,29 @@ def repack_water(
         coordinates = np.asarray(structure.coordinates).copy()
         coordinates[water_indices] = packed_water_coordinates
         structure.coordinates = coordinates
+        applied_coordinates = np.asarray(structure.coordinates)[water_indices]
+        transfer_max_abs_error = float(
+            np.max(np.abs(applied_coordinates - packed_water_coordinates))
+        )
+        if transfer_max_abs_error > 1.0e-8:
+            raise RuntimeError(
+                "Packmol coordinates were not transferred to the Amber structure"
+            )
 
     structure.save(str(rst_path), format="rst7", overwrite=True)
     structure.save(str(pdb_path), format="pdb", overwrite=True)
+    saved = pmd.load_file(str(parm_path), xyz=str(rst_path))
+    saved_water_coordinates = np.asarray(saved.coordinates)[water_indices]
+    saved_max_abs_error = float(
+        np.max(np.abs(saved_water_coordinates - packed_water_coordinates))
+    )
+    if saved_max_abs_error > 1.0e-3:
+        raise RuntimeError("Saved Amber coordinates do not match Packmol output")
     LOGGER.info(f"Repacked {len(water_groups)} water molecules with Packmol")
+    return {
+        "water_molecules": len(water_groups),
+        "water_atoms": len(water_indices),
+        "transfer_max_abs_error_A": transfer_max_abs_error,
+        "saved_max_abs_error_A": saved_max_abs_error,
+        "vectorized_transfer": True,
+    }

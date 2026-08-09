@@ -21,8 +21,19 @@ def run_tleap(input_text, *, keepfiles=False, extra_cleanup=()):
     extra_cleanup : Iterable[str]
         Additional files to remove unless keepfiles is set.
     """
-    Path("tleap.in").write_text(input_text)
-    run_cmd(["tleap", "-f", "tleap.in"], check=True)
-    if not keepfiles:
-        for name in ("leap.log", "tleap.in", *extra_cleanup):
-            Path(name).unlink(missing_ok=True)
+    input_path = Path("tleap.in")
+    log_path = Path("leap.log")
+    existing = [str(path) for path in (input_path, log_path) if path.exists()]
+    if existing:
+        raise FileExistsError(
+            "Refusing to overwrite existing tleap working file(s): "
+            + ", ".join(existing)
+        )
+
+    input_path.write_text(input_text)
+    try:
+        run_cmd(["tleap", "-f", str(input_path)], check=True)
+    finally:
+        if not keepfiles:
+            for name in (log_path, input_path, *map(Path, extra_cleanup)):
+                name.unlink(missing_ok=True)

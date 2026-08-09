@@ -41,6 +41,9 @@ def test_build_solution_default_template_exists_and_outdir_is_created(
 
     assert outdir.exists()
     assert "input_text" in calls
+    exact_box_command = f"set {build_solution.SYSTEM_NAME} box {{ 100 100 100 }}"
+    assert calls["input_text"].count(exact_box_command) == 2
+    assert f"setbox {build_solution.SYSTEM_NAME} vdw" not in calls["input_text"]
 
 
 def test_build_solution_repacks_water_with_packmol(tmp_path, monkeypatch):
@@ -51,7 +54,10 @@ def test_build_solution_repacks_water_with_packmol(tmp_path, monkeypatch):
     monkeypatch.setattr(
         build_solution,
         "repack_water",
-        lambda *args, **kwargs: repack_calls.append((args, kwargs)),
+        lambda *args, **kwargs: (
+            repack_calls.append((args, kwargs))
+            or {"vectorized_transfer": True, "saved_max_abs_error_A": 0.0}
+        ),
     )
     args = _parse_args(
         build_solution.add_subcmd,
@@ -79,6 +85,7 @@ def test_build_solution_repacks_water_with_packmol(tmp_path, monkeypatch):
             {"seed": 42, "tolerance": 1.8},
         )
     ]
+    assert (outdir / "packmol_transfer.json").exists()
 
 
 def test_build_solution_rejects_non_positive_packmol_tolerance(tmp_path):
@@ -94,6 +101,27 @@ def test_build_solution_rejects_non_positive_packmol_tolerance(tmp_path):
     )
 
     with pytest.raises(ValueError, match="--packmol-tolerance must be positive"):
+        build_solution.run(args)
+
+
+@pytest.mark.parametrize(
+    ("extra_args", "message"),
+    [
+        (["--ion_conc", "-0.1"], "--ion_conc must be non-negative"),
+        (["--water-seed", "-1"], "--water-seed must be non-negative"),
+        (
+            ["--boxsize", "2", "10", "10", "--packmol-tolerance", "2"],
+            "Each --boxsize edge",
+        ),
+    ],
+)
+def test_build_solution_rejects_invalid_numeric_inputs(tmp_path, extra_args, message):
+    args = _parse_args(
+        build_solution.add_subcmd,
+        ["build_solution", "-o", str(tmp_path / "output"), *extra_args],
+    )
+
+    with pytest.raises(ValueError, match=message):
         build_solution.run(args)
 
 

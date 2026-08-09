@@ -34,7 +34,7 @@ def remove_gmx_backups(directory="."):
 
 
 @contextmanager
-def gmx_tempfile(suffix=".xvg"):
+def gmx_tempfile(suffix=".xvg", directory="."):
     """Yield a unique temp filename in the current directory, removed on exit.
 
     The placeholder is removed before yielding so gmx creates the output
@@ -42,7 +42,7 @@ def gmx_tempfile(suffix=".xvg"):
     reading it raises. Unique names also avoid collisions between concurrent
     runs in the same directory.
     """
-    fd, path = tempfile.mkstemp(suffix=suffix, dir=".")
+    fd, path = tempfile.mkstemp(suffix=suffix, dir=directory)
     os.close(fd)
     Path(path).unlink()
     try:

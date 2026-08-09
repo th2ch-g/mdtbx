@@ -42,6 +42,14 @@ class TestSplitIntoBlocks:
         assert blocks[0] == [1, 2]
         assert blocks[1] == [3, 4]
 
+    def test_split_on_residue_number_reset(self):
+        from mdtbx.build.fill_chainname import _split_into_blocks
+
+        atoms = [(1, 98, ""), (2, 99, ""), (3, 1, ""), (4, 2, "")]
+        blocks = _split_into_blocks(atoms, max_resi_gap=1, use_segi=False)
+
+        assert blocks == [[1, 2], [3, 4]]
+
     def test_ignore_segi_when_use_segi_false(self):
         from mdtbx.build.fill_chainname import _split_into_blocks
 

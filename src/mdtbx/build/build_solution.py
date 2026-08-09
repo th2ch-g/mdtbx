@@ -1,4 +1,5 @@
 import argparse
+import json
 from pathlib import Path
 import sys
 from ..config import SYSTEM_NAME
@@ -104,6 +105,12 @@ def add_subcmd(subparsers):
 def run(args):
     if args.packmol_tolerance <= 0:
         raise ValueError("--packmol-tolerance must be positive")
+    if args.ion_conc < 0:
+        raise ValueError("--ion_conc must be non-negative")
+    if args.water_seed < 0:
+        raise ValueError("--water-seed must be non-negative")
+    if any(edge <= args.packmol_tolerance for edge in args.boxsize):
+        raise ValueError("Each --boxsize edge must exceed --packmol-tolerance")
 
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
@@ -178,13 +185,17 @@ addionsrand {SYSTEM_NAME} {args.anion} 0
     cmd_tleap = "\n".join(lines)
     run_tleap(cmd_tleap, keepfiles=args.keepfiles)
 
-    repack_water(
+    packmol_report = repack_water(
         outdir / "leap.parm7",
         outdir / "leap.rst7",
         outdir / "leap.pdb",
         seed=args.water_seed,
         tolerance=args.packmol_tolerance,
     )
+    if packmol_report is not None:
+        (outdir / "packmol_transfer.json").write_text(
+            json.dumps(packmol_report, indent=2) + "\n"
+        )
 
     LOGGER.info(
         f"{args.outdir}/leap.parm7 {args.outdir}/leap.rst7 {args.outdir}/leap.pdb generated"

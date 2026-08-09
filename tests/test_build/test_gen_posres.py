@@ -43,9 +43,7 @@ class TestGenPosresRun:
 
         itp = tmp_path / "posres_Protein.itp"
         content = itp.read_text()
-        # output_prefix becomes a full path, so the #ifdef name is path dependent;
-        # only check that #ifdef / #endif are present at all
-        assert "#ifdef" in content
+        assert "#ifdef POSRES" in content
         assert "#endif" in content
         assert "[ position_restraints ]" in content
 
@@ -99,3 +97,32 @@ class TestGenPosresRun:
 
         sol_itp = tmp_path / "posres_SOL.itp"
         assert not sol_itp.exists()
+
+    def test_repeated_run_does_not_duplicate_include(self, sample_top_path, tmp_path):
+        from mdtbx.build.gen_posres import run
+
+        top_copy = tmp_path / "test.top"
+        shutil.copy(str(sample_top_path), str(top_copy))
+        args = self._make_args(top_copy, tmp_path / "posres", selection="name CA")
+
+        run(args)
+        run(args)
+
+        assert top_copy.read_text().count('#include "posres_Protein.itp"') == 1
+
+    def test_include_is_after_last_molecule_record(self, sample_top_path, tmp_path):
+        from mdtbx.build.gen_posres import run
+
+        top_copy = tmp_path / "test.top"
+        content = sample_top_path.read_text().replace(
+            "  8   9   1\n\n[ moleculetype ]",
+            "  8   9   1\n[ moleculetype ]",
+        )
+        top_copy.write_text(content)
+
+        run(self._make_args(top_copy, tmp_path / "posres", selection="name CA"))
+
+        updated = top_copy.read_text()
+        include_index = updated.index('#include "posres_Protein.itp"')
+        assert updated.index("  8   9   1") < include_index
+        assert include_index < updated.index("[ moleculetype ]", include_index)

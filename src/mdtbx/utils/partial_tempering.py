@@ -35,6 +35,11 @@ def add_subcmd(subparsers):
         default="output.top",
         help="Output topology file (.top)",
     )
+    parser.add_argument(
+        "--require-update",
+        action="store_true",
+        help="Fail unless at least one selected atom type is newly marked",
+    )
 
     parser.set_defaults(func=run)
 
@@ -58,10 +63,12 @@ def run(args):
         lines = f.readlines()
 
     updated_count = 0
+    expected_updates = 0
     for atom in selected_atoms:
         atom_type = atom["atom_type"]
         if not isinstance(atom_type, str) or atom_type.endswith("_"):
             continue
+        expected_updates += 1
         pattern = rf"^(\s*(?:\S+\s+){{1}}){re.escape(atom_type)}(?=\s|$)"
         replacement = rf"\g<1>{atom_type}_"
         atom_linenumber = atom["linenumber"]
@@ -71,6 +78,15 @@ def run(args):
             pattern, replacement, lines[atom_linenumber], count=1
         )
         updated_count += replacements
+
+    if updated_count != expected_updates:
+        raise RuntimeError(
+            f"Updated {updated_count} atom lines; expected {expected_updates}"
+        )
+    if getattr(args, "require_update", False) and updated_count == 0:
+        raise ValueError(
+            f"Selection produced no new atom-type updates: {args.selection}"
+        )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w") as f:

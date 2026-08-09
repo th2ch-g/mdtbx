@@ -25,6 +25,7 @@ from mdtbx.utils.atom_selection_parser import (
     SelectionParser,
     Sidechain,
     Water,
+    Ion,
     parse_selection,
 )
 
@@ -75,6 +76,10 @@ class TestProtein:
     def test_unknown_resname_is_not_protein(self):
         assert not Protein().eval({"resname": "LIG", "name": "C1"})
 
+    @pytest.mark.parametrize("resname", ["HID", "HIE", "HIP", "CYM", "CYX"])
+    def test_amber_protein_variants_are_protein(self, resname):
+        assert Protein().eval({"resname": resname, "name": "CA"})
+
 
 class TestWater:
     def test_hoh_is_water(self):
@@ -85,6 +90,15 @@ class TestWater:
 
     def test_protein_is_not_water(self):
         assert not Water().eval(ALA_CA)
+
+
+class TestIon:
+    @pytest.mark.parametrize("ion_name", ["Na+", "Cl-", "MG2+", "ZN2+"])
+    def test_common_amber_ion_names(self, ion_name):
+        assert Ion().eval({"resname": ion_name, "name": ion_name})
+
+    def test_protein_alpha_carbon_is_not_calcium(self):
+        assert not Ion().eval(ALA_CA)
 
 
 class TestBackbone:
