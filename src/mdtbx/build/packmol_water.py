@@ -86,9 +86,10 @@ def repack_water(
     if any(abs(angle - 90.0) > 1e-3 for angle in structure.box[3:]):
         raise ValueError("Packmol water placement requires an orthorhombic box")
 
-    water_indices = {index for group in water_groups for index in group}
+    water_indices = [index for group in water_groups for index in group]
+    water_index_set = set(water_indices)
     fixed_indices = [
-        atom.idx for atom in structure.atoms if atom.idx not in water_indices
+        atom.idx for atom in structure.atoms if atom.idx not in water_index_set
     ]
 
     with tempfile.TemporaryDirectory(prefix="mdtbx-packmol-") as tempdir:
@@ -143,12 +144,14 @@ def repack_water(
                 f"expected {expected_atoms}"
             )
 
-        offset = len(fixed_indices)
         packed_coordinates = np.asarray(packed.coordinates)
-        for water_number, atom_indices in enumerate(water_groups):
-            start = offset + water_number * atoms_per_water
-            stop = start + atoms_per_water
-            structure.coordinates[atom_indices] = packed_coordinates[start:stop]
+        packed_water_coordinates = packed_coordinates[len(fixed_indices) :]
+        if len(packed_water_coordinates) != len(water_indices):
+            raise RuntimeError("Packmol water-coordinate count mismatch")
+
+        coordinates = np.asarray(structure.coordinates).copy()
+        coordinates[water_indices] = packed_water_coordinates
+        structure.coordinates = coordinates
 
     structure.save(str(rst_path), format="rst7", overwrite=True)
     structure.save(str(pdb_path), format="pdb", overwrite=True)
