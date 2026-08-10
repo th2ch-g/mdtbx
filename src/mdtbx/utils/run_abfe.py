@@ -51,6 +51,11 @@ def add_subcmd(subparsers):
             "'mpirun -np {ntmpi}' or 'srun --ntasks {ntmpi}'"
         ),
     )
+    parser.add_argument(
+        "--gpu-offload",
+        action="store_true",
+        help="Enable the validated single-GPU GROMACS offload preset",
+    )
     parser.set_defaults(func=run)
 
 
@@ -72,6 +77,7 @@ def run(args):
                 no_continue=args.no_continue,
                 gmx=args.gmx,
                 mpi_launcher=args.mpi_launcher,
+                gpu_offload=getattr(args, "gpu_offload", False),
             )
         )
         LOGGER.info("Finished ABFE leg %s", leg)

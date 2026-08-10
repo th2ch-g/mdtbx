@@ -8,7 +8,7 @@ import pytest
 
 from mdtbx.agent.model import finalize_plan, fingerprint, verify_plan
 from mdtbx.agent.profile import validate_profile
-from mdtbx.agent.runtime import build_plan
+from mdtbx.agent.runtime import build_plan, collect_run, load_run
 from mdtbx.agent.schedulers import AgeScheduler, PjmScheduler, SlurmScheduler
 from mdtbx.cli import create_parser
 
@@ -51,6 +51,7 @@ def test_agent_commands_and_common_flags_are_registered():
         action for action in parser._actions if isinstance(action, _SubParsersAction)
     )
     assert {
+        "agent_cancel",
         "agent_collect",
         "agent_plan",
         "agent_probe",
@@ -131,6 +132,70 @@ def test_scheduler_directives(adapter, marker):
     )
 
 
+def test_slurm_scheduler_maps_node_cpus_to_tasks():
+    profile = _profile("slurm")
+    resource = profile["resources"][0]
+    step = {
+        "id": "hrex",
+        "resources": {
+            "nodes": 1,
+            "cpus_per_node": 16,
+            "tasks_per_node": 16,
+            "gpus_per_node": 1,
+            "memory_mb": 8192,
+            "walltime_seconds": 600,
+        },
+    }
+
+    lines = SlurmScheduler().directives(step, resource, profile)
+
+    assert "#SBATCH --ntasks-per-node=16" in lines
+    assert "#SBATCH --cpus-per-task=1" in lines
+
+
+def test_slurm_scheduler_cancels_exact_job(monkeypatch):
+    calls = []
+
+    def fake_run(argv, *, check=False):
+        calls.append((argv, check))
+
+    monkeypatch.setattr("mdtbx.agent.schedulers._run", fake_run)
+
+    SlurmScheduler().cancel("12345")
+
+    assert calls == [(["scancel", "12345"], True)]
+
+
+def test_slurm_scheduler_writes_logs_next_to_job_script(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(argv, *, check=False):
+        calls.append((argv, check))
+        return subprocess.CompletedProcess(argv, 0, stdout="12345\n", stderr="")
+
+    monkeypatch.setattr("mdtbx.agent.schedulers._run", fake_run)
+    script = tmp_path / "step" / "job.sh"
+    script.parent.mkdir()
+    script.touch()
+
+    job_id = SlurmScheduler().submit(script, dependencies=["100"], resource={})
+
+    assert job_id == "12345"
+    assert calls == [
+        (
+            [
+                "sbatch",
+                "--parsable",
+                "--dependency=afterok:100",
+                f"--output={script.parent / 'scheduler.stdout.log'}",
+                f"--error={script.parent / 'scheduler.stderr.log'}",
+                str(script),
+            ],
+            True,
+        )
+    ]
+
+
 def test_approval_hook_asks_and_denies():
     hook = Path("agent-skills/md-research/scripts/approval_hook.py")
     ask = subprocess.run(
@@ -168,3 +233,58 @@ def test_agent_schema_exposes_formal_v2_documents():
     assert document["schemas"]["request"]["properties"]["schema_version"] == {
         "const": 2
     }
+
+
+def test_run_fep_path_is_tracked_as_input_and_output():
+    from mdtbx.cli import create_parser
+    from mdtbx.agent.registry import all_descriptors
+
+    item = all_descriptors(create_parser({"run_fep"}))["run_fep"]
+
+    assert "path" in item["inputs"]
+    assert "path" in item["outputs"]
+
+
+def test_load_run_finds_default_root_from_nested_directory(tmp_path, monkeypatch):
+    run_id = "20260101T000000000000Z-example"
+    run_dir = tmp_path / ".mdtbx" / "runs" / run_id
+    run_dir.mkdir(parents=True)
+    (run_dir / "state.json").write_text(
+        json.dumps({"schema_version": 2, "run_id": run_id})
+    )
+    nested = tmp_path / "project" / "workflow"
+    nested.mkdir(parents=True)
+    monkeypatch.chdir(nested)
+
+    resolved, state = load_run(run_id)
+
+    assert resolved == run_dir.resolve()
+    assert state["run_id"] == run_id
+
+
+def test_collect_run_persists_scheduler_step_state(tmp_path, monkeypatch):
+    run_dir = tmp_path / "run-id"
+    run_dir.mkdir()
+    state = {
+        "schema_version": 2,
+        "run_id": "run-id",
+        "plan_id": "plan-id",
+        "scheduler": "slurm",
+        "steps": {"simulation": {"state": "queued", "job_id": "123"}},
+    }
+    (run_dir / "state.json").write_text(json.dumps(state))
+    (run_dir / "plan.json").write_text(
+        json.dumps({"steps": [{"id": "simulation", "artifacts": []}]})
+    )
+
+    class FakeScheduler:
+        def status(self, job_id):
+            return {"job_id": job_id, "state": "succeeded"}
+
+    monkeypatch.setattr("mdtbx.agent.runtime.scheduler", lambda _name: FakeScheduler())
+
+    result = collect_run(str(run_dir))
+    persisted = json.loads((run_dir / "state.json").read_text())
+
+    assert result["status"] == "succeeded"
+    assert persisted["steps"]["simulation"]["state"] == "succeeded"

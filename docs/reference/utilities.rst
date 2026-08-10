@@ -57,6 +57,14 @@ run_fep
    :start_command: run_fep
    :groups:
 
+equilibrate_fep
+---------------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: equilibrate_fep
+   :groups:
+
 shell_hook
 ----------
 

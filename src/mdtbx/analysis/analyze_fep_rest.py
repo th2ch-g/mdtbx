@@ -48,6 +48,17 @@ def add_subcmd(subparsers):
         action="store_true",
         help="Regenerate cached cross-Hamiltonian energies",
     )
+    parser.add_argument(
+        "--gpu-offload",
+        action="store_true",
+        help="Enable GPU nonbonded and PME offload for reruns",
+    )
+    parser.add_argument(
+        "--ntomp",
+        type=int,
+        default=1,
+        help="OpenMP thread count for each rerun",
+    )
     parser.set_defaults(func=run)
 
 
@@ -105,25 +116,47 @@ def _aligned_difference(reference_path, target_path, begin, end, subsample):
 def _rerun_energy(args, trajectory, tpr, output_dir):
     potential = output_dir / "potential.xvg"
     if potential.is_file() and not args.force:
-        return potential
+        cache_time = potential.stat().st_mtime_ns
+        if all(
+            source.is_file() and source.stat().st_mtime_ns <= cache_time
+            for source in (trajectory, tpr)
+        ):
+            return potential
     output_dir.mkdir(parents=True, exist_ok=True)
-    run_cmd(
-        [
-            args.gmx,
-            "mdrun",
-            "-s",
-            str(tpr),
-            "-rerun",
-            str(trajectory),
-            "-e",
-            "rerun.edr",
-            "-g",
-            "rerun.log",
-            "-deffnm",
-            "rerun",
-        ],
-        cwd=output_dir,
-    )
+    command = [
+        args.gmx,
+        "mdrun",
+        "-s",
+        str(tpr),
+        "-rerun",
+        str(trajectory),
+        "-e",
+        "rerun.edr",
+        "-g",
+        "rerun.log",
+        "-deffnm",
+        "rerun",
+        "-ntomp",
+        str(args.ntomp),
+    ]
+    if getattr(args, "gpu_offload", False):
+        command.extend(
+            [
+                "-pin",
+                "on",
+                "-nb",
+                "gpu",
+                "-pme",
+                "gpu",
+                "-pmefft",
+                "gpu",
+                "-bonded",
+                "gpu",
+                "-update",
+                "cpu",
+            ]
+        )
+    run_cmd(command, cwd=output_dir)
     run_cmd(
         [
             args.gmx,
@@ -138,6 +171,9 @@ def _rerun_energy(args, trajectory, tpr, output_dir):
     )
     if not potential.is_file():
         raise FileNotFoundError(f"Potential energy output not found: {potential}")
+    for trajectory_output in (output_dir / "rerun.trr", output_dir / "rerun.xtc"):
+        if trajectory_output.is_file():
+            trajectory_output.unlink()
     return potential
 
 
@@ -208,6 +244,8 @@ def run(args):
         raise ValueError("--end must be greater than --begin")
     if args.subsample <= 0:
         raise ValueError("--subsample must be positive")
+    if args.ntomp <= 0:
+        raise ValueError("--ntomp must be positive")
 
     base, manifest = load_fep_manifest(args.path)
     if manifest.get("workflow") != "fep-rest":

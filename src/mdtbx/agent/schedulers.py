@@ -87,6 +87,10 @@ class Scheduler(ABC):
     def status(self, job_id: str) -> dict[str, Any]:
         raise NotImplementedError
 
+    @abstractmethod
+    def cancel(self, job_id: str) -> None:
+        raise NotImplementedError
+
 
 class SlurmScheduler(Scheduler):
     name = "slurm"
@@ -118,11 +122,16 @@ class SlurmScheduler(Scheduler):
     def directives(self, step, resource, profile):
         request = step["resources"]
         options = resource.get("scheduler_options", {})
+        tasks_per_node = request.get("tasks_per_node", 1)
+        cpus_per_node = request["cpus_per_node"]
+        if cpus_per_node % tasks_per_node:
+            raise ValueError("cpus_per_node must be divisible by tasks_per_node")
         lines = [
             f"#SBATCH --job-name={step['id'][:64]}",
             f"#SBATCH --nodes={request['nodes']}",
             f"#SBATCH --time={_walltime(request['walltime_seconds'])}",
-            f"#SBATCH --cpus-per-task={request['cpus_per_node']}",
+            f"#SBATCH --ntasks-per-node={tasks_per_node}",
+            f"#SBATCH --cpus-per-task={cpus_per_node // tasks_per_node}",
             f"#SBATCH --mem={request['memory_mb']}M",
         ]
         if request["gpus_per_node"]:
@@ -143,6 +152,12 @@ class SlurmScheduler(Scheduler):
         argv = ["sbatch", "--parsable"]
         if dependencies:
             argv.append(f"--dependency=afterok:{':'.join(dependencies)}")
+        argv.extend(
+            [
+                f"--output={script.parent / 'scheduler.stdout.log'}",
+                f"--error={script.parent / 'scheduler.stderr.log'}",
+            ]
+        )
         argv.append(str(script))
         result = _run(argv, check=True)
         job_id = result.stdout.strip().split(";", 1)[0]
@@ -178,6 +193,9 @@ class SlurmScheduler(Scheduler):
             fields[1] if len(fields) > 1 else "",
             fields[2] if len(fields) > 2 else "",
         )
+
+    def cancel(self, job_id):
+        _run(["scancel", str(job_id)], check=True)
 
 
 class AgeScheduler(Scheduler):
@@ -268,6 +286,9 @@ class AgeScheduler(Scheduler):
             job_id, state, state, exit_status, values.get("ru_wallclock", "")
         )
 
+    def cancel(self, job_id):
+        _run(["qdel", str(job_id)], check=True)
+
 
 class PjmScheduler(Scheduler):
     name = "pjm"
@@ -341,6 +362,9 @@ class PjmScheduler(Scheduler):
             raw = fields[3] if len(fields) > 3 else ""
             return _status(job_id, _pjm_state(raw), raw, "", "")
         return _status(job_id, "unknown", "", "not found", "")
+
+    def cancel(self, job_id):
+        _run(["pjdel", str(job_id)], check=True)
 
 
 def scheduler(name: str) -> Scheduler:
@@ -419,7 +443,7 @@ def _pjm_state(value: str) -> str:
 
 
 def _parse_slurm_nodes(text: str) -> list[dict[str, Any]]:
-    groups: dict[tuple[int, int, int, str], int] = {}
+    groups: dict[tuple[int, int, int, str, str], int] = {}
     for line in text.splitlines():
         values = {}
         for field in line.split():
@@ -435,12 +459,16 @@ def _parse_slurm_nodes(text: str) -> list[dict[str, Any]]:
         gpu_match = re.search(r"gpu(?::([^:,()]+))?:(\d+)", gres)
         gpu_type = gpu_match.group(1) if gpu_match else ""
         gpus = int(gpu_match.group(2)) if gpu_match else 0
-        state = values.get("State", "UNKNOWN").split("+", 1)[0]
-        key = (cpus, gpus, memory, gpu_type or "")
-        groups[key] = groups.get(key, 0) + (0 if state == "DOWN" else 1)
+        state = values.get("State", "UNKNOWN").upper()
+        if any(marker in state for marker in ("DOWN", "DRAIN", "FAIL")):
+            continue
+        partitions = values.get("Partitions", "")
+        key = (cpus, gpus, memory, gpu_type or "", partitions)
+        groups[key] = groups.get(key, 0) + 1
     return [
         {
-            "name": f"{gpu_type or 'cpu'}-{cpus}c-{memory}m",
+            "name": (f"{partitions.replace(',', '_')}-" if partitions else "")
+            + f"{gpu_type or 'cpu'}-{cpus}c-{memory}m",
             "count": count,
             "capabilities": {
                 "cpus_per_node": cpus,
@@ -448,6 +476,9 @@ def _parse_slurm_nodes(text: str) -> list[dict[str, Any]]:
                 "memory_mb_per_node": memory,
                 "gpu_type": gpu_type or None,
             },
+            "scheduler_options": {"partition": partitions.split(",", 1)[0]}
+            if partitions
+            else {},
         }
-        for (cpus, gpus, memory, gpu_type), count in sorted(groups.items())
+        for (cpus, gpus, memory, gpu_type, partitions), count in sorted(groups.items())
     ]

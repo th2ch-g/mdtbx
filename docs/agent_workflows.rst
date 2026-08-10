@@ -62,6 +62,7 @@ cannot silently mix login-node and compute-node execution.
    $ pixi run mdtbx agent_run --plan plan.json --approve PLAN_ID
    $ pixi run mdtbx agent_status --run RUN_DIRECTORY
    $ pixi run mdtbx agent_collect --run RUN_DIRECTORY
+   $ pixi run mdtbx agent_cancel --run RUN_DIRECTORY --approve PLAN_ID
 
 The SHA-256 ``plan_id`` covers commands, arguments, dependencies, resource
 allocations, paths, filesystem snapshots, and the cluster-profile fingerprint.
@@ -77,7 +78,11 @@ only to the same immutable ``plan_id``.
 Run state is atomically replaced after every local step and each scheduler
 submission. Partial submission failures retain already-issued job IDs. mdtbx
 does not automatically cancel, resubmit, or alter a scientific protocol.
-``agent_collect`` records result validity and artifact size/hash metadata.
+``agent_collect`` persists normalized scheduler states and records result validity
+and artifact size/hash metadata. Run IDs are resolved from ``.mdtbx/runs`` in the
+current directory or any parent directory, so status and collection commands work
+from nested workflow directories. Slurm scheduler stdout and stderr are stored next
+to each generated job script instead of the submission directory.
 
 Cluster profiles
 ----------------

@@ -88,6 +88,7 @@ meeko = "*"
 pdb2pqr = "*"
 biopython = "*"
 pdb-tools = "*"
+pyyaml = "*"
 
 [tool.pixi.feature.docs.pypi-dependencies]
 sphinx = ">=8.1,<8.2"

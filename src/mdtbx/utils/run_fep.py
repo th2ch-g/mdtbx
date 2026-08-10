@@ -61,7 +61,10 @@ def add_subcmd(subparsers):
     parser.add_argument(
         "--nsteps",
         type=int,
-        help="Override the number of integration steps",
+        help=(
+            "Maximum integration steps for this invocation; when continuing "
+            "from a checkpoint these steps are added after the saved step"
+        ),
     )
     parser.add_argument(
         "--no-continue",
@@ -79,6 +82,11 @@ def add_subcmd(subparsers):
             "External MPI launcher template, for example "
             "'mpirun -np {ntmpi}' or 'srun --ntasks {ntmpi}'"
         ),
+    )
+    parser.add_argument(
+        "--gpu-offload",
+        action="store_true",
+        help="Enable the validated single-GPU GROMACS offload preset",
     )
     parser.set_defaults(func=run)
 
@@ -115,6 +123,23 @@ def _runtime_options(args, *, external_mpi=False):
         if args.nsteps < -2:
             raise ValueError("--nsteps must be -2 or greater")
         options.extend(["-nsteps", str(args.nsteps)])
+    if getattr(args, "gpu_offload", False):
+        options.extend(
+            [
+                "-pin",
+                "on",
+                "-nb",
+                "gpu",
+                "-pme",
+                "gpu",
+                "-pmefft",
+                "gpu",
+                "-bonded",
+                "gpu",
+                "-update",
+                "cpu",
+            ]
+        )
     return options
 
 

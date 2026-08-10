@@ -156,7 +156,12 @@ def validate_profile(data: Any) -> dict[str, Any]:
             raise ValueError(f"{name}.capabilities must be an object")
         _reject_unknown(
             capabilities,
-            {"cpus_per_node", "gpus_per_node", "memory_mb_per_node"},
+            {
+                "cpus_per_node",
+                "gpus_per_node",
+                "memory_mb_per_node",
+                "gpu_type",
+            },
             f"{name}.capabilities",
         )
         _positive_int(capabilities.get("cpus_per_node"), f"{name}.cpus_per_node")
@@ -168,6 +173,9 @@ def validate_profile(data: Any) -> dict[str, Any]:
         _positive_int(
             capabilities.get("memory_mb_per_node"), f"{name}.memory_mb_per_node"
         )
+        gpu_type = capabilities.get("gpu_type")
+        if gpu_type is not None:
+            _safe_string(gpu_type, f"{name}.gpu_type", single_line=True)
 
         limits = resource.setdefault("limits", {})
         if not isinstance(limits, dict):

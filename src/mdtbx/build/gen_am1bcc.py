@@ -1,4 +1,5 @@
 import argparse
+import json
 from pathlib import Path
 
 from ..logger import generate_logger
@@ -40,22 +41,37 @@ def add_subcmd(subparsers):
 
     parser.add_argument("-c", "--charge", default=0, type=int, help="Charge")
 
+    parser.add_argument(
+        "-o",
+        "--outdir",
+        default=".",
+        type=str,
+        help="Output directory",
+    )
+
     parser.set_defaults(func=run)
 
 
 def run(args):
-    filetype = Path(args.structure).suffix[1:]
+    structure = Path(args.structure).expanduser().resolve()
+    outdir = Path(args.outdir).expanduser().resolve()
+    outdir.mkdir(parents=True, exist_ok=True)
+    mol2 = outdir / f"{args.resname}.mol2"
+    frcmod = outdir / f"{args.resname}.frcmod"
+    library = outdir / f"{args.resname}.lib"
+    pdb = outdir / f"{args.resname}.pdb"
+    filetype = structure.suffix[1:]
     # antechamber uses "mdl" as the format flag for MDL .mol files
     if filetype == "mol":
         filetype = "mdl"
     cmd = [
         "antechamber",
         "-i",
-        args.structure,
+        str(structure),
         "-fi",
         filetype,
         "-o",
-        f"{args.resname}.mol2",
+        str(mol2),
         "-fo",
         "mol2",
         "-c",
@@ -71,27 +87,57 @@ def run(args):
         "-pf",
         "y",
     ]
-    run_cmd(cmd, log=f"{args.resname}.mol2 generated")
+    run_cmd(cmd, log=f"{mol2} generated", cwd=outdir)
 
     cmd = [
         "parmchk2",
         "-i",
-        f"{args.resname}.mol2",
+        str(mol2),
         "-f",
         "mol2",
         "-o",
-        f"{args.resname}.frcmod",
+        str(frcmod),
         "-s",
         "gaff2",
     ]
-    run_cmd(cmd, log=f"{args.resname}.frcmod generated")
+    run_cmd(cmd, log=f"{frcmod} generated", cwd=outdir)
+
+    cmd = [
+        "antechamber",
+        "-i",
+        str(mol2),
+        "-fi",
+        "mol2",
+        "-o",
+        str(pdb),
+        "-fo",
+        "pdb",
+        "-pf",
+        "y",
+    ]
+    run_cmd(cmd, log=f"{pdb} generated", cwd=outdir)
 
     cmd_tleap = f"""
 source leaprc.gaff2
-loadamberparams {args.resname}.frcmod
-{args.resname} = loadmol2 {args.resname}.mol2
-saveoff {args.resname} {args.resname}.lib
+loadamberparams {frcmod}
+{args.resname} = loadmol2 {mol2}
+saveoff {args.resname} {library}
 quit
     """
-    run_tleap(cmd_tleap)
-    LOGGER.info(f"{args.resname}.lib generated")
+    run_tleap(cmd_tleap, cwd=outdir)
+    manifest = {
+        "schema_version": 1,
+        "workflow": "gaff2-am1bcc",
+        "structure": str(structure),
+        "resname": args.resname,
+        "charge": args.charge,
+        "multiplicity": args.multiplicity,
+        "mol2": str(mol2),
+        "frcmod": str(frcmod),
+        "library": str(library),
+        "pdb": str(pdb),
+    }
+    (outdir / "parameterization_manifest.json").write_text(
+        json.dumps(manifest, indent=2) + "\n"
+    )
+    LOGGER.info(f"{library} and {pdb} generated")

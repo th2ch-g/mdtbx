@@ -9,6 +9,7 @@ from typing import Any
 from .model import json_value
 
 AGENT_COMMANDS = {
+    "agent_cancel",
     "agent_collect",
     "agent_plan",
     "agent_probe",
@@ -18,7 +19,13 @@ AGENT_COMMANDS = {
     "agent_status",
 }
 
-MD_COMMANDS = {"run_fep", "run_abfe", "analyze_fep_rest", "opt_perf"}
+MD_COMMANDS = {
+    "run_fep",
+    "run_abfe",
+    "equilibrate_fep",
+    "analyze_fep_rest",
+    "opt_perf",
+}
 GPU_COMMANDS = {"modeling_cf"}
 QUANTUM_COMMANDS = {
     "gen_am1bcc",
@@ -49,6 +56,7 @@ DATA_COMMANDS = {
     "tica",
     "cluster",
     "msm",
+    "analyze_rbfe",
 }
 READ_ONLY_COMMANDS = {"show_mdtraj", "show_npy", "print_perf", "shell_hook"}
 PILOT_COMMANDS = {"run_fep", "run_abfe", "opt_perf"}
@@ -58,6 +66,7 @@ INPUT_DESTS = {
     "input1",
     "input2",
     "structure",
+    "b_structure",
     "structure1",
     "structure2",
     "topology",
@@ -65,7 +74,9 @@ INPUT_DESTS = {
     "trajectories",
     "mdp",
     "reference",
+    "b_reference",
     "checkpoint",
+    "b_checkpoint",
     "index",
     "path",
     "npy",
@@ -78,6 +89,7 @@ INPUT_DESTS = {
     "coord",
     "coordinates",
     "parm",
+    "rst",
     "prmtop",
     "ref_structure",
     "complex_checkpoint",
@@ -94,6 +106,21 @@ INPUT_DESTS = {
     "solvent_topology",
     "template_tleap",
     "xvv",
+    "source_a",
+    "source_b",
+    "parameterized_a",
+    "parameterized_b",
+    "structure_a",
+    "structure_b",
+    "topology_a",
+    "topology_b",
+    "mapping",
+    "hybrid_topology",
+    "hybrid_atomtypes",
+    "hybrid_structure",
+    "mdps",
+    "complex",
+    "solvent",
 }
 OUTPUT_DESTS = {
     "output",
@@ -108,6 +135,7 @@ OUTPUT_DESTS = {
     "xvv_output",
     "trial_dir",
 }
+MUTATING_PATH_COMMANDS = {"run_fep", "run_abfe", "analyze_fep_rest"}
 
 
 def command_class(name: str) -> str:
@@ -172,6 +200,9 @@ def descriptor(name: str, parser: argparse.ArgumentParser) -> dict[str, Any]:
             "_agent_cluster_profile",
         }
     ]
+    outputs = [item["name"] for item in arguments if item["name"] in OUTPUT_DESTS]
+    if name in MUTATING_PATH_COMMANDS:
+        outputs.append("path")
     return {
         "name": name,
         "description": parser.description,
@@ -179,7 +210,7 @@ def descriptor(name: str, parser: argparse.ArgumentParser) -> dict[str, Any]:
         "risk": "internal" if name in AGENT_COMMANDS else command_risk(name),
         "pilot_capable": name in PILOT_COMMANDS,
         "inputs": [item["name"] for item in arguments if item["name"] in INPUT_DESTS],
-        "outputs": [item["name"] for item in arguments if item["name"] in OUTPUT_DESTS],
+        "outputs": outputs,
         "arguments": arguments,
     }
 

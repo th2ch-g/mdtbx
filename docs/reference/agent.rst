@@ -1,6 +1,14 @@
 Agent commands
 ==============
 
+agent_cancel
+------------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: agent_cancel
+   :groups:
+
 agent_collect
 -------------
 

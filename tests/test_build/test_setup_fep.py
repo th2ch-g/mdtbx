@@ -80,6 +80,8 @@ def test_transform_mode_uses_dual_state_topology_without_moltype(tmp_path):
     mdp = (tmp_path / "fep" / "lambda_001" / "fep.mdp").read_text()
     assert "fep-lambdas" in mdp
     assert "couple-moltype" not in mdp
+    assert "sc-alpha                 = 0.5" in mdp
+    assert "sc-coul                  = yes" in mdp
 
 
 def test_run_invokes_grompp_from_topology_directory(tmp_path, monkeypatch):

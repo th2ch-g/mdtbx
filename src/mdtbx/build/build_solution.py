@@ -11,6 +11,39 @@ from .packmol_water import repack_water
 LOGGER = generate_logger(__name__)
 
 
+def _center_pdb_in_box(input_path, output_path, boxsize):
+    lines = Path(input_path).read_text().splitlines()
+    coordinates = []
+    for line in lines:
+        if line.startswith(("ATOM  ", "HETATM")):
+            coordinates.append(
+                tuple(float(line[start : start + 8]) for start in (30, 38, 46))
+            )
+    if not coordinates:
+        raise ValueError(f"No PDB coordinates found in {input_path}")
+
+    minima = [min(point[axis] for point in coordinates) for axis in range(3)]
+    maxima = [max(point[axis] for point in coordinates) for axis in range(3)]
+    spans = [maximum - minimum for minimum, maximum in zip(minima, maxima)]
+    if any(span >= edge for span, edge in zip(spans, boxsize)):
+        raise ValueError("Solute dimensions must be smaller than --boxsize")
+    shifts = [
+        edge / 2 - (minimum + maximum) / 2
+        for minimum, maximum, edge in zip(minima, maxima, boxsize)
+    ]
+
+    output = []
+    for line in lines:
+        if line.startswith(("ATOM  ", "HETATM")):
+            xyz = [float(line[start : start + 8]) for start in (30, 38, 46)]
+            moved = [value + shift for value, shift in zip(xyz, shifts)]
+            line = (
+                f"{line[:30]}{moved[0]:8.3f}{moved[1]:8.3f}{moved[2]:8.3f}{line[54:]}"
+            )
+        output.append(line)
+    Path(output_path).write_text("\n".join(output) + "\n")
+
+
 def add_subcmd(subparsers):
     """
     mdtbx build_solution -i input_structure.pdb -o ./outdir --ion_conc 0.15 --cation Na+ --anion Cl- --ligparam FRCMOD:LIB --boxsize 100 100 100
@@ -112,8 +145,19 @@ def run(args):
     if any(edge <= args.packmol_tolerance for edge in args.boxsize):
         raise ValueError("Each --boxsize edge must exceed --packmol-tolerance")
 
-    outdir = Path(args.outdir)
+    outdir = Path(args.outdir).expanduser().resolve()
     outdir.mkdir(parents=True, exist_ok=True)
+    input_path = (
+        Path(args.input).expanduser().resolve() if args.input is not None else None
+    )
+    tleap_input_path = input_path
+    centered_input = None
+    if input_path is not None:
+        centered_input = outdir / "tleap_centered.pdb"
+        if centered_input.exists():
+            raise FileExistsError(f"Refusing to overwrite {centered_input}")
+        _center_pdb_in_box(input_path, centered_input, args.boxsize)
+        tleap_input_path = centered_input
 
     # tleap
     lines = []
@@ -121,10 +165,10 @@ def run(args):
         for line in f:
             line = line.rstrip()
             if "LOADPDB" in line:
-                if args.input is not None:
+                if tleap_input_path is not None:
                     line = line.replace(
                         "LOADPDB",
-                        f"{SYSTEM_NAME} = loadpdb {args.input}",
+                        f"{SYSTEM_NAME} = loadpdb {tleap_input_path}",
                     )
                 else:
                     LOGGER.warning("No input structure")
@@ -145,7 +189,9 @@ def run(args):
                     if len(parts) != 2:
                         LOGGER.error("--ligparam must be in FRCMOD:LIB format")
                         sys.exit(1)
-                    frcmod, lib = parts
+                    frcmod, lib = (
+                        str(Path(value).expanduser().resolve()) for value in parts
+                    )
                     cmd = f"""
 loadamberparams {frcmod}
 loadoff {lib}
@@ -183,7 +229,12 @@ addionsrand {SYSTEM_NAME} {args.anion} 0
             lines.append(line)
 
     cmd_tleap = "\n".join(lines)
-    run_tleap(cmd_tleap, keepfiles=args.keepfiles)
+    run_tleap(
+        cmd_tleap,
+        keepfiles=args.keepfiles,
+        extra_cleanup=(centered_input,) if centered_input is not None else (),
+        cwd=outdir,
+    )
 
     packmol_report = repack_water(
         outdir / "leap.parm7",

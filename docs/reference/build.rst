@@ -41,6 +41,14 @@ amb2gro
    :start_command: amb2gro
    :groups:
 
+combine_pdb
+-----------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: combine_pdb
+   :groups:
+
 build_solution
 --------------
 
@@ -95,6 +103,14 @@ gen_am1bcc
 .. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: gen_am1bcc
+   :groups:
+
+extract_ligand
+--------------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: extract_ligand
    :groups:
 
 gen_distres
@@ -215,4 +231,20 @@ setup_fep_rest
 .. autoprogram:: mdtbx.cli:create_parser()
    :prog: mdtbx
    :start_command: setup_fep_rest
+   :groups:
+
+pmx_ligand_hybrid
+-----------------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: pmx_ligand_hybrid
+   :groups:
+
+assemble_hybrid_system
+----------------------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: assemble_hybrid_system
    :groups:

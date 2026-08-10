@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import parmed as pmd
+import pytest
 
 from mdtbx.build import packmol_water
 
@@ -67,6 +68,7 @@ class _FakeStructure:
         self.residues = residues or []
         self.box = [20.0, 20.0, 20.0, 90.0, 90.0, 90.0]
         self.coordinate_set_count = 0
+        self.bonds = []
 
     @property
     def coordinates(self):
@@ -131,3 +133,40 @@ def test_repack_water_writes_packed_coordinates_back_once(tmp_path, monkeypatch)
 
 def test_atom_selection_mask_keeps_atom_zero():
     assert packmol_water._atom_selection_mask(3, [0, 1, 2]) == [True, True, True]
+
+
+def test_wrap_fixed_coordinates_wraps_single_atom_ions():
+    structure = _FakeStructure([[-1.0, 21.0, 2.0], [5.0, 5.0, 5.0]])
+
+    coordinates, moved = packmol_water._wrap_fixed_coordinates(
+        structure, [0, 1], np.asarray(structure.box[:3])
+    )
+
+    np.testing.assert_allclose(coordinates[0], [19.0, 1.0, 2.0])
+    np.testing.assert_allclose(coordinates[1], [5.0, 5.0, 5.0])
+    assert moved == 1
+
+
+def test_wrap_fixed_coordinates_rejects_split_bond():
+    structure = _FakeStructure([[-1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
+    structure.bonds = [
+        types.SimpleNamespace(atom1=structure.atoms[0], atom2=structure.atoms[1])
+    ]
+
+    with pytest.raises(ValueError, match="split a bonded component"):
+        packmol_water._wrap_fixed_coordinates(
+            structure, [0, 1], np.asarray(structure.box[:3])
+        )
+
+
+def test_align_coordinates_to_reference_removes_uniform_box_shift():
+    reference = np.asarray([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    restart = reference + np.asarray([10.0, 11.0, 12.0])
+
+    aligned, translation, max_error = packmol_water._align_coordinates_to_reference(
+        restart, reference
+    )
+
+    np.testing.assert_allclose(aligned, reference)
+    np.testing.assert_allclose(translation, [10.0, 11.0, 12.0])
+    assert max_error == 0.0

@@ -9,6 +9,7 @@ from ..utils.fep import (
     FEP_SCHEMA_VERSION,
     format_lambdas,
     render_fep_mdp,
+    soft_core_mdp_settings,
     temperature_mdp_overrides,
 )
 from ..utils.fep_rest import (
@@ -36,6 +37,13 @@ def add_subcmd(subparsers):
     parser.add_argument("-f", "--mdp", required=True, help="Base production MDP")
     parser.add_argument("-p", "--topology", required=True, help="Dual-state topology")
     parser.add_argument("-c", "--structure", required=True, help="Starting structure")
+    parser.add_argument(
+        "--b-structure",
+        help=(
+            "State-B starting structure; replicas with FEP lambda >= 0.5 "
+            "start from this structure"
+        ),
+    )
     parser.add_argument("-o", "--outdir", default="fep_rest", help="Output directory")
     parser.add_argument("--replicas", type=int, default=32, help="Replica count")
     parser.add_argument(
@@ -72,6 +80,10 @@ def add_subcmd(subparsers):
         help="Delta H and full-precision trajectory interval",
     )
     parser.add_argument("--checkpoint", help="Checkpoint or trajectory for grompp")
+    parser.add_argument(
+        "--b-checkpoint",
+        help="State-B checkpoint or trajectory for grompp",
+    )
     parser.add_argument("--reference", help="Position-restraint reference structure")
     parser.add_argument("--b-reference", help="State-B restraint reference structure")
     parser.add_argument("--index", help="GROMACS index file")
@@ -102,6 +114,8 @@ def _validate_args(args):
         raise ValueError("--maxwarn must be non-negative")
     if not args.deffnm or Path(args.deffnm).name != args.deffnm:
         raise ValueError("--deffnm must be a filename without directories")
+    if args.b_checkpoint and not args.b_structure:
+        raise ValueError("--b-checkpoint requires --b-structure")
 
 
 def _grompp(
@@ -198,6 +212,11 @@ def run(args):
     mdp_path = _existing_file(args.mdp, "MDP file")
     topology = _existing_file(args.topology, "Topology")
     structure = _existing_file(args.structure, "Structure")
+    b_structure = (
+        _existing_file(args.b_structure, "State-B structure")
+        if args.b_structure
+        else None
+    )
     reference = (
         _existing_file(args.reference, "Reference structure")
         if args.reference
@@ -205,6 +224,11 @@ def run(args):
     )
     checkpoint = (
         _existing_file(args.checkpoint, "Checkpoint") if args.checkpoint else None
+    )
+    b_checkpoint = (
+        _existing_file(args.b_checkpoint, "State-B checkpoint")
+        if args.b_checkpoint
+        else None
     )
     b_reference = (
         _existing_file(args.b_reference, "State-B reference")
@@ -230,6 +254,7 @@ def run(args):
             base_text,
             {
                 **temperature_mdp_overrides(base_text, args.temperature),
+                **soft_core_mdp_settings(coulomb=False),
                 "free-energy": "yes",
                 "init-lambda-state": 0,
                 "fep-lambdas": "0.000000 1.000000",
@@ -294,6 +319,7 @@ def run(args):
                 base_text,
                 {
                     **temperature_mdp_overrides(base_text, args.temperature),
+                    **soft_core_mdp_settings(coulomb=False),
                     "free-energy": "yes",
                     "init-lambda-state": state,
                     "fep-lambdas": fep_values,
@@ -311,13 +337,16 @@ def run(args):
             )
         )
         if not args.no_tpr:
+            use_b_start = b_structure is not None and schedule["fep"][state] >= 0.5
+            window_structure = b_structure if use_b_start else structure
+            window_checkpoint = b_checkpoint if use_b_start else checkpoint
             _grompp(
                 args,
                 mdp=output_mdp,
                 topology=output_topology,
-                structure=structure,
+                structure=window_structure,
                 reference=reference,
-                checkpoint=checkpoint,
+                checkpoint=window_checkpoint,
                 b_reference=b_reference,
                 index=index,
                 output=window_dir / f"{args.deffnm}.tpr",
@@ -334,6 +363,27 @@ def run(args):
                 "charge_b_lambda": schedule["charge_b"][state],
                 "rest_temperature": schedule["rest_temperatures"][state],
                 "rest_scale": schedule["scales"][state],
+                "starting_structure": str(
+                    b_structure
+                    if b_structure is not None and schedule["fep"][state] >= 0.5
+                    else structure
+                ),
+                "starting_checkpoint": str(
+                    b_checkpoint
+                    if b_structure is not None
+                    and schedule["fep"][state] >= 0.5
+                    and b_checkpoint is not None
+                    else checkpoint
+                )
+                if (
+                    checkpoint is not None
+                    or (
+                        b_structure is not None
+                        and schedule["fep"][state] >= 0.5
+                        and b_checkpoint is not None
+                    )
+                )
+                else None,
             }
         )
 
@@ -343,6 +393,7 @@ def run(args):
         "mode": "transform",
         "topology": str(topology),
         "structure": str(structure),
+        "b_structure": str(b_structure) if b_structure is not None else None,
         "deffnm": args.deffnm,
         "prepared": not args.no_tpr,
         "physical_temperature": args.temperature,

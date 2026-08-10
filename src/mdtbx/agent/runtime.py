@@ -75,20 +75,21 @@ _RESOURCE_KEYS = {
     "resource",
     "nodes",
     "cpus_per_node",
+    "tasks_per_node",
     "gpus_per_node",
     "memory_mb",
     "walltime_seconds",
 }
 
 
-def _root_parser():
+def _root_parser(commands: set[str] | None = None):
     from ..cli import create_parser
 
-    return create_parser()
+    return create_parser(commands)
 
 
 def schema(command: str | None = None) -> dict[str, Any]:
-    commands = all_descriptors(_root_parser())
+    commands = all_descriptors(_root_parser({command} if command is not None else None))
     if command is not None:
         try:
             commands = {command: commands[command]}
@@ -126,7 +127,13 @@ def _validate_resources(identifier: str, value: Any) -> dict[str, Any] | None:
         resource = result["resource"]
         if not isinstance(resource, str) or not resource or "\x00" in resource:
             raise ValueError(f"{identifier}.resources.resource must be a string")
-    for key in ("nodes", "cpus_per_node", "memory_mb", "walltime_seconds"):
+    for key in (
+        "nodes",
+        "cpus_per_node",
+        "tasks_per_node",
+        "memory_mb",
+        "walltime_seconds",
+    ):
         if key in result:
             _positive_int(result[key], f"{identifier}.resources.{key}")
     if "gpus_per_node" in result:
@@ -135,6 +142,14 @@ def _validate_resources(identifier: str, value: Any) -> dict[str, Any] | None:
             f"{identifier}.resources.gpus_per_node",
             zero=True,
         )
+    if (
+        "tasks_per_node" in result
+        and "cpus_per_node" in result
+        and result["tasks_per_node"] > result["cpus_per_node"]
+    ):
+        raise ValueError(
+            f"{identifier}.resources.tasks_per_node must not exceed cpus_per_node"
+        )
     return result
 
 
@@ -142,7 +157,12 @@ def _validated_steps(request: dict[str, Any]) -> list[dict[str, Any]]:
     raw_steps = request.get("steps")
     if not isinstance(raw_steps, list) or not raw_steps:
         raise ValueError("Request requires a non-empty steps list")
-    root = _root_parser()
+    command_names = {
+        raw.get("command")
+        for raw in raw_steps
+        if isinstance(raw, dict) and isinstance(raw.get("command"), str)
+    }
+    root = _root_parser(command_names)
     descriptors = all_descriptors(root)
     steps = []
     identifiers: set[str] = set()
@@ -346,6 +366,7 @@ def _select_resources(
     nodes = 1
     minimum_gpus = 1 if resource_class == "gpu" else 0
     minimum_cpus = 1
+    tasks_per_node = 1
     resource_name = None
     if requested is not None:
         nodes = requested.get("nodes", nodes)
@@ -353,6 +374,8 @@ def _select_resources(
         walltime = requested.get("walltime_seconds", walltime)
         minimum_gpus = requested.get("gpus_per_node", minimum_gpus)
         minimum_cpus = requested.get("cpus_per_node", minimum_cpus)
+        tasks_per_node = requested.get("tasks_per_node", tasks_per_node)
+        minimum_cpus = max(minimum_cpus, tasks_per_node)
         resource_name = requested.get("resource")
         evidence.append({"source": "request", "resources": json_value(requested)})
 
@@ -382,10 +405,15 @@ def _select_resources(
     if not suitable:
         raise ValueError(f"No cluster resource can satisfy step {step['id']}")
     resource = min(suitable, key=lambda item: item[0])[1]
+    if minimum_cpus % tasks_per_node:
+        raise ValueError(
+            f"Step {step['id']} cpus_per_node must be divisible by tasks_per_node"
+        )
     allocation = {
         "resource": resource["name"],
         "nodes": nodes,
         "cpus_per_node": minimum_cpus,
+        "tasks_per_node": tasks_per_node,
         "gpus_per_node": minimum_gpus,
         "memory_mb": memory_mb,
         "walltime_seconds": walltime,
@@ -479,16 +507,20 @@ def build_plan(request: dict[str, Any]) -> dict[str, Any]:
         argv = list(step["argv"])
         if confidence < minimum_confidence and step["descriptor"]["pilot_capable"]:
             plan_kind = "pilot"
-            allocation["walltime_seconds"] = min(
-                allocation["walltime_seconds"],
-                int(_policy(profile, "pilot_walltime_seconds", 600)),
-            )
+            requested_resources = step.get("requested_resources") or {}
+            if "walltime_seconds" not in requested_resources:
+                allocation["walltime_seconds"] = min(
+                    allocation["walltime_seconds"],
+                    int(_policy(profile, "pilot_walltime_seconds", 600)),
+                )
             if (
                 step["command"] in {"run_fep", "run_abfe"}
                 and arguments.get("nsteps") is None
             ):
                 arguments["nsteps"] = 1000
-                parser = command_parser(_root_parser(), step["command"])
+                parser = command_parser(
+                    _root_parser({step["command"]}), step["command"]
+                )
                 argv = arguments_to_argv(parser, arguments)
                 arguments = normalized_arguments(parser, argv)
                 evidence.append(
@@ -847,7 +879,12 @@ def load_run(value: str) -> tuple[Path, dict[str, Any]]:
     if path.is_dir():
         run_dir = path.resolve()
     else:
-        matches = list(Path(".mdtbx/runs").glob("*/state.json"))
+        roots = (Path.cwd(), *Path.cwd().parents)
+        matches = [
+            item
+            for root in roots
+            for item in (root / ".mdtbx" / "runs").glob("*/state.json")
+        ]
         selected = [
             item.parent
             for item in matches
@@ -906,6 +943,43 @@ def run_status(value: str) -> dict[str, Any]:
     }
 
 
+def cancel_run(value: str, approval: str) -> dict[str, Any]:
+    """Cancel queued or running jobs from one immutable run."""
+    run_dir, state = load_run(value)
+    if approval != state["plan_id"]:
+        raise ValueError("Approval must exactly match the run plan_id")
+    if state["scheduler"] == "local":
+        raise ValueError("Local runs cannot be cancelled through a batch scheduler")
+
+    adapter = scheduler(state["scheduler"])
+    cancelled = {}
+    for step, item in state["steps"].items():
+        job_id = item.get("job_id")
+        if not job_id:
+            continue
+        current = adapter.status(job_id)
+        item["state"] = current["state"]
+        if current["state"] not in {"queued", "running"}:
+            continue
+        adapter.cancel(job_id)
+        item["state"] = "cancelled"
+        cancelled[step] = str(job_id)
+
+    if cancelled:
+        state["status"] = "cancelled"
+        state["updated_at"] = utc_now()
+        _persist_state(run_dir, state)
+        _append_event(
+            run_dir,
+            {"at": utc_now(), "event": "cancelled", "steps": cancelled},
+        )
+    return {
+        **state,
+        "run_dir": str(run_dir),
+        "cancelled": cancelled,
+    }
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -960,6 +1034,9 @@ def collect_run(value: str) -> dict[str, Any]:
         "steps": results,
     }
     write_json(run_dir / "result.json", result)
+    for step, scheduler_state in status.get("scheduler_status", {}).items():
+        if step in state["steps"]:
+            state["steps"][step]["state"] = scheduler_state["state"]
     state["status"] = status["status"]
     state["collected_at"] = result["collected_at"]
     _persist_state(run_dir, state)
@@ -1002,18 +1079,24 @@ def draft_profile(probe: dict[str, Any]) -> dict[str, Any]:
     drafted = []
     for index, item in enumerate(resources):
         capabilities = item.get("capabilities", {})
+        gpus = int(capabilities.get("gpus_per_node", 0))
+        gpu_type = capabilities.get("gpu_type")
+        drafted_capabilities = {
+            "cpus_per_node": int(capabilities.get("cpus_per_node", 1)),
+            "gpus_per_node": gpus,
+            "memory_mb_per_node": int(capabilities.get("memory_mb_per_node", 4096)),
+        }
+        if gpu_type:
+            drafted_capabilities["gpu_type"] = str(gpu_type)
         drafted.append(
             {
                 "name": item.get("name", f"resource-{index + 1}"),
-                "capabilities": {
-                    "cpus_per_node": int(capabilities.get("cpus_per_node", 1)),
-                    "gpus_per_node": int(capabilities.get("gpus_per_node", 0)),
-                    "memory_mb_per_node": int(
-                        capabilities.get("memory_mb_per_node", 4096)
-                    ),
-                },
+                "classes": ["light", "data", "gpu", "md"]
+                if gpus
+                else ["light", "data"],
+                "capabilities": drafted_capabilities,
                 "limits": {"max_nodes": 1, "max_walltime_seconds": 86400},
-                "scheduler_options": {},
+                "scheduler_options": dict(item.get("scheduler_options", {})),
             }
         )
     if not drafted:

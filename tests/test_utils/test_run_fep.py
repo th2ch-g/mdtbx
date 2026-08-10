@@ -40,6 +40,7 @@ def _args(base, **overrides):
         "no_continue": False,
         "gmx": "gmx",
         "mpi_launcher": None,
+        "gpu_offload": False,
     }
     values.update(overrides)
     return SimpleNamespace(**values)
@@ -89,6 +90,23 @@ def test_multidir_uses_one_mdrun_invocation(tmp_path, monkeypatch):
     assert command[:3] == ["gmx", "mdrun", "-multidir"]
     assert "-replex" in command
     assert command[command.index("-replex") + 1] == "100"
+
+
+def test_gpu_offload_adds_validated_gromacs_options(tmp_path, monkeypatch):
+    base = _fep_setup(tmp_path)
+    calls = []
+    monkeypatch.setattr(
+        run_fep,
+        "run_cmd",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+
+    run_fep.run(_args(base, gpu_offload=True))
+
+    command = calls[0][0]
+    assert command[command.index("-nb") + 1] == "gpu"
+    assert command[command.index("-pme") + 1] == "gpu"
+    assert command[command.index("-update") + 1] == "cpu"
 
 
 def test_multidir_rejects_partial_checkpoint_set(tmp_path):

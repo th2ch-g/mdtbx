@@ -14,6 +14,10 @@ The standard GROMACS alchemical workflow has three stages:
 The input structure must already be equilibrated. The base MDP defines the
 simulation protocol.
 
+``run_fep --nsteps`` follows ``gmx mdrun`` semantics. For a checkpoint
+continuation it specifies the additional number of steps in that invocation,
+not the absolute final step number.
+
 .. code-block:: console
 
    $ pixi run mdtbx setup_fep \
@@ -27,7 +31,9 @@ simulation protocol.
 
 The default decoupling schedule removes electrostatics and then van der Waals
 interactions. Use transformation mode only with a topology that already
-contains valid A-state and B-state parameters.
+contains valid A-state and B-state parameters. ``setup_fep`` writes GROMACS
+soft-core defaults for every alchemical transformation, including dual-state
+transformation mode.
 
 FEP/REST
 --------
@@ -56,7 +62,34 @@ PLUMED-patched ``gmx_mpi``, MPI, and a compatible dual-state topology.
 
 The topology restrictions and installation steps are documented in
 ``example/fep/README.md``. Review the generated manifest and hot-region
-selection before production.
+selection before production. ``setup_fep_rest`` stages charge and van der
+Waals changes separately and writes soft-core van der Waals settings with
+``sc-coul = no``. For a transformation with substantially different endpoint
+geometries, pass the equilibrated B endpoint through ``--b-structure`` and
+``--b-checkpoint`` so each replica starts from its nearest endpoint. Cached
+cross-Hamiltonian energies are regenerated automatically after a trajectory or
+TPR update; use ``--force`` to regenerate them unconditionally. Temporary
+trajectories produced by GROMACS reruns are removed after potential-energy
+extraction.
+
+Relative binding free energy
+----------------------------
+
+Prepare atom-order-preserving endpoint structures and GAFF2 topology files,
+then build a PMX single-topology ligand with ``pmx_ligand_hybrid``. Replace
+the physical ligand in the complex and solvent endpoint systems with that
+hybrid by using ``assemble_hybrid_system``.
+
+Equilibrate both end states with ``equilibrate_fep``. Use
+``setup_fep_rest``, ``run_fep``, and ``analyze_fep_rest`` independently for
+the complex and solvent legs. Finally, ``analyze_rbfe`` calculates
+
+.. math::
+
+   \Delta\Delta G_{bind} = \Delta G_{complex} - \Delta G_{solvent}
+
+and compares the result with the value derived from two experimental
+inhibition constants.
 
 Absolute binding free energy
 ----------------------------

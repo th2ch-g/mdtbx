@@ -25,6 +25,14 @@ analyze_fep_rest
    :start_command: analyze_fep_rest
    :groups:
 
+analyze_rbfe
+------------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: analyze_rbfe
+   :groups:
+
 extract_ave_str
 ---------------
 

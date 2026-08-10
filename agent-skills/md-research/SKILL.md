@@ -25,7 +25,7 @@ visible to the user before any execution or submission.
      approves that exact hash and output path with `mdtbx agent_profile_save`.
    - Prefer `~/.config/mdtbx/clusters/NAME.json`. Never replace an existing
      profile unless the user approves `--replace`.
-5. Create a schema-version-1 request and run `mdtbx agent_plan`.
+5. Create a schema-version-2 request and run `mdtbx agent_plan`.
 6. Present the plan kind, commands, dependencies, inputs, artifacts, resource
    allocation, evidence, confidence, risks, and exact `plan_id`.
 7. Ask the user to approve that exact plan. Do not infer approval from an

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -38,14 +39,77 @@ def test_calculate_bar_uses_cross_hamiltonian_energies(tmp_path):
 def test_rerun_energy_uses_cache(tmp_path):
     output_dir = tmp_path / "rerun"
     output_dir.mkdir()
+    trajectory = tmp_path / "trajectory.trr"
+    tpr = tmp_path / "state.tpr"
+    trajectory.write_text("trajectory")
+    tpr.write_text("tpr")
     cached = output_dir / "potential.xvg"
     cached.write_text("0 1\n")
 
     result = analyze_fep_rest._rerun_energy(
         type("Args", (), {"force": False, "gmx": "gmx"})(),
-        Path("missing.trr"),
-        Path("missing.tpr"),
+        trajectory,
+        tpr,
         output_dir,
     )
 
     assert result == cached
+
+
+def test_rerun_energy_invalidates_cache_after_trajectory_update(tmp_path, monkeypatch):
+    output_dir = tmp_path / "rerun"
+    output_dir.mkdir()
+    trajectory = tmp_path / "trajectory.trr"
+    tpr = tmp_path / "state.tpr"
+    cached = output_dir / "potential.xvg"
+    trajectory.write_text("trajectory")
+    tpr.write_text("tpr")
+    cached.write_text("0 1\n")
+    os.utime(cached, ns=(1_000_000_000, 1_000_000_000))
+    os.utime(trajectory, ns=(2_000_000_000, 2_000_000_000))
+    calls = []
+
+    def fake_run(command, cwd=None, **_kwargs):
+        calls.append(command)
+        if command[1] == "energy":
+            Path(cwd, "potential.xvg").write_text("0 2\n")
+
+    monkeypatch.setattr(analyze_fep_rest, "run_cmd", fake_run)
+    args = type(
+        "Args",
+        (),
+        {"force": False, "gmx": "gmx_mpi", "gpu_offload": False, "ntomp": 1},
+    )()
+
+    analyze_fep_rest._rerun_energy(args, trajectory, tpr, output_dir)
+
+    assert [command[1] for command in calls] == ["mdrun", "energy"]
+
+
+def test_rerun_energy_sets_openmp_threads(tmp_path, monkeypatch):
+    output_dir = tmp_path / "rerun"
+    calls = []
+
+    def fake_run(command, cwd=None, **_kwargs):
+        calls.append((command, cwd))
+        if command[1] == "mdrun":
+            Path(cwd, "rerun.trr").write_text("temporary trajectory")
+        elif command[1] == "energy":
+            Path(cwd, "potential.xvg").write_text("0 1\n")
+
+    monkeypatch.setattr(analyze_fep_rest, "run_cmd", fake_run)
+    args = type(
+        "Args",
+        (),
+        {"force": False, "gmx": "gmx_mpi", "gpu_offload": False, "ntomp": 8},
+    )()
+
+    analyze_fep_rest._rerun_energy(
+        args,
+        Path("trajectory.trr"),
+        Path("state.tpr"),
+        output_dir,
+    )
+
+    assert calls[0][0][calls[0][0].index("-ntomp") + 1] == "8"
+    assert not (output_dir / "rerun.trr").exists()

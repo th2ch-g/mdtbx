@@ -16,9 +16,10 @@ def _fake_tleap_factory():
     """Capture the tleap input passed to run_tleap (which is mocked out)."""
     calls = {}
 
-    def fake_run_tleap(input_text, *, keepfiles=False, extra_cleanup=()):
+    def fake_run_tleap(input_text, *, keepfiles=False, extra_cleanup=(), cwd=None):
         calls["input_text"] = input_text
         calls["keepfiles"] = keepfiles
+        calls["cwd"] = cwd
 
     return calls, fake_run_tleap
 
@@ -41,6 +42,8 @@ def test_build_solution_default_template_exists_and_outdir_is_created(
 
     assert outdir.exists()
     assert "input_text" in calls
+    assert calls["cwd"] == outdir
+    assert "source leaprc.gaff2" in calls["input_text"]
     exact_box_command = f"set {build_solution.SYSTEM_NAME} box {{ 100 100 100 }}"
     assert calls["input_text"].count(exact_box_command) == 2
     assert f"setbox {build_solution.SYSTEM_NAME} vdw" not in calls["input_text"]
@@ -75,6 +78,8 @@ def test_build_solution_repacks_water_with_packmol(tmp_path, monkeypatch):
     build_solution.run(args)
 
     assert "input_text" in calls
+    assert calls["cwd"] == outdir
+    assert "source leaprc.gaff2" in calls["input_text"]
     assert repack_calls == [
         (
             (
@@ -141,3 +146,36 @@ def test_build_vacuum_creates_outdir(tmp_path, sample_pdb_path, monkeypatch):
 
     assert outdir.exists()
     assert "input_text" in calls
+    assert calls["cwd"] == outdir
+    assert "source leaprc.gaff2" in calls["input_text"]
+
+
+def test_center_pdb_in_box_moves_bounding_box_to_center(tmp_path):
+    source = tmp_path / "source.pdb"
+    output = tmp_path / "centered.pdb"
+    source.write_text(
+        "ATOM      1  C1  LIG A   1      10.000  20.000  30.000  1.00  0.00           C\n"
+        "ATOM      2  C2  LIG A   1      14.000  26.000  38.000  1.00  0.00           C\n"
+    )
+
+    build_solution._center_pdb_in_box(source, output, [20.0, 30.0, 40.0])
+
+    lines = output.read_text().splitlines()
+    coordinates = [
+        tuple(float(line[start : start + 8]) for start in (30, 38, 46))
+        for line in lines
+    ]
+    assert coordinates == [(8.0, 12.0, 16.0), (12.0, 18.0, 24.0)]
+
+
+def test_center_pdb_in_box_rejects_oversized_solute(tmp_path):
+    source = tmp_path / "source.pdb"
+    source.write_text(
+        "ATOM      1  C1  LIG A   1       0.000   0.000   0.000  1.00  0.00           C\n"
+        "ATOM      2  C2  LIG A   1      20.000   1.000   1.000  1.00  0.00           C\n"
+    )
+
+    with pytest.raises(ValueError, match="smaller than --boxsize"):
+        build_solution._center_pdb_in_box(
+            source, tmp_path / "centered.pdb", [20.0, 30.0, 40.0]
+        )

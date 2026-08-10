@@ -70,6 +70,53 @@ def _atom_selection_mask(atom_count, indices):
     return mask
 
 
+def _align_coordinates_to_reference(coordinates, reference_coordinates):
+    """Remove a uniform coordinate-origin shift using a reference structure."""
+    import numpy as np
+
+    coordinates = np.asarray(coordinates)
+    reference = np.asarray(reference_coordinates)
+    if coordinates.shape != reference.shape:
+        raise ValueError("Reference PDB atom count differs from the Amber restart")
+    translation = np.median(coordinates - reference, axis=0)
+    aligned = coordinates - translation
+    max_error = float(np.max(np.abs(aligned - reference)))
+    if max_error > 1.0e-3:
+        raise ValueError("Amber restart and reference PDB coordinates are inconsistent")
+    return aligned, translation, max_error
+
+
+def _wrap_fixed_coordinates(structure, fixed_indices, box_lengths, *, coordinates=None):
+    """Wrap fixed atoms without splitting a bonded component across the box."""
+    import numpy as np
+
+    if coordinates is None:
+        coordinates = structure.coordinates
+    coordinates = np.asarray(coordinates).copy()
+    if not fixed_indices:
+        return coordinates, 0
+
+    fixed = np.asarray(fixed_indices, dtype=int)
+    original = coordinates[fixed]
+    wrapped = np.mod(original, box_lengths)
+    local_index = {atom_index: index for index, atom_index in enumerate(fixed_indices)}
+    for bond in getattr(structure, "bonds", ()):
+        index_a = bond.atom1.idx
+        index_b = bond.atom2.idx
+        if index_a not in local_index or index_b not in local_index:
+            continue
+        before = original[local_index[index_b]] - original[local_index[index_a]]
+        after = wrapped[local_index[index_b]] - wrapped[local_index[index_a]]
+        if not np.allclose(before, after, atol=1.0e-6, rtol=0.0):
+            raise ValueError(
+                "Wrapping fixed coordinates would split a bonded component"
+            )
+
+    moved = np.any(np.abs(wrapped - original) > 1.0e-6, axis=1)
+    coordinates[fixed] = wrapped
+    return coordinates, int(np.count_nonzero(moved))
+
+
 def repack_water(
     parm_path,
     rst_path,
@@ -83,6 +130,10 @@ def repack_water(
     import parmed as pmd
 
     structure = pmd.load_file(str(parm_path), xyz=str(rst_path))
+    reference = pmd.load_file(str(pdb_path))
+    aligned_coordinates, origin_translation, origin_alignment_max_error = (
+        _align_coordinates_to_reference(structure.coordinates, reference.coordinates)
+    )
     water_groups = _water_atom_groups(structure, water_resnames)
     if not water_groups:
         LOGGER.info("No water molecules to repack")
@@ -107,6 +158,13 @@ def repack_water(
     fixed_indices = [
         atom.idx for atom in structure.atoms if atom.idx not in water_index_set
     ]
+    box_lengths = np.asarray(structure.box[:3])
+    coordinates, fixed_atoms_wrapped = _wrap_fixed_coordinates(
+        structure,
+        fixed_indices,
+        box_lengths,
+        coordinates=aligned_coordinates,
+    )
 
     with tempfile.TemporaryDirectory(prefix="mdtbx-packmol-") as tempdir:
         workdir = Path(tempdir)
@@ -118,6 +176,7 @@ def repack_water(
         fixed_input = None
         if fixed_indices:
             fixed = structure[_atom_selection_mask(len(structure.atoms), fixed_indices)]
+            fixed.coordinates = coordinates[fixed_indices]
             fixed.box = None
             fixed.save(str(fixed_path), format="pdb", overwrite=True)
             fixed_input = fixed_path
@@ -165,7 +224,7 @@ def repack_water(
         if len(packed_water_coordinates) != len(water_indices):
             raise RuntimeError("Packmol water-coordinate count mismatch")
 
-        coordinates = np.asarray(structure.coordinates).copy()
+        coordinates[fixed_indices] = packed_coordinates[: len(fixed_indices)]
         coordinates[water_indices] = packed_water_coordinates
         structure.coordinates = coordinates
         applied_coordinates = np.asarray(structure.coordinates)[water_indices]
@@ -193,4 +252,7 @@ def repack_water(
         "transfer_max_abs_error_A": transfer_max_abs_error,
         "saved_max_abs_error_A": saved_max_abs_error,
         "vectorized_transfer": True,
+        "fixed_atoms_wrapped": fixed_atoms_wrapped,
+        "restart_origin_translation_A": origin_translation.tolist(),
+        "origin_alignment_max_error_A": origin_alignment_max_error,
     }

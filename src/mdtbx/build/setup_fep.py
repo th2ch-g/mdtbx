@@ -9,6 +9,7 @@ from ..utils.fep import (
     build_lambda_schedule,
     format_lambdas,
     render_fep_mdp,
+    soft_core_mdp_settings,
 )
 from ..utils.proc import run_cmd
 
@@ -188,6 +189,7 @@ def _fep_settings(args, schedule, state):
     }
     if "fep" in schedule:
         settings["fep-lambdas"] = format_lambdas(schedule["fep"])
+        settings.update(soft_core_mdp_settings(coulomb=True))
         return settings
 
     settings["coul-lambdas"] = format_lambdas(schedule["coul"])
@@ -196,11 +198,7 @@ def _fep_settings(args, schedule, state):
     settings["couple-lambda0"] = "vdw-q" if args.mode != "vdw" else "vdw"
     settings["couple-lambda1"] = "vdw" if args.mode == "charge" else "none"
     settings["couple-intramol"] = "no"
-    settings["sc-alpha"] = 0.5
-    settings["sc-power"] = 1
-    settings["sc-r-power"] = 6
-    settings["sc-sigma"] = 0.3
-    settings["sc-coul"] = "no"
+    settings.update(soft_core_mdp_settings(coulomb=False))
     return settings
 
 

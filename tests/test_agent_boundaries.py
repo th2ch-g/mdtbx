@@ -61,6 +61,39 @@ def test_unbenchmarked_md_requires_pilot(tmp_path):
     assert plan["steps"][0]["confidence"] < 0.7
 
 
+def test_explicit_pilot_walltime_is_preserved(tmp_path):
+    profile = tmp_path / "cluster.json"
+    profile.write_text(json.dumps(_batch_profile()))
+    request = {
+        "schema_version": 2,
+        "cwd": str(tmp_path),
+        "cluster_profile": str(profile),
+        "steps": [
+            {
+                "id": "fep",
+                "command": "run_fep",
+                "arguments": {"path": "fep", "nsteps": 50000},
+                "depends_on": [],
+                "resources": {
+                    "resource": "md-node",
+                    "nodes": 1,
+                    "cpus_per_node": 8,
+                    "tasks_per_node": 8,
+                    "gpus_per_node": 1,
+                    "memory_mb": 8192,
+                    "walltime_seconds": 3600,
+                },
+            }
+        ],
+    }
+
+    plan = build_plan(request)
+
+    assert plan["plan_kind"] == "pilot"
+    assert plan["steps"][0]["resources"]["walltime_seconds"] == 3600
+    assert plan["steps"][0]["arguments"]["nsteps"] == 50000
+
+
 def test_approved_pilot_evidence_enables_production_plan(tmp_path):
     profile = tmp_path / "cluster.json"
     profile.write_text(json.dumps(_batch_profile()))
@@ -207,6 +240,23 @@ def test_per_step_execution_mode_is_rejected(tmp_path):
         ],
     }
     with pytest.raises(ValueError, match="Unknown step fields"):
+        build_plan(request)
+
+
+def test_tasks_per_node_cannot_exceed_requested_cpus(tmp_path):
+    request = {
+        "schema_version": 2,
+        "cwd": str(tmp_path),
+        "steps": [
+            {
+                "id": "inspect",
+                "command": "show_npy",
+                "arguments": {"npy": "values.npy"},
+                "resources": {"cpus_per_node": 4, "tasks_per_node": 8},
+            }
+        ],
+    }
+    with pytest.raises(ValueError, match="tasks_per_node"):
         build_plan(request)
 
 

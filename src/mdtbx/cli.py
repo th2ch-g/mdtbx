@@ -25,6 +25,16 @@ _MAX_CAPTURE_BYTES = 1024 * 1024
 # Category packages scanned for subcommand modules. Each subcommand module
 # exposes add_subcmd(subparsers); library modules without it are skipped.
 _SUBCOMMAND_PACKAGES = (utils, build, trajectory, analysis, cv, agent)
+_AGENT_MODULES = {
+    "agent_cancel": "mdtbx.agent.cancel",
+    "agent_collect": "mdtbx.agent.collect",
+    "agent_plan": "mdtbx.agent.plan",
+    "agent_probe": "mdtbx.agent.probe",
+    "agent_profile_save": "mdtbx.agent.profile_save",
+    "agent_run": "mdtbx.agent.execute",
+    "agent_schema": "mdtbx.agent.schema",
+    "agent_status": "mdtbx.agent.status",
+}
 
 
 def get_version():
@@ -54,24 +64,44 @@ def _add_agent_flags(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _register_subcommands(subparsers) -> None:
+def _module_for_command(name: str) -> str | None:
+    """Resolve conventional command modules without importing unrelated code."""
+    if name in _AGENT_MODULES:
+        return _AGENT_MODULES[name]
+    for package in _SUBCOMMAND_PACKAGES:
+        if (Path(next(iter(package.__path__))) / f"{name}.py").is_file():
+            return f"{package.__name__}.{name}"
+    return None
+
+
+def _register_module(subparsers, module_name: str) -> None:
+    module = importlib.import_module(module_name)
+    add_subcmd = getattr(module, "add_subcmd", None)
+    if add_subcmd is None:
+        return
+    before = set(subparsers.choices)
+    add_subcmd(subparsers)
+    for name in set(subparsers.choices) - before:
+        if name not in AGENT_COMMANDS:
+            _add_agent_flags(subparsers.choices[name])
+
+
+def _register_subcommands(subparsers, commands: set[str] | None = None) -> None:
     """Import every module under the category packages exposing add_subcmd."""
+    if commands is not None:
+        modules = {_module_for_command(name) for name in commands}
+        if None not in modules:
+            for module_name in sorted(modules):
+                _register_module(subparsers, module_name)
+            return
     for package in _SUBCOMMAND_PACKAGES:
         for info in sorted(
             pkgutil.iter_modules(package.__path__), key=lambda item: item.name
         ):
-            module = importlib.import_module(f"{package.__name__}.{info.name}")
-            add_subcmd = getattr(module, "add_subcmd", None)
-            if add_subcmd is None:
-                continue
-            before = set(subparsers.choices)
-            add_subcmd(subparsers)
-            for name in set(subparsers.choices) - before:
-                if name not in AGENT_COMMANDS:
-                    _add_agent_flags(subparsers.choices[name])
+            _register_module(subparsers, f"{package.__name__}.{info.name}")
 
 
-def create_parser() -> argparse.ArgumentParser:
+def create_parser(commands: set[str] | None = None) -> argparse.ArgumentParser:
     """Create the top-level argument parser with every registered subcommand."""
     parser = argparse.ArgumentParser(description="ToolBox for MD simulation")
     parser.add_argument(
@@ -82,7 +112,7 @@ def create_parser() -> argparse.ArgumentParser:
         help="Print version",
     )
     subparsers = parser.add_subparsers(dest="_command")
-    _register_subcommands(subparsers)
+    _register_subcommands(subparsers, commands)
     return parser
 
 
@@ -172,7 +202,10 @@ def _run_agent_mode(args) -> int:
 
 
 def cli() -> None:
-    parser = create_parser()
+    selected = None
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        selected = {sys.argv[1]}
+    parser = create_parser(selected)
     args = parser.parse_args()
     if not hasattr(args, "func"):
         LOGGER.error(f"use {sys.argv[0]} --help")

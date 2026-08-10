@@ -11,6 +11,7 @@ LOGGER = generate_logger(__name__)
 TLEAP_TEMPLATE = """\
 source leaprc.protein.ff14SB
 source leaprc.water.tip3p
+source leaprc.gaff2
 {addprecmd}
 {ligand_params}
 {SYSTEM_NAME} = loadpdb {input}
@@ -75,8 +76,9 @@ def add_subcmd(subparsers):
 
 
 def run(args):
-    outdir = Path(args.outdir)
+    outdir = Path(args.outdir).expanduser().resolve()
     outdir.mkdir(parents=True, exist_ok=True)
+    input_path = Path(args.input).expanduser().resolve()
 
     addprecmd = args.addprecmd if args.addprecmd else ""
     addpostcmd = args.addpostcmd if args.addpostcmd else ""
@@ -87,19 +89,19 @@ def run(args):
         if len(parts) != 2:
             LOGGER.error("--ligparam must be in FRCMOD:LIB format")
             sys.exit(1)
-        frcmod, lib = parts
+        frcmod, lib = (str(Path(value).expanduser().resolve()) for value in parts)
         ligand_params = f"loadamberparams {frcmod}\nloadoff {lib}"
 
     tleap_input = TLEAP_TEMPLATE.format(
         addprecmd=addprecmd,
         ligand_params=ligand_params,
         SYSTEM_NAME=SYSTEM_NAME,
-        input=args.input,
+        input=str(input_path),
         addpostcmd=addpostcmd,
         outdir=str(outdir),
     )
 
-    run_tleap(tleap_input, keepfiles=args.keepfiles)
+    run_tleap(tleap_input, keepfiles=args.keepfiles, cwd=outdir)
 
     LOGGER.info(
         f"{args.outdir}/leap.parm7 {args.outdir}/leap.rst7 {args.outdir}/leap.pdb generated"

@@ -67,7 +67,7 @@ def test_centering_gro_uses_unique_topology_and_argv(tmp_path, monkeypatch):
     assert not centered_path.exists()
 
 
-def test_amb2gro_parmed_preserves_paths_as_single_arguments(monkeypatch):
+def test_amb2gro_parmed_preserves_paths_as_single_arguments(tmp_path, monkeypatch):
     from mdtbx.build import amb2gro
 
     calls = []
@@ -81,12 +81,13 @@ def test_amb2gro_parmed_preserves_paths_as_single_arguments(monkeypatch):
         parm="input files/leap.parm7",
         rst="input files/leap.rst7",
         no_editconf=True,
+        outdir=str(tmp_path),
     )
 
     amb2gro.run(args)
 
-    assert calls[0][calls[0].index("-p") + 1] == "input files/leap.parm7"
-    assert calls[0][calls[0].index("-c") + 1] == "input files/leap.rst7"
+    assert calls[0][calls[0].index("-p") + 1].endswith("input files/leap.parm7")
+    assert calls[0][calls[0].index("-c") + 1].endswith("input files/leap.rst7")
 
 
 def test_amb2gro_acpype_uses_isolated_temporary_directory(tmp_path, monkeypatch):
@@ -97,10 +98,10 @@ def test_amb2gro_acpype_uses_isolated_temporary_directory(tmp_path, monkeypatch)
     def fake_run_cmd(_command, **kwargs):
         workdir = Path(kwargs["cwd"])
         workdirs.append(workdir)
-        generated = workdir / "leap.amb2gmx"
+        generated = workdir / "L60.amb2gmx"
         generated.mkdir()
-        (generated / "leap_GMX.gro").write_text("gro\n")
-        (generated / "leap_GMX.top").write_text("top\n")
+        (generated / "L60_GMX.gro").write_text("gro\n")
+        (generated / "L60_GMX.top").write_text("top\n")
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(amb2gro, "run_cmd", fake_run_cmd)
@@ -109,41 +110,53 @@ def test_amb2gro_acpype_uses_isolated_temporary_directory(tmp_path, monkeypatch)
         parm="leap.parm7",
         rst="leap.rst7",
         no_editconf=True,
+        outdir=str(tmp_path),
     )
 
     amb2gro.run(args)
 
     assert (tmp_path / "gmx.gro").read_text() == "gro\n"
     assert (tmp_path / "gmx.top").read_text() == "top\n"
+    assert not (tmp_path / "gmx.itp").exists()
     assert not workdirs[0].exists()
 
 
-def test_gen_am1bcc_reuses_tleap_helper(monkeypatch):
+def test_gen_am1bcc_reuses_tleap_helper(tmp_path, monkeypatch):
     from mdtbx.build import gen_am1bcc
 
     commands = []
+    workdirs = []
     tleap_inputs = []
+
+    def fake_run_cmd(command, **kwargs):
+        commands.append(command)
+        workdirs.append(kwargs.get("cwd"))
+
     monkeypatch.setattr(
         gen_am1bcc,
         "run_cmd",
-        lambda command, **_kwargs: commands.append(command),
+        fake_run_cmd,
     )
     monkeypatch.setattr(
         gen_am1bcc,
         "run_tleap",
-        lambda input_text: tleap_inputs.append(input_text),
+        lambda input_text, **_kwargs: tleap_inputs.append(input_text),
     )
     args = types.SimpleNamespace(
         structure="ligand with spaces.mol",
         resname="LIG",
         charge=-1,
         multiplicity=1,
+        outdir=str(tmp_path),
     )
 
     gen_am1bcc.run(args)
 
     assert all(isinstance(command, list) for command in commands)
     assert commands[0][commands[0].index("-fi") + 1] == "mdl"
-    assert commands[0][commands[0].index("-i") + 1] == "ligand with spaces.mol"
+    assert commands[0][commands[0].index("-i") + 1].endswith("ligand with spaces.mol")
     assert len(tleap_inputs) == 1
-    assert "saveoff LIG LIG.lib" in tleap_inputs[0]
+    assert "saveoff LIG " in tleap_inputs[0]
+    assert "LIG.lib" in tleap_inputs[0]
+    assert commands[2][commands[2].index("-fo") + 1] == "pdb"
+    assert workdirs == [tmp_path, tmp_path, tmp_path]

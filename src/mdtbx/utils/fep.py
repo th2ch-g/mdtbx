@@ -184,6 +184,16 @@ def format_lambdas(values):
     return " ".join(f"{value:.6f}" for value in values)
 
 
+def soft_core_mdp_settings(*, coulomb):
+    return {
+        "sc-alpha": 0.5,
+        "sc-power": 1,
+        "sc-r-power": 6,
+        "sc-sigma": 0.3,
+        "sc-coul": "yes" if coulomb else "no",
+    }
+
+
 def load_fep_manifest(path):
     source = Path(path).expanduser()
     manifest_path = source if source.is_file() else source / FEP_MANIFEST

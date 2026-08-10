@@ -46,6 +46,7 @@ REQUEST_SCHEMA: dict[str, Any] = {
                             "resource": {"type": "string", "minLength": 1},
                             "nodes": _POSITIVE_INTEGER,
                             "cpus_per_node": _POSITIVE_INTEGER,
+                            "tasks_per_node": _POSITIVE_INTEGER,
                             "gpus_per_node": {"type": "integer", "minimum": 0},
                             "memory_mb": _POSITIVE_INTEGER,
                             "walltime_seconds": _POSITIVE_INTEGER,
