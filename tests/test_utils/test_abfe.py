@@ -8,7 +8,9 @@ from mdtbx.utils.abfe import (
     boresch_pull_settings,
     boresch_standard_state_correction,
     calculate_anchor_geometry,
+    calculate_trajectory_anchor_geometry,
     load_abfe_manifest,
+    select_trajectory_boresch_anchors,
     write_anchor_index,
 )
 
@@ -95,3 +97,73 @@ def test_load_abfe_manifest(tmp_path):
     (tmp_path / ABFE_MANIFEST).write_text(json.dumps(manifest))
 
     assert load_abfe_manifest(tmp_path) == (tmp_path, manifest)
+
+
+def test_trajectory_anchor_geometry_uses_all_strided_frames(tmp_path):
+    import mdtraj as md
+    import numpy as np
+
+    structure = _anchor_pdb(tmp_path / "anchors.pdb")
+    frame = md.load(str(structure))
+    xyz = np.repeat(frame.xyz, 3, axis=0)
+    xyz[1, 3, 1] += 0.02
+    xyz[2, 3, 1] -= 0.02
+    trajectory = tmp_path / "anchors.xtc"
+    md.Trajectory(xyz, frame.topology).save_xtc(str(trajectory))
+
+    geometry, deviations, frame_count = calculate_trajectory_anchor_geometry(
+        trajectory,
+        structure,
+        [1, 2, 3, 4, 5, 6],
+        stride=2,
+    )
+
+    assert frame_count == 2
+    assert geometry["distance_nm"] == pytest.approx(0.99, abs=1e-3)
+    assert deviations["distance_nm"] >= 0.0
+
+
+def test_trajectory_anchor_selection_returns_low_variance_candidate(tmp_path):
+    import mdtraj as md
+    import numpy as np
+
+    atoms = [
+        ("N", "REC", 1, (0.0, 1.0, 0.0)),
+        ("CA", "REC", 1, (0.0, 0.0, 0.0)),
+        ("C", "REC", 1, (1.0, 0.0, 0.0)),
+        ("C1", "LIG", 2, (1.0, 1.0, 0.0)),
+        ("C2", "LIG", 2, (2.0, 1.0, 0.0)),
+        ("C3", "LIG", 2, (2.0, 1.0, 1.0)),
+    ]
+    structure = tmp_path / "selection.pdb"
+    lines = []
+    for index, (name, residue, residue_id, xyz) in enumerate(atoms, start=1):
+        x, y, z = xyz
+        lines.append(
+            f"ATOM  {index:5d} {name:^4s} {residue:>3s} A{residue_id:4d}    "
+            f"{x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00           C\n"
+        )
+    structure.write_text("".join(lines) + "END\n")
+    frame = md.load(str(structure))
+    trajectory = tmp_path / "selection.xtc"
+    md.Trajectory(np.repeat(frame.xyz, 2, axis=0), frame.topology).save_xtc(
+        str(trajectory)
+    )
+
+    anchors, _geometry, deviations, frame_count, score = (
+        select_trajectory_boresch_anchors(
+            trajectory,
+            structure,
+            receptor_selection="resname REC",
+            ligand_selection="resname LIG",
+            distance_spring=4184.0,
+            angle_spring=41.84,
+            dihedral_spring=41.84,
+            search_distance=0.25,
+        )
+    )
+
+    assert len(set(anchors)) == 6
+    assert frame_count == 2
+    assert score == pytest.approx(0.0, abs=1e-5)
+    assert deviations["distance_nm"] == pytest.approx(0.0, abs=1e-6)

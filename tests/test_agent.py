@@ -245,6 +245,20 @@ def test_run_fep_path_is_tracked_as_input_and_output():
     assert "path" in item["outputs"]
 
 
+def test_fep_schedule_paths_are_tracked_by_agent_schema():
+    from mdtbx.agent.registry import all_descriptors
+
+    parser = create_parser({"setup_fep", "setup_abfe", "optimize_fep_schedule"})
+    items = all_descriptors(parser)
+
+    assert "schedule" in items["setup_fep"]["inputs"]
+    assert "anchor_trajectory" in items["setup_abfe"]["inputs"]
+    assert "solvent_charge_schedule" in items["setup_abfe"]["inputs"]
+    assert "log" in items["optimize_fep_schedule"]["inputs"]
+    assert "output" in items["optimize_fep_schedule"]["outputs"]
+    assert "path" in items["optimize_fep_schedule"]["outputs"]
+
+
 def test_load_run_finds_default_root_from_nested_directory(tmp_path, monkeypatch):
     run_id = "20260101T000000000000Z-example"
     run_dir = tmp_path / ".mdtbx" / "runs" / run_id

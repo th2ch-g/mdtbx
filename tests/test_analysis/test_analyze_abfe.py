@@ -76,3 +76,53 @@ def test_run_combines_signed_legs_standard_state_and_correction(
     assert result["delta_g_binding_kj_mol"] == statistical_cycle + standard + 1.5
     assert result["uncertainty_kj_mol"] == math.sqrt(5 * 0.1**2 + 0.2**2)
     assert (tmp_path / "abfe_result.txt").is_file()
+
+
+def test_run_reports_sign_adjusted_leg_convergence(tmp_path, monkeypatch):
+    _manifest(tmp_path)
+
+    def fake_analyze(_args, _base, _relative_path, _temperature):
+        estimate = {
+            "index": 0,
+            "begin_ps": 0.0,
+            "end_ps": 1.0,
+            "delta_g_kj_mol": 2.0,
+            "uncertainty_kj_mol": 0.1,
+            "delta_g_kcal_mol": 2.0 / 4.184,
+            "uncertainty_kcal_mol": 0.1 / 4.184,
+        }
+        return {
+            "delta_g_kj_mol": 2.0,
+            "uncertainty_kj_mol": 0.1,
+            "convergence": {
+                "effective_begin_ps": 0.0,
+                "effective_end_ps": 1.0,
+                "block_estimates": [estimate],
+                "cumulative_estimates": [estimate],
+            },
+        }
+
+    monkeypatch.setattr(analyze_abfe, "_analyze_leg", fake_analyze)
+    analyze_abfe.run(
+        SimpleNamespace(
+            path=str(tmp_path),
+            begin=0.0,
+            end=None,
+            temperature=None,
+            symmetry_number=1,
+            correction=None,
+            output=None,
+            gmx="gmx",
+            convergence_blocks=2,
+        )
+    )
+
+    result = json.loads((tmp_path / "abfe_result.json").read_text())
+    complex_value = result["leg_convergence"]["complex_charge"]["block_estimates"][0][
+        "delta_g_kj_mol"
+    ]
+    solvent_value = result["leg_convergence"]["solvent_charge"]["block_estimates"][0][
+        "delta_g_kj_mol"
+    ]
+    assert complex_value == -2.0
+    assert solvent_value == 2.0

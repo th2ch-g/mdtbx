@@ -3,6 +3,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from mdtbx.build import setup_fep_rest
+from mdtbx.utils.fep_schedule import components_from_coordinates
 
 
 DUAL_TOPOLOGY = """\
@@ -146,3 +147,45 @@ def test_run_uses_nearest_endpoint_starting_state(tmp_path, monkeypatch):
     manifest = json.loads((tmp_path / "fep_rest" / "fep_manifest.json").read_text())
     assert manifest["windows"][0]["starting_structure"] == args.structure
     assert manifest["windows"][-1]["starting_structure"] == str(b_structure.resolve())
+
+
+def test_run_uses_optimized_schedule_replica_count(tmp_path, monkeypatch):
+    coordinates = [0.0, 1.0, 1.5, 2.0, 3.0]
+    schedule = tmp_path / "schedule.json"
+    schedule.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "workflow": "optimized-fep-schedule",
+                "source_workflow": "fep-rest",
+                "mode": "transform",
+                "state_count": len(coordinates),
+                "coordinates": coordinates,
+                "lambda_components": components_from_coordinates(
+                    "transform", "fep-rest", coordinates
+                ),
+            }
+        )
+    )
+
+    def fake_run_cmd(command, **kwargs):
+        if command[1] == "grompp" and "-pp" in command:
+            source = Path(command[command.index("-p") + 1])
+            Path(command[command.index("-pp") + 1]).write_text(source.read_text())
+        elif command[1] == "partial_tempering":
+            kwargs["stdout"].write(kwargs["stdin"].read())
+
+    monkeypatch.setattr(setup_fep_rest, "run_cmd", fake_run_cmd)
+    setup_fep_rest.run(
+        _args(
+            tmp_path,
+            replicas=None,
+            schedule=str(schedule),
+            no_tpr=True,
+        )
+    )
+
+    manifest = json.loads((tmp_path / "fep_rest" / "fep_manifest.json").read_text())
+    assert len(manifest["windows"]) == 5
+    assert manifest["lambda_components"]["coordinates"] == coordinates
+    assert manifest["schedule_source"] == str(schedule.resolve())

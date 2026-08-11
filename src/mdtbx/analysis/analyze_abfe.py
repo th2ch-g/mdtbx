@@ -46,6 +46,12 @@ def add_subcmd(subparsers):
         "--gmx",
         help="GROMACS executable; defaults to the setup executable",
     )
+    parser.add_argument(
+        "--convergence-blocks",
+        type=int,
+        default=0,
+        help="Number of equal-duration convergence blocks for each leg",
+    )
     parser.set_defaults(func=run)
 
 
@@ -59,6 +65,7 @@ def _analyze_leg(args, base, relative_path, temperature):
             temperature=temperature,
             output_prefix=str(leg_path / "bar"),
             gmx=args.gmx,
+            convergence_blocks=getattr(args, "convergence_blocks", 0),
         )
     )
     return json.loads((leg_path / "bar.json").read_text())
@@ -67,6 +74,9 @@ def _analyze_leg(args, base, relative_path, temperature):
 def run(args):
     if args.symmetry_number <= 0:
         raise ValueError("--symmetry-number must be positive")
+    convergence_blocks = getattr(args, "convergence_blocks", 0)
+    if convergence_blocks == 1 or convergence_blocks < 0:
+        raise ValueError("--convergence-blocks must be 0 or at least 2")
     base, manifest = load_abfe_manifest(args.path)
     temperature = (
         args.temperature if args.temperature is not None else manifest["temperature"]
@@ -84,6 +94,7 @@ def run(args):
     contributions = []
     total = 0.0
     variance = 0.0
+    leg_convergence = {}
     for leg, sign in signs.items():
         result = _analyze_leg(
             args,
@@ -103,6 +114,19 @@ def run(args):
         )
         total += signed_value
         variance += uncertainty**2
+        if "convergence" in result:
+            signed_convergence = {
+                "effective_begin_ps": result["convergence"]["effective_begin_ps"],
+                "effective_end_ps": result["convergence"]["effective_end_ps"],
+            }
+            for key in ("block_estimates", "cumulative_estimates"):
+                signed_convergence[key] = []
+                for estimate in result["convergence"][key]:
+                    signed = dict(estimate)
+                    signed["delta_g_kj_mol"] *= sign
+                    signed["delta_g_kcal_mol"] *= sign
+                    signed_convergence[key].append(signed)
+            leg_convergence[leg] = signed_convergence
 
     springs = manifest["springs"]
     standard_state = boresch_standard_state_correction(
@@ -163,6 +187,8 @@ def run(args):
         "long_range_method": manifest["long_range_method"],
         "contributions": contributions,
     }
+    if leg_convergence:
+        output["leg_convergence"] = leg_convergence
     output_path = (
         Path(args.output).expanduser() if args.output else base / "abfe_result.json"
     )

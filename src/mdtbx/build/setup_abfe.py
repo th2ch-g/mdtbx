@@ -9,10 +9,13 @@ from ..utils.abfe import (
     ABFE_SCHEMA_VERSION,
     boresch_pull_settings,
     calculate_anchor_geometry,
+    calculate_trajectory_anchor_geometry,
     select_boresch_anchors,
+    select_trajectory_boresch_anchors,
     write_anchor_index,
 )
 from ..utils.fep import render_fep_mdp, temperature_mdp_overrides
+from ..utils.fep_schedule import load_optimized_schedule
 from ..utils.proc import run_cmd
 from . import setup_fep
 
@@ -73,6 +76,16 @@ def add_subcmd(subparsers):
         help="Maximum receptor-ligand anchor distance [nm]",
     )
     parser.add_argument(
+        "--anchor-trajectory",
+        help="Equilibrated complex trajectory used to select stable anchors",
+    )
+    parser.add_argument(
+        "--anchor-stride",
+        type=int,
+        default=1,
+        help="Use every Nth anchor-trajectory frame",
+    )
+    parser.add_argument(
         "--distance-spring",
         type=float,
         default=4184.0,
@@ -102,6 +115,11 @@ def add_subcmd(subparsers):
     parser.add_argument("--charge-windows", type=int, default=12)
     parser.add_argument("--vdw-windows", type=int, default=12)
     parser.add_argument("--restraint-windows", type=int, default=12)
+    parser.add_argument("--solvent-charge-schedule")
+    parser.add_argument("--solvent-vdw-schedule")
+    parser.add_argument("--complex-charge-schedule")
+    parser.add_argument("--complex-vdw-schedule")
+    parser.add_argument("--restraint-schedule")
     parser.add_argument("--nstdhdl", type=int, default=100)
     parser.add_argument("--complex-checkpoint")
     parser.add_argument("--solvent-checkpoint")
@@ -137,6 +155,7 @@ def _setup_args(
     moltype,
     windows,
     lambdas,
+    schedule,
     nstdhdl,
     checkpoint,
     reference,
@@ -156,6 +175,7 @@ def _setup_args(
         fep_lambdas=lambdas if mode == "transform" else None,
         coul_lambdas=lambdas if mode == "charge" else None,
         vdw_lambdas=lambdas if mode == "vdw" else None,
+        schedule=str(schedule) if schedule else None,
         calc_lambda_neighbors=1,
         nstdhdl=nstdhdl,
         checkpoint=str(checkpoint) if checkpoint else None,
@@ -182,6 +202,8 @@ def run(args):
         raise ValueError("--nstdhdl must be positive")
     if args.maxwarn < 0:
         raise ValueError("--maxwarn must be non-negative")
+    if getattr(args, "anchor_stride", 1) <= 0:
+        raise ValueError("--anchor-stride must be positive")
     if args.anchors is None and not args.ligand_selection:
         raise ValueError("--anchors or --ligand-selection is required")
 
@@ -222,6 +244,37 @@ def run(args):
     solvent_index = (
         _existing(args.solvent_index, "Solvent index") if args.solvent_index else None
     )
+    anchor_trajectory = (
+        _existing(args.anchor_trajectory, "Anchor trajectory")
+        if getattr(args, "anchor_trajectory", None)
+        else None
+    )
+    schedule_arguments = {
+        "solvent_charge": getattr(args, "solvent_charge_schedule", None),
+        "solvent_vdw": getattr(args, "solvent_vdw_schedule", None),
+        "complex_charge": getattr(args, "complex_charge_schedule", None),
+        "complex_vdw": getattr(args, "complex_vdw_schedule", None),
+        "complex_restraint": getattr(args, "restraint_schedule", None),
+    }
+    schedule_modes = {
+        "solvent_charge": "charge",
+        "solvent_vdw": "vdw",
+        "complex_charge": "charge",
+        "complex_vdw": "vdw",
+        "complex_restraint": "transform",
+    }
+    schedule_sources = {}
+    for name, value in schedule_arguments.items():
+        if value is None:
+            schedule_sources[name] = None
+            continue
+        schedule_path = _existing(value, f"{name} schedule")
+        load_optimized_schedule(
+            schedule_path,
+            expected_mode=schedule_modes[name],
+            expected_workflow="fep",
+        )
+        schedule_sources[name] = schedule_path
 
     outdir = Path(args.outdir).expanduser().resolve()
     if outdir.exists() and any(outdir.iterdir()):
@@ -229,9 +282,48 @@ def run(args):
     input_dir = outdir / "inputs"
     input_dir.mkdir(parents=True)
 
-    if args.anchors is not None:
+    zero_deviations = {
+        "distance_nm": 0.0,
+        "angles_rad": [0.0, 0.0],
+        "dihedrals_rad": [0.0, 0.0, 0.0],
+    }
+    if args.anchors is not None and anchor_trajectory is not None:
+        anchors = list(args.anchors)
+        geometry, deviations, frame_count = calculate_trajectory_anchor_geometry(
+            anchor_trajectory,
+            complex_structure,
+            anchors,
+            stride=getattr(args, "anchor_stride", 1),
+        )
+        anchor_score = (
+            args.distance_spring * deviations["distance_nm"] ** 2
+            + args.angle_spring * sum(value**2 for value in deviations["angles_rad"])
+            + args.dihedral_spring
+            * sum(value**2 for value in deviations["dihedrals_rad"])
+        )
+        anchor_method = "explicit_trajectory"
+    elif args.anchors is not None:
         anchors = list(args.anchors)
         geometry = calculate_anchor_geometry(complex_structure, anchors)
+        deviations = zero_deviations
+        frame_count = 1
+        anchor_score = None
+        anchor_method = "explicit_single_frame"
+    elif anchor_trajectory is not None:
+        anchors, geometry, deviations, frame_count, anchor_score = (
+            select_trajectory_boresch_anchors(
+                anchor_trajectory,
+                complex_structure,
+                receptor_selection=args.receptor_selection,
+                ligand_selection=args.ligand_selection,
+                distance_spring=args.distance_spring,
+                angle_spring=args.angle_spring,
+                dihedral_spring=args.dihedral_spring,
+                stride=getattr(args, "anchor_stride", 1),
+                search_distance=args.anchor_search_distance,
+            )
+        )
+        anchor_method = "automatic_trajectory"
     else:
         anchors, geometry = select_boresch_anchors(
             complex_structure,
@@ -239,6 +331,10 @@ def run(args):
             ligand_selection=args.ligand_selection,
             search_distance=args.anchor_search_distance,
         )
+        deviations = zero_deviations
+        frame_count = 1
+        anchor_score = None
+        anchor_method = "automatic_single_frame"
     anchor_index = input_dir / "complex_abfe.ndx"
     if complex_index is None:
         run_cmd(
@@ -321,10 +417,27 @@ def run(args):
         )
     )
 
-    charge_lambdas = _linspace(args.charge_windows)
-    x = _linspace(args.vdw_windows)
+    charge_lambdas = (
+        _linspace(args.charge_windows)
+        if any(
+            schedule_sources[name] is None
+            for name in ("solvent_charge", "complex_charge")
+        )
+        else [0.0, 1.0]
+    )
+    x = (
+        _linspace(args.vdw_windows)
+        if any(
+            schedule_sources[name] is None for name in ("solvent_vdw", "complex_vdw")
+        )
+        else [0.0, 1.0]
+    )
     vdw_lambdas = [1.0 - (value - 1.0) ** 2 for value in x]
-    restraint_lambdas = _linspace(args.restraint_windows)
+    restraint_lambdas = (
+        _linspace(args.restraint_windows)
+        if schedule_sources["complex_restraint"] is None
+        else [0.0, 1.0]
+    )
     leg_definitions = {
         "solvent_charge": (
             solvent_output_mdp,
@@ -335,6 +448,7 @@ def run(args):
             solvent_checkpoint,
             solvent_reference,
             solvent_index,
+            schedule_sources["solvent_charge"],
         ),
         "solvent_vdw": (
             solvent_output_mdp,
@@ -345,6 +459,7 @@ def run(args):
             solvent_checkpoint,
             solvent_reference,
             solvent_index,
+            schedule_sources["solvent_vdw"],
         ),
         "complex_charge": (
             complex_restrained_mdp,
@@ -355,6 +470,7 @@ def run(args):
             complex_checkpoint,
             complex_reference,
             anchor_index,
+            schedule_sources["complex_charge"],
         ),
         "complex_vdw": (
             complex_restrained_mdp,
@@ -365,6 +481,7 @@ def run(args):
             complex_checkpoint,
             complex_reference,
             anchor_index,
+            schedule_sources["complex_vdw"],
         ),
         "complex_restraint": (
             complex_release_mdp,
@@ -375,6 +492,7 @@ def run(args):
             complex_checkpoint,
             complex_reference,
             anchor_index,
+            schedule_sources["complex_restraint"],
         ),
     }
     legs = {}
@@ -387,6 +505,7 @@ def run(args):
         checkpoint,
         reference,
         index,
+        schedule_source,
     ) in leg_definitions.items():
         setup_fep.run(
             _setup_args(
@@ -397,7 +516,8 @@ def run(args):
                 mode=mode,
                 moltype=None if mode == "transform" else args.moltype,
                 windows=len(lambdas),
-                lambdas=lambdas,
+                lambdas=None if schedule_source else lambdas,
+                schedule=schedule_source,
                 nstdhdl=args.nstdhdl,
                 checkpoint=checkpoint,
                 reference=reference,
@@ -414,6 +534,14 @@ def run(args):
         "molecule_type": args.moltype,
         "anchors": anchors,
         "geometry": geometry,
+        "anchor_selection": {
+            "method": anchor_method,
+            "trajectory": str(anchor_trajectory) if anchor_trajectory else None,
+            "stride": getattr(args, "anchor_stride", 1),
+            "frame_count": frame_count,
+            "score": anchor_score,
+            "standard_deviations": deviations,
+        },
         "springs": {
             "distance": args.distance_spring,
             "angle": args.angle_spring,
@@ -422,6 +550,9 @@ def run(args):
         "long_range_method": "LJ-PME",
         "lj_pme_comb_rule": args.lj_pme_comb_rule,
         "gmx_executable": args.gmx,
+        "schedule_sources": {
+            name: str(path) if path else None for name, path in schedule_sources.items()
+        },
         "legs": legs,
     }
     (outdir / ABFE_MANIFEST).write_text(json.dumps(manifest, indent=2) + "\n")

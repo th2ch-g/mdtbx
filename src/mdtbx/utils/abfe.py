@@ -61,6 +61,145 @@ def calculate_anchor_geometry(structure, anchors):
     return _anchor_geometry_from_frame(md.load(str(structure)), anchors)
 
 
+def _trajectory_chunks(trajectory, topology, stride):
+    import mdtraj as md
+
+    if stride <= 0:
+        raise ValueError("Anchor trajectory stride must be positive")
+    yield from md.iterload(
+        str(trajectory),
+        top=str(topology),
+        stride=stride,
+        chunk=1000,
+    )
+
+
+def _trajectory_anchor_statistics(trajectory, topology, anchor_sets, stride):
+    import mdtraj as md
+
+    if not anchor_sets:
+        raise ValueError("No Boresch anchor candidates were provided")
+    zero_based = [[index - 1 for index in anchors] for anchors in anchor_sets]
+    distance_pairs = [[anchors[2], anchors[3]] for anchors in zero_based]
+    angle_indices = [
+        indices
+        for anchors in zero_based
+        for indices in (
+            [anchors[1], anchors[2], anchors[3]],
+            [anchors[2], anchors[3], anchors[4]],
+        )
+    ]
+    dihedral_indices = [
+        indices
+        for anchors in zero_based
+        for indices in (
+            [anchors[0], anchors[1], anchors[2], anchors[3]],
+            [anchors[1], anchors[2], anchors[3], anchors[4]],
+            [anchors[2], anchors[3], anchors[4], anchors[5]],
+        )
+    ]
+    candidate_count = len(anchor_sets)
+    distance_sum = np.zeros(candidate_count)
+    distance_square_sum = np.zeros(candidate_count)
+    angle_sum = np.zeros((candidate_count, 2))
+    angle_square_sum = np.zeros((candidate_count, 2))
+    dihedral_sin_sum = np.zeros((candidate_count, 3))
+    dihedral_cos_sum = np.zeros((candidate_count, 3))
+    frame_count = 0
+
+    for chunk in _trajectory_chunks(trajectory, topology, stride):
+        if chunk.n_frames == 0:
+            continue
+        if any(
+            index < 0 or index >= chunk.n_atoms
+            for anchors in zero_based
+            for index in anchors
+        ):
+            raise ValueError("Boresch anchor index is outside the trajectory topology")
+        distances = md.compute_distances(chunk, distance_pairs)
+        angles = md.compute_angles(chunk, angle_indices).reshape(
+            chunk.n_frames,
+            candidate_count,
+            2,
+        )
+        dihedrals = md.compute_dihedrals(chunk, dihedral_indices).reshape(
+            chunk.n_frames,
+            candidate_count,
+            3,
+        )
+        distance_sum += np.sum(distances, axis=0)
+        distance_square_sum += np.sum(distances**2, axis=0)
+        angle_sum += np.sum(angles, axis=0)
+        angle_square_sum += np.sum(angles**2, axis=0)
+        dihedral_sin_sum += np.sum(np.sin(dihedrals), axis=0)
+        dihedral_cos_sum += np.sum(np.cos(dihedrals), axis=0)
+        frame_count += chunk.n_frames
+    if frame_count == 0:
+        raise ValueError("Anchor trajectory contains no sampled frames")
+
+    distance_mean = distance_sum / frame_count
+    distance_variance = np.maximum(
+        distance_square_sum / frame_count - distance_mean**2,
+        0.0,
+    )
+    angle_mean = angle_sum / frame_count
+    angle_variance = np.maximum(
+        angle_square_sum / frame_count - angle_mean**2,
+        0.0,
+    )
+    mean_sin = dihedral_sin_sum / frame_count
+    mean_cos = dihedral_cos_sum / frame_count
+    dihedral_mean = np.arctan2(mean_sin, mean_cos)
+    resultant = np.clip(np.hypot(mean_sin, mean_cos), 1.0e-15, 1.0)
+    dihedral_variance = -2.0 * np.log(resultant)
+
+    results = []
+    for index, anchors in enumerate(anchor_sets):
+        geometry = {
+            "distance_nm": float(distance_mean[index]),
+            "angles_rad": [float(value) for value in angle_mean[index]],
+            "dihedrals_rad": [float(value) for value in dihedral_mean[index]],
+        }
+        if geometry["distance_nm"] <= 0:
+            continue
+        if any(
+            not 45.0 <= math.degrees(angle) <= 135.0 for angle in geometry["angles_rad"]
+        ):
+            continue
+        standard_deviations = {
+            "distance_nm": float(math.sqrt(distance_variance[index])),
+            "angles_rad": [float(math.sqrt(value)) for value in angle_variance[index]],
+            "dihedrals_rad": [
+                float(math.sqrt(value)) for value in dihedral_variance[index]
+            ],
+        }
+        results.append((anchors, geometry, standard_deviations, frame_count))
+    return results
+
+
+def calculate_trajectory_anchor_geometry(
+    trajectory,
+    topology,
+    anchors,
+    *,
+    stride=1,
+):
+    if len(anchors) != 6 or len(set(anchors)) != 6:
+        raise ValueError("Six distinct Boresch anchor atoms are required")
+    results = _trajectory_anchor_statistics(
+        trajectory,
+        topology,
+        [list(anchors)],
+        stride,
+    )
+    if not results:
+        raise ValueError(
+            "Boresch anchor mean angles must be between 45 and 135 degrees"
+        )
+    _anchors, geometry, standard_deviations, frame_count = results[0]
+    return geometry, standard_deviations, frame_count
+
+
 def _bond_graph(frame, indices, cutoff):
     index_set = set(int(index) for index in indices)
     graph = {index: set() for index in index_set}
@@ -145,6 +284,97 @@ def select_boresch_anchors(
         raise ValueError("Could not identify a valid Boresch anchor set")
     _score, anchors, geometry = min(candidates, key=lambda item: item[0])
     return anchors, geometry
+
+
+def select_trajectory_boresch_anchors(
+    trajectory,
+    topology,
+    *,
+    receptor_selection,
+    ligand_selection,
+    distance_spring,
+    angle_spring,
+    dihedral_spring,
+    stride=1,
+    search_distance=0.5,
+    bond_cutoff=0.22,
+    receptor_atom_names=("CB", "CA", "C", "N", "O"),
+):
+    if search_distance <= 0 or bond_cutoff <= 0:
+        raise ValueError("Anchor search distances must be positive")
+    for value in (distance_spring, angle_spring, dihedral_spring):
+        if value <= 0:
+            raise ValueError("Boresch spring constants must be positive")
+    chunks = _trajectory_chunks(trajectory, topology, stride)
+    try:
+        first_frame = next(chunks)[0]
+    except StopIteration as error:
+        raise ValueError("Anchor trajectory contains no sampled frames") from error
+
+    frame_topology = first_frame.topology
+    receptor = set(int(index) for index in frame_topology.select(receptor_selection))
+    ligand = set(int(index) for index in frame_topology.select(ligand_selection))
+    heavy = set(int(index) for index in frame_topology.select("not element H"))
+    receptor &= heavy
+    ligand &= heavy
+    receptor = {
+        index
+        for index in receptor
+        if frame_topology.atom(index).name in receptor_atom_names
+    }
+    if not receptor or not ligand:
+        raise ValueError("Receptor or ligand anchor selection is empty")
+    if receptor & ligand:
+        raise ValueError("Receptor and ligand selections overlap")
+    receptor_graph = _bond_graph(first_frame, receptor, bond_cutoff)
+    ligand_graph = _bond_graph(first_frame, ligand, bond_cutoff)
+    candidates = []
+    xyz = first_frame.xyz[0]
+    for receptor_3 in receptor:
+        for ligand_1 in ligand:
+            if float(np.linalg.norm(xyz[receptor_3] - xyz[ligand_1])) > search_distance:
+                continue
+            for receptor_2 in receptor_graph[receptor_3]:
+                for receptor_1 in receptor_graph[receptor_2] - {receptor_3}:
+                    for ligand_2 in ligand_graph[ligand_1]:
+                        for ligand_3 in ligand_graph[ligand_2] - {ligand_1}:
+                            anchors = [
+                                receptor_1 + 1,
+                                receptor_2 + 1,
+                                receptor_3 + 1,
+                                ligand_1 + 1,
+                                ligand_2 + 1,
+                                ligand_3 + 1,
+                            ]
+                            try:
+                                _anchor_geometry_from_frame(first_frame, anchors)
+                            except ValueError:
+                                continue
+                            candidates.append(anchors)
+    candidates = [list(anchors) for anchors in dict.fromkeys(map(tuple, candidates))]
+    if not candidates:
+        raise ValueError("Could not identify a valid Boresch anchor set")
+
+    stable_candidates = []
+    for anchors, geometry, deviations, frame_count in _trajectory_anchor_statistics(
+        trajectory,
+        topology,
+        candidates,
+        stride,
+    ):
+        score = (
+            distance_spring * deviations["distance_nm"] ** 2
+            + angle_spring * sum(value**2 for value in deviations["angles_rad"])
+            + dihedral_spring * sum(value**2 for value in deviations["dihedrals_rad"])
+        )
+        stable_candidates.append((score, anchors, geometry, deviations, frame_count))
+    if not stable_candidates:
+        raise ValueError("Could not identify a stable Boresch anchor set")
+    score, anchors, geometry, deviations, frame_count = min(
+        stable_candidates,
+        key=lambda item: item[0],
+    )
+    return anchors, geometry, deviations, frame_count, score
 
 
 def boresch_pull_settings(

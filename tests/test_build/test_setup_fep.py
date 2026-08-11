@@ -121,3 +121,47 @@ def test_run_requires_moltype_for_decoupling(tmp_path):
 def test_run_rejects_zero_lambda_neighbors(tmp_path):
     with pytest.raises(ValueError, match="must be -1 or positive"):
         setup_fep.run(_args(tmp_path, calc_lambda_neighbors=0))
+
+
+def test_run_uses_optimized_schedule_and_records_source(tmp_path):
+    schedule = tmp_path / "schedule.json"
+    schedule.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "workflow": "optimized-fep-schedule",
+                "source_workflow": "fep",
+                "mode": "charge",
+                "state_count": 3,
+                "coordinates": [0.0, 0.25, 1.0],
+                "lambda_components": {
+                    "coul": [0.0, 0.25, 1.0],
+                    "vdw": [0.0, 0.0, 0.0],
+                },
+            }
+        )
+    )
+
+    setup_fep.run(
+        _args(
+            tmp_path,
+            mode="charge",
+            schedule=str(schedule),
+        )
+    )
+
+    manifest = json.loads((tmp_path / "fep" / "fep_manifest.json").read_text())
+    assert len(manifest["windows"]) == 3
+    assert manifest["lambda_components"]["coul"] == [0.0, 0.25, 1.0]
+    assert manifest["schedule_source"] == str(schedule.resolve())
+
+
+def test_run_rejects_schedule_with_explicit_lambdas(tmp_path):
+    with pytest.raises(ValueError, match="cannot be combined"):
+        setup_fep.run(
+            _args(
+                tmp_path,
+                schedule="schedule.json",
+                coul_lambdas=[0.0, 1.0],
+            )
+        )

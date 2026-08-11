@@ -78,6 +78,7 @@ def test_all_subcommands_registered():
         "run_fep",
         "run_abfe",
         "analyze_fep",
+        "optimize_fep_schedule",
         "analyze_fep_rest",
         "analyze_abfe",
         "contactmap",

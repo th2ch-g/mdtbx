@@ -21,6 +21,7 @@ from ..utils.fep_rest import (
     underline_global_atoms,
     unify_fep_rest_charges,
 )
+from ..utils.fep_schedule import load_optimized_schedule
 from ..utils.partial_tempering import run as mark_partial_tempering
 from ..utils.proc import run_cmd
 from .setup_fep import _existing_file
@@ -45,7 +46,12 @@ def add_subcmd(subparsers):
         ),
     )
     parser.add_argument("-o", "--outdir", default="fep_rest", help="Output directory")
-    parser.add_argument("--replicas", type=int, default=32, help="Replica count")
+    parser.add_argument(
+        "--replicas",
+        type=int,
+        help="Replica count; defaults to 32 without --schedule",
+    )
+    parser.add_argument("--schedule", help="Optimized FEP/REST schedule JSON")
     parser.add_argument(
         "--temperature",
         type=float,
@@ -116,6 +122,8 @@ def _validate_args(args):
         raise ValueError("--deffnm must be a filename without directories")
     if args.b_checkpoint and not args.b_structure:
         raise ValueError("--b-checkpoint requires --b-structure")
+    if args.replicas is not None and args.replicas < 4:
+        raise ValueError("FEP/REST requires at least 4 replicas")
 
 
 def _grompp(
@@ -237,11 +245,29 @@ def run(args):
     )
     index = _existing_file(args.index, "Index") if args.index else None
 
-    schedule = build_fep_rest_schedule(
-        args.replicas,
-        args.temperature,
-        args.max_temperature,
-    )
+    schedule_source = None
+    if getattr(args, "schedule", None):
+        schedule_source, schedule_data = load_optimized_schedule(
+            args.schedule,
+            expected_mode="transform",
+            expected_workflow="fep-rest",
+        )
+        replica_count = schedule_data["state_count"]
+        if args.replicas is not None and args.replicas != replica_count:
+            raise ValueError("--replicas does not match the optimized schedule")
+        schedule = build_fep_rest_schedule(
+            replica_count,
+            args.temperature,
+            args.max_temperature,
+            coordinates=schedule_data["coordinates"],
+        )
+    else:
+        replica_count = args.replicas if args.replicas is not None else 32
+        schedule = build_fep_rest_schedule(
+            replica_count,
+            args.temperature,
+            args.max_temperature,
+        )
     outdir = Path(args.outdir).expanduser().resolve()
     if outdir.exists() and any(outdir.iterdir()):
         raise FileExistsError(f"Output directory is not empty: {outdir}")
@@ -290,12 +316,12 @@ def run(args):
 
     fep_values = format_lambdas(schedule["fep"])
     vdw_values = format_lambdas(schedule["vdw"])
-    coul_values = format_lambdas([0.0] * args.replicas)
+    coul_values = format_lambdas([0.0] * replica_count)
     windows = []
-    width = max(3, len(str(args.replicas - 1)))
+    width = max(3, len(str(replica_count - 1)))
     underlined_text = underlined_topology.read_text()
 
-    for state in range(args.replicas):
+    for state in range(replica_count):
         directory_name = f"lambda_{state:0{width}d}"
         window_dir = outdir / directory_name
         window_dir.mkdir()
@@ -400,6 +426,7 @@ def run(args):
         "maximum_rest_temperature": args.max_temperature,
         "hot_atom_indices": [index + 1 for index in hot],
         "lambda_components": schedule,
+        "schedule_source": str(schedule_source) if schedule_source else None,
         "plumed_file": str(plumed_file),
         "plumed_executable": args.plumed,
         "gmx_executable": args.gmx,
@@ -407,4 +434,4 @@ def run(args):
         "windows": windows,
     }
     (outdir / FEP_MANIFEST).write_text(json.dumps(manifest, indent=2) + "\n")
-    LOGGER.info("Generated %d PLUMED FEP/REST replicas in %s", args.replicas, outdir)
+    LOGGER.info("Generated %d PLUMED FEP/REST replicas in %s", replica_count, outdir)

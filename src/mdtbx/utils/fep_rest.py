@@ -113,26 +113,53 @@ def parse_preprocessed_topology(text):
     return TopologyData(atoms, molecule_counts, epsilon_by_type)
 
 
-def build_fep_rest_schedule(replicas, temperature, max_temperature):
+def build_fep_rest_schedule(
+    replicas,
+    temperature,
+    max_temperature,
+    *,
+    coordinates=None,
+):
     if replicas < 4:
         raise ValueError("FEP/REST requires at least 4 replicas")
     if temperature <= 0 or max_temperature < temperature:
         raise ValueError("REST temperatures must satisfy 0 < temperature <= maximum")
 
-    boundary_1 = max(1, round((replicas - 1) / 3))
-    boundary_2 = min(replicas - 2, round(2 * (replicas - 1) / 3))
-    if boundary_2 <= boundary_1:
-        boundary_2 = boundary_1 + 1
+    if coordinates is None:
+        boundary_1 = max(1, round((replicas - 1) / 3))
+        boundary_2 = min(replicas - 2, round(2 * (replicas - 1) / 3))
+        if boundary_2 <= boundary_1:
+            boundary_2 = boundary_1 + 1
 
-    coordinates = []
-    for index in range(replicas):
-        if index <= boundary_1:
-            coordinate = index / boundary_1
-        elif index <= boundary_2:
-            coordinate = 1.0 + (index - boundary_1) / (boundary_2 - boundary_1)
-        else:
-            coordinate = 2.0 + (index - boundary_2) / (replicas - 1 - boundary_2)
-        coordinates.append(coordinate)
+        coordinates = []
+        for index in range(replicas):
+            if index <= boundary_1:
+                coordinate = index / boundary_1
+            elif index <= boundary_2:
+                coordinate = 1.0 + (index - boundary_1) / (boundary_2 - boundary_1)
+            else:
+                coordinate = 2.0 + (index - boundary_2) / (replicas - 1 - boundary_2)
+            coordinates.append(coordinate)
+    else:
+        coordinates = [float(value) for value in coordinates]
+        if len(coordinates) != replicas:
+            raise ValueError("FEP/REST coordinate count must match the replica count")
+        if not all(math.isfinite(value) for value in coordinates):
+            raise ValueError("FEP/REST coordinates must be finite")
+        if not math.isclose(coordinates[0], 0.0) or not math.isclose(
+            coordinates[-1], 3.0
+        ):
+            raise ValueError("FEP/REST coordinates must start at 0 and end at 3")
+        if any(
+            current >= following
+            for current, following in zip(coordinates, coordinates[1:])
+        ):
+            raise ValueError("FEP/REST coordinates must be strictly increasing")
+        if not all(
+            any(math.isclose(value, boundary) for value in coordinates)
+            for boundary in (1.0, 2.0)
+        ):
+            raise ValueError("FEP/REST coordinates must contain boundaries 1 and 2")
 
     general_lambdas = [coordinate / 3.0 for coordinate in coordinates]
     vdw_lambdas = [

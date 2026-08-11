@@ -1,5 +1,7 @@
 import os
+import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -113,3 +115,58 @@ def test_rerun_energy_sets_openmp_threads(tmp_path, monkeypatch):
 
     assert calls[0][0][calls[0][0].index("-ntomp") + 1] == "8"
     assert not (output_dir / "rerun.trr").exists()
+
+
+def test_run_reuses_rerun_energies_for_convergence(tmp_path, monkeypatch):
+    windows = []
+    for index in range(2):
+        directory = tmp_path / f"lambda_{index:03d}"
+        directory.mkdir()
+        (directory / "rest.trr").write_text("trajectory")
+        (directory / "rest.tpr").write_text("tpr")
+        windows.append({"index": index, "directory": directory.name})
+    (tmp_path / "fep_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "workflow": "fep-rest",
+                "mode": "transform",
+                "deffnm": "rest",
+                "physical_temperature": 300.0,
+                "windows": windows,
+            }
+        )
+    )
+    energy = _energy(tmp_path / "energy.xvg", [0, 0, 0, 0, 0])
+    rerun_calls = []
+    bar_calls = []
+
+    def fake_rerun(*rerun_args):
+        rerun_calls.append(rerun_args)
+        return energy
+
+    def fake_bar(_paths, _count, _temperature, begin, end, _subsample):
+        bar_calls.append((begin, end))
+        return [], float(begin), 0.1
+
+    monkeypatch.setattr(analyze_fep_rest, "_rerun_energy", fake_rerun)
+    monkeypatch.setattr(analyze_fep_rest, "_calculate_bar", fake_bar)
+    analyze_fep_rest.run(
+        SimpleNamespace(
+            path=str(tmp_path),
+            begin=0.0,
+            end=None,
+            subsample=1,
+            output=None,
+            gmx="gmx_mpi",
+            force=False,
+            gpu_offload=False,
+            ntomp=1,
+            convergence_blocks=2,
+        )
+    )
+
+    output = json.loads((tmp_path / "fep_rest_result.json").read_text())
+    assert len(rerun_calls) == 4
+    assert len(bar_calls) == 4
+    assert len(output["convergence"]["block_estimates"]) == 2

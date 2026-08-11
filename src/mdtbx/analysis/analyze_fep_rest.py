@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from ..logger import generate_logger
+from ..utils.convergence import convergence_ranges
 from ..utils.fep import KJ_TO_KCAL, load_fep_manifest
 from ..utils.proc import run_cmd
 
@@ -58,6 +59,12 @@ def add_subcmd(subparsers):
         type=int,
         default=1,
         help="OpenMP thread count for each rerun",
+    )
+    parser.add_argument(
+        "--convergence-blocks",
+        type=int,
+        default=0,
+        help="Number of equal-duration convergence blocks; 0 disables analysis",
     )
     parser.set_defaults(func=run)
 
@@ -237,6 +244,18 @@ def _calculate_bar(
     return pair_results, total, math.sqrt(total_variance)
 
 
+def _convergence_entry(index, begin, end, delta_g, uncertainty):
+    return {
+        "index": index,
+        "begin_ps": begin,
+        "end_ps": end,
+        "delta_g_kj_mol": delta_g,
+        "uncertainty_kj_mol": uncertainty,
+        "delta_g_kcal_mol": delta_g * KJ_TO_KCAL,
+        "uncertainty_kcal_mol": uncertainty * KJ_TO_KCAL,
+    }
+
+
 def run(args):
     if args.begin < 0:
         raise ValueError("--begin must be non-negative")
@@ -246,6 +265,9 @@ def run(args):
         raise ValueError("--subsample must be positive")
     if args.ntomp <= 0:
         raise ValueError("--ntomp must be positive")
+    convergence_blocks = getattr(args, "convergence_blocks", 0)
+    if convergence_blocks == 1 or convergence_blocks < 0:
+        raise ValueError("--convergence-blocks must be 0 or at least 2")
 
     base, manifest = load_fep_manifest(args.path)
     if manifest.get("workflow") != "fep-rest":
@@ -279,13 +301,25 @@ def run(args):
                 tprs[evaluation],
                 rerun_root / f"sim_{simulation:03d}_eval_{evaluation:03d}",
             )
+    ranges = (
+        convergence_ranges(
+            energy_paths.values(),
+            args.begin,
+            args.end,
+            convergence_blocks,
+        )
+        if convergence_blocks
+        else None
+    )
+    analysis_begin = ranges["effective_begin_ps"] if ranges else args.begin
+    analysis_end = ranges["effective_end_ps"] if ranges else args.end
 
     pair_results, delta_g, uncertainty = _calculate_bar(
         energy_paths,
         len(windows),
         temperature,
-        args.begin,
-        args.end,
+        analysis_begin,
+        analysis_end,
         args.subsample,
     )
     output_path = (
@@ -300,11 +334,54 @@ def run(args):
         "uncertainty_kj_mol": uncertainty,
         "delta_g_kcal_mol": delta_g * KJ_TO_KCAL,
         "uncertainty_kcal_mol": uncertainty * KJ_TO_KCAL,
-        "begin_ps": args.begin,
-        "end_ps": args.end,
+        "begin_ps": analysis_begin,
+        "end_ps": analysis_end,
         "subsample": args.subsample,
         "pairs": pair_results,
     }
+    if convergence_blocks:
+        block_estimates = []
+        cumulative_estimates = []
+        for index, (range_begin, range_end) in enumerate(ranges["blocks"]):
+            _pairs, value, error = _calculate_bar(
+                energy_paths,
+                len(windows),
+                temperature,
+                range_begin,
+                range_end,
+                args.subsample,
+            )
+            block_estimates.append(
+                _convergence_entry(index, range_begin, range_end, value, error)
+            )
+        for index, (range_begin, range_end) in enumerate(ranges["cumulative"][:-1]):
+            _pairs, value, error = _calculate_bar(
+                energy_paths,
+                len(windows),
+                temperature,
+                range_begin,
+                range_end,
+                args.subsample,
+            )
+            cumulative_estimates.append(
+                _convergence_entry(index, range_begin, range_end, value, error)
+            )
+        final_begin, final_end = ranges["cumulative"][-1]
+        cumulative_estimates.append(
+            _convergence_entry(
+                convergence_blocks - 1,
+                final_begin,
+                final_end,
+                delta_g,
+                uncertainty,
+            )
+        )
+        output["convergence"] = {
+            "effective_begin_ps": ranges["effective_begin_ps"],
+            "effective_end_ps": ranges["effective_end_ps"],
+            "block_estimates": block_estimates,
+            "cumulative_estimates": cumulative_estimates,
+        }
     output_path.write_text(json.dumps(output, indent=2) + "\n")
     LOGGER.info(
         "FEP/REST Delta G = %.3f +/- %.3f kJ/mol",

@@ -40,6 +40,7 @@ DATA_COMMANDS = {
     "pacs_trjcat",
     "print_perf",
     "analyze_fep",
+    "optimize_fep_schedule",
     "analyze_abfe",
     "extract_str",
     "extract_ave_str",
@@ -121,6 +122,14 @@ INPUT_DESTS = {
     "mdps",
     "complex",
     "solvent",
+    "log",
+    "schedule",
+    "anchor_trajectory",
+    "solvent_charge_schedule",
+    "solvent_vdw_schedule",
+    "complex_charge_schedule",
+    "complex_vdw_schedule",
+    "restraint_schedule",
 }
 OUTPUT_DESTS = {
     "output",
@@ -135,7 +144,12 @@ OUTPUT_DESTS = {
     "xvv_output",
     "trial_dir",
 }
-MUTATING_PATH_COMMANDS = {"run_fep", "run_abfe", "analyze_fep_rest"}
+MUTATING_PATH_COMMANDS = {
+    "run_fep",
+    "run_abfe",
+    "analyze_fep_rest",
+    "optimize_fep_schedule",
+}
 
 
 def command_class(name: str) -> str:

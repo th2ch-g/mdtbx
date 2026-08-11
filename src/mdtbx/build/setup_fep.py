@@ -11,6 +11,7 @@ from ..utils.fep import (
     render_fep_mdp,
     soft_core_mdp_settings,
 )
+from ..utils.fep_schedule import load_optimized_schedule
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
@@ -98,6 +99,10 @@ def add_subcmd(subparsers):
         help="Custom Van der Waals lambda schedule",
     )
     parser.add_argument(
+        "--schedule",
+        help="Optimized FEP schedule JSON",
+    )
+    parser.add_argument(
         "--calc-lambda-neighbors",
         default=1,
         type=int,
@@ -175,6 +180,11 @@ def _validate_args(args):
         raise ValueError("--maxwarn must be non-negative")
     if not args.deffnm or Path(args.deffnm).name != args.deffnm:
         raise ValueError("--deffnm must be a filename without directories")
+    if getattr(args, "schedule", None) and any(
+        getattr(args, name, None) is not None
+        for name in ("fep_lambdas", "coul_lambdas", "vdw_lambdas")
+    ):
+        raise ValueError("--schedule cannot be combined with explicit lambda lists")
 
 
 def _fep_settings(args, schedule, state):
@@ -261,15 +271,24 @@ def run(args):
     )
     index = _existing_file(args.index, "Index") if args.index else None
 
-    schedule = build_lambda_schedule(
-        args.mode,
-        windows=args.windows,
-        coul_windows=args.coul_windows,
-        vdw_windows=args.vdw_windows,
-        fep_lambdas=args.fep_lambdas,
-        coul_lambdas=args.coul_lambdas,
-        vdw_lambdas=args.vdw_lambdas,
-    )
+    schedule_source = None
+    if getattr(args, "schedule", None):
+        schedule_source, schedule_data = load_optimized_schedule(
+            args.schedule,
+            expected_mode=args.mode,
+            expected_workflow="fep",
+        )
+        schedule = schedule_data["lambda_components"]
+    else:
+        schedule = build_lambda_schedule(
+            args.mode,
+            windows=args.windows,
+            coul_windows=args.coul_windows,
+            vdw_windows=args.vdw_windows,
+            fep_lambdas=args.fep_lambdas,
+            coul_lambdas=args.coul_lambdas,
+            vdw_lambdas=args.vdw_lambdas,
+        )
     window_count = len(next(iter(schedule.values())))
     outdir = Path(args.outdir).expanduser().resolve()
     if outdir.exists() and any(outdir.iterdir()):
@@ -325,6 +344,7 @@ def run(args):
         "gmx_executable": args.gmx,
         "prepared": not args.no_grompp,
         "lambda_components": schedule,
+        "schedule_source": str(schedule_source) if schedule_source else None,
         "windows": windows,
     }
     (outdir / FEP_MANIFEST).write_text(json.dumps(manifest, indent=2) + "\n")

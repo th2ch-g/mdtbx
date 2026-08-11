@@ -25,6 +25,14 @@ analyze_fep_rest
    :start_command: analyze_fep_rest
    :groups:
 
+optimize_fep_schedule
+---------------------
+
+.. autoprogram:: mdtbx.cli:create_parser()
+   :prog: mdtbx
+   :start_command: optimize_fep_schedule
+   :groups:
+
 analyze_rbfe
 ------------
 

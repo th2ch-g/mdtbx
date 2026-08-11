@@ -108,3 +108,67 @@ def test_run_generates_five_leg_abfe_cycle(tmp_path, monkeypatch):
     index = (base / "inputs" / "complex_abfe.ndx").read_text()
     assert "[ System ]" in index
     assert "[ ABFE_6 ]" in index
+
+
+def test_run_records_trajectory_anchor_statistics(tmp_path, monkeypatch):
+    import mdtraj as md
+    import numpy as np
+
+    args = _args(tmp_path)
+    frame = md.load(args.complex_structure)
+    trajectory = tmp_path / "complex.xtc"
+    md.Trajectory(np.repeat(frame.xyz, 2, axis=0), frame.topology).save_xtc(
+        str(trajectory)
+    )
+    args.anchor_trajectory = str(trajectory)
+    args.anchor_stride = 1
+
+    def fake_run_cmd(command, **_kwargs):
+        output = command[command.index("-o") + 1]
+        setup_abfe.Path(output).write_text("[ System ]\n1 2 3 4 5 6\n")
+
+    monkeypatch.setattr(setup_abfe, "run_cmd", fake_run_cmd)
+    setup_abfe.run(args)
+
+    manifest = json.loads((tmp_path / "abfe" / "abfe_manifest.json").read_text())
+    selection = manifest["anchor_selection"]
+    assert selection["method"] == "explicit_trajectory"
+    assert selection["frame_count"] == 2
+    assert selection["trajectory"] == str(trajectory.resolve())
+
+
+def test_run_accepts_per_leg_optimized_schedule(tmp_path, monkeypatch):
+    args = _args(tmp_path)
+    schedule = tmp_path / "charge_schedule.json"
+    schedule.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "workflow": "optimized-fep-schedule",
+                "source_workflow": "fep",
+                "mode": "charge",
+                "state_count": 3,
+                "coordinates": [0.0, 0.25, 1.0],
+                "lambda_components": {
+                    "coul": [0.0, 0.25, 1.0],
+                    "vdw": [0.0, 0.0, 0.0],
+                },
+            }
+        )
+    )
+    args.solvent_charge_schedule = str(schedule)
+
+    def fake_run_cmd(command, **_kwargs):
+        output = command[command.index("-o") + 1]
+        setup_abfe.Path(output).write_text("[ System ]\n1 2 3 4 5 6\n")
+
+    monkeypatch.setattr(setup_abfe, "run_cmd", fake_run_cmd)
+    setup_abfe.run(args)
+
+    base = tmp_path / "abfe"
+    leg_manifest = json.loads(
+        (base / "solvent_charge" / "fep_manifest.json").read_text()
+    )
+    manifest = json.loads((base / "abfe_manifest.json").read_text())
+    assert len(leg_manifest["windows"]) == 3
+    assert manifest["schedule_sources"]["solvent_charge"] == str(schedule.resolve())

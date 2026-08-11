@@ -29,6 +29,12 @@ not the absolute final step number.
    $ pixi run mdtbx run_fep --path fep
    $ pixi run mdtbx analyze_fep --path fep -b 2000
 
+For replica-exchange calculations, ``optimize_fep_schedule`` reads the final
+complete exchange-probability table and writes a damped schedule without
+changing the existing setup. Pass the generated JSON to ``setup_fep
+--schedule`` for the next iteration. Add ``--convergence-blocks N`` to
+``analyze_fep`` to report equal-duration block and cumulative BAR estimates.
+
 The default decoupling schedule removes electrostatics and then van der Waals
 interactions. Use transformation mode only with a topology that already
 contains valid A-state and B-state parameters. ``setup_fep`` writes GROMACS
@@ -59,6 +65,12 @@ PLUMED-patched ``gmx_mpi``, MPI, and a compatible dual-state topology.
        --replex 1000 \
        --ntomp 1
    $ pixi run mdtbx analyze_fep_rest --path fep_rest -b 2000
+
+Use ``optimize_fep_schedule --path fep_rest`` followed by ``setup_fep_rest
+--schedule optimized_schedule.json`` to reuse an optimized three-phase ladder.
+The charge/vdW phase boundaries remain fixed. ``analyze_fep_rest`` accepts the
+same ``--convergence-blocks`` option and reuses cached cross-Hamiltonian
+energies for every estimate.
 
 The topology restrictions and installation steps are documented in
 ``example/fep/README.md``. Review the generated manifest and hot-region
@@ -108,6 +120,7 @@ Explicit one-based anchor atoms are recommended:
        --solvent-structure ligand_solvent_equilibrated.gro \
        --moltype LIG \
        --anchors 125 128 131 4201 4204 4207 \
+       --anchor-trajectory complex_equilibrated.xtc \
        -o abfe
    $ pixi run mdtbx run_abfe --path abfe --ntomp 1
    $ pixi run mdtbx analyze_abfe --path abfe -b 2000
@@ -116,6 +129,12 @@ Inspect ``abfe_manifest.json`` before running production. Charged-ligand
 finite-size corrections are not calculated automatically; supply externally
 calculated corrections to ``analyze_abfe``. See ``example/abfe/README.md`` for
 the complete cycle, result files, symmetry numbers, and corrections.
+When ``--anchor-trajectory`` is provided, explicit anchors are averaged over
+the sampled frames; automatic anchors are ranked by restraint-weighted distance,
+angle, and circular dihedral variance. Optimized schedules can be supplied per
+ABFE leg. ``analyze_abfe --convergence-blocks N`` reports sign-adjusted
+convergence estimates for each leg without constructing an aggregate time
+series across legs.
 
 Reproducibility
 ---------------

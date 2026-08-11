@@ -96,3 +96,28 @@ def test_run_rejects_invalid_time_range(tmp_path):
 
     with pytest.raises(ValueError, match="greater than"):
         analyze_fep.run(_args(base, begin=10.0, end=5.0))
+
+
+def test_run_adds_block_and_cumulative_convergence(tmp_path, monkeypatch):
+    base = _fep_setup(tmp_path)
+    for index in range(2):
+        (base / f"lambda_{index:03d}" / "fep.xvg").write_text(
+            '@ title "Delta H"\n0 0\n1 0\n2 0\n3 0\n4 0\n'
+        )
+    calls = []
+
+    def fake_run_cmd(command, **_kwargs):
+        calls.append(command)
+        begin = float(command[command.index("-b") + 1])
+        return SimpleNamespace(
+            stdout=f"total 0 - 1, DG {begin:.3f} +/- 0.100\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr(analyze_fep, "run_cmd", fake_run_cmd)
+    analyze_fep.run(_args(base, convergence_blocks=2))
+
+    output = json.loads((base / "bar.json").read_text())
+    assert len(output["convergence"]["block_estimates"]) == 2
+    assert len(output["convergence"]["cumulative_estimates"]) == 2
+    assert len(calls) == 4
