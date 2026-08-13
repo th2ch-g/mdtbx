@@ -5,6 +5,9 @@ Confirms that every subcommand registers with argparse. No external tool
 (PyMOL, Gromacs, ...) is invoked.
 """
 
+import subprocess
+import sys
+
 import pytest
 
 
@@ -14,6 +17,17 @@ def test_cli_importable():
 
     assert callable(cli)
     assert callable(create_parser)
+
+
+def test_mdtraj_pkg_resources_warning_is_hidden():
+    result = subprocess.run(
+        [sys.executable, "-m", "mdtbx", "fit", "--help"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "pkg_resources is deprecated as an API" not in result.stderr
 
 
 def test_all_subcommands_registered():

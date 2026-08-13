@@ -9,6 +9,7 @@ import pkgutil
 import sys
 import time
 import traceback
+import warnings
 from importlib import metadata
 from pathlib import Path
 
@@ -75,7 +76,14 @@ def _module_for_command(name: str) -> str | None:
 
 
 def _register_module(subparsers, module_name: str) -> None:
-    module = importlib.import_module(module_name)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r"pkg_resources is deprecated as an API\.",
+            category=UserWarning,
+            module=r"mdtraj\.geometry\.order",
+        )
+        module = importlib.import_module(module_name)
     add_subcmd = getattr(module, "add_subcmd", None)
     if add_subcmd is None:
         return
