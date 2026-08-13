@@ -61,20 +61,51 @@ def load_representative_coordinates(
     return coordinates
 
 
-def pairwise_distances(coordinates: np.ndarray) -> np.ndarray:
-    coordinates = np.asarray(coordinates, dtype=float)
+def _validate_coordinates(coordinates: np.ndarray) -> None:
     if coordinates.ndim != 3 or coordinates.shape[0] == 0 or coordinates.shape[1] == 0:
         raise ValueError("coordinates must have shape (n_frames, n_atoms, 3)")
     if coordinates.shape[2] != 3:
         raise ValueError("coordinates must have shape (n_frames, n_atoms, 3)")
     if not np.all(np.isfinite(coordinates)):
         raise ValueError("coordinates must contain only finite values")
+
+
+def pairwise_distances(coordinates: np.ndarray) -> np.ndarray:
+    coordinates = np.asarray(coordinates, dtype=float)
+    _validate_coordinates(coordinates)
     diff = coordinates[:, :, None, :] - coordinates[:, None, :, :]
     return np.linalg.norm(diff, axis=-1)
 
 
+def reduce_pairwise_distances(
+    coordinates: np.ndarray,
+    transform=None,
+    chunk_frames: int = 100,
+) -> np.ndarray:
+    """Average transform(pairwise distances) over frames in bounded memory.
+
+    The broadcast in pairwise_distances materializes an
+    (n_frames, n_atoms, n_atoms, 3) tensor, which for long trajectories does
+    not fit in memory; both distmap and contactmap only need per-frame
+    reductions, so accumulate chunk sums instead.
+    """
+    if chunk_frames < 1:
+        raise ValueError("chunk_frames must be positive")
+    coordinates = np.asarray(coordinates, dtype=float)
+    _validate_coordinates(coordinates)
+    n_frames = coordinates.shape[0]
+    total = None
+    for start in range(0, n_frames, chunk_frames):
+        block = pairwise_distances(coordinates[start : start + chunk_frames])
+        if transform is not None:
+            block = transform(block)
+        block_sum = block.sum(axis=0, dtype=float)
+        total = block_sum if total is None else total + block_sum
+    return total / n_frames
+
+
 def calculate_distance_map(coordinates: np.ndarray) -> np.ndarray:
-    return pairwise_distances(coordinates).mean(axis=0)
+    return reduce_pairwise_distances(coordinates)
 
 
 def run(args):

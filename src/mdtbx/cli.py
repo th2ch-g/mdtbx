@@ -16,7 +16,7 @@ from pathlib import Path
 from . import agent, analysis, build, cv, trajectory, utils
 from .agent.context import JSON_MODE
 from .agent.model import json_value
-from .agent.registry import AGENT_COMMANDS, OUTPUT_DESTS
+from .agent.registry import AGENT_COMMANDS, MUTATING_PATH_COMMANDS, OUTPUT_DESTS
 from .agent.runtime import direct_plan
 from .logger import generate_logger
 
@@ -135,7 +135,12 @@ def _capture_value(buffer: io.StringIO) -> str:
 
 def _artifact_paths(args) -> list[str]:
     paths = []
-    for name in OUTPUT_DESTS:
+    names = set(OUTPUT_DESTS)
+    # Mirror registry.descriptor(): these commands mutate their --path
+    # directory in place, so it belongs in the artifacts list too.
+    if getattr(args, "_command", None) in MUTATING_PATH_COMMANDS:
+        names.add("path")
+    for name in names:
         value = getattr(args, name, None)
         values = value if isinstance(value, list) else [value]
         for item in values:

@@ -3,6 +3,7 @@ import sys
 
 from ..logger import generate_logger
 from ..utils.common_args import (
+    add_gmx_args,
     add_output_arg,
     add_selection_arg,
     add_topology_arg,
@@ -39,17 +40,7 @@ def add_subcmd(subparsers):
         help="Time point to extract [ps]",
     )
     add_output_arg(parser, default="target.pdb", help="Output struxture file")
-    parser.add_argument(
-        "--gmx",
-        action="store_true",
-        help="Use gmx",
-    )
-    parser.add_argument(
-        "-idx",
-        "--index",
-        type=str,
-        help="Index file (.ndx)",
-    )
+    add_gmx_args(parser)
 
     parser.set_defaults(func=run)
 

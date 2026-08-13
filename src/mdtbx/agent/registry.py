@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 from pathlib import Path
 from typing import Any
 
@@ -190,7 +192,9 @@ def _action_schema(action: argparse.Action) -> dict[str, Any]:
         "name": action.dest,
         "options": list(action.option_strings),
         "positional": positional,
-        "required": bool(action.required or (positional and action.default is None)),
+        # argparse already sets required=False for nargs="?" / "*" positionals,
+        # so action.required is authoritative for both kinds of action.
+        "required": bool(action.required),
         "type": _action_type(action),
         "nargs": action.nargs,
         "choices": json_value(list(action.choices))
@@ -255,6 +259,22 @@ def command_parser(
         raise ValueError(f"Unknown mdtbx command: {name}") from error
 
 
+def _parse_args(parser: argparse.ArgumentParser, argv: list[str]) -> argparse.Namespace:
+    """Parse argv, surfacing argparse failures as ValueError.
+
+    parser.error() prints to stderr and raises SystemExit(2); in agent mode
+    only stdout is captured, so the argparse message would otherwise be lost
+    and the JSON envelope would report an opaque ``SystemExit: 2``.
+    """
+    stream = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(stream):
+            return parser.parse_args(argv)
+    except SystemExit as error:
+        message = stream.getvalue().strip() or "Invalid command arguments"
+        raise ValueError(message) from error
+
+
 def arguments_to_argv(
     parser: argparse.ArgumentParser, arguments: dict[str, Any]
 ) -> list[str]:
@@ -302,14 +322,14 @@ def arguments_to_argv(
         values = value if isinstance(value, list) else [value]
         optional.extend(str(item) for item in values)
     argv = [*positional, *optional]
-    parser.parse_args(argv)
+    _parse_args(parser, argv)
     return argv
 
 
 def normalized_arguments(
     parser: argparse.ArgumentParser, argv: list[str]
 ) -> dict[str, Any]:
-    namespace = parser.parse_args(argv)
+    namespace = _parse_args(parser, argv)
     return {
         key: json_value(value)
         for key, value in vars(namespace).items()

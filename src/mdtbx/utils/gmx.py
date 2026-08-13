@@ -11,11 +11,6 @@ from contextlib import contextmanager
 from pathlib import Path
 
 
-def gmx_index_flag(index):
-    """Return the gmx ``-n <index>`` option, or ``""`` when no index file is set."""
-    return f"-n {index}" if index is not None else ""
-
-
 def gmx_index_args(index):
     """Return the gmx index option as argv elements."""
     return ["-n", str(index)] if index is not None else []

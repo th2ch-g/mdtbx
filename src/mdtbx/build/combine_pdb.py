@@ -41,7 +41,9 @@ def _renumber(records, start):
     output = []
     serial = start
     for line in records:
-        output.append(f"{line[:6]}{serial:5d}{line[11:]}")
+        # The serial column is fixed at 5 characters; wrap to the 1..99999 PDB
+        # range so combined systems past 99999 atoms keep the columns aligned.
+        output.append(f"{line[:6]}{(serial - 1) % 99999 + 1:5d}{line[11:]}")
         serial += 1
     return output, serial
 

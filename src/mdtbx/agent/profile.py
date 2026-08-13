@@ -10,7 +10,13 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-from .model import SCHEMA_VERSION, fingerprint, read_json
+from .model import (
+    SCHEMA_VERSION,
+    fingerprint,
+    positive_int as _positive_int,
+    read_json,
+    reject_unknown as _reject_unknown,
+)
 
 SCHEDULERS = {"local", "slurm", "age", "pjm"}
 RESOURCE_CLASSES = {"light", "data", "quantum", "gpu", "md"}
@@ -33,20 +39,6 @@ _RESOURCE_KEYS = {
     "scheduler_options",
     "incomplete",
 }
-
-
-def _reject_unknown(value: dict[str, Any], allowed: set[str], label: str) -> None:
-    unknown = sorted(set(value) - allowed)
-    if unknown:
-        raise ValueError(f"Unknown {label} fields: {', '.join(unknown)}")
-
-
-def _positive_int(value: Any, label: str, *, zero: bool = False) -> int:
-    minimum = 0 if zero else 1
-    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
-        requirement = "non-negative" if zero else "positive"
-        raise ValueError(f"{label} must be {requirement} integer")
-    return value
 
 
 def _finite_number(value: Any, label: str, *, positive: bool = False) -> float:

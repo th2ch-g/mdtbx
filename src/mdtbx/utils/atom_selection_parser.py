@@ -113,6 +113,13 @@ class Chain(SelectionNode):
 
     def eval(self, mol: AtomRecord) -> bool:
         chain = mol.get("chain")
+        if chain is None:
+            # GromacsTopologyParser records carry no chain id, so a silent
+            # False here would make "chain A" match nothing without warning.
+            raise ValueError(
+                "Selection uses 'chain' but the atom records carry no chain "
+                "information (GROMACS topologies do not provide chain ids)"
+            )
         if not isinstance(chain, str):
             return False
         return any(fnmatch.fnmatchcase(chain, pattern) for pattern in self.names)

@@ -228,6 +228,11 @@ def _replace_gro(path, hybrid_structure, resname):
         for atom in hybrid
     ]
     merged = atoms[: selected[0]] + replacement + atoms[selected[-1] + 1 :]
+    # A GRO file must carry velocities on every atom line or on none; the
+    # replacement atoms have none, so drop the velocity columns everywhere.
+    if any(atom["tail"].strip() for atom in merged):
+        LOGGER.info("Dropped input velocities to keep the merged GRO consistent")
+        merged = [{**atom, "tail": ""} for atom in merged]
     output = [title, str(len(merged))]
     for index, atom in enumerate(merged, start=1):
         output.append(

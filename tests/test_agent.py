@@ -245,6 +245,33 @@ def test_run_fep_path_is_tracked_as_input_and_output():
     assert "path" in item["outputs"]
 
 
+def test_arguments_to_argv_surfaces_argparse_errors_as_value_error():
+    from mdtbx.agent.registry import arguments_to_argv, command_parser
+
+    parser = command_parser(create_parser({"densmap"}), "densmap")
+    arguments = {
+        "topology": "structure.pdb",
+        "trajectory": "trajectory.xtc",
+        "selection": "Water",
+        "bins": "not-a-number",
+    }
+
+    with pytest.raises(ValueError, match="invalid int value"):
+        arguments_to_argv(parser, arguments)
+
+
+def test_agent_schema_optional_positional_is_not_required():
+    from mdtbx.agent.registry import all_descriptors
+
+    item = all_descriptors(create_parser({"agent_schema"}))["agent_schema"]
+    (command_argument,) = [
+        argument for argument in item["arguments"] if argument["name"] == "command"
+    ]
+
+    assert command_argument["positional"] is True
+    assert command_argument["required"] is False
+
+
 def test_fep_schedule_paths_are_tracked_by_agent_schema():
     from mdtbx.agent.registry import all_descriptors
 

@@ -71,6 +71,31 @@ def test_run_replaces_ligand_topology_and_coordinates(tmp_path):
     assert dummy_coordinates == pytest.approx([0.6, 0.9, 0.8])
 
 
+def test_replace_gro_drops_velocities_for_consistency(tmp_path):
+    structure = tmp_path / "gmx.gro"
+    structure.write_text(
+        "Test\n3\n"
+        "    1LIG     C1    1   0.000   0.000   0.000  0.1000  0.2000  0.3000\n"
+        "    1LIG     C2    2   0.100   0.000   0.000  0.1000  0.2000  0.3000\n"
+        "    1LIG     C3    3   0.000   0.100   0.000  0.1000  0.2000  0.3000\n"
+        "1.0 1.0 1.0\n"
+    )
+    hybrid_structure = tmp_path / "hybrid.pdb"
+    hybrid_structure.write_text(
+        "HETATM    1  C1  LIG A   1       0.000   0.000   0.000  1.00  0.00           C\n"
+        "HETATM    2  C2  LIG A   1       1.000   0.000   0.000  1.00  0.00           C\n"
+        "HETATM    3  C3  LIG A   1       0.000   1.000   0.000  1.00  0.00           C\n"
+    )
+
+    output_gro, _, _, _ = assemble_hybrid_system._replace_gro(
+        structure, hybrid_structure, "LIG"
+    )
+
+    # A GRO file must not mix velocity-bearing and velocity-less atom lines.
+    atom_lines = output_gro.splitlines()[2:-1]
+    assert all(len(line) == 44 for line in atom_lines)
+
+
 def test_replace_gro_rejects_different_ligand_pose(tmp_path):
     structure = tmp_path / "gmx.gro"
     structure.write_text(

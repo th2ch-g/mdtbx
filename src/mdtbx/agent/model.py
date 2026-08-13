@@ -42,16 +42,15 @@ def fingerprint(value: Any) -> str:
     return hashlib.sha256(canonical_json(value).encode()).hexdigest()
 
 
-def write_json(path: Path, value: Any) -> None:
-    """Atomically replace a JSON document in its destination directory."""
+def write_text(path: Path, value: str) -> None:
+    """Atomically replace a text file in its destination directory."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(json_value(value), indent=2, ensure_ascii=False) + "\n"
     descriptor, temporary = tempfile.mkstemp(
         prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
     )
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-            handle.write(payload)
+            handle.write(value)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, path)
@@ -61,6 +60,25 @@ def write_json(path: Path, value: Any) -> None:
         except FileNotFoundError:
             pass
         raise
+
+
+def write_json(path: Path, value: Any) -> None:
+    """Atomically replace a JSON document in its destination directory."""
+    write_text(path, json.dumps(json_value(value), indent=2, ensure_ascii=False) + "\n")
+
+
+def reject_unknown(value: dict[str, Any], allowed: set[str], label: str) -> None:
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise ValueError(f"Unknown {label} fields: {', '.join(unknown)}")
+
+
+def positive_int(value: Any, label: str, *, zero: bool = False) -> int:
+    minimum = 0 if zero else 1
+    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
+        requirement = "non-negative" if zero else "positive"
+        raise ValueError(f"{label} must be {requirement} integer")
+    return value
 
 
 def read_json(path: Path) -> Any:

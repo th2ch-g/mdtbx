@@ -6,6 +6,7 @@ import numpy as np
 
 from ..logger import generate_logger
 from ..utils.common_args import (
+    add_gmx_args,
     add_output_arg,
     add_topology_arg,
     add_trajectory_arg,
@@ -198,24 +199,13 @@ def add_subcmd(subparsers):
         type=str,
         help="Selection for reference (MDtraj Atom selection language)",
     )
-    parser.add_argument(
-        "--gmx",
-        action="store_true",
-        help="Use gmx",
-    )
+    add_gmx_args(parser)
     parser.add_argument(
         "-n",
         "--n_components",
         type=int,
         default=10,
         help="Number of components",
-    )
-    parser.add_argument(
-        "-idx",
-        "--index",
-        type=str,
-        default=None,
-        help="Index file (.ndx)",
     )
     add_output_arg(parser, default="pca.npy")
     parser.add_argument(
@@ -243,6 +233,10 @@ def run(args):
         args.selection_fit_ref = args.selection_fit_trj
 
     if args.gmx:
+        LOGGER.warning(
+            "The GROMACS backend fits to --topology; --reference, "
+            "--selection_cal_ref and --selection_fit_ref are ignored"
+        )
         with tempfile.TemporaryDirectory(prefix="mdtbx-pca-", dir=".") as temp_dir:
             temp_path = Path(temp_dir)
             eigenvalue_path = temp_path / "eigenval.xvg"
@@ -358,9 +352,12 @@ def run(args):
                 args.output_npz, pc, pca_model, trj, atom_indices_cal, args
             )
         if args.output_average is not None:
-            ave_xyz = trj.xyz.mean(axis=0, keepdims=True)
+            # `gmx covar -av` writes the average of the analysis group only,
+            # so restrict the MDtraj average to the same selection.
+            average_trj = trj.atom_slice(atom_indices_cal)
+            ave_xyz = average_trj.xyz.mean(axis=0, keepdims=True)
             average_path = ensure_output_parent(args.output_average)
-            md.Trajectory(ave_xyz, trj.topology).save(average_path)
+            md.Trajectory(ave_xyz, average_trj.topology).save(average_path)
             LOGGER.info(f"Saved average structure to {average_path}")
     output_path = save_npy(args.output, pc)
     LOGGER.info(f"Saved to {output_path}")

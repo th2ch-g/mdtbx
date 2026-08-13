@@ -353,6 +353,12 @@ class TestAtomSelector:
         assert not AtomSelector("chain B and protein").eval(mol_a)
         assert AtomSelector("chain B and protein").eval(mol_b)
 
+    def test_chain_selection_without_chain_data_raises(self):
+        # Topology-derived atom records carry no chain id; silently matching
+        # nothing would hide the mistake, so the selector must fail loudly.
+        with pytest.raises(ValueError, match="no chain information"):
+            AtomSelector("chain A").eval({"resname": "ALA", "name": "CA"})
+
 
 # ---------------------------------------------------------------------------
 # Error handling

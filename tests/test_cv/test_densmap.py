@@ -115,3 +115,40 @@ class TestDensmapRun:
 
         assert out.exists()
         assert not list(tmp_path.glob("tmp*.dat"))
+
+    def test_gmx_axis_orientation_and_bins(self, tmp_path, monkeypatch):
+        """The gmx .dat header column/row map to axis0/axis1 like histogram2d"""
+        from mdtbx.cv import densmap
+
+        monkeypatch.chdir(tmp_path)
+        commands = []
+
+        def fake_run_cmd(command, **_kwargs):
+            commands.append(command)
+            output = command[command.index("-od") + 1]
+            # Header row: second-axis ticks; header column: first-axis ticks.
+            Path(output).write_text("0 10 20 30\n1 11 12 13\n2 21 22 23\n")
+
+        monkeypatch.setattr(densmap, "run_cmd", fake_run_cmd)
+        out = tmp_path / "densmap_gmx_axes.npy"
+        args = types.SimpleNamespace(
+            topology="topology.tpr",
+            trajectory="trajectory.xtc",
+            selection="Water",
+            output=str(out),
+            bins=10,
+            axis="xy",
+            gmx=True,
+            index=None,
+        )
+
+        densmap.run(args)
+
+        # allow_pickle: object array written by this very test via save_npy
+        counts, axis0, axis1 = np.load(out, allow_pickle=True)
+        np.testing.assert_allclose(counts, [[11.0, 12.0, 13.0], [21.0, 22.0, 23.0]])
+        np.testing.assert_allclose(axis0, [1.0, 2.0])
+        np.testing.assert_allclose(axis1, [10.0, 20.0, 30.0])
+        (command,) = commands
+        assert command[command.index("-n1") + 1] == "10"
+        assert command[command.index("-n2") + 1] == "10"

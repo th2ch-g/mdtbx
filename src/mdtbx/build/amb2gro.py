@@ -108,7 +108,9 @@ def run(args):
         LOGGER.info("gmx.top generated")
 
     if not args.no_editconf:
-        with gmx_tempfile(".gro") as edited_path:
+        # Keep the temp file next to the final gro so the replace below never
+        # crosses filesystems.
+        with gmx_tempfile(".gro", directory=outdir) as edited_path:
             cmd = [
                 "gmx",
                 "editconf",

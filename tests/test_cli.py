@@ -19,6 +19,19 @@ def test_cli_importable():
     assert callable(create_parser)
 
 
+def test_artifact_paths_include_mutated_path_directory():
+    """Direct --json runs track --path for mutating commands like agent_run does"""
+    import types
+
+    from mdtbx.cli import _artifact_paths
+
+    args = types.SimpleNamespace(_command="run_fep", path="fep", output=None)
+    assert "fep" in _artifact_paths(args)
+
+    args = types.SimpleNamespace(_command="fit", path="fep", output=None)
+    assert "fep" not in _artifact_paths(args)
+
+
 def test_mdtraj_pkg_resources_warning_is_hidden():
     result = subprocess.run(
         [sys.executable, "-m", "mdtbx", "fit", "--help"],

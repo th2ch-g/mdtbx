@@ -3,6 +3,7 @@ import numpy as np
 
 from ..logger import generate_logger
 from ..utils.common_args import (
+    add_gmx_args,
     add_output_arg,
     add_selection_arg,
     add_topology_arg,
@@ -48,15 +49,7 @@ def add_subcmd(subparsers):
         choices=["xy", "xz", "yz"],
         help="Projection plane (MDtraj path only)",
     )
-    parser.add_argument(
-        "--gmx", action="store_true", help="Use Gromacs instead of MDtraj"
-    )
-    parser.add_argument(
-        "-idx",
-        "--index",
-        type=str,
-        help="Index file (.ndx)",
-    )
+    add_gmx_args(parser)
 
     parser.set_defaults(func=run)
 
@@ -75,17 +68,26 @@ def run(args):
                 "-s",
                 args.topology,
                 *gmx_index_args(args.index),
+                "-n1",
+                str(args.bins),
+                "-n2",
+                str(args.bins),
                 "-od",
                 density_path,
             ]
             run_cmd(cmd, input=f"{args.selection}\n")
-            # Layout: first row is X, first column is Y, and the body is density.
+            # Layout: the first column holds the first-axis tick values, the
+            # first row the second-axis tick values, and the body is density,
+            # so rows of the body follow the first axis like np.histogram2d.
+            # Unlike the MDtraj path these ticks are bin centers, not edges.
             a = np.loadtxt(density_path)
-        # Save in the same [counts, edges0, edges1] object-array form as the MDtraj path
+        # Save in the same [counts, axis0, axis1] object-array layout as the
+        # MDtraj path; note the axis arrays stay backend-dependent (gmx: bin
+        # centers, length bins; histogram2d: bin edges, length bins + 1).
         densmap = np.empty(3, dtype=object)
         densmap[0] = a[1:, 1:]
-        densmap[1] = a[0, 1:]
-        densmap[2] = a[1:, 0]
+        densmap[1] = a[1:, 0]
+        densmap[2] = a[0, 1:]
     else:
         import mdtraj as md
 

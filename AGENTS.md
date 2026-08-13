@@ -133,7 +133,7 @@ from ..utils.atom_selection_parser import AtomSelector
 from ..utils.parse_top import GromacsTopologyParser
 from ..utils.proc import run_cmd                 # Run subprocesses and log success
 from ..utils.tleap import run_tleap              # Write tleap.in, run tleap, and clean up
-from ..utils.gmx import gmx_index_flag, to_gmx_index, gmx_tempfile
+from ..utils.gmx import gmx_index_args, to_gmx_index, gmx_tempfile
 from ..utils.pymol_session import pymol_session  # Reinitialize PyMOL and load a structure
 from ..utils.common_args import add_topology_arg, add_trajectory_arg, add_output_arg
 ```

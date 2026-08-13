@@ -25,6 +25,22 @@ def test_combine_pdb_preserves_atom_fields_and_coordinates(tmp_path):
     assert lines[-1] == "END"
 
 
+def test_renumber_wraps_serials_at_pdb_column_limit():
+    from mdtbx.build import combine_pdb
+
+    line = (
+        "ATOM      1  CA  ALA A   1       1.000   2.000   3.000  1.00  0.00           C"
+    )
+    records, next_serial = combine_pdb._renumber([line, line], 99999)
+
+    assert records[0][6:11] == "99999"
+    # 100000 does not fit the 5-column serial field; it must wrap to 1
+    # instead of shifting every downstream column by one character.
+    assert records[1][6:11] == "    1"
+    assert all(len(record) == len(line) for record in records)
+    assert next_serial == 100001
+
+
 def test_combine_pdb_renames_explicit_amber_histidines(tmp_path):
     from mdtbx.build import combine_pdb
 
@@ -32,7 +48,7 @@ def test_combine_pdb_renames_explicit_amber_histidines(tmp_path):
     second = tmp_path / "ligand.pdb"
     output = tmp_path / "complex.pdb"
     first.write_text(
-        "ATOM      1  ND1 HIS A   7       1.000   2.000   3.000  1.00  0.00           N\n"
+        "ATOM      1  AND1 HIS A   7       1.000   2.000   3.000  1.00  0.00           N\n"
         "ATOM      2  HD1 HIS A   7       1.000   2.000   3.000  1.00  0.00           H\n"
         "ATOM      3  NE2 HIS A   8       1.000   2.000   3.000  1.00  0.00           N\n"
         "ATOM      4  HE2 HIS A   8       1.000   2.000   3.000  1.00  0.00           H\n"

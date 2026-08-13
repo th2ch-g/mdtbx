@@ -43,7 +43,7 @@ def test_run_uses_trajectory_extension_for_cleanup(tmp_path, monkeypatch):
 
     args = Namespace(
         trial_dir=str(trial_dir),
-        ref_structure=pacs_trjcat.DEFAULT_TOPOLOGY,
+        ref_structure=None,
         fit_selection="Protein",
         skip=1,
         trjname="prd.trr",

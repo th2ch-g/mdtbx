@@ -10,9 +10,6 @@ from ..utils.proc import run_cmd
 LOGGER = generate_logger(__name__)
 
 
-DEFAULT_TOPOLOGY = "{args.trial_dir}/cycle000/replica001/rmmol_top.tpr"
-
-
 def _list_subdirs(path, prefix):
     root = Path(path)
     if not root.is_dir():
@@ -165,7 +162,7 @@ def run(args):
         cycle_dir: _input_trajectories(cycle_dir, args.trjname)
         for cycle_dir in cycle_dirs
     }
-    if args.ref_structure in (None, DEFAULT_TOPOLOGY):
+    if args.ref_structure is None:
         first_replica = _list_subdirs(cycle_dirs[0], "replica")[0]
         ref_structure = first_replica / "rmmol_top.tpr"
     else:

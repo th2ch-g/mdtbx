@@ -5,9 +5,18 @@ sequence in build_solution / build_vacuum / gen_loop_aa / gen_resp / gen_am1bcc.
 """
 
 import re
+import subprocess
 from pathlib import Path
 
 from .proc import run_cmd
+
+
+def _log_tail(log_path, limit=20):
+    """Return the last lines of leap.log for embedding in error messages."""
+    if not log_path.is_file():
+        return ""
+    lines = log_path.read_text(errors="replace").splitlines()
+    return "\n".join(lines[-limit:])
 
 
 def run_tleap(input_text, *, keepfiles=False, extra_cleanup=(), cwd=None):
@@ -36,13 +45,18 @@ def run_tleap(input_text, *, keepfiles=False, extra_cleanup=(), cwd=None):
 
     input_path.write_text(input_text)
     try:
-        run_cmd(["tleap", "-f", str(input_path)], cwd=workdir, check=True)
+        # leap.log is removed below unless keepfiles is set, so on both failure
+        # paths the log tail must travel inside the exception message.
+        try:
+            run_cmd(["tleap", "-f", str(input_path)], cwd=workdir, check=True)
+        except subprocess.CalledProcessError as error:
+            raise RuntimeError(f"tleap failed:\n{_log_tail(log_path)}") from error
         if log_path.is_file():
             log_text = log_path.read_text(errors="replace")
             summaries = re.findall(r"Exiting LEaP: Errors = (\d+)", log_text)
             if summaries and int(summaries[-1]) != 0:
                 raise RuntimeError(
-                    f"tleap reported {summaries[-1]} error(s); see {log_path}"
+                    f"tleap reported {summaries[-1]} error(s):\n{_log_tail(log_path)}"
                 )
     finally:
         if not keepfiles:

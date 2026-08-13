@@ -68,3 +68,22 @@ def test_pairwise_distances_rejects_invalid_coordinates(coordinates):
 
     with pytest.raises(ValueError, match="coordinates"):
         pairwise_distances(coordinates)
+
+
+def test_reduce_pairwise_distances_matches_full_mean():
+    from mdtbx.cv.distmap import pairwise_distances, reduce_pairwise_distances
+
+    rng = np.random.default_rng(0)
+    coordinates = rng.normal(size=(7, 4, 3))
+    expected = pairwise_distances(coordinates).mean(axis=0)
+
+    chunked = reduce_pairwise_distances(coordinates, chunk_frames=2)
+
+    np.testing.assert_allclose(chunked, expected)
+
+
+def test_reduce_pairwise_distances_rejects_non_positive_chunk():
+    from mdtbx.cv.distmap import reduce_pairwise_distances
+
+    with pytest.raises(ValueError, match="chunk_frames"):
+        reduce_pairwise_distances(np.zeros((1, 2, 3)), chunk_frames=0)

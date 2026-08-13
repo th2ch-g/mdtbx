@@ -146,6 +146,29 @@ class TestPcaRun:
 
         assert out_average.exists()
 
+    def test_output_average_matches_analysis_selection(
+        self, trajectory_files, tmp_path
+    ):
+        """The MDtraj average holds the analysis group only, like gmx covar -av"""
+        import mdtraj as md
+
+        from mdtbx.cv.pca import run
+
+        out = tmp_path / "pca.npy"
+        out_average = tmp_path / "pca_average.pdb"
+        args = self._make_args(
+            trajectory_files,
+            out,
+            output_average=out_average,
+            selection_cal_trj="name CA",
+        )
+        run(args)
+
+        average = md.load(str(out_average))
+        topology = trajectory_files["traj"].topology
+        assert average.n_atoms == len(topology.select("name CA"))
+        assert average.n_atoms < topology.n_atoms
+
     def test_nested_output_directories_are_created(self, trajectory_files, tmp_path):
         from mdtbx.cv.pca import run
 

@@ -5,13 +5,13 @@ from pathlib import Path
 
 import numpy as np
 
+from ..config import GAS_CONSTANT_KJ
 from ..logger import generate_logger
 from ..utils.convergence import convergence_ranges
 from ..utils.fep import KJ_TO_KCAL, load_fep_manifest
 from ..utils.proc import run_cmd
 
 LOGGER = generate_logger(__name__)
-GAS_CONSTANT_KJ = 0.00831446261815324
 
 
 def add_subcmd(subparsers):

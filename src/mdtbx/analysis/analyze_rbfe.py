@@ -5,10 +5,10 @@ import json
 import math
 from pathlib import Path
 
+from ..config import GAS_CONSTANT_KJ
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
-GAS_CONSTANT_KJ = 0.00831446261815324
 
 
 def add_subcmd(subparsers):

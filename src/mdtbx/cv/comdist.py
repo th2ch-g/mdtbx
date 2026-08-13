@@ -5,6 +5,7 @@ import mdtraj as md
 
 from ..logger import generate_logger
 from ..utils.common_args import (
+    add_gmx_args,
     add_output_arg,
     add_topology_arg,
     add_trajectory_arg,
@@ -44,16 +45,7 @@ def add_subcmd(subparsers):
         help="Selection 2 (MDtraj Atom selection language)",
     )
     add_output_arg(parser, default="comdist.npy")
-
-    parser.add_argument(
-        "--gmx", action="store_true", help="Use Gromacs instead of MDtraj"
-    )
-    parser.add_argument(
-        "-idx",
-        "--index",
-        type=str,
-        help="Index file (.ndx)",
-    )
+    add_gmx_args(parser)
 
     parser.set_defaults(func=run)
 

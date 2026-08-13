@@ -2,6 +2,7 @@ import argparse
 
 from ..logger import generate_logger
 from ..utils.common_args import (
+    add_gmx_args,
     add_output_arg,
     add_selection_arg,
     add_topology_arg,
@@ -29,17 +30,7 @@ def add_subcmd(subparsers):
     add_trajectory_arg(parser)
     add_selection_arg(parser)
     add_output_arg(parser, default="ave.pdb", help="Output struxture file")
-    parser.add_argument(
-        "--gmx",
-        action="store_true",
-        help="Use gmx",
-    )
-    parser.add_argument(
-        "-idx",
-        "--index",
-        type=str,
-        help="Index file (.ndx)",
-    )
+    add_gmx_args(parser)
 
     parser.set_defaults(func=run)
 
@@ -75,6 +66,11 @@ def run(args):
         trj = md.load(args.trajectory, top=args.topology)
         atom_indices = select_atom_indices(trj.topology, args.selection)
         sel_trj = trj.atom_slice(atom_indices)
+        # `gmx covar` least-squares fits every frame to the -s structure before
+        # averaging, so superpose onto the topology coordinates here as well;
+        # averaging an unfitted trajectory smears rotational/translational drift.
+        reference = md.load(args.topology).atom_slice(atom_indices)
+        sel_trj.superpose(reference, 0)
         ave_xyz = sel_trj.xyz.mean(axis=0, keepdims=True)  # (1, n_sel_atoms, 3)
         avg_trj = md.Trajectory(ave_xyz, sel_trj.topology)
         avg_trj.save_pdb(str(output_path))

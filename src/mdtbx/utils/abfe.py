@@ -4,9 +4,11 @@ from pathlib import Path
 
 import numpy as np
 
+# GAS_CONSTANT_KJ is also re-exported for existing importers of this module.
+from ..config import GAS_CONSTANT_KJ
+
 ABFE_MANIFEST = "abfe_manifest.json"
 ABFE_SCHEMA_VERSION = 1
-GAS_CONSTANT_KJ = 0.00831446261815324
 STANDARD_VOLUME_NM3 = 1.6605390671738466
 
 

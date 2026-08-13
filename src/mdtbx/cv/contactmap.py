@@ -6,7 +6,7 @@ import numpy as np
 from ..logger import generate_logger
 from ..utils.common_args import add_output_arg, add_topology_arg
 from ..utils.numpy_io import save_npy
-from .distmap import load_representative_coordinates, pairwise_distances
+from .distmap import load_representative_coordinates, reduce_pairwise_distances
 
 LOGGER = generate_logger(__name__)
 
@@ -46,9 +46,13 @@ def add_subcmd(subparsers):
     parser.set_defaults(func=run)
 
 
-def calculate_contact_map(distance_matrices: np.ndarray, cutoff: float) -> np.ndarray:
+def _validate_cutoff(cutoff: float) -> None:
     if not math.isfinite(cutoff) or cutoff <= 0:
         raise ValueError("cutoff must be positive and finite")
+
+
+def calculate_contact_map(distance_matrices: np.ndarray, cutoff: float) -> np.ndarray:
+    _validate_cutoff(cutoff)
     if distance_matrices.ndim != 3 or distance_matrices.shape[0] == 0:
         raise ValueError(
             "distance_matrices must have shape (n_frames, n_atoms, n_atoms)"
@@ -68,11 +72,11 @@ def run(args):
         args.trajectory,
         args.selection,
     )
-    if coordinates is None:
-        return
-
-    distance_matrices = pairwise_distances(coordinates)
-    contact_map = calculate_contact_map(distance_matrices, args.cutoff)
+    _validate_cutoff(args.cutoff)
+    contact_map = reduce_pairwise_distances(
+        coordinates, lambda distances: distances < args.cutoff
+    )
+    np.fill_diagonal(contact_map, 0.0)
 
     LOGGER.info(f"Contact map shape: {contact_map.shape}")
     output_path = save_npy(args.output, contact_map)

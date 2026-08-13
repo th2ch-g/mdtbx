@@ -11,7 +11,6 @@ import shlex
 import stat
 import subprocess
 import sys
-import tempfile
 import uuid
 from pathlib import Path
 from typing import Any
@@ -22,10 +21,13 @@ from .model import (
     finalize_plan,
     fingerprint,
     json_value,
+    positive_int as _positive_int,
     read_json,
+    reject_unknown as _reject_unknown,
     utc_now,
     verify_plan,
     write_json,
+    write_text as _write_text,
 )
 from .profile import load_profile, profile_fingerprint
 from .registry import (
@@ -100,20 +102,6 @@ def schema(command: str | None = None) -> dict[str, Any]:
         "schemas": protocol_schemas(),
         "commands": commands,
     }
-
-
-def _reject_unknown(value: dict[str, Any], allowed: set[str], label: str) -> None:
-    unknown = sorted(set(value) - allowed)
-    if unknown:
-        raise ValueError(f"Unknown {label} fields: {', '.join(unknown)}")
-
-
-def _positive_int(value: Any, label: str, *, zero: bool = False) -> int:
-    minimum = 0 if zero else 1
-    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
-        requirement = "non-negative" if zero else "positive"
-        raise ValueError(f"{label} must be {requirement} integer")
-    return value
 
 
 def _validate_resources(identifier: str, value: Any) -> dict[str, Any] | None:
@@ -331,16 +319,12 @@ def _policy(profile: dict[str, Any], key: str, default: Any) -> Any:
 def _resource_candidates(
     profile: dict[str, Any], resource_class: str
 ) -> list[dict[str, Any]]:
-    candidates = []
-    unclassified = []
-    for resource in profile["resources"]:
-        classes = resource.get("classes")
-        if not classes:
-            unclassified.append(resource)
-        if classes and resource_class not in classes:
-            continue
-        candidates.append(resource)
-    return candidates or unclassified
+    # Resources without a classes list are wildcards that match every class.
+    return [
+        resource
+        for resource in profile["resources"]
+        if not resource.get("classes") or resource_class in resource["classes"]
+    ]
 
 
 def _select_resources(
@@ -638,25 +622,6 @@ def _append_event(run_dir: Path, event: dict[str, Any]) -> None:
         handle.write(payload)
         handle.flush()
         os.fsync(handle.fileno())
-
-
-def _write_text(path: Path, value: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temporary = tempfile.mkstemp(
-        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
-    )
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-            handle.write(value)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    except BaseException:
-        try:
-            os.unlink(temporary)
-        except FileNotFoundError:
-            pass
-        raise
 
 
 def _persist_state(run_dir: Path, state: dict[str, Any]) -> None:

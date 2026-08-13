@@ -1,6 +1,9 @@
 # grompp setting
 MAXWARN = 10
 
+# thermodynamics
+GAS_CONSTANT_KJ = 0.00831446261815324  # kJ/(mol K)
+
 # tleap settings
 SYSTEM_NAME = "SYS"
 AVOGADRO_CONST = 6.022  # 10**23 mol^-1
