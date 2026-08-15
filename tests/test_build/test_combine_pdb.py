@@ -48,7 +48,7 @@ def test_combine_pdb_renames_explicit_amber_histidines(tmp_path):
     second = tmp_path / "ligand.pdb"
     output = tmp_path / "complex.pdb"
     first.write_text(
-        "ATOM      1  AND1 HIS A   7       1.000   2.000   3.000  1.00  0.00           N\n"
+        "ATOM      1  ND1 HIS A   7       1.000   2.000   3.000  1.00  0.00           N\n"
         "ATOM      2  HD1 HIS A   7       1.000   2.000   3.000  1.00  0.00           H\n"
         "ATOM      3  NE2 HIS A   8       1.000   2.000   3.000  1.00  0.00           N\n"
         "ATOM      4  HE2 HIS A   8       1.000   2.000   3.000  1.00  0.00           H\n"
