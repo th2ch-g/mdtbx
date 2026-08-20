@@ -76,6 +76,11 @@ Toolbox for MD simulation
   - [x] MSM
   - [ ] TRAM
 
+- Performance
+
+  - [x] Print mdrun performance (ns/day)
+  - [x] Optimize mdrun performance with Optuna
+
 - Build system
   - [x] Vacuum
   - [x] Solution

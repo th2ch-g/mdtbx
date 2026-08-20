@@ -1,7 +1,8 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code)
-when working with code in this repository.
+This file provides guidance to coding agents such as Claude Code
+(claude.ai/code) when working with code in this repository.
+`CLAUDE.md` imports this file.
 
 ## Overview
 
@@ -19,11 +20,11 @@ workflows by combining multiple subcommands.
 
 ```bash
 # Good: combine small subcommands to build a pipeline
-pixi run mdtbx addh --input protein.pdb --output protein_h.pdb
-pixi run mdtbx gen_am1bcc --input ligand.mol2 --output ligand.mol2
-pixi run mdtbx build_solution --receptor protein_h.pdb --ligand ligand.mol2
-pixi run mdtbx fit --trajectory md.xtc --output fitted.xtc
-pixi run mdtbx rmsd --trajectory fitted.xtc --output rmsd.npy
+pixi run mdtbx addh -s protein.pdb -o protein_h
+pixi run mdtbx gen_am1bcc -s ligand.mol2 -r LIG -o ligparam
+pixi run mdtbx build_solution -i complex.pdb --ligparam ligparam/LIG.frcmod:ligparam/LIG.lib
+pixi run mdtbx fit -f md.xtc -p topol.gro -o fitted.xtc
+pixi run mdtbx rmsd -t fitted.xtc -p topol.gro -o rmsd.npy
 ```
 
 Before adding a subcommand, first consider whether the feature can be built by
@@ -139,6 +140,10 @@ placing its module in the correct directory; `cli.py` does not need to change.
 Libraries and helpers without `add_subcmd` are skipped. When a subcommand name
 is given on the command line, only that module is imported to keep startup
 fast; `--help` without a subcommand imports everything.
+
+After registration, `cli.py` injects `--json`, `--dry-run`, and
+`--cluster-profile` into every non-agent subcommand, so never define these
+flags inside `add_subcmd`.
 
 Import shared helpers and parsers through `..utils`:
 
