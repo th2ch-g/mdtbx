@@ -71,6 +71,10 @@ pixi run pymolrc           # Generate ~/.pymolrc
 
 # JupyterLab on a remote host
 pixi run jupyter_remote
+
+# Build the bilingual Sphinx documentation (English + Japanese)
+pixi run -e docs docs
+pixi run -e docs docs-linkcheck
 ```
 
 ## Architecture
@@ -90,18 +94,26 @@ src/
     agent/       # Agent protocol v2, cluster profiles, and scheduler adapters
 
 tests/
-  conftest.py      # Shared fixtures and PyMOL mocks
-  fixtures/        # Test data
-  test_utils/      # Tests for src/mdtbx/utils/
-  test_build/      # Tests for src/mdtbx/build/
-  test_trajectory/ # Tests for src/mdtbx/trajectory/
-  test_analysis/   # Tests for src/mdtbx/analysis/
-  test_cv/         # Tests for src/mdtbx/cv/
-  test_cli.py      # CLI registration tests for all subcommands
+  conftest.py         # Shared fixtures and PyMOL mocks
+  fixtures/           # Test data
+  test_utils/         # Tests for src/mdtbx/utils/
+  test_build/         # Tests for src/mdtbx/build/
+  test_trajectory/    # Tests for src/mdtbx/trajectory/
+  test_analysis/      # Tests for src/mdtbx/analysis/
+  test_cv/            # Tests for src/mdtbx/cv/
+  test_agent*.py      # Agent protocol, safety-boundary, and subprocess tests
+  test_cli.py         # CLI registration tests for all subcommands
+  test_docs.py        # Documentation consistency tests
+  test_examples/      # Tests for example/ scripts and notebooks
+  test_package.py     # Packaging and import-side-effect tests
+  test_pymol_plugins/ # Tests for pymol-plugins/
 
 pymol-plugins/
-  pymol_plugins/ # PyMOL plugins such as builders, visualizers, and selectors
+  pymol_plugins/ # PyMOL plugins such as builders, visualizers, selectors, and AI commands
 
+docs/            # Bilingual Sphinx documentation (English canonical, Japanese via gettext)
+agent-profiles/  # Example cluster profile JSONs (Slurm, AGE, PJM)
+agent-skills/    # Shared md-research Skill for autonomous MD workflows
 example/         # Example notebooks and scripts organized by use case
 install_scripts/ # Manual installation scripts for GROMACS, PLUMED, and related tools
 ```
@@ -121,10 +133,12 @@ def run(args):
 ```
 
 At startup, `cli.py` scans the category packages
-(`build`/`trajectory`/`analysis`/`cv`/`utils`) and **automatically registers**
-modules that expose `add_subcmd`. Adding a command only requires placing its
-module in the correct directory; `cli.py` does not need to change. Libraries
-and helpers without `add_subcmd` are skipped.
+(`utils`/`build`/`trajectory`/`analysis`/`cv`/`agent`) and **automatically
+registers** modules that expose `add_subcmd`. Adding a command only requires
+placing its module in the correct directory; `cli.py` does not need to change.
+Libraries and helpers without `add_subcmd` are skipped. When a subcommand name
+is given on the command line, only that module is imported to keep startup
+fast; `--help` without a subcommand imports everything.
 
 Import shared helpers and parsers through `..utils`:
 

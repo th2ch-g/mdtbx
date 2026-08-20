@@ -11,6 +11,19 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.py) cd \"$CLAUDE_PROJECT_DIR\" && .pixi/envs/default/bin/ruff format --force-exclude \"$f\" >/dev/null && out=$(.pixi/envs/default/bin/ruff check --fix --force-exclude \"$f\" 2>&1) || { echo \"$out\" >&2; exit 2; };; esac",
+            "timeout": 30,
+            "statusMessage": "ruff format/lint"
+          }
+        ]
+      }
     ]
   }
 }
