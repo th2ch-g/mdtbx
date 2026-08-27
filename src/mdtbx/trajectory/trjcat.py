@@ -66,6 +66,11 @@ def add_subcmd(subparsers):
         action="store_true",
         help="Keep the intermediate concatenated trajectory before PBC processing",
     )
+    parser.add_argument(
+        "--preserve-time",
+        action="store_true",
+        help="Keep existing frame times instead of setting file start times interactively",
+    )
 
     parser.set_defaults(func=run)
 
@@ -109,11 +114,14 @@ def run(args):
     run_cmd(cmd, log="rmmol_top.gro generated")
 
     # trjcat -> trjconv
-    c_cmd = "c\n" * args.num_of_step
     trj_files = [f"{args.prefix}{step}.xtc" for step in range(1, args.num_of_step + 1)]
 
-    cmd = ["gmx", "trjcat", "-f", *trj_files, "-o", concatenated, "-settime"]
-    run_cmd(cmd, input=c_cmd, log=f"{concatenated} generated")
+    cmd = ["gmx", "trjcat", "-f", *trj_files, "-o", concatenated]
+    command_input = None
+    if not getattr(args, "preserve_time", False):
+        cmd.append("-settime")
+        command_input = "c\n" * args.num_of_step
+    run_cmd(cmd, input=command_input, log=f"{concatenated} generated")
 
     if args.pbc == "cluster":
         selection_input = (

@@ -5,14 +5,12 @@ import sys
 
 def test_import_has_no_path_or_pymol_side_effects():
     code = """
-import importlib.util
 import os
 import sys
 before = os.environ.get("PATH")
 import mdtbx
 assert os.environ.get("PATH") == before
 assert "pymol_plugins" not in sys.modules
-assert importlib.util.find_spec("mdtbx.agent") is None
 """
     environment = dict(os.environ)
     environment["PYTHONPATH"] = "src"

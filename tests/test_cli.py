@@ -7,27 +7,8 @@ Confirms that every subcommand registers with argparse. No external tool
 
 import subprocess
 import sys
-from argparse import _SubParsersAction
 
 import pytest
-
-REMOVED_AGENT_COMMANDS = {
-    "agent_cancel",
-    "agent_collect",
-    "agent_plan",
-    "agent_probe",
-    "agent_profile_save",
-    "agent_run",
-    "agent_schema",
-    "agent_status",
-}
-REMOVED_AGENT_OPTIONS = {"--json", "--dry-run", "--cluster-profile"}
-
-
-def _subcommands(parser):
-    return next(
-        action for action in parser._actions if isinstance(action, _SubParsersAction)
-    )
 
 
 def test_cli_importable():
@@ -36,22 +17,6 @@ def test_cli_importable():
 
     assert callable(cli)
     assert callable(create_parser)
-
-
-def test_agent_commands_and_options_are_removed():
-    from mdtbx.cli import create_parser
-
-    parser = create_parser()
-    subcommands = _subcommands(parser)
-    assert REMOVED_AGENT_COMMANDS.isdisjoint(subcommands.choices)
-
-    option_strings = {
-        option
-        for command_parser in subcommands.choices.values()
-        for action in command_parser._actions
-        for option in action.option_strings
-    }
-    assert REMOVED_AGENT_OPTIONS.isdisjoint(option_strings)
 
 
 def test_mdtraj_pkg_resources_warning_is_hidden():

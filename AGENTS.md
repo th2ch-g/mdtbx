@@ -30,6 +30,19 @@ pixi run mdtbx rmsd -t fitted.xtc -p topol.gro -o rmsd.npy
 Before adding a subcommand, first consider whether the feature can be built by
 combining existing commands.
 
+## MD workflow examples
+
+Before preparing or analyzing an MD calculation, read `example/README.md` and
+start from a **Ready** script under `example/workflows/`. Copy the script into
+the calculation directory, edit only its configuration block, run `--check`,
+and inspect every generated input.
+
+Use `mdtbx` for system preparation and analysis. Use an explicit
+installer-provided GROMACS path for production `mdrun`; never use the pixi
+GROMACS for production GPU or PLUMED runs. Generate and validate scheduler
+scripts without submitting them. Actual submission requires explicit user
+approval.
+
 ## Development commands
 
 ```bash
@@ -98,7 +111,7 @@ pymol-plugins/
   pymol_plugins/ # PyMOL plugins such as builders, visualizers, selectors, and AI commands
 
 docs/            # Bilingual Sphinx documentation (English canonical, Japanese via gettext)
-example/         # Example notebooks and scripts organized by use case
+example/         # Catalog plus copy-ready and specialized workflow examples
 install_scripts/ # Manual installation scripts for GROMACS, PLUMED, and related tools
 ```
 

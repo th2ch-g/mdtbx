@@ -20,6 +20,12 @@ periodic-boundary and fitting operations. ``pacs_trjcat`` performs the related
 operation for PaCS-MD directory layouts. ``fit`` handles fitting as a separate
 step.
 
+For segmented conventional MD, ``example/workflows/analyze.sh`` is a
+copy-ready pipeline for ``trjcat``, RMSD, RMSF, contact-map, and performance
+analysis. Edit the segment count and selections, then run its side-effect-free
+``--check`` mode before analysis. It uses ``trjcat --preserve-time`` for
+segments whose time already continues from the preceding checkpoint.
+
 Collective variables
 --------------------
 

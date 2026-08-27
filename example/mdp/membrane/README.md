@@ -1,25 +1,21 @@
-# builder
+# Membrane MDP templates
 
-## 圧力をかけ始めたらエラー
+These files provide the minimization, six-stage equilibration, and production
+defaults copied by `example/workflows/membrane_setup.sh`.
 
-- 状況：charmmguiの拘束力でstep6.4(1fs→2fs)で平衡化してたらエラー
-- 結論：charmmguiほどpackingがうまくないので、tleapで`setbox SYS vdw`とする必要がある+平衡化時の拘束力を弱める必要がある
+Packmol-Memgen systems can require gentler restraints and more equilibration
+than systems prepared by other membrane builders. In particular, inspect the
+packing, box dimensions, pressure-coupling behavior, and all restraint include
+files before production. Do not assume that settings from a CHARMM-GUI system
+transfer unchanged.
 
-## acpype grompp segmentation fault without restraints
+Some GROMACS/topology combinations have failed during `grompp` when multiple
+position-restraint blocks were applied to an ACPYPE-converted topology. Prefer
+the ParmEd conversion used by the canonical membrane workflow, keep separate
+`moleculetype` sections where appropriate, and validate every equilibration
+stage before removing restraints.
 
-- 状況：acpypeで作った系に対して拘束力を弱めてもproductionMDのgromppでセグフォ
-- 結論：gromppのbugぽい、もしくは非推奨
-- 回避策：生産MDでも拘束力=0でMDする
-- 作業メモ：
-  - ifdefをtopの中に入れたらどうなる？
-    - 同じエラー
-  - itpをまとめて一緒にしたらどうなる？
-    - 同じエラー
-  - 脂質への拘束を無くしたらどうなる？
-    - 脂質への拘束を無くしたらちゃんとずれてるので多分拘束は効いてる
-    - 脂質への拘束無くしたら動いた。。。(拘束が一つだけだとOK)
-  - parmedで作った系に位置拘束を2個付いれたらどうなる？
-    - charmmguiのやつは2つ入れても動く。。。、多分moleculetypeを分けているから
-  - acpypeで他の系を作ったらどうなる？
-    - リガンドを揃えないと読み込んで貰えない
-    - ダメだった、、
+The equilibration templates define separate `POSRES`/`POSRES_FC` and
+`POSRES_LIPID`/`POSRES_LIPID_FC` macros. The canonical membrane setup creates
+both include sets. If the lipid selection produces no include file, correct
+`LIPID_POSRES_SELECTION` before running `grompp`.

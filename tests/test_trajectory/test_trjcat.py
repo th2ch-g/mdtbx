@@ -15,6 +15,7 @@ def _args(**overrides):
         "no_resnr": False,
         "output": None,
         "keep_concatenated": False,
+        "preserve_time": False,
     }
     defaults.update(overrides)
     return types.SimpleNamespace(**defaults)
@@ -37,6 +38,23 @@ def test_run_uses_argv_and_stdin(monkeypatch):
     trjcat_call = next(call for call in calls if call[0][1] == "trjcat")
     assert trjcat_call[1] == "c\nc\n"
     assert "run with spaces/prd1.xtc" in trjcat_call[0]
+
+
+def test_preserve_time_uses_existing_trajectory_timestamps(monkeypatch):
+    from mdtbx.trajectory import trjcat
+
+    calls = []
+    monkeypatch.setattr(
+        trjcat,
+        "run_cmd",
+        lambda command, **kwargs: calls.append((command, kwargs.get("input"))),
+    )
+
+    trjcat.run(_args(preserve_time=True))
+
+    trjcat_call = next(call for call in calls if call[0][1] == "trjcat")
+    assert "-settime" not in trjcat_call[0]
+    assert trjcat_call[1] is None
 
 
 def test_cluster_supplies_three_selection_prompts(monkeypatch):

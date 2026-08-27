@@ -14,7 +14,7 @@ function make_file_and_submit() {
     cp ../test.tpr .
 
     echo "#!/bin/bash
-#SBATCH -N ${num_node}
+#SBATCH -N ${num_nodes}
 #SBATCH -n ${mpi}
 #SBATCH -c ${omp}
 #SBATCH -p ${part}
@@ -35,7 +35,7 @@ srun -np $mpi gmx_mpi mdrun -v -deffnm test \${MDRUN_OPTION}
 echo done
 " > test_mdrun.sh
 
-    pjsub test_mdrun.sh
+    sbatch test_mdrun.sh
     cd ..
 
 }
@@ -43,40 +43,40 @@ echo done
 CORE_PER_NODE=128
 
 for part in L1cpu L4cpu L16cpu L36cpu L72cpu L144cpu; do
-    for num_node in {1..10}; do
+    for num_nodes in {1..10}; do
         case $part in
             F1cpu | B1cpu | L1cpu)
-                if [ $num_node -ge 2 ]; then
+                if [ $num_nodes -ge 2 ]; then
                     continue
                 fi
                 ;;
             F4cpu | B4cpu | L4cpu)
-                if [ $num_node -eq 1 ] || [ $num_node -ge 5 ]; then
+                if [ $num_nodes -eq 1 ] || [ $num_nodes -ge 5 ]; then
                     continue
                 fi
                 ;;
             F16cpu | B16cpu | L16cpu)
-                if [ $num_node -le 4 ] || [ $num_node -ge 17 ]; then
+                if [ $num_nodes -le 4 ] || [ $num_nodes -ge 17 ]; then
                     continue
                 fi
                 ;;
             F36cpu | B36cpu | L36cpu)
-                if [ $num_node -le 16 ] || [ $num_node -ge 37 ]; then
+                if [ $num_nodes -le 16 ] || [ $num_nodes -ge 37 ]; then
                     continue
                 fi
                 ;;
             F72cpu | B72cpu | L72cpu)
-                if [ $num_node -ne 72 ]; then
+                if [ $num_nodes -ne 72 ]; then
                     continue
                 fi
                 ;;
             F144cpu | B144cpu | L144cpu)
-                if [ $num_node -ne 144 ]; then
+                if [ $num_nodes -ne 144 ]; then
                     continue
                 fi
                 ;;
             i8cpu)
-                if [ $num_node -ge 9 ]; then
+                if [ $num_nodes -ge 9 ]; then
                     continue
                 fi
                 ;;

@@ -44,6 +44,22 @@ ligand parameters:
 Set ``--water-seed`` when reproducible Packmol water placement is required.
 Use ``build_vacuum`` when no solvent, ions, or periodic box should be added.
 
+Copy-ready conventional MD
+--------------------------
+
+The repository's ``example/README.md`` catalog identifies maintained and
+legacy examples. For a conventional calculation, copy a script from
+``example/workflows/`` into the calculation directory and edit its
+configuration block. ``solution_setup.sh`` and ``membrane_setup.sh`` prepare
+GROMACS inputs with ``mdtbx``; both support a side-effect-free ``--check``
+mode.
+
+The companion ``run_slurm.sh`` uses an explicit installer-provided GROMACS
+binary for production ``mdrun``. It only runs inside an existing Slurm
+allocation and never submits itself. Review the generated topology,
+coordinates, index groups, MDP files, and scheduler settings before an
+explicit submission.
+
 Place structures
 ----------------
 
@@ -88,5 +104,6 @@ Use the remaining build commands for targeted transformations:
 * ``find_bond`` inspects candidate bonds such as disulfide bonds.
 * ``gen_temperatures`` generates temperature ladders for replica exchange.
 
-The repository contains complete shell examples under ``example/build/`` and
-input MDP templates under ``example/mdp/``.
+The canonical shell workflow is under ``example/workflows/``. Older component
+examples remain under ``example/build/`` and input MDP templates under
+``example/mdp/``; check their status in ``example/README.md`` before use.

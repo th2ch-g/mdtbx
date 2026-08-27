@@ -196,6 +196,8 @@ PyMOL> ai_status
 PyMOL> ai_clear
 ```
 
-See [`example/fep/README.md`](example/fep/README.md) for standard FEP and
-FEP/REST, [`example/abfe/README.md`](example/abfe/README.md) for ABFE, and
+Start with the [`example/` catalog](example/README.md) for copy-ready solution,
+membrane, Slurm, and analysis scripts. See
+[`example/fep/README.md`](example/fep/README.md) for standard FEP and FEP/REST,
+[`example/abfe/README.md`](example/abfe/README.md) for ABFE, and
 [`example/msm/README.md`](example/msm/README.md) for kinetic analysis.

@@ -1,4 +1,4 @@
-;define                  = -DPOSRES -DPOSRES_FC=0.0 -DPOSRES_FC_LIPID=0.0 ; Use restraints if acpype is used
+;define                  = -DPOSRES -DPOSRES_FC=0.0 -DPOSRES_LIPID -DPOSRES_LIPID_FC=0.0
 ; Temperature REMD production template for membrane systems
 ; Set ref_t to the target temperature of each replica before grompp
 ; Typical usage: one directory per replica, then run mdrun -multidir ... -replex ...
