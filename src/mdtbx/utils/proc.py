@@ -1,10 +1,8 @@
 """Thin subprocess wrapper shared across subcommands."""
 
 import subprocess
-import sys
 from collections.abc import Sequence
 
-from ..agent.context import JSON_MODE
 from ..logger import generate_logger
 
 LOGGER = generate_logger(__name__)
@@ -23,9 +21,6 @@ def run_cmd(
         option in kwargs for option in ("text", "universal_newlines", "encoding")
     ):
         kwargs["text"] = True
-    if JSON_MODE.get() and not kwargs.get("capture_output"):
-        kwargs.setdefault("stdout", sys.stderr)
-        kwargs.setdefault("stderr", sys.stderr)
     result = subprocess.run(cmd, shell=shell, check=check, **kwargs)
     if log:
         LOGGER.info(log)

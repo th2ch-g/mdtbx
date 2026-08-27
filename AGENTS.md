@@ -30,19 +30,6 @@ pixi run mdtbx rmsd -t fitted.xtc -p topol.gro -o rmsd.npy
 Before adding a subcommand, first consider whether the feature can be built by
 combining existing commands.
 
-## Autonomous MD research
-
-Use the shared `md-research` Skill for autonomous preparation, simulation,
-analysis, free-energy, resource discovery, or scheduler work. Discover typed
-arguments with `mdtbx agent_schema`, create immutable plans with
-`mdtbx agent_plan`, and execute only an exact user-approved `plan_id` with
-`mdtbx agent_run`.
-
-Cluster capabilities belong in approved external JSON profiles. Probe them
-read-only from a login node with `mdtbx agent_probe`. Never run heavy
-calculations on a login node, submit with raw scheduler commands, or
-automatically cancel, resubmit, expand sampling, or change a protocol.
-
 ## Development commands
 
 ```bash
@@ -92,7 +79,6 @@ src/
     trajectory/  # Trajectory commands
     analysis/    # Free-energy, tICA, clustering, and MSM commands
     cv/          # Collective-variable commands
-    agent/       # Agent protocol v2, cluster profiles, and scheduler adapters
 
 tests/
   conftest.py         # Shared fixtures and PyMOL mocks
@@ -102,7 +88,6 @@ tests/
   test_trajectory/    # Tests for src/mdtbx/trajectory/
   test_analysis/      # Tests for src/mdtbx/analysis/
   test_cv/            # Tests for src/mdtbx/cv/
-  test_agent*.py      # Agent protocol, safety-boundary, and subprocess tests
   test_cli.py         # CLI registration tests for all subcommands
   test_docs.py        # Documentation consistency tests
   test_examples/      # Tests for example/ scripts and notebooks
@@ -113,8 +98,6 @@ pymol-plugins/
   pymol_plugins/ # PyMOL plugins such as builders, visualizers, selectors, and AI commands
 
 docs/            # Bilingual Sphinx documentation (English canonical, Japanese via gettext)
-agent-profiles/  # Example cluster profile JSONs (Slurm, AGE, PJM)
-agent-skills/    # Shared md-research Skill for autonomous MD workflows
 example/         # Example notebooks and scripts organized by use case
 install_scripts/ # Manual installation scripts for GROMACS, PLUMED, and related tools
 ```
@@ -122,8 +105,8 @@ install_scripts/ # Manual installation scripts for GROMACS, PLUMED, and related 
 ### Subcommand pattern
 
 Each command module under `src/mdtbx/build/`, `src/mdtbx/trajectory/`,
-`src/mdtbx/analysis/`, `src/mdtbx/cv/`, `src/mdtbx/utils/`, or
-`src/mdtbx/agent/` implements these two functions:
+`src/mdtbx/analysis/`, `src/mdtbx/cv/`, or `src/mdtbx/utils/` implements these
+two functions:
 
 ```python
 def add_subcmd(subparsers):
@@ -134,16 +117,12 @@ def run(args):
 ```
 
 At startup, `cli.py` scans the category packages
-(`utils`/`build`/`trajectory`/`analysis`/`cv`/`agent`) and **automatically
-registers** modules that expose `add_subcmd`. Adding a command only requires
-placing its module in the correct directory; `cli.py` does not need to change.
-Libraries and helpers without `add_subcmd` are skipped. When a subcommand name
-is given on the command line, only that module is imported to keep startup
-fast; `--help` without a subcommand imports everything.
-
-After registration, `cli.py` injects `--json`, `--dry-run`, and
-`--cluster-profile` into every non-agent subcommand, so never define these
-flags inside `add_subcmd`.
+(`utils`/`build`/`trajectory`/`analysis`/`cv`) and **automatically registers**
+modules that expose `add_subcmd`. Adding a command only requires placing its
+module in the correct directory; `cli.py` does not need to change. Libraries
+and helpers without `add_subcmd` are skipped. When a subcommand name is given
+on the command line, only that module is imported to keep startup fast;
+`--help` without a subcommand imports everything.
 
 Import shared helpers and parsers through `..utils`:
 

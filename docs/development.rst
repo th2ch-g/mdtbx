@@ -16,7 +16,6 @@ The Python package is organized by command category:
        trajectory/
        analysis/
        cv/
-       agent/
    tests/
    example/
    pymol-plugins/

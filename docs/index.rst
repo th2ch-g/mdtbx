@@ -17,7 +17,6 @@ Start here
 * :doc:`workflows/system_building` covers common system-preparation steps.
 * :doc:`workflows/trajectory_analysis` shows trajectory and CV pipelines.
 * :doc:`workflows/free_energy` covers FEP, FEP/REST, and ABFE.
-* :doc:`agent_workflows` describes approved autonomous Agent workflows.
 * :doc:`reference/index` lists every available command and option.
 
 Design principle
@@ -42,7 +41,6 @@ pipeline instead of expecting one command to perform an entire study:
    workflows/system_building
    workflows/trajectory_analysis
    workflows/free_energy
-   agent_workflows
    pymol_ai
    troubleshooting
    reference/index

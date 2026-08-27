@@ -203,7 +203,3 @@ cython_debug/
 TODO.md
 
 ref/
-
-# Agent execution state and local cluster profiles
-.mdtbx/
-agent-profiles/*.local.json

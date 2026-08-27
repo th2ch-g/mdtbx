@@ -181,15 +181,6 @@ pixi run mdtbx run_fep --path fep_rest --multidir --replex 1000
 pixi run mdtbx analyze_fep_rest --path fep_rest -b 2000
 ```
 
-### Autonomous agent workflows
-
-AI agents drive mdtbx through a typed protocol: discover arguments with
-`agent_schema`, create an immutable plan with `agent_plan`, and execute only a
-user-approved `plan_id` with `agent_run`. Cluster capabilities live in external
-JSON profiles (see `agent-profiles/`) probed read-only with `agent_probe`.
-Every subcommand also accepts `--json` and `--dry-run` for machine-readable
-results. See the [documentation](https://th2ch-g.github.io/mdtbx/) for details.
-
 ### PyMOL AI commands
 
 Inside the configured PyMOL session, `claude` and `codex` automatically apply

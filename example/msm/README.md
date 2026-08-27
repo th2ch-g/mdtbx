@@ -21,10 +21,6 @@ centers, and convergence metadata. `msm.npz` contains transition/count
 matrices, the stationary distribution, eigenvalues, timescales, and retained
 state symbols.
 
-For batch execution, place these commands in an Agent schema-v2 workflow and
-select an approved cluster profile. See the project Agent workflow
-documentation.
-
 ## Reference
 
 - [deeptime](https://deeptime-ml.github.io/)

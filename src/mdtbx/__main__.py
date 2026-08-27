@@ -1,4 +1,4 @@
-"""Command-line entry point for humans and autonomous agents."""
+"""Command-line entry point."""
 
 
 def main():
