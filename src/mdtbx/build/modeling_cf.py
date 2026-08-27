@@ -65,7 +65,8 @@ def run(args):
                 raise FileNotFoundError(f"Template PDB not found: {input_path}")
             template_dir = temp_path / "templates"
             template_dir.mkdir()
-            shutil.copy2(input_path, template_dir / "template.pdb")
+            # ColabFold treats the filename stem as a four-character template ID.
+            shutil.copy2(input_path, template_dir / "tmpl.pdb")
             command.extend(
                 [
                     "--custom-template-path",

@@ -51,7 +51,9 @@ def test_run_adds_template_arguments(tmp_path, monkeypatch):
     def fake_run(command, **_kwargs):
         captured["command"] = command
         template_arg = command[command.index("--custom-template-path") + 1]
-        assert (modeling_cf.Path(template_arg) / "template.pdb").is_file()
+        copied_template = modeling_cf.Path(template_arg) / "tmpl.pdb"
+        assert copied_template.is_file()
+        assert len(copied_template.stem) == 4
 
     monkeypatch.setattr(modeling_cf, "run_cmd", fake_run)
 
