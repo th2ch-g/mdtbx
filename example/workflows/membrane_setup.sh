@@ -14,7 +14,7 @@ SALT_CONC="${SALT_CONC:-0.15}"
 CATION="${CATION:-Na+}"
 ANION="${ANION:-Cl-}"
 # Angstrom.
-BOX_DIMS=(${BOX_DIMS:-120 120 200})
+read -r -a BOX_DIMS <<< "${BOX_DIMS:-120 120 200}"
 WATER_MODEL="${WATER_MODEL:-tip3p}"
 PROTEIN_FF="${PROTEIN_FF:-ff14SB}"
 LIPID_FF="${LIPID_FF:-lipid21}"
@@ -33,7 +33,10 @@ CHECK_ONLY=false
 case "${1:-}" in
     "") ;;
     --check) CHECK_ONLY=true ;;
-    *) echo "Usage: $0 [--check]" >&2; exit 2 ;;
+    *)
+        echo "Usage: $0 [--check]" >&2
+        exit 2
+        ;;
 esac
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -65,10 +68,10 @@ absolute_file() {
 }
 
 require_file "$INPUT_PDB"
-command -v "${MDTBX[0]}" >/dev/null || fail "Command not found: ${MDTBX[0]}"
+command -v "${MDTBX[0]}" > /dev/null || fail "Command not found: ${MDTBX[0]}"
 [[ -d "$MDP_SOURCE_DIR" ]] || fail "MDP directory not found: $MDP_SOURCE_DIR"
 [[ ${#BOX_DIMS[@]} -eq 3 ]] || fail "BOX_DIMS must contain three values"
-[[ "$PREORIENTED" == true || "$PREORIENTED" == false ]] || \
+[[ "$PREORIENTED" == true || "$PREORIENTED" == false ]] ||
     fail "PREORIENTED must be true or false"
 
 for stage in "${required_mdps[@]}"; do
@@ -76,7 +79,7 @@ for stage in "${required_mdps[@]}"; do
 done
 
 if [[ -n "$LIGAND_FRCMOD" || -n "$LIGAND_LIB" ]]; then
-    [[ -n "$LIGAND_FRCMOD" && -n "$LIGAND_LIB" ]] || \
+    [[ -n "$LIGAND_FRCMOD" && -n "$LIGAND_LIB" ]] ||
         fail "Set both LIGAND_FRCMOD and LIGAND_LIB"
     require_file "$LIGAND_FRCMOD"
     require_file "$LIGAND_LIB"
@@ -101,6 +104,9 @@ memgen_command=(
     --ffwat "$WATER_MODEL"
     --ffprot "$PROTEIN_FF"
     --fflip "$LIPID_FF"
+    --movebadrandom
+    --short_penalty
+    --nloop 40
     --parametrize
 )
 if [[ "$PREORIENTED" == true ]]; then
@@ -129,9 +135,9 @@ fi
 mkdir -p "${OUTPUT_DIR}/membrane_build"
 cp "$INPUT_PDB" "${OUTPUT_DIR}/membrane_build/system.pdb"
 
-pushd "${OUTPUT_DIR}/membrane_build" >/dev/null
+pushd "${OUTPUT_DIR}/membrane_build" > /dev/null
 "${memgen_command[@]}"
-popd >/dev/null
+popd > /dev/null
 
 "${MDTBX[@]}" amb2gro \
     -p "${OUTPUT_DIR}/membrane_build/bilayer_system_lipid.top" \
@@ -155,7 +161,7 @@ mv "${OUTPUT_DIR}/gmx_centered.gro" "${OUTPUT_DIR}/gmx.gro"
 shopt -s nullglob
 protein_posres_files=("${OUTPUT_DIR}"/posres_*.itp)
 shopt -u nullglob
-[[ ${#protein_posres_files[@]} -gt 0 ]] || \
+[[ ${#protein_posres_files[@]} -gt 0 ]] ||
     fail "POSRES_SELECTION generated no restraint include files"
 "${MDTBX[@]}" gen_posres \
     -p "${OUTPUT_DIR}/gmx.top" \
@@ -164,7 +170,7 @@ shopt -u nullglob
 shopt -s nullglob
 lipid_posres_files=("${OUTPUT_DIR}"/posres_lipid_*.itp)
 shopt -u nullglob
-[[ ${#lipid_posres_files[@]} -gt 0 ]] || \
+[[ ${#lipid_posres_files[@]} -gt 0 ]] ||
     fail "LIPID_POSRES_SELECTION generated no restraint include files"
 
 for stage in "${required_mdps[@]}"; do
