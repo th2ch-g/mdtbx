@@ -24,7 +24,10 @@ CHECK_ONLY=false
 case "${1:-}" in
     "") ;;
     --check) CHECK_ONLY=true ;;
-    *) echo "Usage: $0 [--check]" >&2; exit 2 ;;
+    *)
+        echo "Usage: $0 [--check]" >&2
+        exit 2
+        ;;
 esac
 
 fail() {
@@ -38,12 +41,12 @@ require_file() {
 
 [[ "$GROMACS_BIN" != /path/to/* ]] || fail "Edit GROMACS_BIN"
 [[ -x "$GROMACS_BIN" ]] || fail "GROMACS_BIN is not executable: $GROMACS_BIN"
-GROMACS_REALPATH="$(realpath "$GROMACS_BIN")" || \
+GROMACS_REALPATH="$(realpath "$GROMACS_BIN")" ||
     fail "Cannot resolve GROMACS_BIN: $GROMACS_BIN"
 case "${GROMACS_BIN}:${GROMACS_REALPATH}" in
     *"/.pixi/envs/"*) fail "Use installer GROMACS, not pixi GROMACS" ;;
 esac
-[[ "$PRODUCTION_SEGMENTS" =~ ^[1-9][0-9]*$ ]] || \
+[[ "$PRODUCTION_SEGMENTS" =~ ^[1-9][0-9]*$ ]] ||
     fail "PRODUCTION_SEGMENTS must be a positive integer"
 [[ -d "$SYSTEM_DIR" ]] || fail "System directory not found: $SYSTEM_DIR"
 
@@ -69,6 +72,10 @@ run_stage() {
     local mdp="$2"
     local previous_structure="$3"
     local previous_checkpoint="${4:-}"
+    local restraint_reference="gmx.gro"
+    if [[ "$stage" =~ ^eq[1-6]$ ]]; then
+        restraint_reference="$previous_structure"
+    fi
 
     if [[ -f "${stage}.gro" ]]; then
         echo "Skipping completed stage: $stage"
@@ -77,14 +84,14 @@ run_stage() {
 
     if [[ ! -f "${stage}.tpr" ]]; then
         if [[ -n "$previous_checkpoint" ]]; then
-            [[ -f "$previous_checkpoint" ]] || \
+            [[ -f "$previous_checkpoint" ]] ||
                 fail "Checkpoint required for continuation: $previous_checkpoint"
         fi
         grompp_command=(
             "$GROMACS_BIN" grompp
             -f "$mdp"
             -c "$previous_structure"
-            -r gmx.gro
+            -r "$restraint_reference"
             -p gmx.top
             -n index.ndx
             -o "${stage}.tpr"

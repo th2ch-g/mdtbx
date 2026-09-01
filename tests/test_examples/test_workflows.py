@@ -148,6 +148,14 @@ def test_slurm_starts_eq1_without_a_minimization_checkpoint():
     assert "run_stage eq1 eq1.mdp mini.gro mini.cpt" not in text
 
 
+def test_slurm_uses_previous_structure_as_restraint_reference():
+    text = (WORKFLOW_ROOT / "run_slurm.sh").read_text()
+
+    assert 'if [[ "$stage" =~ ^eq[1-6]$ ]]' in text
+    assert 'restraint_reference="$previous_structure"' in text
+    assert '-r "$restraint_reference"' in text
+
+
 def test_slurm_rejects_a_pixi_gromacs_alias(tmp_path: Path):
     for filename in (
         "gmx.gro",
