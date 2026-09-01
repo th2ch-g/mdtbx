@@ -28,6 +28,9 @@ def test_run_uses_argv_and_preserves_unrelated_files(tmp_path, monkeypatch):
     def fake_run(command, **kwargs):
         captured["command"] = command
         captured["kwargs"] = kwargs
+        output = modeling_cf.Path(command[-2])
+        output.mkdir()
+        (output / "input_unrelaxed_rank_001_model_1.pdb").write_text("ATOM\n")
 
     monkeypatch.setattr(modeling_cf, "run_cmd", fake_run)
 
@@ -54,6 +57,9 @@ def test_run_adds_template_arguments(tmp_path, monkeypatch):
         copied_template = modeling_cf.Path(template_arg) / "tmpl.pdb"
         assert copied_template.is_file()
         assert len(copied_template.stem) == 4
+        output = modeling_cf.Path(command[-2])
+        output.mkdir()
+        (output / "input_unrelaxed_rank_001_model_1.pdb").write_text("ATOM\n")
 
     monkeypatch.setattr(modeling_cf, "run_cmd", fake_run)
 
@@ -74,3 +80,12 @@ def test_empty_sequence_raises(tmp_path, monkeypatch):
 
     with pytest.raises(ValueError, match="must not be empty"):
         modeling_cf.run(_args(tmp_path, sequence=" \n"))
+
+
+def test_missing_ranked_model_raises(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(modeling_cf.shutil, "which", lambda _name: "/bin/tool")
+    monkeypatch.setattr(modeling_cf, "run_cmd", lambda *_args, **_kwargs: None)
+
+    with pytest.raises(RuntimeError, match="rank-001 model"):
+        modeling_cf.run(_args(tmp_path))

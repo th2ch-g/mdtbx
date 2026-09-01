@@ -76,3 +76,5 @@ def run(args):
             )
         command.extend([str(fasta_path), str(output_path), "--amber"])
         run_cmd(command, log=f"{output_path}/ generated")
+        if not list(output_path.glob("*rank_001*.pdb")):
+            raise RuntimeError("ColabFold did not generate a rank-001 model")
