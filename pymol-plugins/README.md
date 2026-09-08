@@ -21,6 +21,10 @@ cuemol_style ray, filename=figure_ray.png, width=2400, height=1800
 cuemol_style reset
 ```
 
+Material and outline styles default to `ribbon`, so helices remain spiral-shaped.
+Geometry presets such as `cartoon`, `cpk`, and `surface` select their own geometry.
+Use `representation=auto` with a material or outline style to inherit source layers.
+
 Colors follow CueMol GUI defaults: khaki helices, SteelBlue sheets, FloralWhite
 coils, and yellow nucleic geometry. Atomic representations use DefaultCPKColoring,
 with carbon inheriting the molecular color. `color=keep` preserves existing colors;

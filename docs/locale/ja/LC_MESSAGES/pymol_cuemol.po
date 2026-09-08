@@ -43,6 +43,17 @@ msgstr "``pixi install`` と ``pixi run pymolrc`` を実行してPyMOLを再起�
 
 #: ../../../pymol_cuemol.rst:30
 msgid ""
+"Material and outline styles default to ``ribbon``, so helices remain spiral-shaped. "
+"Geometry presets such as ``cartoon``, ``cpk``, and ``surface`` select their own "
+"geometry. Use ``representation=auto`` with a material or outline style to inherit "
+"source layers."
+msgstr ""
+"材質・輪郭線スタイルの既定は ``ribbon`` で、ヘリックスを螺旋状に描きます。``cartoon``、``cpk``、"
+"``surface`` などの形状プリセットは、それぞれ対応する形状を選びます。材質・輪郭線スタイルで元の表示を"
+"引き継ぐ場合は ``representation=auto`` を指定します。"
+
+#: ../../../pymol_cuemol.rst:30
+msgid ""
 "Default colors follow CueMol GUI's initial painting: khaki helices, SteelBlue sheets,"
 " FloralWhite coils, and yellow nucleic geometry. Carbon inherits the molecular "
 "painting. ``color=keep`` uses existing atom colors. Helix outside faces keep their "

@@ -27,6 +27,11 @@ loading a structure, use the PyMOL command line:
    cuemol_style reset
    cuemol_style list
 
+Material and outline styles default to ``ribbon``, so helices remain
+spiral-shaped. Geometry presets such as ``cartoon``, ``cpk``, and ``surface``
+select their own geometry. Use ``representation=auto`` with a material or
+outline style to inherit source layers.
+
 Default colors follow CueMol GUI's initial painting: khaki helices,
 SteelBlue sheets, FloralWhite coils, and yellow nucleic geometry. Carbon
 inherits the molecular painting. ``color=keep`` uses existing atom colors.
