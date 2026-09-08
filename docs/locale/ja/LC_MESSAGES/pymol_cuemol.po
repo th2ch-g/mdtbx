@@ -1,9 +1,9 @@
-# Japanese translation of the cuemol_style guide.
+# Japanese translation of the cuemol_style integration guide.
 msgid ""
 msgstr ""
 "Project-Id-Version: mdtbx 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-08 20:57+0900\n"
+"POT-Creation-Date: 2026-09-09 00:15+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: mdtbx contributors\n"
 "Language: ja\n"
@@ -20,15 +20,16 @@ msgstr "CueMol風のPyMOLスタイル"
 
 #: ../../pymol_cuemol.rst:4
 msgid ""
-"``cuemol_style`` adds molecular geometry and live GPU materials to the "
-"``pymol_plugins`` package. It requires PyMOL 3.1 with Qt, NumPy, SciPy, and PyOpenGL,"
-" and a compatibility OpenGL 2.1 / GLSL 1.20 context. ``pixi install`` installs the "
-"Python dependencies. CueMol itself is not required. PyMOL's source code and standard "
-"commands are unchanged."
+"The ``cuemol_style`` command is implemented by the standalone `cuemol_style_in_pymol "
+"package <https://github.com/th2ch-g/cuemol_style_in_pymol>`_. ``pymol_plugins`` "
+"depends on a pinned Git revision of that package and registers the command when "
+"imported. ``pixi install`` resolves the dependency; no sibling source checkout is "
+"required."
 msgstr ""
-"``cuemol_style`` は ``pymol_plugins`` に分子形状と操作中のGPU材質描画を追加します。Qt版PyMOL "
-"3.1、NumPy、SciPy、PyOpenGL、および互換OpenGL 2.1 / GLSL 1.20コンテキストが必要です。Python依存は ``pixi "
-"install`` で導入されます。CueMol本体は不要です。PyMOLのソースコードと標準コマンドは変更しません。"
+"``cuemol_style`` は独立した `cuemol_style_in_pymolパッケージ "
+"<https://github.com/th2ch-g/cuemol_style_in_pymol>`_ で実装しています。``pymol_plugins`` "
+"はこのパッケージの特定のGitリビジョンに依存し、インポート時にコマンドを登録します。``pixi install`` "
+"で依存を取得するため、隣接ディレクトリへのソース配置は不要です。"
 
 #: ../../pymol_cuemol.rst:11
 msgid "Quick start"
@@ -36,313 +37,45 @@ msgstr "使い始める"
 
 #: ../../pymol_cuemol.rst:13
 msgid ""
-"Configure the plugin with ``pixi run pymolrc`` and restart PyMOL, or import "
-"``pymol_plugins`` in an already configured Python environment. Run these commands in "
-"the PyMOL command line after loading a structure:"
-msgstr ""
-"``pixi run pymolrc`` でプラグインを設定してPyMOLを再起動するか、設定済みのPython環境で ``pymol_plugins`` "
-"をインポートします。構造を読み込んだ後、PyMOLのコマンド欄で実行します。"
+"Run ``pixi install`` and ``pixi run pymolrc``, then restart PyMOL. After loading a "
+"structure, use the PyMOL command line:"
+msgstr "``pixi install`` と ``pixi run pymolrc`` を実行してPyMOLを再起動します。構造を読み込んだ後、PyMOLのコマンド欄で実行します。"
 
-#: ../../pymol_cuemol.rst:26
+#: ../../pymol_cuemol.rst:30
 msgid ""
-"The default named view is ``cuemol``. Applying another style with the same name "
-"replaces that view. ``richardson`` uses thin ribbons, sheet arrows, lighter "
-"undersides, stepped lighting, and black silhouette/crease lines. Rotation and zoom "
-"update the GPU rendering immediately."
+"Default colors follow CueMol GUI's initial painting: khaki helices, SteelBlue sheets,"
+" FloralWhite coils, and yellow nucleic geometry. Carbon inherits the molecular "
+"painting. ``color=keep`` uses existing atom colors. Helix outside faces keep their "
+"base color and inside faces use a lighter color. Applying or resetting styles "
+"preserves the existing background."
 msgstr ""
-"既定の管理名は ``cuemol`` です。同じ名前で別のスタイルを適用すると置き換わります。``richardson`` "
-"は薄いリボン、シートの矢印、明るい裏面、段階的な陰影、黒い輪郭・折れ目の線を組み合わせます。回転や拡大に合わせてGPU描画が更新されます。"
+"既定の配色はCueMol "
+"GUIの初期配色に合わせ、ヘリックスはkhaki、シートはSteelBlue、コイルはFloralWhite、核酸形状は黄色です。炭素は分子の配色を引き継ぎます。``color=keep``"
+" では既存の原子色を使います。ヘリックスの外側は基準色、内側は明るい色です。スタイルの適用やresetでは既存の背景を維持します。"
 
-#: ../../pymol_cuemol.rst:32
-msgid "Styles and controls"
-msgstr "スタイルと設定"
-
-#: ../../pymol_cuemol.rst:34
-msgid "Style names"
-msgstr "スタイル名"
-
-#: ../../pymol_cuemol.rst:38
-msgid "Group"
-msgstr "分類"
-
-#: ../../pymol_cuemol.rst:39
-msgid "Names"
-msgstr "名前"
-
-#: ../../pymol_cuemol.rst:40
-msgid "Protein geometry"
-msgstr "タンパク質の形状"
-
-#: ../../pymol_cuemol.rst:41
+#: ../../pymol_cuemol.rst:36
 msgid ""
-"``richardson``, ``ribbon``, ``round_ribbon``, ``fancy_ribbon``, ``cartoon``, "
-"``round_cartoon``, ``tube``"
+"Standard ``ray`` and ``png, ray=1`` include the custom geometry. The dedicated "
+"``cuemol_style ray`` export adds camera-dependent outlines and material samples. Ray "
+"shading approximates the GPU appearance. The ``richardson`` profile does not "
+"implement CueMol 3's hatching strokes. PyMOL's source and standard commands are "
+"unchanged; CueMol is not required."
 msgstr ""
-"``richardson``, ``ribbon``, ``round_ribbon``, ``fancy_ribbon``, ``cartoon``, "
-"``round_cartoon``, ``tube``"
+"標準の ``ray`` と ``png, ray=1`` にも独自形状が写ります。専用の ``cuemol_style ray`` "
+"は視点に応じた輪郭線と材質サンプルを追加します。rayの陰影はGPU表示の近似です。``richardson`` はCueMol "
+"3のハッチングの線を実装していません。PyMOLのソースコードと標準コマンドは変更せず、CueMol本体も不要です。"
 
-#: ../../pymol_cuemol.rst:43
-msgid "Other molecular geometry"
-msgstr "その他の分子形状"
-
-#: ../../pymol_cuemol.rst:44
-msgid "``nucleic``, ``ballstick``, ``cpk``, ``surface``"
-msgstr "``nucleic``, ``ballstick``, ``cpk``, ``surface``"
-
-#: ../../pymol_cuemol.rst:45
-msgid "Lighting and shading"
-msgstr "照明と陰影"
-
-#: ../../pymol_cuemol.rst:46
-msgid "``default``, ``shadow``, ``nolighting``, ``matte``, ``toon1``, ``toon2``"
-msgstr "``default``, ``shadow``, ``nolighting``, ``matte``, ``toon1``, ``toon2``"
-
-#: ../../pymol_cuemol.rst:47
-msgid "Decorative materials"
-msgstr "装飾材質"
-
-#: ../../pymol_cuemol.rst:48
+#: ../../pymol_cuemol.rst:42
 msgid ""
-"``diff_metal``, ``spec_metal``, ``metallic_chrome``, ``metallic_copper``, "
-"``stone35``, ``wood31``, ``wood14scl2``"
+"See the standalone package's `full guide "
+"<https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.rst>`_ "
+"for installation requirements, all 26 presets, selection and trajectory handling, "
+"session restoration, memory limits, rendering differences, and validation commands. "
+"Its implementation, shaders, and dedicated tests are maintained in that repository. "
+"mdtbx retains compatibility imports for older PyMOL sessions that reference "
+"``pymol_plugins.cuemol_style.gpu``."
 msgstr ""
-"``diff_metal``, ``spec_metal``, ``metallic_chrome``, ``metallic_copper``, "
-"``stone35``, ``wood31``, ``wood14scl2``"
-
-#: ../../pymol_cuemol.rst:50
-msgid "Outlines"
-msgstr "輪郭線"
-
-#: ../../pymol_cuemol.rst:51
-msgid "``outline``, ``silhouette``"
-msgstr "``outline``, ``silhouette``"
-
-#: ../../pymol_cuemol.rst:53
-msgid ""
-"Geometry presets choose a representation. Material presets use "
-"``representation=auto``: existing sticks, spheres, surface, cartoon, and ribbon "
-"layers are retained as custom geometry. Atoms shown only as lines or nonbonded points"
-" become protein ribbons, nucleic backbones/base slabs, or ball-and-stick geometry. "
-"Hidden atoms stay hidden in this automatic mode. Maps, labels, and other unsupported "
-"layers remain native."
-msgstr ""
-"形状プリセットは表示形式を指定します。材質プリセットは ``representation=auto`` "
-"を使い、既存のスティック、球、表面、cartoon、ribbonを独自形状に置き換えます。線や非結合点だけで表示されている原子は、タンパク質リボン、核酸の骨格と塩基板、または球棒になります。自動モードでは非表示原子を表示しません。マップ、ラベル、その他の未対応表現はPyMOL標準のまま残ります。"
-
-#: ../../pymol_cuemol.rst:60
-msgid ""
-"Override the representation with ``ribbon``, ``cartoon``, ``tube``, ``nucleic``, "
-"``ballstick``, ``sticks``, ``cpk``, or ``surface``. ``cartoon`` uses helix cylinders;"
-" ``ribbon`` follows the backbone. Quality is ``low``, ``medium`` (default), or "
-"``high``. Higher quality increases preparation time and memory use."
-msgstr ""
-"表示形式は "
-"``ribbon``、``cartoon``、``tube``、``nucleic``、``ballstick``、``sticks``、``cpk``、``surface``"
-" で指定できます。``cartoon`` はヘリックスを円柱にし、``ribbon`` は骨格に沿います。品質は "
-"``low``、``medium``（既定）、``high`` です。高品質ほど準備時間とメモリ使用量が増えます。"
-
-#: ../../pymol_cuemol.rst:66
-msgid ""
-"``edge`` accepts ``auto``, ``none``, ``edges``, ``silhouette``, ``thin``, ``normal``,"
-" or ``thick``. ``edges`` includes sharp visible creases. ``edge_width`` is in "
-"angstroms, with a one-pixel minimum in GPU images; ``edge_color`` accepts a PyMOL "
-"color. ``transparency=keep`` preserves the source representation's opacity; a number "
-"from 0 to 1 overrides it."
-msgstr ""
-"``edge`` には ``auto``、``none``、``edges``、``silhouette``、``thin``、``normal``、``thick`` "
-"を指定します。``edges`` は見えている鋭い折れ目も描きます。``edge_width`` "
-"の単位はオングストロームで、GPU画像では最小1ピクセルです。``edge_color`` はPyMOLの色名を受け取ります。``transparency=keep`` "
-"は元の表示形式の不透明度を保持し、0から1の数値はそれを上書きします。"
-
-#: ../../pymol_cuemol.rst:79
-msgid "Default colors"
-msgstr "既定の配色"
-
-#: ../../pymol_cuemol.rst:81
-msgid ""
-"``color=cuemol`` is the default. It combines CueMol's WoodyHSCPaint palette for "
-"protein ribbons/cartoons/tubes with DarkCPKColoring for atomic and surface "
-"representations on a white background. Nucleic backbone/base geometry is white. This "
-"is a deliberate combination of CueMol styles."
-msgstr ""
-"既定値は ``color=cuemol`` "
-"です。白い背景で、タンパク質のリボン・cartoon・tubeにはCueMolのWoodyHSCPaint、原子表現と表面にはDarkCPKColoringを使います。核酸の骨格と塩基形状は白です。複数のCueMolスタイルを意図的に組み合わせています。"
-
-#: ../../pymol_cuemol.rst:86
-msgid "CueMol palette"
-msgstr "CueMolの配色"
-
-#: ../../pymol_cuemol.rst:89
-msgid "Feature"
-msgstr "対象"
-
-#: ../../pymol_cuemol.rst:90
-msgid "Color"
-msgstr "色"
-
-#: ../../pymol_cuemol.rst:91
-msgid "Helix / sheet / coil"
-msgstr "ヘリックス / シート / コイル"
-
-#: ../../pymol_cuemol.rst:92
-msgid "``#FF7F7F`` / ``#7FFF7F`` / ``#FFFFBF``"
-msgstr "``#FF7F7F`` / ``#7FFF7F`` / ``#FFFFBF``"
-
-#: ../../pymol_cuemol.rst:93
-msgid "Carbon / nitrogen / oxygen"
-msgstr "炭素 / 窒素 / 酸素"
-
-#: ../../pymol_cuemol.rst:94
-msgid "``#404040`` / blue / red"
-msgstr "``#404040`` / 青 / 赤"
-
-#: ../../pymol_cuemol.rst:95
-msgid "Hydrogen / sulfur / phosphorus"
-msgstr "水素 / 硫黄 / リン"
-
-#: ../../pymol_cuemol.rst:96
-msgid "cyan / green / yellow"
-msgstr "シアン / 緑 / 黄"
-
-#: ../../pymol_cuemol.rst:98
-msgid ""
-"Other modes are ``keep`` (existing atom colors), ``chain``, ``ss`` (WoodyHSC "
-"secondary-structure colors), ``rainbow``, and ``element`` (a conventional element "
-"palette). Changing a PyMOL atom color while a style is active takes effect after "
-"``refresh`` and only when the color mode uses that atom color. Source atom colors and"
-" secondary-structure assignments are never changed by this command."
-msgstr ""
-"他のモードは "
-"``keep``（既存の原子色）、``chain``、``ss``（WoodyHSCの二次構造色）、``rainbow``、``element``（一般的な元素色）です。適用中にPyMOLの原子色を変更した場合、その色を使う配色モードで"
-" ``refresh`` を実行すると反映されます。元の原子色や二次構造の割り当ては変更しません。"
-
-#: ../../pymol_cuemol.rst:111
-msgid "Selection and state management"
-msgstr "選択とstate管理"
-
-#: ../../pymol_cuemol.rst:113
-msgid ""
-"Click custom geometry to select its original atoms in ``sele``. PyMOL's mouse "
-"selection mode controls atom/residue/chain expansion; Shift adds to the selection. "
-"Pink markers identify selected source atom positions. Dragging retains native "
-"rotation/movement. Native opaque geometry blocks clicks on custom geometry behind it."
-" Picking requires the Qt GUI."
-msgstr ""
-"独自形状をクリックすると、対応する元の原子を ``sele`` "
-"に選択します。原子・残基・鎖への展開はPyMOLのマウス選択モードに従い、Shiftで追加選択します。選択された原子位置にはピンクのマーカーを表示します。ドラッグによる回転・移動は標準操作を維持します。手前の不透明な標準形状は、背後の独自形状へのクリックを遮ります。クリック選択にはQt"
-" GUIが必要です。"
-
-#: ../../pymol_cuemol.rst:119
-msgid ""
-"All loaded states are prepared before playback. Global state changes, movie frame-to-"
-"state mappings, object state overrides, and ``all_states`` are supported. Coordinate,"
-" bond, color, secondary-structure, transparency, or state-count edits require "
-"``refresh``. To change the native representation layers, reset the view, change the "
-"layers, and apply the style again. Source visibility and object state settings are "
-"synchronized by a short Qt timer."
-msgstr ""
-"再生前に読み込み済みの全stateを準備します。全体のstate変更、動画フレームからstateへの対応、オブジェクトごとのstate指定、``all_states`` "
-"に対応します。座標、結合、色、二次構造、透明度、state数を編集した後は ``refresh`` "
-"が必要です。元の表示形式を変える場合はreset後に表示を変更し、スタイルを再適用します。元オブジェクトの表示状態とstate設定は短いQtタイマーで同期します。"
-
-#: ../../pymol_cuemol.rst:132
-msgid ""
-"``reset`` restores the original native representation masks and background, and "
-"removes generated objects and GUI hooks. Source coordinates and bonds are untouched. "
-"Use distinct ``name`` values for disjoint selections; overlapping managed selections "
-"are rejected. Deleting a managed group or source object triggers cleanup. Saved PyMOL"
-" sessions store recipes and rebuild the views on load when the plugin is available."
-msgstr ""
-"``reset`` は元の標準表現と背景を復元し、生成オブジェクトとGUIフックを削除します。元の座標や結合は変更しません。互いに重ならない選択には異なる "
-"``name`` "
-"を使えます。管理対象が重なる選択は拒否します。管理グループや元オブジェクトを削除すると後処理が実行されます。PyMOLセッションには設定を保存し、プラグインが利用可能なら読み込み時に形状を再生成します。"
-
-#: ../../pymol_cuemol.rst:139
-msgid ""
-"``cache_mb=2048`` limits prepared mesh storage and separately guards the estimated "
-"input snapshots. It is not a cap on total process memory. The GPU cache retains up to"
-" 256 MiB of vertex buffers and evicts old states; evicted buffers are uploaded again "
-"from prepared CPU meshes. Large trajectories, especially surfaces and transparent "
-"atomistic views, can be expensive to prepare. ``cuemol_style list`` reports "
-"preparation time and mesh storage for each active view."
-msgstr ""
-"``cache_mb=2048`` "
-"は準備済みメッシュの保存量を制限し、入力スナップショットの推定量にも別途適用します。プロセス全体のメモリ上限ではありません。GPUキャッシュは最大256 "
-"MiBの頂点バッファを保持し、古いstateを追い出します。追い出されたバッファは準備済みCPUメッシュから再転送します。大きな軌跡、特に表面や半透明の全原子表示は準備の負荷が大きくなります。``cuemol_style"
-" list`` は各表示の準備時間とメッシュ保存量を表示します。"
-
-#: ../../pymol_cuemol.rst:148
-msgid "Image export"
-msgstr "画像出力"
-
-#: ../../pymol_cuemol.rst:155
-msgid ""
-"Both operations save the complete visible scene and require a filename. ``png`` "
-"captures the GPU appearance and requires the Qt GUI. ``ray`` builds temporary CGO "
-"geometry for the current state and camera; it also works in headless PyMOL. Export "
-"restores visibility, playback, and temporary settings even if rendering fails. "
-"Selection markers are omitted from exports."
-msgstr ""
-"どちらも表示中のシーン全体を保存し、ファイル名が必須です。``png`` はGPUの見た目を取得するためQt GUIが必要です。``ray`` "
-"は現在のstateと視点に対する一時CGO形状を作り、ヘッドレスPyMOLでも使えます。描画失敗時も表示状態、再生、一時設定を復元します。選択マーカーは出力から除きます。"
-
-#: ../../pymol_cuemol.rst:162
-msgid ""
-"Opaque bodies use independent GPU shaders. Transparent bodies use native CGO with "
-"lighting baked into vertex colors so that PyMOL can composite them with native "
-"translucent objects. Their lighting is fixed in molecular coordinates during "
-"rotation. Ray output samples materials into vertex colors and uses PyMOL lighting and"
-" cylindrical outline geometry, so its shading and line appearance differ from the GPU"
-" image. Wood, stone, and metal are procedural approximations; they do not reproduce "
-"CueMol's POV-Ray textures exactly. ``shadow`` is a flat shading material, not a "
-"scene-shadow generator."
-msgstr ""
-"不透明形状は独自GPUシェーダーで描画します。半透明形状は照明を頂点色に焼き込んだ標準CGOを使い、PyMOLの半透明オブジェクトと合成します。その照明は回転中も分子座標に固定されます。ray出力は材質を頂点色に変換し、PyMOLの照明と円柱の輪郭線を使うため、GPU画像とは陰影や線の見え方が異なります。木目、石、金属は手続き的な近似であり"
-"、CueMolのPOV-Rayテクスチャを完全再現するものではありません。``shadow`` は平坦な陰影材質であり、シーンの影を生成する機能ではありません。"
-
-#: ../../pymol_cuemol.rst:172
-msgid ""
-"Standard PyMOL ``ray`` and ``png, ray=1`` cannot see opaque callback geometry. Use "
-"the dedicated ``cuemol_style ray`` operation for a complete image. Object "
-"transformation matrices, stereo/VR picking, editing atoms by dragging, and headless "
-"interactive GPU rendering are outside the supported interface; apply coordinate "
-"transforms to source atoms and refresh when needed."
-msgstr ""
-"標準の ``ray`` と ``png, ray=1`` には不透明なコールバック形状が映りません。完全な画像には専用の ``cuemol_style ray`` "
-"を使います。オブジェクト変換行列、ステレオ・VRのクリック選択、ドラッグによる原子編集、ヘッドレス環境での対話GPU描画は対応範囲外です。必要な変換は元の原子座標に適用してrefreshしてください。"
-
-#: ../../pymol_cuemol.rst:180
-msgid "Validation"
-msgstr "検証"
-
-#: ../../pymol_cuemol.rst:182
-msgid ""
-"The standalone harness exercises every style in real PyMOL, restoration after "
-"failures, multiple states, session reload, Qt picking, rotation, and native/custom "
-"transparency. GUI mode also writes GPU and ray images for visual review. Run Python "
-"through the repository's pixi interpreter:"
-msgstr "独立した検証スクリプトで、実PyMOLの全スタイル、失敗後の復元、複数state、セッション再読込、Qtクリック選択、回転、標準・独自形状の半透明表示を確認します。GUIモードでは目視確認用のGPU画像とray画像も保存します。リポジトリのpixiインタープリターでPythonを実行します。"
-
-#: ../../pymol_cuemol.rst:195
-msgid ""
-"The benchmark uses 500 residues and 100 synthetic states at a 1280 by 720 viewport "
-"with medium-quality ribbons. It reports preparation time, CPU/GPU mesh storage, "
-"rotation speed, explicit state-switch speed, actual movie draw rate, and one-state "
-"surface preparation. The targets after preparation are 30 FPS rotation and 15 FPS "
-"playback; results depend on the GPU and input geometry. Generated images and reports "
-"under ``.cache`` are ignored by Git."
-msgstr ""
-"ベンチマークは500残基・100個の合成stateを使い、1280×720の描画領域で中品質のリボンを描画します。準備時間、CPU・GPUメッシュ保存量、回転速度、明示的state切替速度、実際の動画描画速度、1"
-" stateの表面準備を報告します。準備後の目標は回転30 FPS、再生15 FPSです。結果はGPUと入力形状に依存します。``.cache`` "
-"内の生成画像とレポートはGitの対象外です。"
-
-#: ../../pymol_cuemol.rst:202
-msgid ""
-"The geometry and names are inspired by the `CueMol ribbon renderer "
-"<https://cuemol.github.io/cuemol2_docs/cuemol2/RibbonRenderer/>`_ and CueMol style "
-"definitions. This plugin implements its own mesh generation and rendering and has no "
-"runtime dependency on the CueMol source tree."
-msgstr ""
-"形状と名前は `CueMol ribbon renderer "
-"<https://cuemol.github.io/cuemol2_docs/cuemol2/RibbonRenderer/>`_ "
-"およびCueMolのスタイル定義を参考にしています。メッシュ生成と描画は独自実装で、実行時にCueMolのソースツリーへ依存しません。"
+"導入要件、全26プリセット、選択や軌跡の扱い、セッション復元、メモリ上限、描画の違い、検証コマンドは独立パッケージの `詳細ガイド "
+"<https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.rst>`_ "
+"を参照してください。実装、シェーダー、専用テストはそのリポジトリで管理します。mdtbxには ``pymol_plugins.cuemol_style.gpu`` "
+"を参照する古いPyMOLセッション用の互換インポートを残しています。"

@@ -176,6 +176,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tomli-2.2.1-pyhe01879c_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025b-h78e105d_0.conda
       - pypi: ./
+      - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git?rev=da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e#da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e
       - pypi: https://files.pythonhosted.org/packages/de/e4/1ba6f44e491c4eece978685230dde56b14d51a0365bc1b774ddaa94d14cd/pyopengl-3.1.10-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/df/64/ff35eb9e54894cf471ff4716abd3c81eb0a0626869217ce3e6ba4ccf17d7/scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
       osx-64:
@@ -268,6 +269,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.1-hd23fc13_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-h8210216_2.conda
       - pypi: ./
+      - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git?rev=da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e#da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e
       - pypi: https://files.pythonhosted.org/packages/18/f7/240c110c08693826b4513a52f5717d62ec7c7af72f2920821247c03b17b3/scipy-1.18.1-cp312-cp312-macosx_10_15_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/de/e4/1ba6f44e491c4eece978685230dde56b14d51a0365bc1b774ddaa94d14cd/pyopengl-3.1.10-py3-none-any.whl
       osx-arm64:
@@ -360,6 +362,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-h6491c7d_2.conda
       - pypi: ./
+      - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git?rev=da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e#da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e
       - pypi: https://files.pythonhosted.org/packages/05/4a/78c6285577c375e7cf27277ea8ee6961224327f1e1a0c44af5f17f23635c/scipy-1.18.1-cp312-cp312-macosx_12_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/de/e4/1ba6f44e491c4eece978685230dde56b14d51a0365bc1b774ddaa94d14cd/pyopengl-3.1.10-py3-none-any.whl
 packages:
@@ -4463,9 +4466,17 @@ packages:
 - pypi: ./
   name: pymol-plugins
   requires_dist:
+  - cuemol-style-in-pymol @ git+https://github.com/th2ch-g/cuemol_style_in_pymol.git@da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e
+  requires_python: '>=3.10'
+- pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git?rev=da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e#da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e
+  name: cuemol-style-in-pymol
+  version: 0.1.0
+  requires_dist:
   - numpy>=1.24
   - scipy>=1.10
   - pyopengl>=3.1.7,<4
+  - pytest>=8 ; extra == 'test'
+  - pillow>=9 ; extra == 'test'
   requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/05/4a/78c6285577c375e7cf27277ea8ee6961224327f1e1a0c44af5f17f23635c/scipy-1.18.1-cp312-cp312-macosx_12_0_arm64.whl
   name: scipy
