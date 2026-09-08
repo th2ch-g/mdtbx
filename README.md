@@ -136,6 +136,18 @@ docker run -it --rm mdtbx mdtbx ...
 docker run -it --rm mdtbx gmx ... # equal to docker run -it --rm mdtbx mdtbx cmd gmx ...
 ```
 
+### Agent guide
+
+Run `mdtbx skill` (or `pixi run mdtbx skill` from a source checkout) to print
+the bundled English Markdown guide for agents. It covers preparation,
+simulation, analysis, and recovery, and directs workflows to the maintained
+scripts under `example/`.
+
+```bash
+pixi run mdtbx skill
+pixi run mdtbx skill > MDTBX_SKILL.md
+```
+
 ### Enhanced workflows
 
 ```bash

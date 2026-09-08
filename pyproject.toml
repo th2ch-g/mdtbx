@@ -15,6 +15,7 @@ where = ["src"]
 include = ["mdtbx*"]
 
 [tool.setuptools.package-data]
+"mdtbx" = ["MDTBX_SKILL.md"]
 "mdtbx.utils" = ["template_tleap.in"]
 "mdtbx.build" = ["dummy.mdp"]
 

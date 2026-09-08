@@ -73,6 +73,9 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Exported agent guide
+/MDTBX_SKILL.md
+
 # PyBuilder
 .pybuilder/
 target/

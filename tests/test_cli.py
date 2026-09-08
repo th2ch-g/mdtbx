@@ -80,6 +80,7 @@ def test_all_subcommands_registered():
         "print_perf",
         "opt_perf",
         "shell_hook",
+        "skill",
         "partial_tempering",
         "gen_temperatures",
         "cmd",
