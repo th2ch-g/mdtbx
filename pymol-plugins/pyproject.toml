@@ -5,7 +5,7 @@ description = "Plugings for PyMOL"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "cuemol-style-in-pymol @ git+https://github.com/th2ch-g/cuemol_style_in_pymol.git@da0c20b30a97bcf69ada29e9ca7d4801aa9bae8e",
+    "cuemol-style-in-pymol @ git+https://github.com/th2ch-g/cuemol_style_in_pymol.git",
 ]
 
 [tool.pixi.project]

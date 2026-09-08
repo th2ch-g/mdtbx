@@ -6,8 +6,9 @@ configure plugin loading, then restart PyMOL.
 
 `cuemol_style` comes from the standalone
 [cuemol_style_in_pymol package](https://github.com/th2ch-g/cuemol_style_in_pymol),
-installed as a dependency at a pinned Git revision. No sibling checkout is
-required. This integration registers its 26 geometry and material presets:
+installed from the repository's default branch without an explicit revision.
+`pixi.lock` records the resolved version. No sibling checkout is required.
+This integration registers its 26 geometry and material presets:
 
 ```text
 cuemol_style richardson
@@ -28,11 +29,13 @@ The current background is preserved. Opaque geometry uses GPU shaders and
 retained ray-only CGO; transparent geometry uses native CGO. Standard `ray`
 and `png, ray=1` work directly. The dedicated ray export adds camera-dependent
 outlines and material samples. Ray shading approximates the GPU appearance.
+Richardson's colored-pencil strokes are available in opaque GPU rendering and
+`cuemol_style png`; ray and transparent CGO use their average tone.
 PyMOL's core and standard commands remain unchanged. CueMol is not required.
 
 Requires PyMOL 3.1 Qt and compatibility OpenGL 2.1 / GLSL 1.20 for interactive
 rendering; the dedicated ray export also works in headless PyMOL. See the
-[full guide](https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.rst)
+[full guide](https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.md)
 for presets, selection, trajectories, session restoration, rendering differences,
 and validation commands. The implementation, shaders, and dedicated tests live
 in that repository. Compatibility imports remain here for older PyMOL sessions.

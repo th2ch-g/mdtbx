@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mdtbx 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-09 00:15+0900\n"
+"POT-Creation-Date: 2026-09-09 01:15+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: mdtbx contributors\n"
 "Language: ja\n"
@@ -14,34 +14,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../pymol_cuemol.rst:2
+#: ../../../pymol_cuemol.rst:2
 msgid "CueMol-inspired PyMOL styles"
 msgstr "CueMol風のPyMOLスタイル"
 
-#: ../../pymol_cuemol.rst:4
+#: ../../../pymol_cuemol.rst:4
 msgid ""
 "The ``cuemol_style`` command is implemented by the standalone `cuemol_style_in_pymol "
 "package <https://github.com/th2ch-g/cuemol_style_in_pymol>`_. ``pymol_plugins`` "
-"depends on a pinned Git revision of that package and registers the command when "
-"imported. ``pixi install`` resolves the dependency; no sibling source checkout is "
-"required."
+"depends on that Git repository without an explicit revision and registers the command"
+" when imported. ``pixi install`` uses the resolved version recorded in ``pixi.lock``;"
+" no sibling source checkout is required."
 msgstr ""
-"``cuemol_style`` は独立した `cuemol_style_in_pymolパッケージ "
-"<https://github.com/th2ch-g/cuemol_style_in_pymol>`_ で実装しています。``pymol_plugins`` "
-"はこのパッケージの特定のGitリビジョンに依存し、インポート時にコマンドを登録します。``pixi install`` "
-"で依存を取得するため、隣接ディレクトリへのソース配置は不要です。"
+"``cuemol_style`` コマンドは独立した `cuemol_style_in_pymolパッケージ "
+"<https://github.com/th2ch-g/cuemol_style_in_pymol>`_ で実装されています。``pymol_plugins`` "
+"は特定のリビジョンを指定せずにGitリポジトリへ依存し、インポート時にコマンドを登録します。``pixi install`` は ``pixi.lock`` "
+"に記録された解決済みの版を使います。隣接するソースチェックアウトは不要です。"
 
-#: ../../pymol_cuemol.rst:11
+#: ../../../pymol_cuemol.rst:11
 msgid "Quick start"
 msgstr "使い始める"
 
-#: ../../pymol_cuemol.rst:13
+#: ../../../pymol_cuemol.rst:13
 msgid ""
 "Run ``pixi install`` and ``pixi run pymolrc``, then restart PyMOL. After loading a "
 "structure, use the PyMOL command line:"
 msgstr "``pixi install`` と ``pixi run pymolrc`` を実行してPyMOLを再起動します。構造を読み込んだ後、PyMOLのコマンド欄で実行します。"
 
-#: ../../pymol_cuemol.rst:30
+#: ../../../pymol_cuemol.rst:30
 msgid ""
 "Default colors follow CueMol GUI's initial painting: khaki helices, SteelBlue sheets,"
 " FloralWhite coils, and yellow nucleic geometry. Carbon inherits the molecular "
@@ -53,22 +53,24 @@ msgstr ""
 "GUIの初期配色に合わせ、ヘリックスはkhaki、シートはSteelBlue、コイルはFloralWhite、核酸形状は黄色です。炭素は分子の配色を引き継ぎます。``color=keep``"
 " では既存の原子色を使います。ヘリックスの外側は基準色、内側は明るい色です。スタイルの適用やresetでは既存の背景を維持します。"
 
-#: ../../pymol_cuemol.rst:36
+#: ../../../pymol_cuemol.rst:36
 msgid ""
 "Standard ``ray`` and ``png, ray=1`` include the custom geometry. The dedicated "
-"``cuemol_style ray`` export adds camera-dependent outlines and material samples. Ray "
-"shading approximates the GPU appearance. The ``richardson`` profile does not "
-"implement CueMol 3's hatching strokes. PyMOL's source and standard commands are "
-"unchanged; CueMol is not required."
+"``cuemol_style ray`` export adds camera-dependent outlines and material samples. The "
+"``richardson`` GPU profile uses colored-pencil hatching on warm paper. Use "
+"``cuemol_style png`` to export those strokes. Ray and transparent CGO approximate "
+"them with average vertex tones. PyMOL's source and standard commands are unchanged; "
+"CueMol is not required."
 msgstr ""
-"標準の ``ray`` と ``png, ray=1`` にも独自形状が写ります。専用の ``cuemol_style ray`` "
-"は視点に応じた輪郭線と材質サンプルを追加します。rayの陰影はGPU表示の近似です。``richardson`` はCueMol "
-"3のハッチングの線を実装していません。PyMOLのソースコードと標準コマンドは変更せず、CueMol本体も不要です。"
+"標準の ``ray`` と ``png, ray=1`` に独自形状が含まれます。専用の ``cuemol_style ray`` "
+"はカメラ方向に応じた輪郭線と材質評価を加えます。``richardson`` のGPU描画は暖色の紙と色鉛筆状のハッチングを使います。線を含む画像は "
+"``cuemol_style png`` "
+"で保存します。rayと透明CGOでは平均的な頂点階調で近似します。PyMOLのソースと標準コマンドは変更せず、CueMolも不要です。"
 
-#: ../../pymol_cuemol.rst:42
+#: ../../../pymol_cuemol.rst:43
 msgid ""
 "See the standalone package's `full guide "
-"<https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.rst>`_ "
+"<https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.md>`_ "
 "for installation requirements, all 26 presets, selection and trajectory handling, "
 "session restoration, memory limits, rendering differences, and validation commands. "
 "Its implementation, shaders, and dedicated tests are maintained in that repository. "
@@ -76,6 +78,6 @@ msgid ""
 "``pymol_plugins.cuemol_style.gpu``."
 msgstr ""
 "導入要件、全26プリセット、選択や軌跡の扱い、セッション復元、メモリ上限、描画の違い、検証コマンドは独立パッケージの `詳細ガイド "
-"<https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.rst>`_ "
+"<https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.md>`_ "
 "を参照してください。実装、シェーダー、専用テストはそのリポジトリで管理します。mdtbxには ``pymol_plugins.cuemol_style.gpu`` "
 "を参照する古いPyMOLセッション用の互換インポートを残しています。"

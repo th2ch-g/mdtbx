@@ -3,9 +3,9 @@ CueMol-inspired PyMOL styles
 
 The ``cuemol_style`` command is implemented by the standalone
 `cuemol_style_in_pymol package <https://github.com/th2ch-g/cuemol_style_in_pymol>`_.
-``pymol_plugins`` depends on a pinned Git revision of that package and
-registers the command when imported. ``pixi install`` resolves the dependency;
-no sibling source checkout is required.
+``pymol_plugins`` depends on that Git repository without an explicit revision
+and registers the command when imported. ``pixi install`` uses the resolved
+version recorded in ``pixi.lock``; no sibling source checkout is required.
 
 Quick start
 -----------
@@ -35,12 +35,13 @@ color. Applying or resetting styles preserves the existing background.
 
 Standard ``ray`` and ``png, ray=1`` include the custom geometry. The dedicated
 ``cuemol_style ray`` export adds camera-dependent outlines and material
-samples. Ray shading approximates the GPU appearance. The ``richardson``
-profile does not implement CueMol 3's hatching strokes. PyMOL's source and
-standard commands are unchanged; CueMol is not required.
+samples. The ``richardson`` GPU profile uses colored-pencil hatching on warm
+paper. Use ``cuemol_style png`` to export those strokes. Ray and transparent
+CGO approximate them with average vertex tones. PyMOL's source and standard
+commands are unchanged; CueMol is not required.
 
 See the standalone package's
-`full guide <https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.rst>`_
+`full guide <https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.md>`_
 for installation requirements, all 26 presets, selection and trajectory
 handling, session restoration, memory limits, rendering differences, and
 validation commands. Its implementation, shaders, and dedicated tests are
