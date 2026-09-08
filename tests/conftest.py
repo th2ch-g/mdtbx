@@ -13,6 +13,7 @@ from unittest.mock import MagicMock
 sys.modules["pymol_plugins"] = MagicMock()
 sys.modules["pymol"] = MagicMock()
 sys.modules["pymol.cmd"] = MagicMock()
+sys.modules["pymol.shortcut"] = MagicMock()
 
 import pathlib  # noqa: E402
 

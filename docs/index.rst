@@ -42,6 +42,7 @@ pipeline instead of expecting one command to perform an entire study:
    workflows/trajectory_analysis
    workflows/free_energy
    pymol_ai
+   pymol_cuemol
    troubleshooting
    reference/index
    development

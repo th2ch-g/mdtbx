@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Plugings for PyMOL"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["numpy>=1.24", "scipy>=1.10", "PyOpenGL>=3.1.7,<4"]
+
+[tool.setuptools.package-data]
+"pymol_plugins.cuemol_style" = ["shaders/*.vert", "shaders/*.frag"]
 
 [tool.pixi.project]
 channels = ["conda-forge", "bioconda"]
