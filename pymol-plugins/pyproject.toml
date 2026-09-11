@@ -5,6 +5,7 @@ description = "Plugings for PyMOL"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "molstar-style-in-pymol @ git+https://github.com/th2ch-g/molstar_style_in_pymol.git",
     "cuemol-style-in-pymol @ git+https://github.com/th2ch-g/cuemol_style_in_pymol.git",
 ]
 

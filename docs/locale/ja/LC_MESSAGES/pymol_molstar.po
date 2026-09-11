@@ -1,0 +1,17 @@
+# Japanese translation of the Molstar integration guide.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ja\n"
+
+msgid "Mol* style in PyMOL"
+msgstr "PyMOL で使う Mol* 風表示"
+
+msgid "The ``molstar_style`` command is provided by the standalone `molstar_style_in_pymol package <https://github.com/th2ch-g/molstar_style_in_pymol>`_. The ``pymol_plugins`` distribution installs and registers it automatically. Both pixi locks record the resolved default-branch commit. The main CLI does not import the renderer or start PyMOL."
+msgstr "``molstar_style`` は独立した `molstar_style_in_pymol パッケージ <https://github.com/th2ch-g/molstar_style_in_pymol>`_ が提供し、``pymol_plugins`` で自動導入・登録されます。両方の pixi lock に既定ブランチの解決済みコミットを記録します。mdtbx 本体の CLI は描画モジュールを読み込まず、PyMOL も起動しません。"
+
+msgid "The independent Python implementation supports molecular, volumetric, particle, measurement, glycan, annotation, orbital, and pairwise-metric visualization. It reads local data only and has no Node.js, Mol*, CueMol, or service dependency. Interactive rendering requires PyMOL 3.1 Qt and OpenGL 2.1 / GLSL 1.20; headless PyMOL supports ray export."
+msgstr "独立した Python 実装で、分子、ボリューム、粒子、計測、糖鎖、注釈、軌道、ペア指標を可視化します。入力はローカルのみで、Node.js・Mol*・CueMol・外部サービスに依存しません。対話表示は PyMOL 3.1 Qt と OpenGL 2.1 / GLSL 1.20、ray 出力は headless PyMOL に対応します。"
+
+msgid "See the `English guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/guide.md>`_, `Japanese guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md>`_, and `coverage table <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/coverage.md>`_ for input schemas, managed-view restoration, and documented numerical/rendering approximations. This is not a full Mol* browser application or MVS protocol port."
+msgstr "入力形式、表示の復元、数値・描画の近似については `英語ガイド <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/guide.md>`_、`日本語ガイド <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md>`_、`対応表 <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/coverage.md>`_ を参照してください。Mol* のブラウザーアプリや MVS プロトコル全体の移植ではありません。"

@@ -12,9 +12,12 @@ from .ai import *  # noqa: F403
 from . import morph as _morph_plugin
 from .cuemol_style import cuemol_style as cuemol_style
 from .cuemol_style import __init_plugin__ as _init_cuemol_style
+from .molstar_style import molstar_style as molstar_style
+from .molstar_style import __init_plugin__ as _init_molstar_style
 
 _morph_plugin.__init_plugin__()
 _init_cuemol_style()
+_init_molstar_style()
 
 
 # similar to alignto

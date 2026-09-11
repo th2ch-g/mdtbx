@@ -43,3 +43,25 @@ rendering; the dedicated ray export also works in headless PyMOL. See the
 for presets, selection, trajectories, session restoration, rendering differences,
 and validation commands. The implementation, shaders, and dedicated tests live
 in that repository. Compatibility imports remain here for older PyMOL sessions.
+
+
+`molstar_style` comes from the standalone
+[molstar_style_in_pymol package](https://github.com/th2ch-g/molstar_style_in_pymol).
+It is installed from its default branch; both pixi locks record the resolved commit.
+The command supports molecular representations, local volumes and particles,
+measurements, SNFG glycans, annotation geometry, orbitals, PAE panels, and rendering
+effects. Node.js, Mol*, CueMol, and network services are not runtime dependencies.
+
+```text
+molstar_style
+molstar_style cartoon, color=secondary-structure
+molstar_style glossy, representation=ball-and-stick
+molstar_style direct-volume, data=density.mrc
+molstar_style ray, filename=molstar_figure.png, width=1600, height=1200
+molstar_style reset, name=all
+```
+
+See the [English guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/guide.md)
+and [Japanese guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md)
+for local input schemas and the explicit differences from Mol* rendering.
+The main `mdtbx` CLI does not import this renderer or start PyMOL.

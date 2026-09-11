@@ -43,6 +43,7 @@ pipeline instead of expecting one command to perform an entire study:
    workflows/free_energy
    pymol_ai
    pymol_cuemol
+   pymol_molstar
    troubleshooting
    reference/index
    development
