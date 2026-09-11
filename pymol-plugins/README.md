@@ -65,3 +65,9 @@ See the [English guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/m
 and [Japanese guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md)
 for local input schemas and the explicit differences from Mol* rendering.
 The main `mdtbx` CLI does not import this renderer or start PyMOL.
+
+Ellipsoid views require anisotropic displacement tensors. See the
+[geometry audit](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/audit.md)
+for corrected defaults and remaining approximations, and the
+[local GPU/ray gallery](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/gallery.md)
+for every named style. Gallery rendering runs locally without CI.

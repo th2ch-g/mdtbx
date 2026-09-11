@@ -27,3 +27,7 @@ See the `English guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/m
 and `coverage table <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/coverage.md>`_
 for input schemas, managed-view restoration, and documented numerical/rendering
 approximations. This is not a full Mol* browser application or MVS protocol port.
+
+Ellipsoid views require anisotropic displacement tensors; missing tensors are not replaced by van der Waals spheres. The corrected implementation also checks polymer radii, surface winding, colored cross sections, particle targets, and native ray output.
+
+The `local GPU/ray gallery <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/gallery.md>`_ and `geometry audit <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/audit.md>`_ document the examples, regression checks, and remaining approximations. Gallery images are generated locally without CI.

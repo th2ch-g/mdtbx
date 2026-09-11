@@ -15,3 +15,9 @@ msgstr "独立した Python 実装で、分子、ボリューム、粒子、計�
 
 msgid "See the `English guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/guide.md>`_, `Japanese guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md>`_, and `coverage table <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/coverage.md>`_ for input schemas, managed-view restoration, and documented numerical/rendering approximations. This is not a full Mol* browser application or MVS protocol port."
 msgstr "入力形式、表示の復元、数値・描画の近似については `英語ガイド <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/guide.md>`_、`日本語ガイド <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md>`_、`対応表 <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/coverage.md>`_ を参照してください。Mol* のブラウザーアプリや MVS プロトコル全体の移植ではありません。"
+
+msgid "Ellipsoid views require anisotropic displacement tensors; missing tensors are not replaced by van der Waals spheres. The corrected implementation also checks polymer radii, surface winding, colored cross sections, particle targets, and native ray output."
+msgstr "楕円体表示には異方性変位テンソルが必要です。欠損値を van der Waals 球へ置き換えません。修正版ではポリマー半径、表面の頂点順序、原子断面の色、粒子 target、native ray 出力も検証しています。"
+
+msgid "The `local GPU/ray gallery <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/gallery.md>`_ and `geometry audit <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/audit.md>`_ document the examples, regression checks, and remaining approximations. Gallery images are generated locally without CI."
+msgstr "`ローカル GPU/ray ギャラリー <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/gallery.md>`_ と `形状の監査結果 <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/audit.md>`_ に表示例、回帰検証、残る近似を記載しています。ギャラリー画像は CI を使わずローカルで生成します。"
