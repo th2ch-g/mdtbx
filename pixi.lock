@@ -267,7 +267,7 @@ environments:
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/00/78/9cbcc1c073b9d4918e925af1a059762265dc65004e020511b2a06fbfd020/pydssp-0.9.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/03/49/d10027df9fce941cb8184e78a02857af36360d33e1721df81c5ed2179a1a/async_lru-2.0.5-py3-none-any.whl
@@ -670,7 +670,7 @@ environments:
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/00/78/9cbcc1c073b9d4918e925af1a059762265dc65004e020511b2a06fbfd020/pydssp-0.9.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/03/49/d10027df9fce941cb8184e78a02857af36360d33e1721df81c5ed2179a1a/async_lru-2.0.5-py3-none-any.whl
@@ -1056,7 +1056,7 @@ environments:
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/00/78/9cbcc1c073b9d4918e925af1a059762265dc65004e020511b2a06fbfd020/pydssp-0.9.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/03/49/d10027df9fce941cb8184e78a02857af36360d33e1721df81c5ed2179a1a/async_lru-2.0.5-py3-none-any.whl
@@ -1501,7 +1501,7 @@ environments:
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/00/78/9cbcc1c073b9d4918e925af1a059762265dc65004e020511b2a06fbfd020/pydssp-0.9.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/d4/87747d12eaf2d852676fd6535df76df945ef62681f1eb5391b63d1fc05e2/logfire_api-4.39.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/50/5817619a0fca56aff06383dbfde7ae017b3ca383915b3f1e4713164273cf/tqdm-4.69.1-py3-none-any.whl
@@ -1939,7 +1939,7 @@ environments:
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/00/78/9cbcc1c073b9d4918e925af1a059762265dc65004e020511b2a06fbfd020/pydssp-0.9.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/d4/87747d12eaf2d852676fd6535df76df945ef62681f1eb5391b63d1fc05e2/logfire_api-4.39.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/50/5817619a0fca56aff06383dbfde7ae017b3ca383915b3f1e4713164273cf/tqdm-4.69.1-py3-none-any.whl
@@ -2359,7 +2359,7 @@ environments:
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/00/78/9cbcc1c073b9d4918e925af1a059762265dc65004e020511b2a06fbfd020/pydssp-0.9.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/d4/87747d12eaf2d852676fd6535df76df945ef62681f1eb5391b63d1fc05e2/logfire_api-4.39.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/01/50/5817619a0fca56aff06383dbfde7ae017b3ca383915b3f1e4713164273cf/tqdm-4.69.1-py3-none-any.whl
@@ -14844,7 +14844,7 @@ packages:
   - pytest>=8 ; extra == 'test'
   - pillow>=9 ; extra == 'test'
   requires_python: '>=3.10'
-- pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+- pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
   name: molstar-style-in-pymol
   version: 0.1.0
   requires_dist:

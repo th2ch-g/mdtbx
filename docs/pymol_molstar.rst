@@ -31,3 +31,5 @@ approximations. This is not a full Mol* browser application or MVS protocol port
 Ellipsoid views require anisotropic displacement tensors; missing tensors are not replaced by van der Waals spheres. The corrected implementation also checks polymer radii, surface winding, colored cross sections, particle targets, and native ray output.
 
 The `local GPU/ray gallery <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/gallery.md>`_ and `geometry audit <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/audit.md>`_ document the examples, regression checks, and remaining approximations. Gallery images are generated locally without CI.
+
+Ribbon curves, cross sections, GGX materials, camera-relative lighting, chain colors and ambient occlusion now follow the pinned Mol* source. The `actual Mol* comparison <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/fidelity.md>`_ checks matched-camera 8GNG, material and DNA images. Dedicated density ray integrates pixels directly in managed opaque scenes; mixed native scenes retain the documented approximation. All rendering checks run locally without CI.

@@ -177,7 +177,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025b-h78e105d_0.conda
       - pypi: ./
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/3e/2d/ca050652104bab2cf55e569db2a178b1b61cb041fef28307f2db383f6d9f/imageio-2.37.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/41/f0/29f591bea185616cf417645ac03bd3ad9b317483ad8572160e325f7fe777/msgpack-1.2.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/4f/bc/699eecd5f5829e28939e8dc22aeff0a65b8d37af80a4f6543d26e1184ad2/tifffile-2026.9.9-py3-none-any.whl
@@ -279,7 +279,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-h8210216_2.conda
       - pypi: ./
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/0b/72/7e33f0c1871d648088e3dd67ce47366ed942d625300f6d966730da92a7d7/gemmi-0.7.5-cp312-cp312-macosx_10_14_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/18/f7/240c110c08693826b4513a52f5717d62ec7c7af72f2920821247c03b17b3/scipy-1.18.1-cp312-cp312-macosx_10_15_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/31/78/90c15bebb1a72667349ca62d4507e9d9369e7f8f76b95f490b823d3622e5/msgpack-1.2.2-cp312-cp312-macosx_10_13_x86_64.whl
@@ -381,7 +381,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-h6491c7d_2.conda
       - pypi: ./
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
-      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+      - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/05/4a/78c6285577c375e7cf27277ea8ee6961224327f1e1a0c44af5f17f23635c/scipy-1.18.1-cp312-cp312-macosx_12_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/3e/2d/ca050652104bab2cf55e569db2a178b1b61cb041fef28307f2db383f6d9f/imageio-2.37.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4f/bc/699eecd5f5829e28939e8dc22aeff0a65b8d37af80a4f6543d26e1184ad2/tifffile-2026.9.9-py3-none-any.whl
@@ -4506,7 +4506,7 @@ packages:
   - pytest>=8 ; extra == 'test'
   - pillow>=9 ; extra == 'test'
   requires_python: '>=3.10'
-- pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#8d5c3b7b00e744ad6a769f8750b8df1e1d6d62df
+- pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
   name: molstar-style-in-pymol
   version: 0.1.0
   requires_dist:
