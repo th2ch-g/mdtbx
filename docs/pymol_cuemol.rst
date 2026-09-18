@@ -15,6 +15,7 @@ loading a structure, use the PyMOL command line:
 
 .. code-block:: text
 
+   cuemol_style
    cuemol_style richardson
    cuemol_style richardson, representation=cpk
    cuemol_style toon1
@@ -26,6 +27,10 @@ loading a structure, use the PyMOL command line:
    cuemol_style refresh
    cuemol_style reset
    cuemol_style list
+
+With no arguments, ``cuemol_style`` applies the ``ribbon`` preset. Use ``cuemol_style richardson`` to select the pencil material explicitly.
+
+To receive plugin fixes through mdtbx, run ``pixi run update`` and restart PyMOL. Updating the standalone source repositories alone does not update the installed plugins: mdtbx uses the revisions pinned in its lockfile. An already running PyMOL process keeps its imported modules until restart.
 
 Material and outline styles default to ``ribbon``, so helices remain
 spiral-shaped. Geometry presets such as ``cartoon``, ``cpk``, and ``surface``

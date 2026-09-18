@@ -82,3 +82,9 @@ msgstr ""
 "<https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.md>`_ "
 "を参照してください。実装、シェーダー、専用テストはそのリポジトリで管理します。mdtbxには ``pymol_plugins.cuemol_style.gpu`` "
 "を参照する古いPyMOLセッション用の互換インポートを残しています。"
+
+msgid "With no arguments, ``cuemol_style`` applies the ``ribbon`` preset. Use ``cuemol_style richardson`` to select the pencil material explicitly."
+msgstr "引数なしの ``cuemol_style`` は ``ribbon`` プリセットを適用します。鉛筆材質を使う場合は ``cuemol_style richardson`` と明示します。"
+
+msgid "To receive plugin fixes through mdtbx, run ``pixi run update`` and restart PyMOL. Updating the standalone source repositories alone does not update the installed plugins: mdtbx uses the revisions pinned in its lockfile. An already running PyMOL process keeps its imported modules until restart."
+msgstr "mdtbx経由でプラグインの修正を反映するには、``pixi run update`` を実行してPyMOLを再起動します。独立パッケージのソースリポジトリだけを更新しても、インストール済みプラグインは更新されません。mdtbxはlockfileに固定した版を使い、起動中のPyMOLは再起動まで読み込み済みのモジュールを保持します。"
