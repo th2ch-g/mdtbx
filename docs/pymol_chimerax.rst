@@ -30,3 +30,5 @@ and `GPU/ray gallery <https://github.com/th2ch-g/chimerax_style_in_pymol/blob/ma
 for all styles, local data formats, and documented differences from ChimeraX
 rendering. The gallery contains interactive GPU and ray images for every named
 style.
+
+Molecular surfaces use ``params.grid_spacing`` (default 0.5 Angstrom) at high quality; medium and low use 1.5 and 2 times that spacing. This follows the reference sampling scale, while surface triangulation remains native PyMOL. It reduces rotation and ray cost without changing source colors or material lighting. Set the spacing to 0.125 for the previous dense sampling. Run ``pixi run update`` and restart PyMOL after updating.

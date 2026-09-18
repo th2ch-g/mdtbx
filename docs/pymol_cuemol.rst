@@ -57,3 +57,5 @@ handling, session restoration, memory limits, rendering differences, and
 validation commands. Its implementation, shaders, and dedicated tests are
 maintained in that repository. mdtbx retains compatibility imports for
 older PyMOL sessions that reference ``pymol_plugins.cuemol_style.gpu``.
+
+Mouse rotation and zoom temporarily use a lighter preview and restore full quality after 150 ms without motion. PNG and ray retain full sampling precision. Managed-only ray scenes reuse sampled color and depth directly; mixed scenes keep native intersection handling. Update mdtbx and restart PyMOL to load these changes.

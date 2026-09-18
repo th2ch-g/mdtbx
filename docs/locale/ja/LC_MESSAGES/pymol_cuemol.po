@@ -88,3 +88,6 @@ msgstr "引数なしの ``cuemol_style`` は ``ribbon`` プリセットを適用
 
 msgid "To receive plugin fixes through mdtbx, run ``pixi run update`` and restart PyMOL. Updating the standalone source repositories alone does not update the installed plugins: mdtbx uses the revisions pinned in its lockfile. An already running PyMOL process keeps its imported modules until restart."
 msgstr "mdtbx経由でプラグインの修正を反映するには、``pixi run update`` を実行してPyMOLを再起動します。独立パッケージのソースリポジトリだけを更新しても、インストール済みプラグインは更新されません。mdtbxはlockfileに固定した版を使い、起動中のPyMOLは再起動まで読み込み済みのモジュールを保持します。"
+
+msgid "Mouse rotation and zoom temporarily use a lighter preview and restore full quality after 150 ms without motion. PNG and ray retain full sampling precision. Managed-only ray scenes reuse sampled color and depth directly; mixed scenes keep native intersection handling. Update mdtbx and restart PyMOL to load these changes."
+msgstr "マウスでの回転・ズーム中は軽いプレビューを使い、操作が150 ms止まると通常品質へ戻ります。PNGとrayは常に精密なサンプリングを使います。管理対象だけのrayは色・深度サンプルを直接再利用し、他の形状があるsceneは標準の交差判定を維持します。mdtbxを更新してPyMOLを再起動すると反映されます。"
