@@ -33,8 +33,9 @@ The current background is preserved. Opaque geometry uses GPU shaders and
 retained ray-only CGO; transparent geometry uses native CGO. Standard `ray`
 and `png, ray=1` work directly. The dedicated ray export adds camera-dependent
 outlines and material samples. Ray shading approximates the GPU appearance.
-Richardson's colored-pencil strokes are available in opaque GPU rendering and
-`cuemol_style png`; ray and transparent CGO use their average tone.
+Richardson's colored-pencil strokes are available in GPU rendering,
+`cuemol_style png`, and dedicated `cuemol_style ray`. Standard ray retains an
+averaged fallback. Source builds require a C++17 compiler.
 PyMOL's core and standard commands remain unchanged. CueMol is not required.
 
 Requires PyMOL 3.1 Qt and compatibility OpenGL 2.1 / GLSL 1.20 for interactive
@@ -61,8 +62,8 @@ molstar_style ray, filename=molstar_figure.png, width=1600, height=1200
 molstar_style reset, name=all
 ```
 
-See the [English guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/guide.md)
-and [Japanese guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md)
+See the [English guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/pymol_molstar.md)
+and [Japanese guide](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/pymol_molstar.md)
 for local input schemas and the explicit differences from Mol* rendering.
 The main `mdtbx` CLI does not import this renderer or start PyMOL.
 

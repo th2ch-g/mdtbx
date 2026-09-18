@@ -65,18 +65,8 @@ msgstr ""
 " では既存の原子色を使います。ヘリックスの外側は基準色、内側は明るい色です。スタイルの適用やresetでは既存の背景を維持します。"
 
 #: ../../../pymol_cuemol.rst:36
-msgid ""
-"Standard ``ray`` and ``png, ray=1`` include the custom geometry. The dedicated "
-"``cuemol_style ray`` export adds camera-dependent outlines and material samples. The "
-"``richardson`` GPU profile uses colored-pencil hatching on warm paper. Use "
-"``cuemol_style png`` to export those strokes. Ray and transparent CGO approximate "
-"them with average vertex tones. PyMOL's source and standard commands are unchanged; "
-"CueMol is not required."
-msgstr ""
-"標準の ``ray`` と ``png, ray=1`` に独自形状が含まれます。専用の ``cuemol_style ray`` "
-"はカメラ方向に応じた輪郭線と材質評価を加えます。``richardson`` のGPU描画は暖色の紙と色鉛筆状のハッチングを使います。線を含む画像は "
-"``cuemol_style png`` "
-"で保存します。rayと透明CGOでは平均的な頂点階調で近似します。PyMOLのソースと標準コマンドは変更せず、CueMolも不要です。"
+msgid "Standard ``ray`` and ``png, ray=1`` include the custom geometry. The dedicated ``cuemol_style ray`` export adds camera-dependent outlines and material samples. Richardson colored-pencil hatching is available in GPU rendering, ``cuemol_style png``, and dedicated ``cuemol_style ray``. Standard ray retains an averaged fallback. Source builds require a C++17 compiler. PyMOL's source and standard commands are unchanged; CueMol is not required."
+msgstr "標準の ``ray`` と ``png, ray=1`` に独自形状が含まれます。専用の ``cuemol_style ray`` は視点に応じた輪郭線と材質評価を加えます。Richardson の色鉛筆ハッチングは GPU 描画、``cuemol_style png``、専用の ``cuemol_style ray`` で利用できます。標準 ray では平均階調の近似を使います。ソースからのビルドには C++17 コンパイラーが必要です。PyMOL のソースと標準コマンドは変更せず、CueMol も不要です。"
 
 #: ../../../pymol_cuemol.rst:43
 msgid ""

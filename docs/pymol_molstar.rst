@@ -22,8 +22,8 @@ It reads local data only and has no Node.js, Mol*, CueMol, or service dependency
 Interactive rendering requires PyMOL 3.1 Qt and OpenGL 2.1 / GLSL 1.20;
 headless PyMOL supports ray export.
 
-See the `English guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/guide.md>`_,
-`Japanese guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/guide.md>`_,
+See the `English guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/pymol_molstar.md>`_,
+`Japanese guide <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/ja/pymol_molstar.md>`_,
 and `coverage table <https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/coverage.md>`_
 for input schemas, managed-view restoration, and documented numerical/rendering
 approximations. This is not a full Mol* browser application or MVS protocol port.

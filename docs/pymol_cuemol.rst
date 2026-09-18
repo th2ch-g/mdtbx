@@ -39,11 +39,11 @@ Helix outside faces keep their base color and inside faces use a lighter
 color. Applying or resetting styles preserves the existing background.
 
 Standard ``ray`` and ``png, ray=1`` include the custom geometry. The dedicated
-``cuemol_style ray`` export adds camera-dependent outlines and material
-samples. The ``richardson`` GPU profile uses colored-pencil hatching on warm
-paper. Use ``cuemol_style png`` to export those strokes. Ray and transparent
-CGO approximate them with average vertex tones. PyMOL's source and standard
-commands are unchanged; CueMol is not required.
+``cuemol_style ray`` export adds camera-dependent outlines and material samples.
+Richardson colored-pencil hatching is available in GPU rendering,
+``cuemol_style png``, and dedicated ``cuemol_style ray``. Standard ray retains
+an averaged fallback. Source builds require a C++17 compiler. PyMOL's source
+and standard commands are unchanged; CueMol is not required.
 
 See the standalone package's
 `full guide <https://github.com/th2ch-g/cuemol_style_in_pymol/blob/main/docs/pymol_cuemol.md>`_
