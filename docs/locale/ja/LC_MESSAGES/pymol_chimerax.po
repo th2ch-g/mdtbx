@@ -1,0 +1,20 @@
+# Japanese translation of the ChimeraX integration guide.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ja\n"
+
+msgid "ChimeraX style in PyMOL"
+msgstr "PyMOL で使う ChimeraX 風表示"
+
+msgid "The ``chimerax_style`` command is provided by the standalone `chimerax_style_in_pymol package <https://github.com/th2ch-g/chimerax_style_in_pymol>`_. The ``pymol_plugins`` distribution installs and registers it automatically. Both pixi locks record the resolved default-branch commit. No sibling checkout or ChimeraX installation is required. The main CLI does not load the renderer."
+msgstr "``chimerax_style`` は独立した `chimerax_style_in_pymol パッケージ <https://github.com/th2ch-g/chimerax_style_in_pymol>`_ が提供し、``pymol_plugins`` で自動導入・登録されます。両方の pixi lock に既定ブランチの解決済みコミットを記録します。隣接ディレクトリへの clone や ChimeraX のインストールは不要です。mdtbx 本体の CLI は描画モジュールを読み込みません。"
+
+msgid "The map example requires a map object named ``density`` loaded in PyMOL. Use ``chimerax_style list`` to list the available styles."
+msgstr "マップの例では、PyMOL に ``density`` という名前のマップオブジェクトを読み込んでおく必要があります。``chimerax_style list`` で利用可能なスタイルを一覧表示できます。"
+
+msgid "The 84 named styles cover atoms, cartoons, surfaces, nucleotides, glycans, thermal ellipsoids, density maps, annotations, shapes, presets, and lighting. Managed views preserve source atoms and support trajectories, session save/load, refresh, and reset. Interactive PyMOL and standard ray export are supported."
+msgstr "84 種類のスタイルで、原子、カートゥーン、表面、核酸、糖鎖、熱振動楕円体、密度マップ、注釈、図形、プリセット、照明を扱います。元の原子を保持した管理対象の表示で、トラジェクトリ、セッションの保存・読み込み、更新、リセットに対応します。PyMOL の対話表示と標準 ray 出力を利用できます。"
+
+msgid "See the `English guide <https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/pymol_chimerax.md>`_, `Japanese guide <https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/ja/pymol_chimerax.md>`_, and `GPU/ray gallery <https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/gallery.md>`_ for all styles, local data formats, and documented differences from ChimeraX rendering. The gallery contains interactive GPU and ray images for every named style."
+msgstr "全スタイル、ローカル入力形式、ChimeraX との描画差分は `英語ガイド <https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/pymol_chimerax.md>`_、`日本語ガイド <https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/ja/pymol_chimerax.md>`_、`GPU/ray ギャラリー <https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/gallery.md>`_ を参照してください。ギャラリーには全スタイルの対話 GPU 表示と ray 画像を掲載しています。"

@@ -176,6 +176,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tomli-2.2.1-pyhe01879c_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025b-h78e105d_0.conda
       - pypi: ./
+      - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#35cad60e50bb063b294fa914373f3fa2d88aff9c
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/3e/2d/ca050652104bab2cf55e569db2a178b1b61cb041fef28307f2db383f6d9f/imageio-2.37.4-py3-none-any.whl
@@ -278,6 +279,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.1-hd23fc13_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-h8210216_2.conda
       - pypi: ./
+      - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#35cad60e50bb063b294fa914373f3fa2d88aff9c
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/0b/72/7e33f0c1871d648088e3dd67ce47366ed942d625300f6d966730da92a7d7/gemmi-0.7.5-cp312-cp312-macosx_10_14_x86_64.whl
@@ -380,6 +382,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-h6491c7d_2.conda
       - pypi: ./
+      - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#35cad60e50bb063b294fa914373f3fa2d88aff9c
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#d2ae206e28d1717ddd46e38ccdde255bab173cc4
       - pypi: https://files.pythonhosted.org/packages/05/4a/78c6285577c375e7cf27277ea8ee6961224327f1e1a0c44af5f17f23635c/scipy-1.18.1-cp312-cp312-macosx_12_0_arm64.whl
@@ -4495,6 +4498,19 @@ packages:
   requires_dist:
   - molstar-style-in-pymol @ git+https://github.com/th2ch-g/molstar_style_in_pymol.git
   - cuemol-style-in-pymol @ git+https://github.com/th2ch-g/cuemol_style_in_pymol.git
+  - chimerax-style-in-pymol @ git+https://github.com/th2ch-g/chimerax_style_in_pymol.git
+  requires_python: '>=3.10'
+- pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#35cad60e50bb063b294fa914373f3fa2d88aff9c
+  name: chimerax-style-in-pymol
+  version: 0.1.0
+  requires_dist:
+  - numpy>=1.24
+  - scipy>=1.10
+  - scikit-image>=0.21
+  - pillow>=10
+  - gemmi>=0.7
+  - pytest>=8 ; extra == 'test'
+  - ruff>=0.9 ; extra == 'test'
   requires_python: '>=3.10'
 - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#6467bd0f071a60f64a95873a9ea401142acec989
   name: cuemol-style-in-pymol

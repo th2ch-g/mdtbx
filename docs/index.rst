@@ -44,6 +44,7 @@ pipeline instead of expecting one command to perform an entire study:
    pymol_ai
    pymol_cuemol
    pymol_molstar
+   pymol_chimerax
    troubleshooting
    reference/index
    development

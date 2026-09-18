@@ -71,3 +71,32 @@ Ellipsoid views require anisotropic displacement tensors. See the
 for corrected defaults and remaining approximations, and the
 [local GPU/ray gallery](https://github.com/th2ch-g/molstar_style_in_pymol/blob/main/docs/gallery.md)
 for every named style. Gallery rendering runs locally without CI.
+
+`chimerax_style` comes from the standalone
+[chimerax_style_in_pymol package](https://github.com/th2ch-g/chimerax_style_in_pymol).
+It is installed from its default branch and registered automatically;
+both pixi locks record the resolved commit. No sibling checkout or ChimeraX
+installation is required. The main `mdtbx` CLI does not load the renderer.
+
+Its 84 named styles cover atoms, cartoons, surfaces, nucleotides, glycans,
+thermal ellipsoids, density maps, annotations, shapes, presets, and lighting.
+Managed views preserve source atoms and support trajectories, session save/load,
+refresh, and reset. Interactive PyMOL and standard ray export are supported.
+
+```text
+chimerax_style
+chimerax_style cartoon, color=secondary-structure
+chimerax_style soft, representation=surface
+chimerax_style volume-mesh, selection=density
+chimerax_style ray, filename=chimerax_figure.png, width=1600, height=1200
+chimerax_style reset, name=all
+```
+
+The map example requires a map object named `density` loaded in PyMOL.
+See the [English guide][chimerax-en], [Japanese guide][chimerax-ja], and
+[GPU/ray gallery][chimerax-gallery] for all styles, local data formats, and
+documented differences from ChimeraX rendering.
+
+[chimerax-en]: https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/pymol_chimerax.md
+[chimerax-ja]: https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/ja/pymol_chimerax.md
+[chimerax-gallery]: https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/gallery.md

@@ -118,6 +118,10 @@ docker build -t mdtbx .
 pre-commit install
 ```
 
+The PyMOL plugin loader automatically registers `cuemol_style`,
+`molstar_style`, and `chimerax_style`. See the
+[plugin guide](pymol-plugins/README.md) for commands and galleries.
+
 ## Update
 
 ```bash

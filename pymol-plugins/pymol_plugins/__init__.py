@@ -14,10 +14,13 @@ from .cuemol_style import cuemol_style as cuemol_style
 from .cuemol_style import __init_plugin__ as _init_cuemol_style
 from .molstar_style import molstar_style as molstar_style
 from .molstar_style import __init_plugin__ as _init_molstar_style
+from .chimerax_style import chimerax_style as chimerax_style
+from .chimerax_style import __init_plugin__ as _init_chimerax_style
 
 _morph_plugin.__init_plugin__()
 _init_cuemol_style()
 _init_molstar_style()
+_init_chimerax_style()
 
 
 # similar to alignto
