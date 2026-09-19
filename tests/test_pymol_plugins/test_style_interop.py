@@ -58,3 +58,44 @@ def test_style_combinations_preserve_original_sources():
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.count("PASS:") == 6
+
+
+def test_compact_transparent_styles_share_and_restore_native_mode():
+    script = textwrap.dedent(
+        """
+        import pymol2
+        from cuemol_style_in_pymol.controller import manager_for as cue_manager
+        from molstar_style_in_pymol.controller import manager_for as mol_manager
+
+        with pymol2.SingletonPyMOL() as instance:
+            from pymol import cmd
+            import pymol_plugins
+
+            for first in ("cuemol", "molstar"):
+                cmd.reinitialize()
+                cmd.fragment("ala", "sample")
+                cmd.create("other", "sample")
+                cmd.set("transparency_mode", 2)
+                cmd.do("cuemol_style ballstick, selection=sample, transparency=0.4, atomic_mode=native, quiet=1")
+                pymol_plugins.molstar_style("ball-and-stick", "other", transparency=0.4, params={"atomicMode": "native"}, quiet=1)
+                assert cue_manager(cmd).entries["cuemol"].native_objects
+                assert mol_manager(cmd).entries["molstar"].native_objects
+                assert cmd.get_setting_int("transparency_mode") == 3
+                cmd.do(first + "_style reset, name=all")
+                assert cmd.get_setting_int("transparency_mode") == 3
+                second = "molstar" if first == "cuemol" else "cuemol"
+                cmd.do(second + "_style reset, name=all")
+                assert cmd.get_setting_int("transparency_mode") == 2
+                assert sorted(cmd.get_names("objects")) == ["other", "sample"]
+                print("PASS:", first)
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.count("PASS:") == 2

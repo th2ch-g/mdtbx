@@ -32,3 +32,5 @@ rendering. The gallery contains interactive GPU and ray images for every named
 style.
 
 Molecular surfaces use ``params.grid_spacing`` (default 0.5 Angstrom) at high quality; medium and low use 1.5 and 2 times that spacing. This follows the reference sampling scale, while surface triangulation remains native PyMOL. It reduces rotation and ray cost without changing source colors or material lighting. Set the spacing to 0.125 for the previous dense sampling. Run ``pixi run update`` and restart PyMOL after updating.
+
+Large-system preparation batches uniform/element color assignments and constructs preset meshes from polymers only. Selected solvent, lipids, and ions remain in native atom/bond representations. Source coordinates, colors, quality settings, and reset behavior are preserved.

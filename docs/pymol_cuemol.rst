@@ -59,3 +59,7 @@ maintained in that repository. mdtbx retains compatibility imports for
 older PyMOL sessions that reference ``pymol_plugins.cuemol_style.gpu``.
 
 Mouse rotation and zoom temporarily use a lighter preview and restore full quality after 150 ms without motion. PNG and ray retain full sampling precision. Managed-only ray scenes reuse sampled color and depth directly; mixed scenes keep native intersection handling. Update mdtbx and restart PyMOL to load these changes.
+
+Large default-material atomic layers now use compact native spheres and split cylinders with ``atomic_mode=auto``. Water, hydrogens, lipids, ions, source picking, and loaded states are retained. Native atoms use PyMOL lighting and transparency; use ``atomic_mode=mesh`` for custom shader shading throughout. Custom materials, outlines, and surfaces retain their mesh renderers.
+
+Compact translucent atoms require PyMOL's scene-wide ``transparency_mode=3`` to avoid expansion into triangle meshes. CueMol and Mol* share this setting while such views are active. Resetting the last compact translucent view restores the previous mode, unless it has since been changed explicitly. Other translucent native objects use the same scene-wide method during that time.

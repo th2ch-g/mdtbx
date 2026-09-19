@@ -21,3 +21,6 @@ msgstr "全スタイル、ローカル入力形式、ChimeraX との描画差分
 
 msgid "Molecular surfaces use ``params.grid_spacing`` (default 0.5 Angstrom) at high quality; medium and low use 1.5 and 2 times that spacing. This follows the reference sampling scale, while surface triangulation remains native PyMOL. It reduces rotation and ray cost without changing source colors or material lighting. Set the spacing to 0.125 for the previous dense sampling. Run ``pixi run update`` and restart PyMOL after updating."
 msgstr "分子表面はhighで ``params.grid_spacing``（既定0.5 Angstrom）を使い、mediumとlowはその1.5倍・2倍です。本家の標本化スケールに合わせますが、三角分割はPyMOLの処理です。元の配色や照明を変えず、回転とrayの負荷を減らします。以前の密な分割には間隔0.125を指定できます。``pixi run update`` 後にPyMOLを再起動してください。"
+
+msgid "Large-system preparation batches uniform/element color assignments and constructs preset meshes from polymers only. Selected solvent, lipids, and ions remain in native atom/bond representations. Source coordinates, colors, quality settings, and reset behavior are preserved."
+msgstr "大規模系では単色・元素色をまとめて設定し、複合プリセットのメッシュをポリマーだけから作ります。選択した溶媒・脂質・イオンは標準原子/結合表示に保持します。元座標・色・品質設定・reset の動作を保持します。"

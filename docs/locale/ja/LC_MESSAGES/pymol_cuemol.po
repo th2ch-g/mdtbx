@@ -91,3 +91,9 @@ msgstr "mdtbx経由でプラグインの修正を反映するには、``pixi run
 
 msgid "Mouse rotation and zoom temporarily use a lighter preview and restore full quality after 150 ms without motion. PNG and ray retain full sampling precision. Managed-only ray scenes reuse sampled color and depth directly; mixed scenes keep native intersection handling. Update mdtbx and restart PyMOL to load these changes."
 msgstr "マウスでの回転・ズーム中は軽いプレビューを使い、操作が150 ms止まると通常品質へ戻ります。PNGとrayは常に精密なサンプリングを使います。管理対象だけのrayは色・深度サンプルを直接再利用し、他の形状があるsceneは標準の交差判定を維持します。mdtbxを更新してPyMOLを再起動すると反映されます。"
+
+msgid "Large default-material atomic layers now use compact native spheres and split cylinders with ``atomic_mode=auto``. Water, hydrogens, lipids, ions, source picking, and loaded states are retained. Native atoms use PyMOL lighting and transparency; use ``atomic_mode=mesh`` for custom shader shading throughout. Custom materials, outlines, and surfaces retain their mesh renderers."
+msgstr "大規模な既定材質の原子レイヤーでは ``atomic_mode=auto`` により軽量な球・分割円柱を使います。水・水素・脂質・イオン・元原子の選択・読み込み状態を保持します。原子部分は PyMOL の照明と透明度を使い、全体で独自シェーダーが必要な場合は ``atomic_mode=mesh`` を指定します。独自材質・輪郭・表面はメッシュ描画を継続します。"
+
+msgid "Compact translucent atoms require PyMOL's scene-wide ``transparency_mode=3`` to avoid expansion into triangle meshes. CueMol and Mol* share this setting while such views are active. Resetting the last compact translucent view restores the previous mode, unless it has since been changed explicitly. Other translucent native objects use the same scene-wide method during that time."
+msgstr "軽量な半透明原子では、三角形への展開を避けるため PyMOL のシーン全体の設定 ``transparency_mode=3`` を使います。CueMol と Mol* は該当ビューの表示中、この設定を共有します。最後の軽量半透明ビューを reset すると、途中で明示的に変更していない限り以前のモードへ戻します。その間、他の半透明な標準オブジェクトにも同じ描画方式が適用されます。"
