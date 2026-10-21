@@ -1,0 +1,20 @@
+# Japanese translation of the Blender integration guide.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ja\n"
+
+msgid "Blender / Molecular Nodes style in PyMOL"
+msgstr "PyMOL で使う Blender / Molecular Nodes 風表示"
+
+msgid "The ``blender_style`` command is provided by the standalone `blender_style_in_pymol package <https://github.com/th2ch-g/blender_style_in_pymol>`_. The ``pymol_plugins`` distribution installs it and registers both ``blender_style`` and ``blender_load_oxdna`` automatically. Both pixi locks record the resolved default-branch commit. Blender and Molecular Nodes are not runtime dependencies. The main CLI does not import the renderer or start PyMOL."
+msgstr "``blender_style`` は独立した `blender_style_in_pymol パッケージ <https://github.com/th2ch-g/blender_style_in_pymol>`_ が提供し、``pymol_plugins`` で自動導入します。``blender_style`` と ``blender_load_oxdna`` を自動登録し、両方の pixi lock に既定ブランチの解決済みコミットを記録します。実行時に Blender や Molecular Nodes は不要です。mdtbx 本体の CLI は描画モジュールを読み込まず、PyMOL も起動しません。"
+
+msgid "The density example requires a loaded map object named ``density``. The oxDNA example requires local topology and trajectory files. Use ``blender_style list`` for all 16 representations and 8 materials, or ``blender_style gui`` for controls."
+msgstr "密度の例では ``density`` というマップオブジェクトを読み込んでおく必要があります。oxDNA の例ではローカルのトポロジーとトラジェクトリを指定します。``blender_style list`` で16種類の形状と8種類の材質を一覧表示し、``blender_style gui`` で操作パネルを開きます。"
+
+msgid "Managed views preserve source coordinates and colors, support native atom picking, trajectories, session save/load, refresh, and reset. Native molecular copies avoid Python mesh construction during playback; oxDNA base ellipsoids use CGO. Auto quality and a preparation-memory estimate limit the cost of larger structures. The estimate is not a hard process-memory limit."
+msgstr "元の座標と色を保持し、原子の選択、トラジェクトリ、セッションの保存・読み込み、更新、リセットに対応します。標準の分子オブジェクトを複製して表示するため、再生中に Python でメッシュを再構築しません。oxDNA の塩基楕円体には CGO を使います。自動品質調整と準備時のメモリ見積もりで大規模構造の負荷を制限しますが、プロセス全体のメモリ使用量を保証する上限ではありません。"
+
+msgid "See the `command guide <https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/pymol_blender.md>`_, `GPU/ray gallery <https://github.com/th2ch-g/blender_style_in_pymol/tree/gallery>`_, `reference comparison <https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/fidelity.md>`_, and `performance measurements <https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/performance.md>`_. Cartoons, surfaces, materials, and ambient occlusion approximate Molecular Nodes. Outlines require ray export; Cycles path tracing and subsurface scattering are not reproduced."
+msgstr "詳細は `コマンドガイド <https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/pymol_blender.md>`_、`GPU/ray ギャラリー <https://github.com/th2ch-g/blender_style_in_pymol/tree/gallery>`_、`本家との比較 <https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/fidelity.md>`_、`性能測定 <https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/performance.md>`_ を参照してください。カートゥーン、表面、材質、環境遮蔽は Molecular Nodes の近似です。輪郭線には ray 出力が必要で、Cycles のパストレーシングや表面下散乱は再現しません。"

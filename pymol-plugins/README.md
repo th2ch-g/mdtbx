@@ -101,3 +101,41 @@ documented differences from ChimeraX rendering.
 [chimerax-en]: https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/pymol_chimerax.md
 [chimerax-ja]: https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/ja/pymol_chimerax.md
 [chimerax-gallery]: https://github.com/th2ch-g/chimerax_style_in_pymol/blob/main/docs/gallery.md
+
+
+`blender_style` comes from the standalone
+[blender_style_in_pymol package](https://github.com/th2ch-g/blender_style_in_pymol).
+The plugin loader registers it and `blender_load_oxdna` automatically. Both pixi
+locks record the resolved default-branch commit. Blender and Molecular Nodes
+are not required at runtime.
+
+```text
+blender_style cartoon, color=secondary-structure
+blender_style glossy, representation=ball-and-stick
+blender_style ambient-occlusion, representation=surface
+blender_style density-iso-surface, selection=density
+blender_load_oxdna system.top, trajectory.dat
+blender_style oxdna-ribbon, selection=oxdna
+blender_style ray, filename=blender_figure.png, width=1600, height=1200
+blender_style reset, name=all
+```
+
+The density example requires a loaded map object named `density`; the oxDNA
+example requires local topology and trajectory files. Use `blender_style list`
+for all 16 representations and 8 materials, or `blender_style gui` for controls.
+Native PyMOL geometry preserves atom picking, trajectories, and session loading;
+oxDNA base ellipsoids use CGO. Auto quality and a preparation-memory estimate
+limit the cost of larger structures. Source coordinates and colors are retained.
+The integration filters managed molecular copies from all four renderers when
+reading source atoms, including GUI application and refresh.
+
+See the [command guide][blender-guide], [GPU/ray gallery][blender-gallery],
+[reference comparison][blender-fidelity], and [performance measurements][blender-performance].
+Cartoons, surfaces, materials, and ambient occlusion approximate Molecular Nodes;
+ray outlines are available, while Cycles path tracing and subsurface scattering
+are not reproduced. The main `mdtbx` CLI does not load the renderer.
+
+[blender-guide]: https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/pymol_blender.md
+[blender-gallery]: https://github.com/th2ch-g/blender_style_in_pymol/tree/gallery
+[blender-fidelity]: https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/fidelity.md
+[blender-performance]: https://github.com/th2ch-g/blender_style_in_pymol/blob/main/docs/performance.md

@@ -16,11 +16,17 @@ from .molstar_style import molstar_style as molstar_style
 from .molstar_style import __init_plugin__ as _init_molstar_style
 from .chimerax_style import chimerax_style as chimerax_style
 from .chimerax_style import __init_plugin__ as _init_chimerax_style
+from .blender_style import blender_style as blender_style
+from .blender_style import blender_load_oxdna as blender_load_oxdna
+from .blender_style import __init_plugin__ as _init_blender_style
+from .style_sources import install as _install_style_sources
 
 _morph_plugin.__init_plugin__()
 _init_cuemol_style()
 _init_molstar_style()
 _init_chimerax_style()
+_init_blender_style()
+_install_style_sources()
 
 
 # similar to alignto

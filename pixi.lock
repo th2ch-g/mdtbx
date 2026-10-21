@@ -266,6 +266,7 @@ environments:
       - pypi: ./
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -670,6 +671,7 @@ environments:
       - pypi: ./
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -1057,6 +1059,7 @@ environments:
       - pypi: ./
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -1503,6 +1506,7 @@ environments:
       - pypi: ./
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -1942,6 +1946,7 @@ environments:
       - pypi: ./
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -2363,6 +2368,7 @@ environments:
       - pypi: ./
       - pypi: ./pymol-plugins
       - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -14833,6 +14839,7 @@ packages:
   - molstar-style-in-pymol @ git+https://github.com/th2ch-g/molstar_style_in_pymol.git
   - cuemol-style-in-pymol @ git+https://github.com/th2ch-g/cuemol_style_in_pymol.git
   - chimerax-style-in-pymol @ git+https://github.com/th2ch-g/chimerax_style_in_pymol.git
+  - blender-style-in-pymol @ git+https://github.com/th2ch-g/blender_style_in_pymol.git
   requires_python: '>=3.10'
 - pypi: git+https://github.com/jgreener64/mmterm.git#3023ba373380d99c71befb9998a1945559748db7
   name: mmterm
@@ -14841,6 +14848,17 @@ packages:
   - numpy
   - biopython
   - drawille
+- pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
+  name: blender-style-in-pymol
+  version: 0.1.0
+  requires_dist:
+  - pytest>=8 ; extra == 'test'
+  - ruff>=0.9 ; extra == 'test'
+  - pillow>=10 ; extra == 'test'
+  - psutil>=6 ; extra == 'test'
+  - numpy>=1.24 ; extra == 'test'
+  - pyopengl>=3.1.7 ; extra == 'test'
+  requires_python: '>=3.10'
 - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
   name: chimerax-style-in-pymol
   version: 0.1.0
