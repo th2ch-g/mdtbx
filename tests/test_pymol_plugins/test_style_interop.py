@@ -165,3 +165,34 @@ def test_blender_standard_ray_with_registered_plugins(tmp_path):
         check=False,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_blender_optical_material_uses_registered_ray():
+    script = textwrap.dedent(
+        """
+        from unittest.mock import patch
+        import pymol2
+
+        with pymol2.SingletonPyMOL() as instance:
+            from pymol import cmd
+            import pymol_plugins
+
+            cmd.pseudoatom("sample", elem="C")
+            for material in ("glass", "subsurface"):
+                entry = pymol_plugins.blender_style(material, representation="spheres")
+                assert entry["backend"] == "mesh"
+                with patch("blender_style_in_pymol.cycles.render") as render:
+                    cmd.do("ray 160, 120")
+                    assert tuple(map(int, render.call_args.args[1:])) == (160, 120)
+                pymol_plugins.blender_style("reset", name="all")
+                assert cmd.get_names("objects") == ["sample"]
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
