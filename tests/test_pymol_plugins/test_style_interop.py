@@ -124,3 +124,44 @@ def test_compact_transparent_styles_share_and_restore_native_mode():
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.count("PASS:") == 2
+
+
+def test_blender_standard_ray_with_registered_plugins(tmp_path):
+    script = textwrap.dedent(
+        """
+        import sys
+        from pathlib import Path
+
+        import numpy as np
+        import pymol2
+        from PIL import Image
+
+        with pymol2.SingletonPyMOL() as instance:
+            from pymol import cmd
+            import pymol_plugins
+
+            cmd.fragment("trp", "sample")
+            cmd.orient("sample")
+            pymol_plugins.blender_style("ball-and-stick", backend="mesh", quality="low")
+            ambient = cmd.get_setting_float("ambient")
+            for index in range(2):
+                cmd.turn("y", 40)
+                cmd.do("ray 160, 120")
+                path = Path(sys.argv[1]) / f"ray-{index}.png"
+                cmd.png(str(path), prior=1)
+                assert Image.open(path).size == (160, 120)
+                assert cmd.get_setting_float("ambient") == ambient
+            a, b = [np.asarray(Image.open(Path(sys.argv[1]) / f"ray-{i}.png")) for i in range(2)]
+            assert not np.array_equal(a, b)
+            pymol_plugins.blender_style("reset", name="all")
+            assert cmd.get_names("objects") == ["sample"]
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script, str(tmp_path)],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr

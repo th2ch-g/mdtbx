@@ -176,7 +176,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tomli-2.2.1-pyhe01879c_2.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025b-h78e105d_0.conda
       - pypi: ./
-      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#95cf1464756ed112abbc0ca481aad5e1477a4d89
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -280,7 +280,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-1.3.1-hd23fc13_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-h8210216_2.conda
       - pypi: ./
-      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#95cf1464756ed112abbc0ca481aad5e1477a4d89
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -384,7 +384,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.3.1-h8359307_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-h6491c7d_2.conda
       - pypi: ./
-      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
+      - pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#95cf1464756ed112abbc0ca481aad5e1477a4d89
       - pypi: git+https://github.com/th2ch-g/chimerax_style_in_pymol.git#a458ccdfb84243bac861fd31bd61f952a5605847
       - pypi: git+https://github.com/th2ch-g/cuemol_style_in_pymol.git#cf3f054fd8783a7b5ecdf19f8815db62f891b795
       - pypi: git+https://github.com/th2ch-g/molstar_style_in_pymol.git#ce1ac5b05acb022527cafca1157472824e259cea
@@ -4504,10 +4504,15 @@ packages:
   - chimerax-style-in-pymol @ git+https://github.com/th2ch-g/chimerax_style_in_pymol.git
   - blender-style-in-pymol @ git+https://github.com/th2ch-g/blender_style_in_pymol.git
   requires_python: '>=3.10'
-- pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#4bc8e8adb8a8d1fac76d6c8364093731b901c7f0
+- pypi: git+https://github.com/th2ch-g/blender_style_in_pymol.git#95cf1464756ed112abbc0ca481aad5e1477a4d89
   name: blender-style-in-pymol
-  version: 0.1.0
+  version: 0.2.0
   requires_dist:
+  - numpy>=1.24
+  - scipy>=1.10
+  - scikit-image>=0.21
+  - pyopengl>=3.1.7
+  - pillow>=10
   - pytest>=8 ; extra == 'test'
   - ruff>=0.9 ; extra == 'test'
   - pillow>=10 ; extra == 'test'
